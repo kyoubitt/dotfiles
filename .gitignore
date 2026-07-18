@@ -1,0 +1,41 @@
+# Fish auto-generated migration files
+fish/conf.d/fish_frozen_key_bindings.fish
+
+# Installed apps with local/session state that should never be tracked
+go/
+yay/
+pulse/
+dconf/
+vesktop/
+configstore/
+xsettingsd/
+htop/
+nautilus/
+spotify/
+obs-studio/
+
+# Machine-specific associations & paths
+mimeapps.list
+user-dirs.dirs
+user-dirs.locale
+QtProject.conf
+
+# Theme engines: track only the actual config, ignore cache/local files
+gtk-3.0/*
+!gtk-3.0/settings.ini
+!gtk-3.0/gtk.css
+gtk-4.0/*
+!gtk-4.0/settings.ini
+!gtk-4.0/gtk.css
+qt6ct/*
+!qt6ct/qt6ct.conf
+qt5ct/*
+!qt5ct/qt5ct.conf
+
+# Misc
+*.env
+*.swp.*
+temp.md
+
+# Local AI assistant tooling artifacts - not part of the actual dotfiles
+.claude/

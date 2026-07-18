@@ -1,0 +1,41 @@
+window {
+    background-image: url("../../.local/state/lockscreen.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#clock-label {
+    color: {{foreground}};
+    font-size: 64px;
+    font-weight: bold;
+}
+
+#date-label {
+    color: {{foreground}};
+    font-size: 24px;
+}
+
+entry {
+    background-color: alpha({{background}}, 0.7);
+    color: {{foreground}};
+    border: 2px solid {{color2}};
+    border-radius: 12px;
+    padding: 8px 16px;
+}
+
+entry:focus {
+    border-color: {{color4}};
+}
+
+button {
+    background-color: {{color2}};
+    color: {{foreground}};
+    border: 1px solid transparent;
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: alpha({{color4}}, 0.3);
+    border-color: {{color4}};
+}

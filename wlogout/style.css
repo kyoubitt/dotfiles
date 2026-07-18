@@ -1,0 +1,51 @@
+* {
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+window {
+    background-color: alpha(#01251F, 0.7);
+}
+
+box {
+    background-color: transparent;
+}
+
+button {
+    background-color: #475E62;
+    color: #B2A9B1;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    margin: 16px;
+    min-width: 140px;
+    min-height: 140px;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 42px;
+    transition: all 0.15s ease;
+}
+
+button:focus,
+button:hover {
+    background-color: alpha(#3D998A, 0.18);
+    border-color: #3D998A;
+    outline: none;
+}
+
+#lock {
+    background-image: image(url("assets/lock-icon.png"));
+}
+
+#suspend {
+    background-image: image(url("assets/suspend-icon.png"));
+}
+
+#reboot {
+    background-image: image(url("assets/reboot-icon.png"));
+}
+
+#shutdown {
+    background-image: image(url("assets/shutdown-icon.png"));
+}

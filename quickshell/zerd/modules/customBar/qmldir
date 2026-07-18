@@ -1,0 +1,3 @@
+module qs.modules.customBar
+WCustomBar 1.0 WCustomBar.qml
+WCustomBarContent 1.0 WCustomBarContent.qml

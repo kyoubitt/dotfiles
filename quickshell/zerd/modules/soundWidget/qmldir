@@ -1,0 +1,3 @@
+module qs.modules.soundWidget
+WSoundWidget 1.0 WSoundWidget.qml
+WSoundWidgetContent 1.0 WSoundWidgetContent.qml

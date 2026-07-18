@@ -1,0 +1,171 @@
+# Main format configuration - rounded pill/segment prompt
+format = """
+[](fg:#5E81AC)[ $username ](bg:#5E81AC fg:#ECEFF4)[](fg:#5E81AC bg:#81A1C1)[ $directory ](bg:#81A1C1 fg:#ECEFF4)[](fg:#81A1C1 bg:#88C0D0)[  ](bg:#88C0D0 fg:#ECEFF4)[](fg:#88C0D0 bg:#4C566A)[ $time ](bg:#4C566A fg:#ECEFF4)[](fg:#4C566A)
+$line_break\
+$character
+"""
+
+add_newline = false
+
+# Directory configuration
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style)"
+style = "bg:#81A1C1 fg:#ECEFF4"
+read_only = "󰌾 "
+truncation_length = 1
+fish_style_pwd_dir_length = 1
+home_symbol = "~"
+
+# Character at prompt
+[character]
+success_symbol = "[❯](bold white)"
+error_symbol = "[](bold white)"
+vimcmd_symbol ="[](bold white)"
+
+# Username display
+[username]
+format = "[$user]($style)"
+style_user = "bg:#5E81AC fg:#ECEFF4"
+style_root = "bg:#5E81AC fg:#ECEFF4"
+disabled = false
+show_always = true
+
+# Hostname for SSH
+[hostname]
+ssh_only = true
+ssh_symbol = ""
+format = "[$hostname ]($style)"
+style = "bg:#A94744 fg:#0D1017"
+disabled = false
+
+# Time display
+[time]
+disabled = false
+time_format = "%R" # Hour:Minute format
+format = "[$time]($style)"
+style = "bg:#4C566A fg:#ECEFF4"
+use_12hr = true
+
+[aws]
+symbol = "󰅟 "
+
+[buf]
+symbol = " "
+
+[c]
+symbol = " "
+
+[cmake]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[crystal]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[git_branch]
+symbol = " "
+
+[git_commit]
+tag_symbol = " "
+
+[git_status]
+ahead = "  "
+behind = "  "
+conflicted = " 󰞇 "
+deleted = " 󰆴 "
+diverged = " 󰃻 "
+modified = " 󰏫 "
+renamed = "  "
+staged = "  "
+stashed = " 󰀼 "
+untracked = " 󰋖 "
+up_to_date = "  "
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[hg_branch]
+symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[meson]
+symbol = "󰔷 "
+
+[nim]
+symbol = "󰆥 "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[ocaml]
+symbol = " "
+
+[package]
+symbol = "󰏗 "
+
+[perl]
+symbol = " "
+
+[php]
+symbol = " "
+
+[pijul_channel]
+symbol = " "
+
+[python]
+symbol = " "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = "󱘗 "
+
+[scala]
+symbol = " "
+
+[swift]
+symbol = " "
+
+[zig]
+symbol = " "
+
+[gradle]
+symbol = " "
