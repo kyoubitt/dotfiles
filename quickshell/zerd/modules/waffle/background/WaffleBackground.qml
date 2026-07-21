@@ -98,6 +98,8 @@ Variants {
                 source: panelRoot.wallpaperUrl
                 asynchronous: true
                 cache: true
+                sourceSize.width: panelRoot.width
+                sourceSize.height: panelRoot.height
                 visible: status === Image.Ready && !blurEffect.visible
             }
 

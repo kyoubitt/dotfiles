@@ -94,42 +94,6 @@ WSettingsPage {
     }
     
     WSettingsCard {
-        title: Translation.tr("Lock Screen")
-        icon: "lock-closed"
-        
-        WSettingsSwitch {
-            label: Translation.tr("Enable blur")
-            icon: "options"
-            description: Translation.tr("Blur background on lock screen")
-            checked: Config.options?.lock?.blur?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("lock.blur.enable", checked)
-        }
-        
-        WSettingsSpinBox {
-            visible: Config.options?.lock?.blur?.enable ?? true
-            label: Translation.tr("Blur radius")
-            icon: "options"
-            from: 0; to: 200; stepSize: 10
-            value: Config.options?.lock?.blur?.radius ?? 100
-            onValueChanged: Config.setNestedValue("lock.blur.radius", value)
-        }
-        
-        WSettingsSwitch {
-            label: Translation.tr("Center clock")
-            icon: "options"
-            checked: Config.options?.lock?.centerClock ?? true
-            onCheckedChanged: Config.setNestedValue("lock.centerClock", checked)
-        }
-        
-        WSettingsSwitch {
-            label: Translation.tr("Show 'Locked' text")
-            icon: "options"
-            checked: Config.options?.lock?.showLockedText ?? true
-            onCheckedChanged: Config.setNestedValue("lock.showLockedText", checked)
-        }
-    }
-    
-    WSettingsCard {
         title: Translation.tr("Screen Corners")
         icon: "desktop"
         

@@ -33,6 +33,8 @@ hotkey-overlay {
 }
 
 cursor {
+    xcursor-theme "Future-cursors-Black"
+    xcursor-size 24
     hide-when-typing
     hide-after-inactive-ms 5000
 }
@@ -167,6 +169,7 @@ binds {
 
     // Window Modes
     Mod+T { toggle-window-floating; }
+    Mod+Shift+T { switch-focus-between-floating-and-tiling; }
     Mod+F { fullscreen-window; }
     Mod+M { maximize-column; }
 

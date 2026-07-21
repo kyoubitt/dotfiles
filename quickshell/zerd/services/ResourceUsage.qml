@@ -105,6 +105,8 @@ Singleton {
 		}
 	}
 
+	property int _pollCount: 0
+
 	Timer {
 		id: pollTimer
 		interval: Config.options?.resources?.updateInterval ?? 3000
@@ -112,6 +114,7 @@ Singleton {
 	    repeat: true
 		onTriggered: {
 	        autoStopTimer.restart()
+	        root._pollCount++
 	        // Reload files
 	        fileMeminfo.reload()
 	        fileStat.reload()
@@ -150,9 +153,13 @@ Singleton {
 	        gpuTemp = Math.round(gpuTempRaw / 1000)
 
             root.updateHistories()
-            
-            // Update disk usage
-            diskProc.running = true
+
+            // Disk usage barely changes on human timescales - spawning `df`
+            // on every 3s tick forever is wasteful, so only check every 10th
+            // tick (~30s) instead, plus immediately on the first tick.
+            if (root._pollCount === 1 || root._pollCount % 10 === 0) {
+                diskProc.running = true
+            }
 	    }
 	}
 

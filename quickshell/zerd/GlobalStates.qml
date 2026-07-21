@@ -47,7 +47,6 @@ Singleton {
     }
     property bool cheatsheetOpen: false
     property bool workspaceShowNumbers: false
-    property var activeBooruImageMenu: null  // Track which BooruImage has its menu open
     property var activeTaskViewMenu: null  // Track which WindowThumbnail has its menu open
     // Waffle-specific states
     property bool searchOpen: false
@@ -216,6 +215,21 @@ Singleton {
 
         function zoomOut(): void {
             screenZoom = Math.max(screenZoom - 0.4, 1)
-        } 
+        }
 	}
+
+    // gtklock is the only lock screen in use - this just mirrors its actual
+    // lock state into screenLocked (via gtklock's -L/-U hooks in lock.sh) so
+    // things like notification popups still know to suppress themselves.
+    IpcHandler {
+        target: "lockState"
+
+        function locked(): void {
+            root.screenLocked = true
+        }
+
+        function unlocked(): void {
+            root.screenLocked = false
+        }
+    }
 }

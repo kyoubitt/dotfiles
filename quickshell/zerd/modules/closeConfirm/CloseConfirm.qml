@@ -132,17 +132,8 @@ Scope {
                     id: contentLoader
                     anchors.fill: parent
                     focus: true
-                    sourceComponent: Config.options?.panelFamily === "waffle" ? waffleContent : iiContent
+                    sourceComponent: waffleContent
                     onLoaded: if (item) item.forceActiveFocus()
-
-                    Component {
-                        id: iiContent
-                        CloseConfirmContent {
-                            targetWindow: root.targetWindow
-                            onConfirm: root.confirmClose()
-                            onCancel: root.cancel()
-                        }
-                    }
 
                     Component {
                         id: waffleContent

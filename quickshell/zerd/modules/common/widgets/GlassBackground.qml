@@ -51,6 +51,8 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         cache: true
         asynchronous: true
+        sourceSize.width: width
+        sourceSize.height: height
 
         layer.enabled: Appearance.effectsEnabled
         layer.effect: StyledBlurEffect {

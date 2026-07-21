@@ -31,7 +31,22 @@ Item {
 
         default property alias content: blobRow.children
         property alias spacing: blobRow.spacing
+        // Whole-blob click handling lives here as a direct sibling of blobRow
+        // (not inside it) so it's a plain Item under a non-Layout parent -
+        // putting a MouseArea inside a RowLayout with anchors.fill triggers
+        // "anchors on an item managed by a layout" (undefined behavior).
+        property bool clickable: false
+        signal blobClicked()
         implicitWidth: blobRow.implicitWidth + 20
+
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            visible: blob.clickable
+            enabled: blob.clickable
+            cursorShape: Qt.PointingHandCursor
+            onClicked: blob.blobClicked()
+        }
 
         RowLayout {
             id: blobRow
@@ -107,13 +122,8 @@ Item {
         id: centerBlob
         anchors.centerIn: parent
         spacing: 8
-
-        MouseArea {
-            anchors.fill: parent
-            z: -1
-            cursorShape: Qt.PointingHandCursor
-            onClicked: GlobalStates.mediaWidgetOpen = !GlobalStates.mediaWidgetOpen
-        }
+        clickable: true
+        onBlobClicked: GlobalStates.mediaWidgetOpen = !GlobalStates.mediaWidgetOpen
 
         PillText {
             text: Qt.locale().toString(DateTime.clock.date, "ddd, MMM d")
@@ -155,12 +165,19 @@ Item {
 
         Divider {}
 
-        RowLayout {
+        Item {
             Layout.alignment: Qt.AlignVCenter
-            spacing: 4
+            implicitWidth: volumeRow.implicitWidth
+            implicitHeight: volumeRow.implicitHeight
 
-            PillIcon { text: Audio.value > 0.5 ? "volume_up" : Audio.value > 0 ? "volume_down" : "volume_off" }
-            PillText { text: Math.round((Audio.value ?? 0) * 100) + "%" }
+            RowLayout {
+                id: volumeRow
+                anchors.fill: parent
+                spacing: 4
+
+                PillIcon { text: Audio.value > 0.5 ? "volume_up" : Audio.value > 0 ? "volume_down" : "volume_off" }
+                PillText { text: Math.round((Audio.value ?? 0) * 100) + "%" }
+            }
 
             MouseArea {
                 anchors.fill: parent

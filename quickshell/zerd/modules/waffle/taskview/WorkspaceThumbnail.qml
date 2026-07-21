@@ -288,6 +288,8 @@ Item {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 visible: false
+                sourceSize.width: width
+                sourceSize.height: height
             }
 
             MultiEffect {

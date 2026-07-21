@@ -139,6 +139,8 @@ Rectangle {
                     source: root.player?.trackArtUrl ?? ""
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
+                    sourceSize.width: width
+                    sourceSize.height: height
                     visible: false
                 }
                 Rectangle {

@@ -418,6 +418,8 @@ WBarAttachedPanelContent {
                         anchors.fill: parent
                         source: MprisController.activePlayer?.trackArtUrl ?? ""
                         fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: width
+                        sourceSize.height: height
                         visible: false
                     }
                     FastBlur {
@@ -449,6 +451,8 @@ WBarAttachedPanelContent {
                                 anchors.fill: parent
                                 source: MprisController.activePlayer?.trackArtUrl ?? ""
                                 fillMode: Image.PreserveAspectCrop
+                                sourceSize.width: width
+                                sourceSize.height: height
                                 visible: source != ""
                             }
                             FluentIcon {

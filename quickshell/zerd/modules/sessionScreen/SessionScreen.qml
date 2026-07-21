@@ -99,7 +99,9 @@ Scope {
                 source: Config.options?.background?.wallpaperPath ?? ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
-                
+                sourceSize.width: width
+                sourceSize.height: height
+
                 readonly property real blurRadius: 64
                 readonly property real blurZoom: 1.1
                 

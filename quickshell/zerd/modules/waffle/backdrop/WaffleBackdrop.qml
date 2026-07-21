@@ -75,6 +75,8 @@ Variants {
                 source: backdropWindow.wallpaperUrl
                 asynchronous: true
                 cache: true
+                sourceSize.width: width
+                sourceSize.height: height
             }
 
             MultiEffect {

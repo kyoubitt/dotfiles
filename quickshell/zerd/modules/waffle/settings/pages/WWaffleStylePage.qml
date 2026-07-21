@@ -68,62 +68,6 @@ WSettingsPage {
     }
     
     WSettingsCard {
-        visible: root.isWaffleActive && root.isPanelEnabled("iiAltSwitcher")
-        title: Translation.tr("Alt+Tab Switcher")
-        icon: "apps"
-        
-        WSettingsDropdown {
-            label: Translation.tr("Style")
-            icon: "options"
-            description: Translation.tr("Visual style of the window switcher")
-            currentValue: Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails"
-            options: [
-                { value: "thumbnails", displayName: Translation.tr("Thumbnails") },
-                { value: "cards", displayName: Translation.tr("Cards") },
-                { value: "compact", displayName: Translation.tr("Compact") },
-                { value: "list", displayName: Translation.tr("List") },
-                { value: "none", displayName: Translation.tr("Disabled") }
-            ]
-            onSelected: newValue => Config.setNestedValue("waffles.altSwitcher.preset", newValue)
-        }
-        
-        WSettingsSwitch {
-            label: Translation.tr("Quick switch")
-            icon: "flash-on"
-            description: Translation.tr("Single Alt+Tab switches without showing UI")
-            checked: Config.options?.waffles?.altSwitcher?.quickSwitch ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.quickSwitch", checked)
-        }
-        
-        WSettingsSwitch {
-            label: Translation.tr("Most recent first")
-            icon: "arrow-counterclockwise"
-            description: Translation.tr("Order windows by most recently used")
-            checked: Config.options?.waffles?.altSwitcher?.useMostRecentFirst ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.useMostRecentFirst", checked)
-        }
-        
-        WSettingsSwitch {
-            label: Translation.tr("Auto-hide")
-            icon: "options"
-            description: Translation.tr("Hide switcher after delay when not interacting")
-            checked: Config.options?.waffles?.altSwitcher?.autoHide ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.autoHide", checked)
-        }
-        
-        WSettingsSpinBox {
-            visible: Config.options?.waffles?.altSwitcher?.autoHide ?? true
-            label: Translation.tr("Auto-hide delay")
-            icon: "options"
-            description: Translation.tr("Time before switcher hides after releasing Alt")
-            suffix: "ms"
-            from: 100; to: 2000; stepSize: 100
-            value: Config.options?.waffles?.altSwitcher?.autoHideDelayMs ?? 500
-            onValueChanged: Config.setNestedValue("waffles.altSwitcher.autoHideDelayMs", value)
-        }
-    }
-    
-    WSettingsCard {
         visible: root.isWaffleActive && root.isPanelEnabled("wTaskView")
         title: Translation.tr("Task View")
         icon: "desktop"

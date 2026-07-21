@@ -6,7 +6,6 @@
 //@ pragma Env QT_SCALE_FACTOR=1
 
 import qs.modules.common
-import qs.modules.altSwitcher
 import qs.modules.closeConfirm
 import qs.modules.customBar
 import qs.modules.controlCenter
@@ -41,13 +40,10 @@ ShellRoot {
         ConflictKiller.load();
     }
 
-    // Default panel set for first run / corrupted config. "iiXxx"-prefixed
-    // entries here are modules shared with the waffle family, not leftover
-    // from the old switchable "ii" style (that's been removed entirely).
+    // Default panel set for first run / corrupted config.
     readonly property list<string> defaultPanels: [
-        "wBar", "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter", "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wLock", "wPolkit", "wSessionScreen",
-        "iiCheatsheet", "iiLock", "iiOnScreenKeyboard", "iiOverlay", "iiOverview", "iiPolkit",
-        "iiRegionSelector", "iiScreenCorners", "iiSessionScreen", "iiWallpaperSelector", "iiClipboard"
+        "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter", "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wPolkit", "wSessionScreen",
+        "onScreenKeyboard", "regionSelector", "wallpaperSelector"
     ]
 
     Connections {
@@ -69,18 +65,12 @@ ShellRoot {
     IpcHandler {
         target: "settings"
         function open(): void {
-            const settingsPath = Config.options?.waffles?.settings?.useMaterialStyle === true
-                ? Quickshell.shellPath("settings.qml")
-                : Quickshell.shellPath("waffleSettings.qml")
             // -n = no daemon (standalone window), -p = path to QML file
-            Quickshell.execDetached(["/usr/bin/qs", "-n", "-p", settingsPath])
+            Quickshell.execDetached(["/usr/bin/qs", "-n", "-p", Quickshell.shellPath("waffleSettings.qml")])
         }
     }
 
     // === Panel Loaders ===
-    // AltSwitcher IPC router
-    LazyLoader { active: Config.ready; component: AltSwitcher {} }
-
     LazyLoader {
         active: Config.ready
         component: ShellWafflePanels { }

@@ -16,5 +16,5 @@ ghostty = { src = "ghostty.conf", dst = "~/.config/ghostty/colors" }
 mako = { src = "mako", dst = "~/.config/mako/config" }
 zathurarc = { src = "zathurarc", dst = "~/.config/zathura/zathurarc" }
 wlogout = { src = "wlogout.css", dst = "~/.config/wlogout/style.css" }
-quickshell-startmenu = { src = "startmenu-colors.qml", dst = "~/.config/quickshell/zerd/modules/waffle/startMenu/SMColors.qml" }
+quickshell-startmenu = { src = "startmenu-colors.json", dst = "~/.cache/wallust/startmenu-colors.json" }
 

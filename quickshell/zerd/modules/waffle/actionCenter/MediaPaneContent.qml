@@ -95,6 +95,8 @@ Rectangle {
                 anchors.fill: parent
                 source: MprisController.activeTrack?.artUrl || ""
                 fillMode: Image.PreserveAspectCrop
+                sourceSize.width: width
+                sourceSize.height: height
             }
 
             FluentIcon {

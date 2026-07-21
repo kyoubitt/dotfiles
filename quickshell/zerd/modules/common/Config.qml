@@ -100,14 +100,10 @@ Singleton {
         JsonAdapter {
             id: configOptionsJsonAdapter
             
-            // Panel system - "iiXxx"-prefixed entries here are modules shared
-            // with the waffle family, not a separate switchable style.
             property list<string> enabledPanels: [
-                "wBar", "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter",
-                "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wLock", "wPolkit", "wSessionScreen",
-                "iiCheatsheet", "iiOnScreenKeyboard", "iiOverlay", "iiOverview", "iiPolkit",
-                "iiRegionSelector", "iiScreenCorners", "iiSessionScreen",
-                "iiWallpaperSelector", "iiAltSwitcher", "iiClipboard"
+                "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter",
+                "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wPolkit", "wSessionScreen",
+                "onScreenKeyboard", "regionSelector", "wallpaperSelector"
             ]
             property string panelFamily: "waffle"
             
@@ -245,7 +241,7 @@ Singleton {
                 property int screenOffTimeout: 300 // seconds, 0 = disabled
                 property int lockTimeout: 600 // seconds, 0 = disabled
                 property int suspendTimeout: 0 // seconds, 0 = disabled
-                property bool lockBeforeSleep: true
+                property bool lockBeforeSleep: false
             }
 
             property JsonObject modules: JsonObject {
@@ -275,7 +271,7 @@ Singleton {
             }
 
             property JsonObject gameMode: JsonObject {
-                property bool autoDetect: true
+                property bool autoDetect: false
                 property bool disableAnimations: true
                 property bool disableEffects: true
                 property bool disableNiriAnimations: true

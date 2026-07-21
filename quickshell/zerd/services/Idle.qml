@@ -42,6 +42,9 @@ Singleton {
 
         const cmd = ["/usr/bin/swayidle", "-w"]
         const lockBeforeSleep = Config.options?.idle?.lockBeforeSleep !== false
+        // gtklock (via lock.sh) is the only lock screen in use - quickshell's
+        // own built-in lock was removed in favor of it.
+        const lockCommand = `${Quickshell.env("HOME")}/.local/bin/lock.sh`
 
         if (screenOffTimeout > 0) {
             cmd.push("timeout", screenOffTimeout.toString(), "/usr/bin/niri msg action power-off-monitors", "resume", "/usr/bin/niri msg action power-on-monitors")
@@ -59,7 +62,7 @@ Singleton {
         }
 
         if (effectiveLockTimeout > 0) {
-            cmd.push("timeout", effectiveLockTimeout.toString(), "/usr/bin/qs -c zerd ipc call lock activate")
+            cmd.push("timeout", effectiveLockTimeout.toString(), lockCommand)
         }
 
         if (suspendTimeout > 0) {
@@ -67,7 +70,7 @@ Singleton {
         }
 
         if (lockBeforeSleep) {
-            cmd.push("before-sleep", "/usr/bin/qs -c zerd ipc call lock activate")
+            cmd.push("before-sleep", lockCommand)
         }
 
         console.log("[Idle] Starting swayidle")

@@ -1,0 +1,5 @@
+{
+    "bg": "{{background}}",
+    "fg": "{{foreground}}",
+    "accent": "{{color4}}"
+}

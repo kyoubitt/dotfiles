@@ -54,6 +54,8 @@ Scope {
                 }
                 fillMode: Image.PreserveAspectCrop
                 visible: false
+                sourceSize.width: width
+                sourceSize.height: height
             }
 
             // Click outside to close - but not during drag

@@ -42,13 +42,6 @@ WSettingsPage {
         icon: "desktop"
 
         WSettingsSwitch {
-            label: Translation.tr("Taskbar")
-            icon: "desktop"
-            checked: root.isPanelEnabled("wBar")
-            onCheckedChanged: root.setPanelEnabled("wBar", checked)
-        }
-
-        WSettingsSwitch {
             label: Translation.tr("Background")
             icon: "image"
             checked: root.isPanelEnabled("wBackground")

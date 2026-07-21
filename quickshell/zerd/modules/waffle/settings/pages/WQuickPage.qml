@@ -46,7 +46,9 @@ WSettingsPage {
                     }
                     asynchronous: true
                     cache: false
-                    
+                    sourceSize.width: width
+                    sourceSize.height: height
+
                     layer.enabled: true
                     layer.effect: OpacityMask {
                         maskSource: Rectangle {
