@@ -95,11 +95,36 @@ Scope {
     }
 
     property real currentPos: 0
+    property real lastUpdate: 0
+
+    function updatePos() {
+        if (!MprisController.activePlayer) return
+        root.currentPos = MprisController.activePlayer.position
+        root.lastUpdate = Date.now()
+    }
+
     Timer {
         interval: 100
         running: root.locked && MprisController.isPlaying
         repeat: true
-        onTriggered: root.currentPos = MprisController.activePlayer?.position ?? 0
+        onTriggered: {
+            if (!MprisController.activePlayer) return
+            const now = Date.now()
+            const elapsed = (now - root.lastUpdate) / 1000
+            root.currentPos += elapsed * MprisController.activePlayer.playbackRate
+            root.lastUpdate = now
+
+            // Resync periodically with the actual player position to prevent drift
+            if (Math.abs(root.currentPos - MprisController.activePlayer.position) > 1.0) {
+                updatePos()
+            }
+        }
+    }
+
+    Connections {
+        target: MprisController.activePlayer
+        function onPositionChanged() { root.updatePos() }
+        function onPlaybackStateChanged() { root.updatePos() }
     }
 
     readonly property int currentLyricIndex: {
