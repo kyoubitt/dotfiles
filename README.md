@@ -33,7 +33,7 @@ Ghostty + fastfetch, with the terminal palette regenerated to match whatever wal
 - **Terminal:** Ghostty (Kitty/Alacritty also configured)
 - **Shell (the other kind):** Zsh, with Starship as the prompt
 - **Notifications:** Mako
-- **Screen lock:** gtklock
+- **Screen lock:** native QuickShell lock screen (WlSessionLock + PAM)
 - **Wallpaper daemon:** awww
 - **Theming engine:** wallust, generating color palettes from the current wallpaper and pushing them out to every themed app
 

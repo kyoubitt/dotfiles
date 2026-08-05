@@ -114,6 +114,10 @@ Singleton {
     property int unread: 0
     property var filePath: Directories.notificationsPath
     property list<Notif> list: []
+    // Hard cap on retained history - each entry is a live QtObject that
+    // stays parented to this singleton for the shell's whole lifetime, so
+    // an unbounded list here is an unbounded leak over a long session.
+    readonly property int maxHistory: 200
     // Cached lists - updated via debounce timer
     property var popupList: []
     property var _cachedGroupsByAppName: ({})
@@ -299,6 +303,11 @@ Singleton {
                 "time": Date.now(),
             });
 			root.list = [...root.list, newNotifObject];
+            while (root.list.length > root.maxHistory) {
+                const evicted = root.list.shift();
+                evicted?.timer?.stop();
+                evicted?.destroy();
+            }
 
             // Sonido de notificación opcional
             if ((Config.options?.sounds?.notifications ?? false) && !root.silent) {
@@ -338,9 +347,11 @@ Singleton {
         const index = root.list.findIndex((notif) => notif.notificationId === id);
         const notifServerIndex = notifServer.trackedNotifications.values.findIndex((notif) => notif.id + root.idOffset === id);
         if (index !== -1) {
-            root.list.splice(index, 1);
+            const [removed] = root.list.splice(index, 1);
             notifFileView.setText(stringifyList(root.list));
             triggerListChange()
+            removed?.timer?.stop();
+            removed?.destroy();
         }
         if (notifServerIndex !== -1) {
             notifServer.trackedNotifications.values[notifServerIndex].dismiss()
@@ -349,8 +360,13 @@ Singleton {
     }
 
     function discardAllNotifications() {
+        const removed = root.list;
         root.list = []
         triggerListChange()
+        removed.forEach((notif) => {
+            notif?.timer?.stop();
+            notif?.destroy();
+        })
         notifFileView.setText(stringifyList(root.list));
         notifServer.trackedNotifications.values.forEach((notif) => {
             notif.dismiss()

@@ -316,6 +316,7 @@ switch() {
             if command -v wallust >/dev/null 2>&1; then
                 (
                     wallust run "$imgpath"
+                    $HOME/.config/niri/scripts/sync-colors.sh
                     if [[ -f "$HOME/.dotfiles-zerda/scripts/theme-sync.sh" ]]; then
                         source "$HOME/.dotfiles-zerda/scripts/theme-sync.sh"
                         update_sddm_theme "$imgpath"

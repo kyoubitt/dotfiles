@@ -4,8 +4,8 @@ notified_10=0
 notified_5=0
 
 while true; do
-  battery_status=$(acpi -b | grep -o 'Discharging\|Charging')
-  battery_level=$(acpi -b | grep -P -o '[0-9]+(?=%)')
+  battery_status=$(cat /sys/class/power_supply/BAT1/status 2>/dev/null)
+  battery_level=$(cat /sys/class/power_supply/BAT1/capacity 2>/dev/null)
 
   if [ "$battery_status" = "Discharging" ]; then
     if [ "$battery_level" -eq 20 ] && [ "$notified_20" -eq 0 ]; then

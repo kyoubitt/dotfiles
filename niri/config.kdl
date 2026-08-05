@@ -40,7 +40,7 @@ cursor {
 }
 
 overview {
-    backdrop-color "#1E1E2E"
+    backdrop-color "#00000066"
     workspace-shadow {
         off
 }
@@ -60,23 +60,23 @@ binds {
 
     // Application Shortcuts
     Mod+Return hotkey-overlay-title="Open Terminal: Ghostty" { spawn-sh "ghostty"; }
-    Mod+Shift+Q hotkey-overlay-title="Lock Screen: gtklock" { spawn-sh "~/.local/bin/lock.sh"; }
-    Mod+Shift+E hotkey-overlay-title="Power Menu" { spawn-sh "~/.config/scripts/powermenu.sh"; }
+    Mod+Shift+Q hotkey-overlay-title="Lock Screen" { spawn-sh "qs -c zerd ipc call lockScreen lock"; }
+    Mod+Shift+E hotkey-overlay-title="Power Menu" { spawn-sh "qs -c zerd ipc call sessionScreen toggle"; }
     Mod+B hotkey-overlay-title="Open Browser: Firefox" { spawn-sh "firefox"; }
     Mod+E hotkey-overlay-title="File Manager: Nautilus" { spawn "nautilus"; }
     Mod+W hotkey-overlay-title="Open Wallpaper Selector" { spawn-sh "qs -c zerd ipc call wallpaperSelector toggle"; }
 
     // Media Keys
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "mediactl volume_up"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "mediactl volume_down"; }
-    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "mediactl brightness_up"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "mediactl brightness_down"; }
-    XF86AudioMute allow-when-locked=true { spawn-sh "mediactl volume_mute"; }
-    XF86AudioMicMute allow-when-locked=true { spawn-sh "mediactl mic_mute"; }
-    XF86AudioNext allow-when-locked=true { spawn-sh "mediactl next_track"; }
-    XF86AudioPause allow-when-locked=true { spawn-sh "mediactl play_pause"; }
-    XF86AudioPlay allow-when-locked=true { spawn-sh "mediactl play_pause"; }
-    XF86AudioPrev allow-when-locked=true { spawn-sh "mediactl prev_track"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh volume_up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh volume_down"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh brightness_up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh brightness_down"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh volume_mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh mic_mute"; }
+    XF86AudioNext allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh next_track"; }
+    XF86AudioPause allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh play_pause"; }
+    XF86AudioPlay allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh play_pause"; }
+    XF86AudioPrev allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh prev_track"; }
 
     // Window Management
     Mod+Q { close-window; }
@@ -175,12 +175,13 @@ binds {
 
     // Utils
     Mod+S { screenshot; }
-    Mod+Shift+S { screenshot-screen write-to-disk=true; }
+    Mod+Shift+S hotkey-overlay-title="Open in Satty" { spawn-sh "satty --filename \"$(find ~/Pictures/Screenshots -name '*.png' -printf '%T@ %p\\n' | sort -n | tail -1 | cut -d' ' -f2-)\""; }
+    Mod+Shift+P hotkey-overlay-title="Screenshot Editor" { spawn-sh "satty --filename \"$(find ~/Pictures/Screenshots -name '*.png' -printf '%T@ %p\\n' | sort -n | tail -1 | cut -d' ' -f2-)\""; }
     Mod+Ctrl+S { screenshot-window write-to-disk=true; }
 }
 
 layout {
-    gaps 0
+    gaps 6
     center-focused-column "on-overflow"
     background-color "#00000000"
 
@@ -191,17 +192,18 @@ layout {
 }
 
     focus-ring {
-        width 0
-        active-color "#0F1114"
-}
+        width 2
+        active-color "#6EB9E2bb"
+        inactive-color "#6EB9E2bb"
+    }
+
+
 
     insert-hint {
         off
         color "#0F1114"
 }
 
-    struts {
-}
 }
 
 // Animation Settings
@@ -265,54 +267,21 @@ window-rule {
 // File dialogs - Open/Save/Select
 window-rule {
     match title=r#".*(Open|Save|Select).*"#
-    open-floating true
-    default-column-width { proportion 0.0;
-}
-    max-width 800
-    max-height 1000
-}
-
-window-rule {
     match title=r#".*File.*"#
-    open-floating true
-    default-column-width { proportion 0.0;
-}
-    max-width 800
-    max-height 1000
-}
-
-window-rule {
     match app-id=r#"org\.gtk\.FileChooserDialog"#
     open-floating true
-    default-column-width { proportion 0.0;
+    default-column-width { proportion 0.5;
 }
     max-width 800
     max-height 1000
 }
 
+// System / auth dialogs
 window-rule {
     match title=r#".*Sign in - Google Accounts — Mozilla Firefox"#
-    open-floating true
-}
-
-// System dialogs
-window-rule {
     match title=r#".*(Dialog|Properties|Preferences|Settings|Rename).*"#
-    open-floating true
-}
-
-window-rule {
     match app-id=r#"zenity"#
-    open-floating true
-}
-
-// Authentication dialogs
-window-rule {
     match app-id=r#"org\.kde\.polkit-kde-authentication-agent-1"#
-    open-floating true
-}
-
-window-rule {
     match title=r#".*Authentication.*"#
     open-floating true
 }
@@ -320,10 +289,6 @@ window-rule {
 // Password managers
 window-rule {
     match app-id=r#"org\.keepassxc\.KeePassXC"# title=r#".*Auto-Type.*"#
-    open-floating true
-}
-
-window-rule {
     match app-id=r#"Bitwarden"# title=r#".*unlock.*"#
     open-floating true
 }
@@ -331,22 +296,14 @@ window-rule {
 // Notification and system utilities
 window-rule {
     match app-id=r#"nm-connection-editor"#
-    open-floating true
-}
-
-window-rule {
     match app-id=r#"blueman-manager"#
-    open-floating true
-}
-
-window-rule {
     match app-id=r#"pavucontrol"#
     open-floating true
 }
 
 // Global window appearance
 window-rule {
-    geometry-corner-radius 0
+    geometry-corner-radius 12
     clip-to-geometry true
 }
 
@@ -357,10 +314,6 @@ window-rule {
 }
 
 // Environment Variables
-
-
-
-
 
 
 
@@ -375,4 +328,83 @@ environment {
     _JAVA_AWT_WM_NONREPARENTING "1"
     XCURSOR_THEME "Adwaita"
     XCURSOR_SIZE "24"
+}
+
+layer-rule {
+    match namespace="quickshell:wBackground"
+    place-within-backdrop true
+}
+
+window-rule {
+    match is-active=true
+    shadow {
+        on
+        softness 40
+        spread 8
+        color "#ffffff00"
+    }
+}
+
+
+
+window-rule {
+    match app-id="satty"
+    open-maximized true
+}
+
+window-rule {
+    match app-id="com.mitchellh.ghostty"
+    geometry-corner-radius 12
+    clip-to-geometry true
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+window-rule {
+    match app-id="vesktop"
+    geometry-corner-radius 12
+    clip-to-geometry true
+    opacity 0.95
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+window-rule {
+    match app-id="vesktop"
+    geometry-corner-radius 12
+    clip-to-geometry true
+    opacity 0.95
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+window-rule {
+    match app-id="firefox"
+    geometry-corner-radius 12
+    clip-to-geometry true
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+window-rule {
+    match app-id="firefox"
+    geometry-corner-radius 12
+    clip-to-geometry true
+    background-effect {
+        blur true
+        xray true
+    }
+}
+window-rule {
+    match app-id="cursor"
+    match app-id="code"
+    opacity 0.75
 }

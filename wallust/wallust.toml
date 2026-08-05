@@ -4,17 +4,9 @@ backend = "fastresize"
 color_space = "lab"
 palette = "harddark"
 check_contrast = true
-
 [templates]
 # Consumed by scripts/theme-sync.sh (update_niri_config, update_sddm_theme).
 wallust-json = { src = "wallust-colors.json", dst = "~/.cache/wallust/colors.json" }
-alacritty = { src = "alacritty.toml", dst = "~/.config/alacritty/colors.toml" }
-kitty = { src = "kitty.conf", dst = "~/.config/kitty/colors.conf" }
-cava = { src = "cava", dst = "~/.config/cava/config" }
-gtklock = { src = "gtklock.css", dst = "~/.config/gtklock/style.css" }
-ghostty = { src = "ghostty.conf", dst = "~/.config/ghostty/colors" }
 mako = { src = "mako", dst = "~/.config/mako/config" }
 zathurarc = { src = "zathurarc", dst = "~/.config/zathura/zathurarc" }
-wlogout = { src = "wlogout.css", dst = "~/.config/wlogout/style.css" }
-quickshell-startmenu = { src = "startmenu-colors.json", dst = "~/.cache/wallust/startmenu-colors.json" }
-
+starship = { src = "starship", dst = "~/.config/starship/starship.toml" }

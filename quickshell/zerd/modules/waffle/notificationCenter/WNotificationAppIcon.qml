@@ -13,18 +13,29 @@ Item {
 
     property string icon: ""
     property real implicitSize: 16
-    implicitWidth: implicitSize
-    implicitHeight: implicitSize
+    // Fallback (no resolvable app icon) reads as a bare, colorless glyph
+    // floating with nothing around it - give it a soft chip so it looks
+    // like a designed badge instead of a missing asset.
+    readonly property bool isFallback: !icon
+    implicitWidth: isFallback ? implicitSize * 1.6 : implicitSize
+    implicitHeight: implicitWidth
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.isFallback
+        radius: width / 2
+        color: Looks.colors.bg2
+    }
 
     Kirigami.Icon {
-        anchors.fill: parent
-        implicitWidth: root.implicitSize
-        implicitHeight: root.implicitSize
+        anchors.centerIn: parent
+        implicitWidth: root.implicitSize * (root.isFallback ? 0.62 : 1.0)
+        implicitHeight: implicitWidth
 
         source: root.icon || fallback
         fallback: `${Looks.iconsPath}/apps.svg`
         roundToIconSize: true
-        isMask: !root.icon
-        color: Looks.colors.fg
+        isMask: root.isFallback
+        color: Looks.colors.subfg
     }
 }

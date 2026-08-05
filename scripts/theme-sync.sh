@@ -2,8 +2,6 @@
 
 set -uo pipefail
 
-sleep 0.8 # let awww set the wallpaper
-
 # Source common utilities if available
 if [[ -f "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" ]]; then
   source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
@@ -291,21 +289,6 @@ map_to_wallust_theme() {
 }
 
 # --- Functions ---
-
-map_to_spicetify_scheme() {
-  local theme_name="$1"
-  case "${theme_name}" in
-    "catppuccin") echo "Catppuccin" ;;
-    "dracula") echo "Dracula" ;;
-    "everforest") echo "Everforest" ;;
-    "gruvbox") echo "Gruvbox" ;;
-    "nord") echo "Nord" ;;
-    "rose-pine") echo "RosePine" ;;
-    "material") echo "Material" ;;
-    "solarized") echo "Osaka" ;;
-    *) echo "Nord" ;;
-  esac
-}
 
 
 
@@ -712,6 +695,8 @@ update_sddm_theme() {
 main() {
   log_info "Starting dynamic theme synchronization"
 
+  sleep 0.8 # let awww set the wallpaper before we query it below
+
   # Validate dependencies
   validate_dependencies "awww" "wallust" "jq" "sed" "grep" "head" "tr"
 
@@ -765,15 +750,6 @@ main() {
     fi
 
     save_theme_state "$detected_theme" "$wallpaper_variation"
-
-    # Reload apps with new theme
-    pkill cava 2>/dev/null || true
-    # Fix spicetify colors (remove # from hex values)
-    sed -i "s/ = #/ = /g" ~/.config/spicetify/Themes/Wallust/color.ini
-    # Fix spicetify colors (remove # from hex values)
-    spicetify_scheme=$(map_to_spicetify_scheme "$detected_theme")
-    spicetify config color_scheme "$spicetify_scheme" 2>/dev/null || true
-    spicetify apply 2>/dev/null || true
 
     log_success "Dynamic theme synchronization completed successfully"
     send_notification "Theme Manager" "Theme Synchronization Complete" "" "normal" "preferences-desktop-theme"

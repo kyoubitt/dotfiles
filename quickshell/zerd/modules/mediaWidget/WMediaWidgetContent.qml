@@ -18,7 +18,7 @@ Rectangle {
     readonly property color dimTextCol: ColorUtils.applyAlpha(SMColors.fg, 0.6)
     readonly property color dimWaveCol: ColorUtils.applyAlpha(SMColors.fg, 0.2)
 
-    implicitWidth: 290
+    implicitWidth: 300
     implicitHeight: col.implicitHeight + 32
     radius: 18
     antialiasing: true
@@ -59,47 +59,25 @@ Rectangle {
         }
         spacing: 18
 
-        readonly property int barCount: 24
-
-        // Circular art badge, with cava bars attached directly to its sides.
-        // Sized to fully contain the radiating bars so they don't overlap
-        // the title/controls below.
+        // Circular art badge with thin bars radiating from its sides - no
+        // ring border, no glow, no depth shadow around it, just art + bars.
         Item {
             Layout.alignment: Qt.AlignHCenter
-            implicitWidth: 230
-            implicitHeight: 230
-
-            Rectangle {
-                id: ring
-                anchors.centerIn: parent
-                width: 150
-                height: 150
-                radius: width / 2
-                antialiasing: true
-                color: ColorUtils.applyAlpha(ColorUtils.mix(SMColors.fg, SMColors.bg, 0.08), 0.5)
-                border.width: 2
-                border.color: SMColors.accent
-            }
+            implicitWidth: 250
+            implicitHeight: 250
 
             Repeater {
-                model: col.barCount
+                model: 24
                 delegate: Item {
                     id: pivot
                     required property int index
-                    anchors.centerIn: ring
+                    anchors.centerIn: parent
                     width: 0
                     height: 0
-                    rotation: pivot.index * (360 / col.barCount)
+                    rotation: pivot.index * (360 / 24)
 
                     Rectangle {
-                        id: bar
-                        // Mirror the spectrum across left/right halves (bass at
-                        // top/bottom, treble at the sides) instead of walking
-                        // straight through the data, which made one side look
-                        // consistently longer than the other.
-                        readonly property int mirroredIndex: pivot.index <= col.barCount / 2
-                            ? pivot.index
-                            : col.barCount - pivot.index
+                        readonly property int mirroredIndex: pivot.index <= 12 ? pivot.index : 24 - pivot.index
                         readonly property int dataIndex: Math.min(mirroredIndex, root.visualizerPoints.length - 1)
                         readonly property real level: root.visualizerPoints.length > 0
                             ? Math.max(0, Math.min(1, root.visualizerPoints[dataIndex] / 1000))
@@ -108,12 +86,15 @@ Rectangle {
                         height: 6 + level * 26
                         radius: width / 2
                         antialiasing: true
-                        color: SMColors.accent
+                        color: ColorUtils.applyAlpha(SMColors.accent, 0.4 + level * 0.6)
                         x: -width / 2
-                        y: -(ring.width / 2 + 4) - height
+                        y: -(artMask.width / 2 + 4) - height
 
                         Behavior on height {
                             NumberAnimation { duration: 90; easing.type: Easing.OutQuad }
+                        }
+                        Behavior on color {
+                            ColorAnimation { duration: 90 }
                         }
                     }
                 }
@@ -122,8 +103,8 @@ Rectangle {
             Item {
                 id: artMask
                 anchors.centerIn: parent
-                width: 120
-                height: 120
+                width: 180
+                height: 180
 
                 RotationAnimation on rotation {
                     running: MprisController.isPlaying

@@ -6,148 +6,165 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+// Single grid cell: a wallpaper thumbnail or a folder to browse into.
 MouseArea {
     id: root
     required property var fileModelData
-    property bool isDirectory: fileModelData.fileIsDir
     property bool useThumbnail: !fileModelData.fileIsDir
-
-    property alias colBackground: background.color
-    property alias colText: wallpaperItemName.color
-    property alias radius: background.radius
-    property alias margins: background.anchors.margins
-    property alias padding: wallpaperItemColumnLayout.anchors.margins
-    margins: Appearance.sizes.wallpaperSelectorItemMargins
-    padding: Appearance.sizes.wallpaperSelectorItemPadding
-
-    // Coverflow-style presentation (used by the horizontal wallpaper filmstrip)
-    property real skewFactor: 0
-    property real coverScale: 1
-    property real coverOpacity: 1
-    property bool suppressGlow: false
-    scale: root.coverScale
-    opacity: root.coverOpacity
-    transformOrigin: Item.Center
-    transform: Matrix4x4 {
-        matrix: Qt.matrix4x4(
-            1, root.skewFactor, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        )
-    }
-    Behavior on scale {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-    }
-    Behavior on opacity {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-    }
+    property bool isCurrent: false
 
     signal activated()
 
     hoverEnabled: true
     onClicked: root.activated()
 
+    scale: pressed ? 0.95 : 1.0
+    Behavior on scale {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
+
     Rectangle {
         id: background
         anchors.fill: parent
         radius: Appearance.rounding.normal
-        border.width: 0
-        Behavior on color {
-            animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+        color: Appearance.colors.colLayer1
+
+        // Selection/hover ring drawn as a border overlay
+        border.width: root.isCurrent ? 2 : (root.containsMouse ? 1 : 0)
+        border.color: root.isCurrent
+            ? Appearance.colors.colPrimary
+            : Appearance.colors.colOutlineVariant
+
+        Behavior on border.width {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
 
-        ColumnLayout {
-            id: wallpaperItemColumnLayout
+        // Thumbnail fills the whole card (no inner margin)
+        Loader {
+            id: thumbnailLoader
             anchors.fill: parent
-            spacing: 4
+            active: root.useThumbnail
 
-            Item {
-                id: wallpaperItemImageContainer
-                Layout.fillHeight: true
-                Layout.fillWidth: true
+            sourceComponent: ThumbnailImage {
+                id: thumbnailImage
+                generateThumbnail: false
+                thumbnailSizeName: "xx-large"
+                sourcePath: fileModelData.filePath
 
-                Loader {
-                    id: thumbnailShadowLoader
-                    active: thumbnailImageLoader.active && thumbnailImageLoader.item.status === Image.Ready
-                    anchors.fill: thumbnailImageLoader
-                    sourceComponent: StyledRectangularShadow {
-                        target: thumbnailImageLoader
-                        anchors.fill: undefined
-                        radius: Appearance.rounding.small
+                cache: true
+                fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                clip: true
+                sourceSize.width: thumbnailLoader.width
+                sourceSize.height: thumbnailLoader.height
+
+                Connections {
+                    target: Wallpapers
+                    function onThumbnailGenerated(directory) {
+                        if (thumbnailImage.status !== Image.Error) return
+                        if (FileUtils.parentDirectory(thumbnailImage.sourcePath) !== directory) return
+                        thumbnailImage.source = ""
+                        thumbnailImage.source = thumbnailImage.thumbnailPath
+                    }
+                    function onThumbnailGeneratedFile(filePath) {
+                        if (thumbnailImage.status !== Image.Error) return
+                        if (Qt.resolvedUrl(thumbnailImage.sourcePath) !== Qt.resolvedUrl(filePath)) return
+                        thumbnailImage.source = ""
+                        thumbnailImage.source = thumbnailImage.thumbnailPath
                     }
                 }
 
-                Loader {
-                    id: thumbnailImageLoader
-                    anchors.fill: parent
-                    active: root.useThumbnail
-                    sourceComponent: ThumbnailImage {
-                        id: thumbnailImage
-                        generateThumbnail: false
-                        thumbnailSizeName: "xx-large"
-                        sourcePath: fileModelData.filePath
-
-                        cache: false
-                        fillMode: Image.PreserveAspectCrop
-                        clip: true
-                        sourceSize.width: wallpaperItemColumnLayout.width
-                        sourceSize.height: wallpaperItemColumnLayout.height - wallpaperItemColumnLayout.spacing - wallpaperItemName.height
-
-                        Connections {
-                            target: Wallpapers
-                            function onThumbnailGenerated(directory) {
-                                if (thumbnailImage.status !== Image.Error) return;
-                                if (FileUtils.parentDirectory(thumbnailImage.sourcePath) !== directory) return;
-                                thumbnailImage.source = "";
-                                thumbnailImage.source = thumbnailImage.thumbnailPath;
-                            }
-                            function onThumbnailGeneratedFile(filePath) {
-                                if (thumbnailImage.status !== Image.Error) return;
-                                if (Qt.resolvedUrl(thumbnailImage.sourcePath) !== Qt.resolvedUrl(filePath)) return;
-                                thumbnailImage.source = "";
-                                thumbnailImage.source = thumbnailImage.thumbnailPath;
-                            }
-                        }
-
-                        layer.enabled: true
-                        layer.effect: OpacityMask {
-                            maskSource: Rectangle {
-                                width: wallpaperItemImageContainer.width
-                                height: wallpaperItemImageContainer.height
-                                radius: Appearance.rounding.small
-                            }
-                        }
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: Rectangle {
+                        width: thumbnailLoader.width
+                        height: thumbnailLoader.height
+                        radius: Appearance.rounding.normal
                     }
                 }
+            }
+        }
 
-                Loader {
-                    id: iconLoader
-                    active: !root.useThumbnail
-                    anchors.fill: parent
-                    sourceComponent: DirectoryIcon {
-                        fileModelData: root.fileModelData
-                        sourceSize.width: wallpaperItemColumnLayout.width
-                        sourceSize.height: wallpaperItemColumnLayout.height - wallpaperItemColumnLayout.spacing - wallpaperItemName.height
-                    }
+        // Folder icon (no thumbnail)
+        Loader {
+            anchors.fill: parent
+            active: !root.useThumbnail
+            sourceComponent: DirectoryIcon {
+                fileModelData: root.fileModelData
+            }
+        }
+
+        // Hover/current name overlay — gradient scrim at the bottom of image tiles
+        Rectangle {
+            id: nameScrim
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            height: nameLabel.implicitHeight + 16
+            radius: Appearance.rounding.normal
+            // Only round the bottom corners by overlapping with a non-rounded rect above
+            Rectangle {
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    right: parent.right
+                }
+                height: parent.radius
+                color: parent.color
+                opacity: parent.opacity
+            }
+
+            visible: root.useThumbnail && (root.containsMouse || root.isCurrent)
+            opacity: root.containsMouse || root.isCurrent ? 1.0 : 0.0
+            color: "transparent"
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150; easing.type: Easing.InOutQuad }
+            }
+
+            // Dark gradient so text is always readable
+            LinearGradient {
+                anchors.fill: parent
+                start: Qt.point(0, 0)
+                end: Qt.point(0, parent.height)
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "transparent" }
+                    GradientStop { position: 1.0; color: "#cc000000" }
                 }
             }
 
             StyledText {
-                id: wallpaperItemName
-                visible: false
-                Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-
+                id: nameLabel
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                    margins: 8
+                }
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                Behavior on color {
-                    animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
-                }
+                color: "#ffffff"
                 text: fileModelData.fileName
             }
+        }
+
+        // Folder name label (always visible for dirs)
+        StyledText {
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                margins: 6
+            }
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: Appearance.colors.colOnLayer1
+            text: fileModelData.fileName
+            visible: !root.useThumbnail
         }
     }
 }

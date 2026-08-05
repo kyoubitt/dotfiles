@@ -84,12 +84,17 @@ Singleton {
     }
     
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
-        applyProc.exec([Directories.wallpaperSwitchScriptPath, "--mode", (darkMode ? "dark" : "light")])
+        // command + running instead of exec(): exec() blocks the whole shell's
+        // UI thread until the script returns, which made wallpaper switching
+        // feel frozen/slow (the color pipeline can take a couple seconds).
+        applyProc.command = [Directories.wallpaperSwitchScriptPath, "--mode", (darkMode ? "dark" : "light")]
+        applyProc.running = true
     }
 
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
         if (!path || path.length === 0) return
-        applyProc.exec(["bash", "-c", `'${Directories.wallpaperSwitchScriptPath}' --image '${path}' --mode '${darkMode ? "dark" : "light"}' > /tmp/switchwall-debug.log 2>&1`])
+        applyProc.command = ["bash", "-c", `'${Directories.wallpaperSwitchScriptPath}' --image '${path}' --mode '${darkMode ? "dark" : "light"}' > /tmp/switchwall-debug.log 2>&1`]
+        applyProc.running = true
         root.changed()
     }
 

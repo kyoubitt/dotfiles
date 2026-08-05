@@ -37,7 +37,7 @@ SUDO_PID=""
 # Expected configuration folders in the repo
 readonly CONFIG_FOLDERS=(
   niri fish zsh fastfetch mako alacritty kitty ghostty starship
-  gtklock zathura wallust wlogout scripts quickshell
+  zathura wallust scripts quickshell
 )
 
 # Optional dependencies that the status bar's audio/bluetooth modules depend on
@@ -61,7 +61,7 @@ readonly PACMAN_PACKAGES=(
   niri fish fastfetch mako alacritty kitty ghostty starship
   zathura zathura-pdf-mupdf ttf-jetbrains-mono-nerd
   qt5-wayland qt6-wayland polkit-gnome ffmpeg imagemagick unzip jq
-  gtklock curl libnotify wlogout
+  curl libnotify
   qt5ct qt6ct
 )
 
@@ -903,7 +903,7 @@ verify_all_binaries() {
   local missing_binaries=()
   local binaries_to_check=(
     niri fish fastfetch mako alacritty kitty ghostty starship
-    gtklock zathura wallust awww
+    zathura wallust awww
   )
 
   for binary in "${binaries_to_check[@]}"; do
@@ -1263,20 +1263,12 @@ create_systemd_services() {
   printf "  - polkit-gnome-authentication-agent\n"
   printf "  - awww-daemon\n"
   printf "\n"
-  info "Creating gtklock service for manual/idle trigger only..."
 
   local service_dir="${HOME}/.config/systemd/user"
   mkdir -p "${service_dir}"
-  create_gtklock_service "${service_dir}"
   install_low_battery_notify_service "${service_dir}"
 
   systemctl --user daemon-reload >> "${LOG_FILE}" 2>&1 || warn "Failed to reload systemd daemon."
-
-  printf "\n"
-  info "gtklock service has been created but NOT enabled by default."
-  info "To manually lock your screen: systemctl --user start gtklock"
-  info "To enable autostart on login: systemctl --user enable gtklock"
-  printf "\n"
 
   msg "Systemd services configured."
 }
@@ -1294,32 +1286,6 @@ install_low_battery_notify_service() {
   systemctl --user enable --now low-battery-notify.service >> "${LOG_FILE}" 2>&1 \
     && info "Enabled: low-battery-notify.service" \
     || warn "Failed to enable low-battery-notify.service"
-}
-
-create_gtklock_service() {
-  local service_dir="$1"
-
-  if ! verify_binary gtklock; then
-    warn "gtklock binary not found, skipping service creation"
-    return
-  fi
-
-  local gtklock_bin
-  gtklock_bin="$(command -v gtklock)"
-
-  cat > "${service_dir}/gtklock.service" << EOF
-[Unit]
-Description=GTKLock Screen Locker
-Documentation=man:gtklock(1)
-
-[Service]
-Type=simple
-ExecStart=${gtklock_bin}
-Restart=no
-EOF
-
-  info "Created: gtklock.service (manual trigger only)"
-  info "Note: gtklock will NOT autostart. Trigger it via 'systemctl --user start gtklock'"
 }
 
 # ==========================
@@ -1371,7 +1337,7 @@ EOF
   printf "${BLUE}${BOLD}Important Notes:${NC}\n"
   printf "  • Services are auto-started by niri.conf, not systemd\n"
   printf "  • awww-daemon and polkit start automatically\n"
-  printf "  • gtklock can be triggered manually or via idle timeout\n"
+  printf "  • Screen lock is native (Mod+Shift+Q), triggered on idle/suspend too\n"
   printf "\n"
 
   if [[ -d "${BACKUP_DIR}" ]] && [[ -n "$(ls -A "${BACKUP_DIR}" 2> /dev/null)" ]]; then

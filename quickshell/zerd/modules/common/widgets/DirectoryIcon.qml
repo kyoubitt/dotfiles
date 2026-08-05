@@ -1,41 +1,40 @@
 import QtQuick
-import Quickshell
-import Quickshell.Io
 import qs.modules.common
-import qs.modules.common.functions
 
-// From https://github.com/caelestia-dots/shell with modifications.
-// License: GPLv3
-
-Image {
+// Self-contained vector folder icon - deliberately does NOT depend on
+// system icon-theme resolution (Quickshell.iconPath/QIcon::fromTheme).
+// That lookup silently falls back to a generic broken-icon glyph whenever
+// the configured theme name doesn't match what's actually installed (as
+// happened with the icon AND cursor themes elsewhere in this config), so
+// directory entries in the wallpaper picker draw their own shape instead.
+Item {
     id: root
     required property var fileModelData
-    asynchronous: true
-    fillMode: Image.PreserveAspectFit
 
-    source: {
-        if (!fileModelData.fileIsDir)
-            return Quickshell.iconPath("application-x-zerosize");
+    readonly property color folderColor: Appearance.colors.colSecondary ?? Appearance.colors.colPrimary
 
-        if ([Directories.documents, Directories.downloads, Directories.music, Directories.pictures, Directories.videos].some(dir => FileUtils.trimFileProtocol(dir) === fileModelData.filePath))
-            return Quickshell.iconPath(`folder-${fileModelData.fileName.toLowerCase()}`);
+    Item {
+        anchors.centerIn: parent
+        width: Math.min(parent.width, parent.height) * 0.55
+        height: width * 0.72
 
-        return Quickshell.iconPath("inode-directory");
-    }
+        Rectangle {
+            id: tab
+            width: parent.width * 0.45
+            height: parent.height * 0.22
+            radius: 3
+            color: root.folderColor
+            anchors.top: parent.top
+            anchors.left: parent.left
+        }
 
-    onStatusChanged: {
-        if (status === Image.Error)
-            source = Quickshell.iconPath("error");
-    }
-
-    Process {
-        running: !fileModelData.fileIsDir
-        command: ["file", "--mime", "-b", fileModelData.filePath]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const mime = text.split(";")[0].replace("/", "-");
-                root.source = Images.validImageTypes.some(t => mime === `image-${t}`) ? fileModelData.fileUrl : Quickshell.iconPath(mime, "image-missing");
-            }
+        Rectangle {
+            width: parent.width
+            height: parent.height * 0.85
+            radius: 5
+            color: root.folderColor
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
         }
     }
 }

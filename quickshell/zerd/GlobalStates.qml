@@ -24,7 +24,6 @@ Singleton {
     property bool overviewOpen: false
     property bool altSwitcherOpen: false
     property bool clipboardOpen: false
-    property bool regionSelectorOpen: false
     property bool screenLocked: false
     property bool screenLockContainsCharacters: false
     property bool screenUnlockFailed: false
@@ -217,19 +216,4 @@ Singleton {
             screenZoom = Math.max(screenZoom - 0.4, 1)
         }
 	}
-
-    // gtklock is the only lock screen in use - this just mirrors its actual
-    // lock state into screenLocked (via gtklock's -L/-U hooks in lock.sh) so
-    // things like notification popups still know to suppress themselves.
-    IpcHandler {
-        target: "lockState"
-
-        function locked(): void {
-            root.screenLocked = true
-        }
-
-        function unlocked(): void {
-            root.screenLocked = false
-        }
-    }
 }

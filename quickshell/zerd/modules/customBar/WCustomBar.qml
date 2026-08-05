@@ -13,7 +13,7 @@ Scope {
         active: GlobalStates.barOpen
         component: PanelWindow {
             id: panelWindow
-            exclusiveZone: 40
+            exclusiveZone: 44
             WlrLayershell.namespace: "quickshell:customBar"
             WlrLayershell.layer: WlrLayer.Top
             color: "transparent"
@@ -22,7 +22,7 @@ Scope {
                 left: true
                 right: true
             }
-            implicitHeight: 40
+            implicitHeight: 44
 
             WCustomBarContent {
                 anchors.fill: parent

@@ -42,9 +42,9 @@ Singleton {
 
         const cmd = ["/usr/bin/swayidle", "-w"]
         const lockBeforeSleep = Config.options?.idle?.lockBeforeSleep !== false
-        // gtklock (via lock.sh) is the only lock screen in use - quickshell's
-        // own built-in lock was removed in favor of it.
-        const lockCommand = `${Quickshell.env("HOME")}/.local/bin/lock.sh`
+        // Native WlSessionLock+PAM lock screen (modules/lockScreen/LockScreen.qml)
+        // is the only lock screen now - gtklock has been removed.
+        const lockCommand = "/usr/bin/qs -c zerd ipc call lockScreen lock"
 
         if (screenOffTimeout > 0) {
             cmd.push("timeout", screenOffTimeout.toString(), "/usr/bin/niri msg action power-off-monitors", "resume", "/usr/bin/niri msg action power-on-monitors")

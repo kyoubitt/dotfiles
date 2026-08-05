@@ -1,4 +1,3 @@
-//@ pragma UseQApplication
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 //@ pragma Env QT_LOGGING_RULES=quickshell.dbus.properties=false
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
@@ -12,6 +11,7 @@ import qs.modules.controlCenter
 import qs.modules.mediaWidget
 import qs.modules.soundWidget
 import qs.modules.calendarWidget
+import qs.modules.lockScreen
 
 import QtQuick
 import Quickshell
@@ -42,8 +42,7 @@ ShellRoot {
 
     // Default panel set for first run / corrupted config.
     readonly property list<string> defaultPanels: [
-        "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter", "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wPolkit", "wSessionScreen",
-        "onScreenKeyboard", "regionSelector", "wallpaperSelector"
+        "wBackground", "wStartMenu", "wPolkit", "wNotificationPopup", "wallpaperSelector"
     ]
 
     Connections {
@@ -109,4 +108,9 @@ ShellRoot {
 
     // Shared (always loaded via ToastManager)
     ToastManager {}
+
+    // Native lock screen (WlSessionLock + PamContext) - always instantiated,
+    // never behind a LazyLoader: the compositor leaves the screen
+    // permanently blanked if this is destroyed while locked.
+    LockScreen {}
 }

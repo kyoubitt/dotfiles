@@ -101,9 +101,7 @@ Singleton {
             id: configOptionsJsonAdapter
             
             property list<string> enabledPanels: [
-                "wBackground", "wBackdrop", "wStartMenu", "wActionCenter", "wNotificationCenter",
-                "wNotificationPopup", "wOnScreenDisplay", "wWidgets", "wPolkit", "wSessionScreen",
-                "onScreenKeyboard", "regionSelector", "wallpaperSelector"
+                "wBackground", "wStartMenu", "wPolkit", "wNotificationPopup", "wallpaperSelector"
             ]
             property string panelFamily: "waffle"
             
@@ -245,28 +243,8 @@ Singleton {
             }
 
             property JsonObject modules: JsonObject {
-                property bool altSwitcher: true
-                property bool bar: true
-                property bool background: true
-                property bool cheatsheet: true
-                property bool clipboard: true
-                property bool crosshair: false
-                property bool dock: true
-                property bool lock: true
-                property bool mediaControls: true
-                property bool notificationPopup: true
-                property bool onScreenDisplay: true
-                property bool onScreenKeyboard: true
-                property bool overview: true
-                property bool overlay: true
                 property bool polkit: true
-                property bool regionSelector: true
-                property bool reloadPopup: true
-                property bool screenCorners: true
                 property bool sessionScreen: true
-                property bool sidebarLeft: true
-                property bool sidebarRight: true
-                property bool verticalBar: true
                 property bool wallpaperSelector: true
             }
 
@@ -614,8 +592,8 @@ Singleton {
                 property int timeoutLow: 5000
                 property int timeoutNormal: 7000
                 property int timeoutCritical: 0
-                // Posición del popup de notificaciones: topRight, bottomRight, topLeft, bottomLeft
-                property string position: "topRight"
+                // Posición del popup de notificaciones: topCenter, center, topRight, bottomRight, topLeft, bottomLeft
+                property string position: "topCenter"
                 // Margen respecto a los bordes de pantalla (px)
                 property int edgeMargin: 4
                 // Do Not Disturb mode
@@ -699,28 +677,6 @@ Singleton {
                 property bool compactStyle: false // Compact horizontal icon-only style
                 property bool showOverviewWhileSwitching: false
                 property int autoHideDelayMs: 500
-            }
-
-            property JsonObject regionSelector: JsonObject {
-                property JsonObject targetRegions: JsonObject {
-                    property bool windows: true
-                    property bool layers: false
-                    property bool content: true
-                    property bool showLabel: false
-                    property real opacity: 0.3
-                    property real contentRegionOpacity: 0.8
-                    property int selectionPadding: 5
-                }
-                property JsonObject rect: JsonObject {
-                    property bool showAimLines: true
-                }
-                property JsonObject circle: JsonObject {
-                    property int strokeWidth: 6
-                    property int padding: 10
-                }
-                property JsonObject annotation: JsonObject {
-                    property bool useSatty: false
-                }
             }
 
             property JsonObject resources: JsonObject {
@@ -955,13 +911,6 @@ Singleton {
                 property int stronglyAdviseUpdateThreshold: 200
             }
             property JsonObject waffles: JsonObject {
-                property JsonObject modules: JsonObject {
-                    property bool sidebarLeft: false
-                    property bool sidebarRight: false
-                    property bool dock: false
-                    property bool mediaControls: false
-                    property bool screenCorners: false
-                }
                 property JsonObject tweaks: JsonObject {
                     property bool smootherMenuAnimations: true
                     property bool switchHandlePositionFix: true
@@ -1006,9 +955,6 @@ Singleton {
                     property bool leftAlignApps: false
                     property bool monochromeIcons: false
                     property bool tintTrayIcons: false
-                }
-                property JsonObject actionCenter: JsonObject {
-                    property list<string> toggles: [ "network", "bluetooth", "easyEffects", "powerProfile", "idleInhibitor", "nightLight", "darkMode", "antiFlashbang", "cloudflareWarp", "mic", "musicRecognition", "notifications", "onScreenKeyboard", "gameMode", "screenSnip", "colorPicker" ]
                 }
                 property JsonObject calendar: JsonObject {
                     property bool force2CharDayOfWeek: true

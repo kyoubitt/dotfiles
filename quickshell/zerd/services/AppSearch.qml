@@ -24,6 +24,15 @@ Singleton {
         "footclient": "foot",
         "spotify": "spotify",
         "brave-browser": "brave-desktop",
+        // These specific icons live behind the icon theme's Dark->Light
+        // symlink (apps/scalable is a symlink to the Light variant), which
+        // the named icon-theme lookup fails to resolve for some icons even
+        // though the files genuinely exist - pointing directly at the file
+        // sidesteps that lookup entirely.
+        "claude": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/claude.svg",
+        "claude-desktop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/claude.svg",
+        "btop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/btop.svg",
+        "CMakeSetup": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/cmake.svg",
     })
     property var regexSubstitutions: [
         {
@@ -32,7 +41,10 @@ Singleton {
         },
         {
             "regex": /Minecraft.*/,
-            "replace": "minecraft"
+            // Not every icon theme ships a "minecraft" icon (e.g. it's missing
+            // from several dark variants) - try known-good alternates before
+            // giving up on a substitution entirely.
+            "candidates": ["minecraft", "minecraft-launcher", "org.prismlauncher.PrismLauncher"]
         },
         {
             "regex": /.*polkit.*/,
@@ -128,10 +140,17 @@ Singleton {
         // Regex substitutions
         for (let i = 0; i < regexSubstitutions.length; i++) {
             const substitution = regexSubstitutions[i];
-            const replacedName = str.replace(
-                substitution.regex,
-                substitution.replace,
-            );
+            if (!substitution.regex.test(str)) continue;
+
+            // Multiple candidates - use the first one that actually exists in
+            // the current icon theme, instead of committing blind to the first
+            if (substitution.candidates) {
+                const found = substitution.candidates.find(c => iconExists(c));
+                if (found) return found;
+                continue;
+            }
+
+            const replacedName = str.replace(substitution.regex, substitution.replace);
             if (replacedName != str) return replacedName;
         }
 

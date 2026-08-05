@@ -32,10 +32,12 @@ Button {
         radius: Looks.radius.medium
         antialiasing: true
         color: root.color
-        
-        // Subtle scale on press for tactile feedback
-        scale: root.down ? 0.97 : 1.0
-        
+
+        // Subtle scale on press for tactile feedback, and a slight lift on
+        // hover so tiles feel responsive before you even click - previously
+        // only color changed on hover, which read as static/flat.
+        scale: root.down ? 0.97 : (root.hovered ? 1.03 : 1.0)
+
         Behavior on color {
             ColorAnimation {
                 duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0

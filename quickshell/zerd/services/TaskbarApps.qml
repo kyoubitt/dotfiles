@@ -8,47 +8,30 @@ import Quickshell.Wayland
 Singleton {
     id: root
 
-    function togglePin(appId) {
-        const pinned = Config.options?.dock?.pinnedApps ?? []
-        const exists = pinned.indexOf(appId) !== -1
-        const next = exists ? pinned.filter(id => id !== appId) : pinned.concat([appId])
-        Config.setNestedValue(["dock", "pinnedApps"], next)
-    }
-
+    // Every currently open window, grouped by app.
+    // Keyed by lowercased appId (dedup only) - each entry keeps the
+    // original-cased appId, since icon-name guessing (AppSearch) relies on
+    // exact casing (e.g. regex substitutions like /Minecraft.*/), and
+    // lowercasing it here previously broke icon lookup for such apps.
     property list<var> apps: {
         var map = new Map();
 
-        // Pinned apps
-        const pinnedApps = Config.options?.dock?.pinnedApps ?? [];
-        for (const appId of pinnedApps) {
-            if (!map.has(appId.toLowerCase())) map.set(appId.toLowerCase(), ({
-                pinned: true,
-                toplevels: []
-            }));
-        }
-
-        // Separator
-        if (pinnedApps.length > 0) {
-            map.set("SEPARATOR", { pinned: false, toplevels: [] });
-        }
-
-        // Ignored apps
         const ignoredRegexStrings = Config.options?.dock.ignoredAppRegexes ?? [];
         const ignoredRegexes = ignoredRegexStrings.map(pattern => new RegExp(pattern, "i"));
-        // Open windows
+
         for (const toplevel of ToplevelManager.toplevels.values) {
             if (ignoredRegexes.some(re => re.test(toplevel.appId))) continue;
-            if (!map.has(toplevel.appId.toLowerCase())) map.set(toplevel.appId.toLowerCase(), ({
-                pinned: false,
+            const key = toplevel.appId.toLowerCase();
+            if (!map.has(key)) map.set(key, ({
+                appId: toplevel.appId,
                 toplevels: []
             }));
-            map.get(toplevel.appId.toLowerCase()).toplevels.push(toplevel);
+            map.get(key).toplevels.push(toplevel);
         }
 
         var values = [];
-
         for (const [key, value] of map) {
-            values.push(appEntryComp.createObject(null, { appId: key, toplevels: value.toplevels, pinned: value.pinned }));
+            values.push(appEntryComp.createObject(null, { appId: value.appId, toplevels: value.toplevels }));
         }
 
         return values;
@@ -58,7 +41,6 @@ Singleton {
         id: wrapper
         required property string appId
         required property list<var> toplevels
-        required property bool pinned
     }
     Component {
         id: appEntryComp

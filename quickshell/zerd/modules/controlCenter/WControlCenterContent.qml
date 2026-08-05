@@ -37,6 +37,19 @@ Item {
     }
     Component.onCompleted: refreshWifiState()
 
+    property list<real> visualizerPoints: []
+    Process {
+        id: cavaProc
+        running: MprisController.isPlaying
+        onRunningChanged: { if (!running) root.visualizerPoints = [] }
+        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/media_widget_config.txt`]
+        stdout: SplitParser {
+            onRead: data => {
+                root.visualizerPoints = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p))
+            }
+        }
+    }
+
     Process {
         id: wifiCheckProc
         command: ["rfkill", "list", "wifi"]
@@ -222,6 +235,36 @@ Item {
                         text: "skip_next"
                         font.pixelSize: 18
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.next() }
+                    }
+                }
+
+                // Small equalizer, same cava data the media widget/session
+                // screen use.
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 2
+                    spacing: 3
+
+                    Repeater {
+                        model: 24
+                        delegate: Rectangle {
+                            id: eqBar
+                            required property int index
+                            readonly property real level: root.visualizerPoints.length > 0
+                                ? Math.max(0, Math.min(1, (root.visualizerPoints[Math.min(eqBar.index, root.visualizerPoints.length - 1)] ?? 0) / 1000))
+                                : 0
+                            Layout.alignment: Qt.AlignBottom
+                            implicitWidth: 3
+                            implicitHeight: 3 + level * 14
+                            radius: width / 2
+                            antialiasing: true
+                            color: SMColors.accent
+                            opacity: 0.5 + level * 0.5
+
+                            Behavior on implicitHeight { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+                            Behavior on opacity { NumberAnimation { duration: 90 } }
+                        }
                     }
                 }
             }

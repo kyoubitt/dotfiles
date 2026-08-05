@@ -105,10 +105,13 @@ Item {
         }
     }
 
-    // Shadow behind the card
+    // Shadow behind the card - a bit stronger than the default so the card
+    // reads as floating above the wallpaper instead of flat against it.
     WRectangularShadow {
         visible: Appearance.effectsEnabled
         target: background
+        blur: 18
+        spread: 3
     }
 
     Rectangle {
@@ -116,12 +119,16 @@ Item {
         width: parent.width
         height: content.height + 24
         x: root.expanded ? 0 : dragManager.dragDiffX
-        color: root.hasCritical 
+        color: root.hasCritical
             ? ColorUtils.mix(Looks.colors.bgPanelFooterBase, Looks.colors.danger, 0.92)
             : Looks.colors.bgPanelFooterBase
-        radius: Looks.radius.large
-        border.color: root.hasCritical ? Looks.colors.danger : Looks.colors.bg2Border
-        border.width: 1
+        radius: Looks.radius.xLarge
+        antialiasing: true
+        // bg2Border reads as near-invisible against this card's near-black
+        // material fill (the two are close in luminance) - a translucent
+        // light edge gives the floating card actual definition instead.
+        border.color: root.hasCritical ? Looks.colors.danger : ColorUtils.applyAlpha(Looks.colors.fg, 0.16)
+        border.width: root.hasCritical ? 1 : 1.5
         
         Behavior on x {
             enabled: false

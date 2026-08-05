@@ -1,302 +1,372 @@
-import qs
-import qs.services
-import qs.modules.common
-import qs.modules.common.widgets
-import qs.modules.common.functions
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Hyprland
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.functions
+import qs.modules.common.widgets
+import qs.modules.waffle.startMenu
 
 Scope {
     id: root
-    property var focusedScreen: {
-        if (CompositorService.isNiri && typeof NiriService !== "undefined" && NiriService.currentOutput) {
-            const name = NiriService.currentOutput;
-            const matchNiri = Quickshell.screens.find(s => s && s.name === name);
-            if (matchNiri)
-                return matchNiri;
-        }
-        if (Hyprland.focusedMonitor && Hyprland.focusedMonitor.name) {
-            const name = Hyprland.focusedMonitor.name;
-            const matchHypr = Quickshell.screens.find(s => s && s.name === name);
-            if (matchHypr)
-                return matchHypr;
-        }
-        return Quickshell.screens[0];
-    }
-    readonly property bool packageManagerRunning: SessionWarnings.packageManagerRunning
-    readonly property bool downloadRunning: SessionWarnings.downloadRunning
 
-    component DescriptionLabel: Rectangle {
-        id: descriptionLabel
-        property string text
-        property color textColor: Appearance.colors.colOnTooltip
-        color: Appearance.colors.colTooltip
-        clip: true
-        radius: Appearance.rounding.normal
-        implicitHeight: descriptionLabelText.implicitHeight + 10 * 2
-        implicitWidth: descriptionLabelText.implicitWidth + 15 * 2
+    component SessionButton: ColumnLayout {
+        id: sessionButton
+        required property string icon
+        required property string label
+        readonly property bool hovered: buttonMouse.containsMouse
+        signal activated()
 
-        Behavior on implicitWidth {
-            animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
-        }
+        spacing: 10
 
-        StyledText {
-            id: descriptionLabelText
-            anchors.centerIn: parent
-            color: descriptionLabel.textColor
-            text: descriptionLabel.text
-        }
-    }
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            width: 120
+            height: 120
+            radius: width / 2
+            antialiasing: true
+            color: SMColors.accent
+            opacity: sessionButton.hovered ? 0.85 : 0.5
+            scale: sessionButton.hovered ? 1.06 : 1.0
 
-    Loader {
-        id: sessionLoader
-        active: GlobalStates.sessionOpen
-        onActiveChanged: {
-            if (sessionLoader.active) SessionWarnings.refresh();
-        }
+            Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
-        Connections {
-            target: GlobalStates
-            function onScreenLockedChanged() {
-                if (GlobalStates.screenLocked) {
-                    GlobalStates.sessionOpen = false;
-                }
+            Text {
+                anchors.centerIn: parent
+                text: sessionButton.icon
+                font.family: "Material Symbols Rounded"
+                font.pixelSize: 42
+                color: SMColors.fg
             }
-        }
-
-        sourceComponent: PanelWindow { // Session menu
-            id: sessionRoot
-            visible: sessionLoader.active
-            property string subtitle
-            
-            function hide() {
-                GlobalStates.sessionOpen = false;
-            }
-
-            exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.namespace: "quickshell:session"
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-            color: "transparent"
-
-            anchors {
-                top: true
-                bottom: true
-                left: true
-                right: true
-            }
-
-            // Background wallpaper with blur (like lock screen)
-            Image {
-                id: backgroundWallpaper
-                anchors.fill: parent
-                source: Config.options?.background?.wallpaperPath ?? ""
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                sourceSize.width: width
-                sourceSize.height: height
-
-                readonly property real blurRadius: 64
-                readonly property real blurZoom: 1.1
-                
-                layer.enabled: true
-                layer.effect: FastBlur {
-                    radius: backgroundWallpaper.blurRadius
-                }
-                
-                transform: Scale {
-                    origin.x: backgroundWallpaper.width / 2
-                    origin.y: backgroundWallpaper.height / 2
-                    xScale: backgroundWallpaper.blurZoom
-                    yScale: backgroundWallpaper.blurZoom
-                }
-            }
-            
-            // Dim overlay for better readability
-            Rectangle {
-                anchors.fill: parent
-                color: Qt.rgba(0, 0, 0, 0.4)
-            }
-
-            implicitWidth: root.focusedScreen?.width ?? 0
-            implicitHeight: root.focusedScreen?.height ?? 0
 
             MouseArea {
-                id: sessionMouseArea
+                id: buttonMouse
                 anchors.fill: parent
-                onClicked: {
-                    sessionRoot.hide()
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: sessionButton.activated()
+            }
+        }
+
+        Text {
+            Layout.alignment: Qt.AlignHCenter
+            text: sessionButton.label
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 15
+            font.bold: true
+            color: SMColors.fg
+        }
+    }
+
+    LazyLoader {
+        active: GlobalStates.sessionOpen
+
+        PanelWindow {
+            id: panelWindow
+            WlrLayershell.namespace: "quickshell:sessionScreen"
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            WlrLayershell.exclusionMode: ExclusionMode.Ignore
+            exclusiveZone: 0
+            color: "transparent"
+
+            anchors { top: true; bottom: true; left: true; right: true }
+
+            property list<real> visualizerPoints: []
+            Process {
+                id: cavaProc
+                running: MprisController.isPlaying
+                onRunningChanged: { if (!running) panelWindow.visualizerPoints = [] }
+                command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/media_widget_config.txt`]
+                stdout: SplitParser {
+                    onRead: data => {
+                        panelWindow.visualizerPoints = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p))
+                    }
                 }
             }
 
-            ColumnLayout { // Content column
-                id: contentColumn
+            // Real frosted-glass backdrop: the actual wallpaper, blurred live,
+            // rather than a flat dimmed rectangle - static power-menu tools
+            // can't do this without a pre-baked screenshot.
+            Image {
+                id: bgSource
+                anchors.fill: parent
+                source: Wallpapers.effectiveWallpaperUrl
+                fillMode: Image.PreserveAspectCrop
+                sourceSize.width: width
+                sourceSize.height: height
+                asynchronous: true
+                visible: false
+            }
+            FastBlur {
+                anchors.fill: bgSource
+                source: bgSource
+                radius: 64
+            }
+            Rectangle {
+                anchors.fill: parent
+                color: SMColors.bg
+                opacity: 0.45
+            }
+
+            // Entrance: fade + rise, so it feels like something actually
+            // happened rather than just popping into existence.
+            ColumnLayout {
+                id: content
                 anchors.centerIn: parent
-                spacing: 15
+                spacing: 32
+                opacity: 0
+                property real riseOffset: 24
+                anchors.verticalCenterOffset: riseOffset
 
-                // Subtle open animation for the session dialog
-                transformOrigin: Item.Center
-                scale: GlobalStates.sessionOpen ? 1.0 : 0.97
-                opacity: GlobalStates.sessionOpen ? 1.0 : 0.0
-                Behavior on scale {
-                    animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
-                }
-                Behavior on opacity {
-                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                focus: true
+                Keys.onEscapePressed: GlobalStates.sessionOpen = false
+
+                Component.onCompleted: {
+                    entranceAnim.start()
+                    content.forceActiveFocus()
                 }
 
-                Keys.onPressed: (event) => {
-                    if (event.key === Qt.Key_Escape) {
-                        sessionRoot.hide();
-                    }
+                ParallelAnimation {
+                    id: entranceAnim
+                    NumberAnimation { target: content; property: "opacity"; from: 0; to: 1; duration: 280; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: content; property: "riseOffset"; from: 24; to: 0; duration: 320; easing.type: Easing.OutQuad }
                 }
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 0
-                    StyledText { // Title
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        font {
-                            family: Appearance.font.family.title
-                            pixelSize: Appearance.font.pixelSize.title
-                            variableAxes: Appearance.font.variableAxes.title
-                        }
-                        text: Translation.tr("Session")
-                    }
+                    spacing: 6
 
-                    StyledText { // Small instruction
+                    Text {
                         Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        text: Translation.tr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
+                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm AP")
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 72
+                        font.bold: true
+                        color: SMColors.fg
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 18
+                        color: SMColors.fg
+                        opacity: 0.7
                     }
                 }
 
-                GridLayout {
-                    columns: 4
-                    columnSpacing: 15
-                    rowSpacing: 15
-
-                    SessionActionButton {
-                        id: sessionLock
-                        focus: sessionRoot.visible
-                        buttonIcon: "lock"
-                        buttonText: Translation.tr("Lock")
-                        onClicked:  { Session.lock(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.right: sessionSleep
-                        KeyNavigation.down: sessionHibernate
-                    }
-                    SessionActionButton {
-                        id: sessionSleep
-                        buttonIcon: "dark_mode"
-                        buttonText: Translation.tr("Sleep")
-                        onClicked:  { 
-                            Session.suspend();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionLock
-                        KeyNavigation.right: sessionLogout
-                        KeyNavigation.down: sessionShutdown
-                    }
-                    SessionActionButton {
-                        id: sessionLogout
-                        buttonIcon: "logout"
-                        buttonText: Translation.tr("Logout")
-                        onClicked: { Session.logout(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionSleep
-                        KeyNavigation.right: sessionTaskManager
-                        KeyNavigation.down: sessionReboot
-                    }
-                    SessionActionButton {
-                        id: sessionTaskManager
-                        buttonIcon: "browse_activity"
-                        buttonText: Translation.tr("Task Manager")
-                        onClicked:  { Session.launchTaskManager(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionLogout
-                        KeyNavigation.down: sessionFirmwareReboot
-                    }
-
-                    SessionActionButton {
-                        id: sessionHibernate
-                        buttonIcon: "downloading"
-                        buttonText: Translation.tr("Hibernate")
-                        onClicked:  { Session.hibernate(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.up: sessionLock
-                        KeyNavigation.right: sessionShutdown
-                    }
-                    SessionActionButton {
-                        id: sessionShutdown
-                        buttonIcon: "power_settings_new"
-                        buttonText: Translation.tr("Shutdown")
-                        onClicked:  { Session.poweroff(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionHibernate
-                        KeyNavigation.right: sessionReboot
-                        KeyNavigation.up: sessionSleep
-                    }
-                    SessionActionButton {
-                        id: sessionReboot
-                        buttonIcon: "restart_alt"
-                        buttonText: Translation.tr("Reboot")
-                        onClicked:  { Session.reboot(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionShutdown
-                        KeyNavigation.right: sessionFirmwareReboot
-                        KeyNavigation.up: sessionLogout
-                    }
-                    SessionActionButton {
-                        id: sessionFirmwareReboot
-                        buttonIcon: "settings_applications"
-                        buttonText: Translation.tr("Reboot to firmware settings")
-                        onClicked:  { Session.rebootToFirmware(); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.up: sessionTaskManager
-                        KeyNavigation.left: sessionReboot
-                    }
-                }
-
-                DescriptionLabel {
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    text: sessionRoot.subtitle
-                }
-            }
+                    spacing: 36
 
-            RowLayout {
-                anchors {
-                    top: contentColumn.bottom
-                    topMargin: 10
-                    horizontalCenter: contentColumn.horizontalCenter
-                }
-                spacing: 10
-
-                Loader {
-                    active: root.packageManagerRunning
-                    visible: active
-                    sourceComponent: DescriptionLabel {
-                        text: Translation.tr("Your package manager is running")
-                        textColor: Appearance.m3colors.m3onErrorContainer
-                        color: Appearance.m3colors.m3errorContainer
+                    SessionButton {
+                        icon: "lock"
+                        label: "Lock"
+                        onActivated: {
+                            GlobalStates.sessionOpen = false
+                            Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
+                        }
+                    }
+                    SessionButton {
+                        icon: "bedtime"
+                        label: "Sleep"
+                        onActivated: {
+                            GlobalStates.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "suspend"])
+                        }
+                    }
+                    SessionButton {
+                        icon: "restart_alt"
+                        label: "Reboot"
+                        onActivated: {
+                            GlobalStates.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "reboot"])
+                        }
+                    }
+                    SessionButton {
+                        icon: "power_settings_new"
+                        label: "Shutdown"
+                        onActivated: {
+                            GlobalStates.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "poweroff"])
+                        }
                     }
                 }
-                Loader {
-                    active: root.downloadRunning
-                    visible: active
-                    sourceComponent: DescriptionLabel {
-                        text: Translation.tr("There might be a download in progress")
-                        textColor: Appearance.m3colors.m3onErrorContainer
-                        color: Appearance.m3colors.m3errorContainer
+
+                // Now playing - modeled on the gtklock media card: bigger
+                // art, stacked title/artist, wavy seekbar, real controls -
+                // last in the content group so it moves/centers as one unit
+                // with the clock and buttons.
+                Item {
+                    id: nowPlayingCard
+                    visible: MprisController.activePlayer !== null
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 8
+                    implicitWidth: 300
+                    implicitHeight: nowPlayingCol.implicitHeight + 28
+
+                    // Sibling of the content, not a wrapping parent - a
+                    // parent's opacity multiplies into every child, which
+                    // is what made the album art look washed out/hazy
+                    // rather than just the background being translucent.
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 20
+                        antialiasing: true
+                        color: "gray"
+                        opacity: 0.35
+                    }
+
+                    ColumnLayout {
+                        id: nowPlayingCol
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            top: parent.top
+                            margins: 16
+                        }
+                        spacing: 10
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter
+                                width: 56
+                                height: 56
+                                radius: 12
+                                antialiasing: true
+                                color: SMColors.bg
+                                clip: true
+
+                                Image {
+                                    id: nowPlayingArt
+                                    anchors.fill: parent
+                                    source: MprisController.activePlayer?.trackArtUrl ?? ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    sourceSize.width: width
+                                    sourceSize.height: height
+                                    asynchronous: true
+                                    visible: status === Image.Ready
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: nowPlayingArt.status !== Image.Ready
+                                    text: "music_note"
+                                    font.family: "Material Symbols Rounded"
+                                    font.pixelSize: 22
+                                    color: SMColors.accent
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+                                MarqueeText {
+                                    Layout.fillWidth: true
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 15
+                                    font.bold: true
+                                    color: SMColors.fg
+                                    text: MprisController.activeTrack?.title ?? ""
+                                }
+                                MarqueeText {
+                                    Layout.fillWidth: true
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 12
+                                    color: SMColors.fg
+                                    opacity: 0.65
+                                    text: MprisController.activeTrack?.artist ?? ""
+                                }
+                            }
+                        }
+
+                        WavySeekbar {
+                            Layout.fillWidth: true
+                            progress: (MprisController.activePlayer && MprisController.activePlayer.length > 0)
+                                ? Math.max(0, Math.min(1, MprisController.activePlayer.position / MprisController.activePlayer.length)) : 0
+                            accentColor: SMColors.accent
+                            dimColor: ColorUtils.applyAlpha(SMColors.fg, 0.25)
+                            amplitude: 4
+                            animate: MprisController.isPlaying
+                            onSeekRequested: fraction => {
+                                if (!MprisController.activePlayer || MprisController.activePlayer.length <= 0) return
+                                MprisController.activePlayer.position = fraction * MprisController.activePlayer.length
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 24
+
+                            Text {
+                                text: "skip_previous"
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: 20
+                                color: SMColors.fg
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.previous() }
+                            }
+                            Text {
+                                text: MprisController.isPlaying ? "pause" : "play_arrow"
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: 24
+                                color: SMColors.fg
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.togglePlaying() }
+                            }
+                            Text {
+                                text: "skip_next"
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: 20
+                                color: SMColors.fg
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.next() }
+                            }
+                        }
+
+                        // Small equalizer, driven by the same cava data the
+                        // media widget uses. Mirrored from the center (bass
+                        // in the middle, treble at the edges) instead of a
+                        // raw left-to-right sweep - reads as more musical
+                        // and symmetric than one side just being louder.
+                        RowLayout {
+                            id: eqRow
+                            readonly property int barCount: 20
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: 4
+                            spacing: 4
+
+                            Repeater {
+                                model: eqRow.barCount
+                                delegate: Rectangle {
+                                    id: eqBar
+                                    required property int index
+                                    readonly property int mirroredIndex: eqBar.index <= eqRow.barCount / 2
+                                        ? eqBar.index
+                                        : eqRow.barCount - eqBar.index
+                                    readonly property real level: panelWindow.visualizerPoints.length > 0
+                                        ? Math.max(0, Math.min(1, (panelWindow.visualizerPoints[Math.min(eqBar.mirroredIndex, panelWindow.visualizerPoints.length - 1)] ?? 0) / 1000))
+                                        : 0
+                                    Layout.alignment: Qt.AlignBottom
+                                    implicitWidth: 3
+                                    implicitHeight: 4 + level * 22
+                                    radius: width / 2
+                                    antialiasing: true
+                                    color: SMColors.accent
+                                    opacity: 0.45 + level * 0.55
+
+                                    Behavior on implicitHeight { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
+                                    Behavior on opacity { NumberAnimation { duration: 100 } }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -304,51 +374,9 @@ Scope {
     }
 
     IpcHandler {
-        target: "session"
-        enabled: Config.options?.panelFamily !== "waffle"
-
-        function toggle(): void {
-            GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
-        }
-
-        function close(): void {
-            GlobalStates.sessionOpen = false
-        }
-
-        function open(): void {
-            GlobalStates.sessionOpen = true
-        }
+        target: "sessionScreen"
+        function toggle(): void { GlobalStates.sessionOpen = !GlobalStates.sessionOpen }
+        function open(): void { GlobalStates.sessionOpen = true }
+        function close(): void { GlobalStates.sessionOpen = false }
     }
-    Loader {
-        active: CompositorService.isHyprland
-        sourceComponent: Item {
-            GlobalShortcut {
-                name: "sessionToggle"
-                description: "Toggles session screen on press"
-
-                onPressed: {
-                    GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
-                }
-            }
-
-            GlobalShortcut {
-                name: "sessionOpen"
-                description: "Opens session screen on press"
-
-                onPressed: {
-                    GlobalStates.sessionOpen = true
-                }
-            }
-
-            GlobalShortcut {
-                name: "sessionClose"
-                description: "Closes session screen on press"
-
-                onPressed: {
-                    GlobalStates.sessionOpen = false
-                }
-            }
-        }
-    }
-
 }

@@ -1,126 +1,119 @@
-# Main format configuration - rounded pill/segment prompt
-format = """
-[](fg:#5E81AC)[ $username ](bg:#5E81AC fg:#ECEFF4)[](fg:#5E81AC bg:#81A1C1)[ $directory ](bg:#81A1C1 fg:#ECEFF4)[](fg:#81A1C1 bg:#88C0D0)[  ](bg:#88C0D0 fg:#ECEFF4)[](fg:#88C0D0 bg:#4C566A)[ $time ](bg:#4C566A fg:#ECEFF4)[](fg:#4C566A)
+format = """\
+[](fg:#558FAE)[ $username ](bg:#558FAE fg:#081520)[ $directory ](bg:#BCF2FF fg:#081520)[  ](bg:#F7EBF5 fg:#558FAE)[ $time ](bg:#625C5C fg:#B4AEAE)[](fg:#625C5C)
 $line_break\
 $character
 """
 
 add_newline = false
 
-# Directory configuration
 [directory]
 format = "[$path]($style)[$read_only]($read_only_style)"
-style = "bg:#81A1C1 fg:#ECEFF4"
+style = "bg:#BCF2FF fg:#081520"
 read_only = "󰌾 "
 truncation_length = 1
 fish_style_pwd_dir_length = 1
 home_symbol = "~"
 
-# Character at prompt
 [character]
 success_symbol = "[❯](bold white)"
-error_symbol = "[](bold white)"
-vimcmd_symbol ="[](bold white)"
+error_symbol = "[](bold white)"
+vimcmd_symbol = "[](bold white)"
 
-# Username display
 [username]
 format = "[$user]($style)"
-style_user = "bg:#5E81AC fg:#ECEFF4"
-style_root = "bg:#5E81AC fg:#ECEFF4"
+style_user = "bg:#558FAE fg:#081520"
+style_root = "bg:#558FAE fg:#081520"
 disabled = false
 show_always = true
 
-# Hostname for SSH
 [hostname]
 ssh_only = true
-ssh_symbol = ""
 format = "[$hostname ]($style)"
-style = "bg:#A94744 fg:#0D1017"
+style = "bg:#5A4D4C fg:#081520"
 disabled = false
 
-# Time display
 [time]
 disabled = false
-time_format = "%R" # Hour:Minute format
+time_format = "%R"
 format = "[$time]($style)"
-style = "bg:#4C566A fg:#ECEFF4"
+style = "bg:#625C5C fg:#B4AEAE"
 use_12hr = true
 
 [aws]
 symbol = "󰅟 "
 
 [buf]
-symbol = " "
+symbol = " "
 
 [c]
-symbol = " "
+symbol = " "
 
 [cmake]
-symbol = " "
+symbol = " "
 
 [conda]
-symbol = " "
+symbol = " "
 
 [crystal]
-symbol = " "
+symbol = " "
 
 [dart]
-symbol = " "
+symbol = " "
 
 [docker_context]
-symbol = " "
+symbol = " "
 
 [elixir]
-symbol = " "
+symbol = " "
 
 [elm]
-symbol = " "
+symbol = " "
 
 [fossil_branch]
-symbol = " "
+symbol = " "
 
 [git_branch]
-symbol = " "
+symbol = " "
 
 [git_commit]
-tag_symbol = " "
+tag_symbol = " "
 
 [git_status]
-ahead = "  "
-behind = "  "
+ahead = "  "
+behind = "  "
 conflicted = " 󰞇 "
 deleted = " 󰆴 "
 diverged = " 󰃻 "
 modified = " 󰏫 "
-renamed = "  "
-staged = "  "
+renamed = "  "
+staged = "  "
 stashed = " 󰀼 "
 untracked = " 󰋖 "
-up_to_date = "  "
+up_to_date = "  "
 
 [golang]
-symbol = " "
+symbol = " "
 
 [guix_shell]
-symbol = " "
+symbol = " "
 
 [haskell]
-symbol = " "
+symbol = " "
 
 [hg_branch]
-symbol = " "
+symbol = " "
 
 [java]
-symbol = " "
+symbol = " "
 
 [julia]
-symbol = " "
+symbol = " "
 
 [kotlin]
-symbol = " "
+symbol = " "
 
 [lua]
-symbol = " "
+symbol = " "
 
 [meson]
 symbol = "󰔷 "
@@ -129,43 +122,43 @@ symbol = "󰔷 "
 symbol = "󰆥 "
 
 [nix_shell]
-symbol = " "
+symbol = " "
 
 [nodejs]
-symbol = " "
+symbol = " "
 
 [ocaml]
-symbol = " "
+symbol = " "
 
 [package]
 symbol = "󰏗 "
 
 [perl]
-symbol = " "
+symbol = " "
 
 [php]
-symbol = " "
+symbol = " "
 
 [pijul_channel]
-symbol = " "
+symbol = " "
 
 [python]
-symbol = " "
+symbol = " "
 
 [ruby]
-symbol = " "
+symbol = " "
 
 [rust]
 symbol = "󱘗 "
 
 [scala]
-symbol = " "
+symbol = " "
 
 [swift]
-symbol = " "
+symbol = " "
 
 [zig]
-symbol = " "
+symbol = " "
 
 [gradle]
-symbol = " "
+symbol = " "

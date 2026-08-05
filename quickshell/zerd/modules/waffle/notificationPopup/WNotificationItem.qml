@@ -128,11 +128,15 @@ Item {
             }
 
             // Image - larger and better presented
+            // Some apps (e.g. Claude Code) send their app icon through the
+            // same "image" hint real hero/preview images use, with no way
+            // to tell the two apart from here - capped low enough that a
+            // mistaken icon doesn't dominate the whole notification card.
             Rectangle {
                 visible: root.hasImage
                 Layout.fillWidth: true
-                implicitHeight: imageContent.status === Image.Ready 
-                    ? Math.min(imageContent.sourceSize.height, 120) 
+                implicitHeight: imageContent.status === Image.Ready
+                    ? Math.min(imageContent.implicitHeight, 72)
                     : 60
                 radius: Looks.radius.medium
                 color: Looks.colors.bg1Base
@@ -143,7 +147,7 @@ Item {
                     anchors.fill: parent
                     source: root.notifImage
                     sourceSize.width: parent.width
-                    sourceSize.height: 120
+                    sourceSize.height: 72
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     smooth: true

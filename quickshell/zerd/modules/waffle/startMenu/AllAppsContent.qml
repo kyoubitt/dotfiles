@@ -99,8 +99,8 @@ WPanelPageColumn {
                         Item { Layout.preferredHeight: 2 }
                         Image {
                             Layout.alignment: Qt.AlignHCenter
-                            source: Quickshell.iconPath(gridItem.modelData.icon || gridItem.modelData.name, "application-x-executable")
-                            sourceSize: Qt.size(56, 56)
+                            source: AppSearch.getIconSource(gridItem.modelData.icon || gridItem.modelData.name, "application-x-executable")
+                            sourceSize: Qt.size(64, 64)
                             asynchronous: true
                         }
                         WText {
@@ -162,9 +162,9 @@ WPanelPageColumn {
                         spacing: 14
                         Image {
                             Layout.alignment: Qt.AlignVCenter
-                            source: Quickshell.iconPath(listItem.modelData.icon || listItem.modelData.name, "application-x-executable")
-                            sourceSize: Qt.size(40, 40)
-                            width: 40; height: 40
+                            source: AppSearch.getIconSource(listItem.modelData.icon || listItem.modelData.name, "application-x-executable")
+                            sourceSize: Qt.size(44, 44)
+                            width: 44; height: 44
                             asynchronous: true
                         }
                         WText {
