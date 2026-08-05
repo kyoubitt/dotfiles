@@ -280,11 +280,21 @@ Scope {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
-                    visible: root.lyricLines.length > 0
+                    visible: MprisController.activePlayer !== null
                     spacing: 6
 
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        visible: root.lyricLines.length === 0
+                        text: "No lyrics available"
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 15
+                        color: SMColors.fg
+                        opacity: 0.35
+                    }
+
                     Repeater {
-                        model: 5
+                        model: root.lyricLines.length > 0 ? 5 : 0
                         delegate: Text {
                             id: lyricLine
                             required property int index
