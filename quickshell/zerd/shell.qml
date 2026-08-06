@@ -13,6 +13,8 @@ import qs.modules.soundWidget
 import qs.modules.calendarWidget
 import qs.modules.lockScreen
 import qs.modules.waffle.background as WaffleBackgroundModule
+import qs.modules.wallpaperSelector
+import qs.modules.sessionScreen
 
 import QtQuick
 import Qt5Compat.GraphicalEffects
@@ -107,6 +109,18 @@ ShellRoot {
     LazyLoader {
         active: Config.ready && (Config.options?.enabledPanels ?? []).includes("calendarWidget")
         component: WCalendarWidget {}
+    }
+
+    // Wallpaper selector (toggle via IPC / keybind)
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wallpaperSelector")
+        component: WallpaperSelector {}
+    }
+
+    // Session/power menu (toggle via IPC / keybind)
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wSessionScreen")
+        component: SessionScreen {}
     }
 
     // Shared (always loaded via ToastManager)
