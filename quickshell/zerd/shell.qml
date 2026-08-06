@@ -116,4 +116,37 @@ ShellRoot {
     // never behind a LazyLoader: the compositor leaves the screen
     // permanently blanked if this is destroyed while locked.
     LockScreen {}
+
+    // Overview blur overlay: shows a fast blurred wallpaper when the compositor
+    // overview is active (Niri). Non-invasive: only visible when `NiriService.inOverview`.
+    Item {
+        id: overviewBlur
+        anchors.fill: parent
+        visible: typeof NiriService !== "undefined" ? NiriService.inOverview : false
+        z: 9999
+
+        Image {
+            id: overviewBg
+            anchors.fill: parent
+            source: Wallpapers.effectiveWallpaperUrl
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: true
+            visible: overviewBlur.visible
+        }
+
+        FastBlur {
+            anchors.fill: overviewBg
+            source: overviewBg
+            radius: 48
+            visible: overviewBg.visible
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.25
+            visible: overviewBg.visible
+        }
+    }
 }
