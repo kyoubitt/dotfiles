@@ -102,6 +102,7 @@ Scope {
                 sourceSize.width: width
                 sourceSize.height: height
                 asynchronous: true
+                cache: true
                 visible: false
             }
             FastBlur {

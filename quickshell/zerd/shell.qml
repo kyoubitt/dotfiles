@@ -12,8 +12,10 @@ import qs.modules.mediaWidget
 import qs.modules.soundWidget
 import qs.modules.calendarWidget
 import qs.modules.lockScreen
+import qs.modules.waffle.background as WaffleBackgroundModule
 
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -70,9 +72,10 @@ ShellRoot {
     }
 
     // === Panel Loaders ===
+    // Waffle background is enabled so overview/backdrop blur can render.
     LazyLoader {
-        active: Config.ready
-        component: ShellWafflePanels { }
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wBackground")
+        component: WaffleBackgroundModule.WaffleBackground {}
     }
 
     // Close confirmation dialog (always loaded, handles IPC)

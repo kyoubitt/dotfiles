@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions as CF
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -53,7 +54,7 @@ Variants {
         // Hide wallpaper (show only backdrop for overview)
         readonly property bool backdropOnly: wBg.backdrop?.hideWallpaper ?? false
         
-        visible: !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
+        visible: !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true) || NiriService.inOverview)
 
         // Dynamic focus based on windows
         property bool hasWindowsOnCurrentWorkspace: {
@@ -78,8 +79,8 @@ Variants {
 
         // Blur progress
         property real blurProgress: {
-            const blurEnabled = wEffects.enableBlur ?? false;
-            const blurRadius = wEffects.blurRadius ?? 0;
+            const blurEnabled = (wEffects.enableBlur ?? false) || NiriService.inOverview;
+            const blurRadius = Number(wEffects.blurRadius) || 32;
             if (!blurEnabled || blurRadius <= 0) return 0;
             
             const blurStatic = Math.max(0, Math.min(100, Number(wEffects.blurStatic) || 0));
@@ -104,14 +105,12 @@ Variants {
             }
 
             // Blur effect
-            MultiEffect {
+            FastBlur {
                 id: blurEffect
                 anchors.fill: parent
                 source: wallpaper
                 visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 && wallpaper.status === Image.Ready
-                blurEnabled: visible
-                blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
-                blurMax: 64
+                radius: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
             }
 
             // Dim overlay
