@@ -31,112 +31,6 @@ Scope {
     // it can't be used as a bypass for an actual lock.
     property bool pseudoLock: false
 
-    // --- Lyrics: fetched from lrclib.net for the active MPRIS track ---
-    property var lyricLines: []
-    property string lyricsForTrackKey: ""
-
-    function trackKey(): string {
-        const t = MprisController.activeTrack
-        if (!t) return ""
-        return `${t.artist ?? ""}|${t.title ?? ""}`
-    }
-
-    function parseLrc(lrcText) {
-        const lines = []
-        const re = /\[(\d+):(\d+(?:\.\d+)?)\]/g
-        for (const rawLine of lrcText.split("\n")) {
-            let m
-            const times = []
-            re.lastIndex = 0
-            while ((m = re.exec(rawLine)) !== null) {
-                times.push(parseInt(m[1]) * 60 + parseFloat(m[2]))
-            }
-            if (times.length === 0) continue
-            const text = rawLine.replace(re, "").trim()
-            if (text.length === 0) continue
-            for (const t of times) lines.push({ time: t, text: text })
-        }
-        lines.sort((a, b) => a.time - b.time)
-        return lines
-    }
-
-    function fetchLyrics() {
-        const t = MprisController.activeTrack
-        root.lyricLines = []
-        root.lyricsForTrackKey = root.trackKey()
-        if (!t || !t.title) return
-        lyricsProc.command = ["curl", "-s", "-G", "https://lrclib.net/api/get",
-            "--data-urlencode", `artist_name=${t.artist ?? ""}`,
-            "--data-urlencode", `track_name=${t.title ?? ""}`]
-        lyricsProc.running = true
-    }
-
-    Process {
-        id: lyricsProc
-        stdout: StdioCollector {
-            id: lyricsCollector
-            onStreamFinished: {
-                try {
-                    const data = JSON.parse(lyricsCollector.text)
-                    if (data && data.syncedLyrics) root.lyricLines = root.parseLrc(data.syncedLyrics)
-                } catch (e) {
-                    // No lyrics available (not found / offline) - falls back
-                    // to just the clock + wallpaper, per design.
-                }
-            }
-        }
-    }
-
-    Connections {
-        target: MprisController
-        function onActiveTrackChanged() {
-            if (root.trackKey() !== root.lyricsForTrackKey) root.fetchLyrics()
-        }
-    }
-
-    property real currentPos: 0
-    property real lastUpdate: 0
-
-    function updatePos() {
-        if (!MprisController.activePlayer) return
-        root.currentPos = MprisController.activePlayer.position
-        root.lastUpdate = Date.now()
-    }
-
-    Timer {
-        interval: 100
-        running: root.locked && MprisController.isPlaying
-        repeat: true
-        onTriggered: {
-            if (!MprisController.activePlayer) return
-            const now = Date.now()
-            const elapsed = (now - root.lastUpdate) / 1000
-            root.currentPos += elapsed * MprisController.activePlayer.playbackRate
-            root.lastUpdate = now
-
-            // Resync periodically with the actual player position to prevent drift
-            if (Math.abs(root.currentPos - MprisController.activePlayer.position) > 1.0) {
-                updatePos()
-            }
-        }
-    }
-
-    Connections {
-        target: MprisController.activePlayer
-        function onPositionChanged() { root.updatePos() }
-        function onPlaybackStateChanged() { root.updatePos() }
-    }
-
-    readonly property int currentLyricIndex: {
-        if (lyricLines.length === 0 || !MprisController.activePlayer) return -1
-        const pos = root.currentPos
-        let idx = -1
-        for (let i = 0; i < lyricLines.length; i++) {
-            if (lyricLines[i].time <= pos) idx = i
-            else break
-        }
-        return idx
-    }
 
     // --- Cava equalizer, one shared process regardless of monitor count ---
     property list<real> visualizerPoints: []
@@ -205,6 +99,7 @@ Scope {
                 authBusy = true
                 pam.start()
             }
+            passwordInput.forceActiveFocus()
         } else {
             if (pam.active) pam.abort()
             pseudoLock = false
@@ -216,7 +111,7 @@ Scope {
             root.locked = false
             return
         }
-        if (pam.responseRequired) pam.respond(text)
+        if (pam.active && text.length > 0) pam.respond(text)
     }
 
     WlSessionLock {
@@ -271,50 +166,6 @@ Scope {
                         font.pixelSize: 16
                         color: SMColors.fg
                         opacity: 0.7
-                    }
-                }
-
-                // Karaoke-style synced lyrics: current line bold/centered,
-                // neighbors faded above/below - only shown when lrclib had
-                // a match for the currently playing track.
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
-                    visible: MprisController.activePlayer !== null
-                    spacing: 6
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        visible: root.lyricLines.length === 0
-                        text: "No lyrics available"
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 15
-                        color: SMColors.fg
-                        opacity: 0.35
-                    }
-
-                    Repeater {
-                        model: root.lyricLines.length > 0 ? 5 : 0
-                        delegate: Text {
-                            id: lyricLine
-                            required property int index
-                            readonly property int lineOffset: index - 2
-                            readonly property int lineIdx: root.currentLyricIndex + lineOffset
-                            readonly property bool lineValid: lineIdx >= 0 && lineIdx < root.lyricLines.length
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.fillWidth: true
-                            horizontalAlignment: Text.AlignHCenter
-                            wrapMode: Text.WordWrap
-                            text: lineValid ? root.lyricLines[lineIdx].text : ""
-                            visible: lineValid
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: lineOffset === 0 ? 19 : 15
-                            font.bold: lineOffset === 0
-                            color: SMColors.fg
-                            opacity: !lineValid ? 0 : (lineOffset === 0 ? 1.0 : Math.max(0.15, 0.55 - Math.abs(lineOffset) * 0.18))
-
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
-                        }
                     }
                 }
 
@@ -378,7 +229,7 @@ Scope {
                             font.family: "JetBrainsMono Nerd Font"
                             font.pixelSize: 15
                             clip: true
-                            enabled: root.pseudoLock || pam.responseRequired
+                            enabled: root.pseudoLock || pam.active || pam.responseRequired
 
                             Component.onCompleted: passwordInput.forceActiveFocus()
 
@@ -387,7 +238,7 @@ Scope {
                                     root.submitPassword(text)
                                     return
                                 }
-                                if (pam.responseRequired && text.length > 0) {
+                                if (pam.active && text.length > 0) {
                                     root.submitPassword(text)
                                     text = ""
                                 }
