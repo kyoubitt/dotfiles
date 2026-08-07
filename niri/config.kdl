@@ -40,7 +40,7 @@ cursor {
 }
 
 overview {
-    backdrop-color "#00000066"
+    backdrop-color "#00000000"
     workspace-shadow {
         off
 }
@@ -332,6 +332,11 @@ environment {
 
 layer-rule {
     match namespace="quickshell:wBackground"
+    place-within-backdrop true
+}
+
+layer-rule {
+    match namespace="^quickshell:wOverviewBackdrop$"
     place-within-backdrop true
 }
 

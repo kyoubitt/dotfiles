@@ -82,6 +82,13 @@ Item {
     Component.onCompleted: {
         if (root.inWallpapersRoot) root.rescanWallpapersFlat()
         Wallpapers.generateThumbnail("xx-large")
+        // The Loader that instantiates this component only goes active
+        // *after* GlobalStates.wallpaperSelectorOpen has already flipped
+        // true, so the onWallpaperSelectorOpenChanged handler below never
+        // fires for a fresh open - it already missed the signal. Grab focus
+        // here instead, which runs exactly once per open since the Loader
+        // tears the whole tree down on close.
+        root.forceActiveFocus()
     }
 
     Connections {

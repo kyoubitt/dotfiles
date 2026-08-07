@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -122,6 +123,9 @@ Scope {
             id: surface
             color: "transparent"
 
+            // Wallpaper background, blurred via a cached GPU layer effect
+            // (only paid for while actually locked) rather than the old
+            // always-composited Qt5Compat FastBlur.
             Image {
                 id: bgSource
                 anchors.fill: parent
@@ -131,12 +135,15 @@ Scope {
                 sourceSize.height: height
                 asynchronous: true
                 cache: true
-                visible: false
-            }
-            FastBlur {
-                anchors.fill: bgSource
-                source: bgSource
-                radius: 48
+
+                layer.enabled: Appearance.effectsEnabled
+                layer.effect: MultiEffect {
+                    source: bgSource
+                    anchors.fill: bgSource
+                    blurEnabled: true
+                    blur: 1.0
+                    blurMax: 64
+                }
             }
             Rectangle {
                 anchors.fill: parent

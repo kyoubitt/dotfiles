@@ -50,7 +50,7 @@ Singleton {
     }
 
     function lock() {
-        Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lock", "activate"]);
+        Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]);
     }
 
     function suspend() {

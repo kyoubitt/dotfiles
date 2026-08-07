@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -103,12 +103,15 @@ Scope {
                 sourceSize.height: height
                 asynchronous: true
                 cache: true
-                visible: false
-            }
-            FastBlur {
-                anchors.fill: bgSource
-                source: bgSource
-                radius: 64
+
+                layer.enabled: Appearance.effectsEnabled
+                layer.effect: MultiEffect {
+                    source: bgSource
+                    anchors.fill: bgSource
+                    blurEnabled: true
+                    blur: 1.0
+                    blurMax: 64
+                }
             }
             Rectangle {
                 anchors.fill: parent

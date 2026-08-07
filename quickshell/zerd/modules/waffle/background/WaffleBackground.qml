@@ -5,7 +5,6 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions as CF
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -54,7 +53,14 @@ Variants {
         // Hide wallpaper (show only backdrop for overview)
         readonly property bool backdropOnly: wBg.backdrop?.hideWallpaper ?? false
         
-        visible: !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true) || NiriService.inOverview)
+        readonly property bool overviewBackdropActive: {
+            const backdrop = wBg.backdrop ?? {};
+            return (backdrop.enable ?? false) && NiriService.inOverview;
+        }
+
+        visible: !backdropOnly
+            && !overviewBackdropActive
+            && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
 
         // Dynamic focus based on windows
         property bool hasWindowsOnCurrentWorkspace: {
@@ -79,7 +85,7 @@ Variants {
 
         // Blur progress
         property real blurProgress: {
-            const blurEnabled = (wEffects.enableBlur ?? false) || NiriService.inOverview;
+            const blurEnabled = (wEffects.enableBlur ?? false);
             const blurRadius = Number(wEffects.blurRadius) || 32;
             if (!blurEnabled || blurRadius <= 0) return 0;
             
@@ -101,29 +107,31 @@ Variants {
                 cache: true
                 sourceSize.width: panelRoot.width
                 sourceSize.height: panelRoot.height
-                visible: status === Image.Ready && !blurEffect.visible
-            }
 
-            // Blur effect
-            FastBlur {
-                id: blurEffect
-                anchors.fill: parent
-                source: wallpaper
-                visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 && wallpaper.status === Image.Ready
-                radius: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
+                layer.enabled: Appearance.effectsEnabled && panelRoot.blurProgress > 0
+                layer.effect: MultiEffect {
+                    source: wallpaper
+                    anchors.fill: wallpaper
+                    blurEnabled: true
+                    blur: panelRoot.blurProgress
+                    blurMax: Number(panelRoot.wEffects.blurRadius) || 32
+                }
             }
 
             // Dim overlay
             Rectangle {
                 anchors.fill: parent
                 color: {
+                    if (typeof NiriService !== "undefined" && NiriService.inOverview) {
+                        return Qt.rgba(0, 0, 0, 0.45);
+                    }
                     const baseN = Number(panelRoot.wEffects.dim) || 0;
                     const dynN = Number(panelRoot.wEffects.dynamicDim) || 0;
                     const extra = panelRoot.focusPresenceProgress > 0 ? dynN * panelRoot.focusPresenceProgress : 0;
                     const total = Math.max(0, Math.min(100, baseN + extra));
                     return Qt.rgba(0, 0, 0, total / 100);
                 }
-                Behavior on color { ColorAnimation { duration: 220 } }
+                Behavior on color { ColorAnimation { duration: 200 } }
             }
         }
     }

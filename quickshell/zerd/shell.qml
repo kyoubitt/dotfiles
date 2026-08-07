@@ -13,6 +13,9 @@ import qs.modules.soundWidget
 import qs.modules.calendarWidget
 import qs.modules.lockScreen
 import qs.modules.waffle.background as WaffleBackgroundModule
+import qs.modules.waffle.startMenu
+import qs.modules.polkit
+import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
 import qs.modules.wallpaperSelector
 import qs.modules.sessionScreen
 
@@ -80,6 +83,29 @@ ShellRoot {
         component: WaffleBackgroundModule.WaffleBackground {}
     }
 
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wBackground")
+        component: WaffleBackgroundModule.WaffleOverviewBackdrop {}
+    }
+
+    // Start menu (application launcher) - handles IPC target "search"
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wStartMenu")
+        component: WaffleStartMenu {}
+    }
+
+    // Polkit authentication dialog
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wPolkit")
+        component: Polkit {}
+    }
+
+    // Notification popups
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wNotificationPopup")
+        component: WaffleNotificationPopupModule.WaffleNotificationPopup {}
+    }
+
     // Close confirmation dialog (always loaded, handles IPC)
     LazyLoader { active: Config.ready; component: CloseConfirm {} }
 
@@ -130,37 +156,4 @@ ShellRoot {
     // never behind a LazyLoader: the compositor leaves the screen
     // permanently blanked if this is destroyed while locked.
     LockScreen {}
-
-    // Overview blur overlay: shows a fast blurred wallpaper when the compositor
-    // overview is active (Niri). Non-invasive: only visible when `NiriService.inOverview`.
-    Item {
-        id: overviewBlur
-        anchors.fill: parent
-        visible: typeof NiriService !== "undefined" ? NiriService.inOverview : false
-        z: 9999
-
-        Image {
-            id: overviewBg
-            anchors.fill: parent
-            source: Wallpapers.effectiveWallpaperUrl
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: true
-            visible: overviewBlur.visible
-        }
-
-        FastBlur {
-            anchors.fill: overviewBg
-            source: overviewBg
-            radius: 48
-            visible: overviewBg.visible
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            color: "black"
-            opacity: 0.25
-            visible: overviewBg.visible
-        }
-    }
 }
