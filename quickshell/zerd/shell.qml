@@ -20,7 +20,6 @@ import qs.modules.wallpaperSelector
 import qs.modules.sessionScreen
 
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
 import qs.services
