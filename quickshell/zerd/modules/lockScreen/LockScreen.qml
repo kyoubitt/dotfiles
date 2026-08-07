@@ -100,7 +100,6 @@ Scope {
                 authBusy = true
                 pam.start()
             }
-            passwordInput.forceActiveFocus()
         } else {
             if (pam.active) pam.abort()
             pseudoLock = false
