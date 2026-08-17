@@ -22,7 +22,7 @@ AUR_HELPER=""
 
 # Progress tracking
 CURRENT_STEP=0
-readonly TOTAL_STEPS=19
+readonly TOTAL_STEPS=20
 
 # Installation summary tracking
 declare -a INSTALL_SUMMARY=()
@@ -54,6 +54,7 @@ readonly AUR_PACKAGES=(
   minizip
   awww-git
   quickshell-git
+  sddm-astronaut-theme
 )
 
 # Official repository packages
@@ -63,6 +64,7 @@ readonly PACMAN_PACKAGES=(
   qt5-wayland qt6-wayland polkit-gnome ffmpeg imagemagick unzip jq
   curl libnotify
   qt5ct qt6ct
+  sddm
 )
 
 # ==========================
@@ -1274,6 +1276,54 @@ create_symlinks() {
 }
 
 # ==========================
+# SDDM LOGIN THEME
+# ==========================
+
+install_sddm_theme() {
+  info "Configuring SDDM login theme..."
+
+  local theme_dir="/usr/share/sddm/themes/sddm-astronaut-theme"
+  local theme_conf_target="${theme_dir}/Themes/wallust.conf"
+  local seed_conf="${DOTDIR}/sddm/wallust.conf"
+
+  if [[ ! -d "${theme_dir}" ]]; then
+    warn "sddm-astronaut-theme not installed, skipping SDDM theme setup"
+    return 1
+  fi
+
+  if [[ ! -f "${seed_conf}" ]]; then
+    warn "sddm/wallust.conf not found in repo, skipping SDDM theme setup"
+    return 1
+  fi
+
+  # Owned by the user (not root) so theme-sync.sh can sed-patch it on every
+  # wallpaper change without needing sudo.
+  if sudo cp "${seed_conf}" "${theme_conf_target}" >> "${LOG_FILE}" 2>&1 &&
+    sudo chown "${USER}:${USER}" "${theme_conf_target}" >> "${LOG_FILE}" 2>&1; then
+    info "Installed wallust SDDM theme config"
+  else
+    warn "Failed to install SDDM wallust theme config"
+    return 1
+  fi
+
+  sudo mkdir -p /etc/sddm.conf.d
+  if printf '[Theme]\nCurrent=sddm-astronaut-theme\n' | sudo tee /etc/sddm.conf.d/theme.conf > /dev/null 2>> "${LOG_FILE}"; then
+    info "Set SDDM theme to sddm-astronaut-theme"
+  else
+    warn "Failed to write /etc/sddm.conf.d/theme.conf"
+    return 1
+  fi
+
+  if sudo systemctl enable sddm >> "${LOG_FILE}" 2>&1; then
+    msg "SDDM login theme configured and sddm.service enabled"
+  else
+    warn "Failed to enable sddm.service"
+  fi
+
+  return 0
+}
+
+# ==========================
 # SYSTEMD SERVICE MANAGEMENT
 # ==========================
 
@@ -1467,6 +1517,10 @@ main() {
   step "Creating Symbolic Links"
   create_symlinks
   add_summary "Configuration symlinks created in ~/.config"
+
+  step "Configuring SDDM Login Theme"
+  install_sddm_theme || warn "Proceeding without SDDM theme configured"
+  add_summary "SDDM login theme configured (sddm-astronaut-theme, wallust variant)"
 
   step "Configuring System Services"
   create_systemd_services
