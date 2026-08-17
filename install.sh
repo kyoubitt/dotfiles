@@ -36,7 +36,7 @@ SUDO_PID=""
 
 # Expected configuration folders in the repo
 readonly CONFIG_FOLDERS=(
-  niri fish zsh fastfetch mako alacritty kitty ghostty starship
+  niri fish zsh fastfetch mako ghostty starship
   zathura wallust scripts quickshell
 )
 
@@ -59,7 +59,7 @@ readonly AUR_PACKAGES=(
 
 # Official repository packages
 readonly PACMAN_PACKAGES=(
-  niri fish fastfetch mako alacritty kitty ghostty starship
+  niri fish fastfetch mako kitty ghostty starship
   zathura zathura-pdf-mupdf ttf-jetbrains-mono-nerd
   qt5-wayland qt6-wayland polkit-gnome ffmpeg imagemagick unzip jq
   curl libnotify
@@ -904,7 +904,7 @@ verify_all_binaries() {
   info "Verifying all required binaries are installed..."
   local missing_binaries=()
   local binaries_to_check=(
-    niri fish fastfetch mako alacritty kitty ghostty starship
+    niri fish fastfetch mako kitty ghostty starship
     zathura wallust awww
   )
 
