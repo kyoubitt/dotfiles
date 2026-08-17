@@ -35,6 +35,56 @@ Singleton {
     property int manualActiveHour
     property int manualActiveMinute
 
+    // Real location, so automatic mode can follow the actual solar sunset/
+    // sunrise (via wlsunset's own -l/-L calculation) instead of a fixed
+    // clock window that's wrong for most of the year.
+    property var location: ({ valid: false, lat: 0, lon: 0 })
+
+    // Set once the real running-state check (niriFetchProc/fetchProc) has
+    // actually completed at least once since this singleton was created.
+    property bool _initialStateChecked: false
+
+    Process {
+        id: ipLocator
+        command: ["/usr/bin/curl", "-s", "--max-time", "10", "http://ip-api.com/json/?fields=lat,lon"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.lat && data.lon) {
+                        root.location = { valid: true, lat: data.lat, lon: data.lon };
+                        root.ensureState();
+                    } else {
+                        fallbackLocator.running = true;
+                    }
+                } catch (e) {
+                    fallbackLocator.running = true;
+                }
+            }
+        }
+        onExited: (code) => {
+            if (code !== 0 && !root.location.valid) fallbackLocator.running = true;
+        }
+    }
+
+    Process {
+        id: fallbackLocator
+        command: ["/usr/bin/curl", "-s", "--max-time", "10", "https://ipwho.is/"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.latitude && data.longitude) {
+                        root.location = { valid: true, lat: data.latitude, lon: data.longitude };
+                        root.ensureState();
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
+    Component.onCompleted: ipLocator.running = true
+
     // Debounce timer for wlsunset restarts
     property bool _pendingRestart: false
     Timer {
@@ -84,6 +134,21 @@ Singleton {
     function ensureState() {
         if (!root.automatic || root.manualActive !== undefined)
             return;
+        // Every QML engine reload reconstructs this singleton from scratch,
+        // resetting `active` to its false default even though wlsunset may
+        // already be running fine - acting before niriFetchProc has told us
+        // the real state meant killing+respawning it on every single edit
+        // reload. Wait for that real check first.
+        if (!root._initialStateChecked)
+            return;
+        if (CompositorService.isNiri && root.location.valid) {
+            // wlsunset computes the real sunset/sunrise itself and fades
+            // between them continuously - just keep it running rather than
+            // toggling it on/off against a fixed clock window. enable()
+            // kills+respawns the process, so only call it if not already up.
+            if (!root.active) root.enable();
+            return;
+        }
         if (root.shouldBeOn) {
             root.enable();
         } else {
@@ -96,9 +161,15 @@ Singleton {
     function _doEnable() {
         if (CompositorService.isNiri) {
             // wlsunset: -T high temp (day), -t low temp (night)
-            // Force "always night" mode: sunset at 00:00, sunrise at 23:59
             // Must use execDetached so wlsunset keeps running after Process ends
-            Quickshell.execDetached(["/usr/bin/wlsunset", "-T", "6500", "-t", root.colorTemperature.toString(), "-s", "00:00", "-S", "23:59"]);
+            if (root.manualActive === undefined && root.location.valid) {
+                // Automatic mode with a real location - let wlsunset compute
+                // today's actual sunset/sunrise and fade between them.
+                Quickshell.execDetached(["/usr/bin/wlsunset", "-T", "6500", "-t", root.colorTemperature.toString(), "-l", root.location.lat.toString(), "-L", root.location.lon.toString()]);
+            } else {
+                // Manual override, or location not resolved yet - force "always night".
+                Quickshell.execDetached(["/usr/bin/wlsunset", "-T", "6500", "-t", root.colorTemperature.toString(), "-s", "00:00", "-S", "23:59"]);
+            }
         } else {
             hyprsunsetStartProc.running = true;
         }
@@ -154,6 +225,8 @@ Singleton {
                     root.active = false;
                 else
                     root.active = (output != "6500"); // 6500 is the default when off
+                root._initialStateChecked = true;
+                root.ensureState();
             }
         }
     }
@@ -179,6 +252,8 @@ Singleton {
         command: ["/usr/bin/pidof", "wlsunset"]
         onExited: (exitCode, exitStatus) => {
             root.active = (exitCode === 0);
+            root._initialStateChecked = true;
+            root.ensureState();
         }
     }
 

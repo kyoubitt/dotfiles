@@ -317,6 +317,7 @@ switch() {
                 (
                     wallust run "$imgpath"
                     $HOME/.config/niri/scripts/sync-colors.sh
+                    [[ -x "$HOME/.config/wallust/sync-thunar-theme.sh" ]] && "$HOME/.config/wallust/sync-thunar-theme.sh"
                     if [[ -f "$HOME/.dotfiles-zerda/scripts/theme-sync.sh" ]]; then
                         source "$HOME/.dotfiles-zerda/scripts/theme-sync.sh"
                         update_sddm_theme "$imgpath"

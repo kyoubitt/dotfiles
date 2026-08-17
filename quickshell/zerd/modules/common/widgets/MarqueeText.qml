@@ -35,6 +35,7 @@ Item {
             id: label1
             height: parent.height
             verticalAlignment: Text.AlignVCenter
+            renderType: Text.NativeRendering
         }
         Item {
             width: marquee.gapWidth
@@ -48,6 +49,7 @@ Item {
             text: label1.text
             font: label1.font
             color: label1.color
+            renderType: Text.NativeRendering
         }
     }
 

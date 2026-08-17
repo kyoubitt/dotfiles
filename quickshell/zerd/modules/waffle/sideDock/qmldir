@@ -1,0 +1,3 @@
+module qs.modules.waffle.sideDock
+WSideDock 1.0 WSideDock.qml
+WSideDockContent 1.0 WSideDockContent.qml

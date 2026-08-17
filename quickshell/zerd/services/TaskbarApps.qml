@@ -13,7 +13,17 @@ Singleton {
     // original-cased appId, since icon-name guessing (AppSearch) relies on
     // exact casing (e.g. regex substitutions like /Minecraft.*/), and
     // lowercasing it here previously broke icon lookup for such apps.
-    property list<var> apps: {
+    //
+    // This used to be a plain property binding that read
+    // ToplevelManager.toplevels.values inside the loop - QML's automatic
+    // dependency tracking doesn't reliably pick that up as a live
+    // dependency (CompositorService.qml hits the same API and works around
+    // it the same way: an explicit Connections/onValuesChanged), so the
+    // list only ever reflected whatever was open at the exact instant this
+    // singleton was first constructed and never updated after that.
+    property list<var> apps: []
+
+    function _recompute() {
         var map = new Map();
 
         const ignoredRegexStrings = Config.options?.dock.ignoredAppRegexes ?? [];
@@ -34,7 +44,14 @@ Singleton {
             values.push(appEntryComp.createObject(null, { appId: value.appId, toplevels: value.toplevels }));
         }
 
-        return values;
+        root.apps = values;
+    }
+
+    Component.onCompleted: root._recompute()
+
+    Connections {
+        target: ToplevelManager.toplevels
+        function onValuesChanged() { root._recompute() }
     }
 
     component TaskbarAppEntry: QtObject {

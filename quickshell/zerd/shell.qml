@@ -6,13 +6,12 @@
 
 import qs.modules.common
 import qs.modules.closeConfirm
-import qs.modules.customBar
 import qs.modules.controlCenter
-import qs.modules.mediaWidget
 import qs.modules.soundWidget
-import qs.modules.calendarWidget
 import qs.modules.lockScreen
 import qs.modules.waffle.background as WaffleBackgroundModule
+import qs.modules.waffle.sideDock as WaffleSideDockModule
+import qs.modules.waffle.topBar as WaffleTopBarModule
 import qs.modules.waffle.startMenu
 import qs.modules.polkit
 import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
@@ -66,15 +65,6 @@ ShellRoot {
         }
     }
 
-    // IPC for settings - open as separate window using execDetached
-    IpcHandler {
-        target: "settings"
-        function open(): void {
-            // -n = no daemon (standalone window), -p = path to QML file
-            Quickshell.execDetached(["/usr/bin/qs", "-n", "-p", Quickshell.shellPath("waffleSettings.qml")])
-        }
-    }
-
     // === Panel Loaders ===
     // Waffle background is enabled so overview/backdrop blur can render.
     LazyLoader {
@@ -108,10 +98,19 @@ ShellRoot {
     // Close confirmation dialog (always loaded, handles IPC)
     LazyLoader { active: Config.ready; component: CloseConfirm {} }
 
-    // Custom bar - independent panel, not nested under waffle
+    // Vertical side dock: workspace indicator, media toggle, quick toggles,
+    // settings/power. Gated on its own Config.options.waffles.sideDock.enable
+    // rather than enabledPanels, so it doesn't need a config-file migration.
     LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("customBar")
-        component: WCustomBar {}
+        active: Config.ready && (Config.options.waffles?.sideDock?.enable ?? true)
+        component: WaffleSideDockModule.WSideDock {}
+    }
+
+    // Top bar: now-playing + system stats (RAM/CPU temp), same blurred-glass
+    // treatment as the side dock. Own enable gate, matching that pattern.
+    LazyLoader {
+        active: Config.ready && (Config.options.waffles?.topBar?.enable ?? true)
+        component: WaffleTopBarModule.WTopBar {}
     }
 
     // Combined control center (toggles + media + notifications + calendar merged
@@ -122,18 +121,8 @@ ShellRoot {
     }
 
     LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("mediaWidget")
-        component: WMediaWidget {}
-    }
-
-    LazyLoader {
         active: Config.ready && (Config.options?.enabledPanels ?? []).includes("soundWidget")
         component: WSoundWidget {}
-    }
-
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("calendarWidget")
-        component: WCalendarWidget {}
     }
 
     // Wallpaper selector (toggle via IPC / keybind)

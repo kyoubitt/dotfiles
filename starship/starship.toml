@@ -1,5 +1,5 @@
 format = """\
-[](fg:#558FAE)[ $username ](bg:#558FAE fg:#081520)[ $directory ](bg:#BCF2FF fg:#081520)[  ](bg:#F7EBF5 fg:#558FAE)[ $time ](bg:#625C5C fg:#B4AEAE)[](fg:#625C5C)
+[](fg:#3D998A)[ $username ](bg:#3D998A fg:#01251F)[ $directory ](bg:#958671 fg:#01251F)[  ](bg:#F5BA8C fg:#3D998A)[ $time ](bg:#60575E fg:#B2A9B1)[](fg:#60575E)
 $line_break\
 $character
 """
@@ -8,7 +8,7 @@ add_newline = false
 
 [directory]
 format = "[$path]($style)[$read_only]($read_only_style)"
-style = "bg:#BCF2FF fg:#081520"
+style = "bg:#958671 fg:#01251F"
 read_only = "󰌾 "
 truncation_length = 1
 fish_style_pwd_dir_length = 1
@@ -21,22 +21,22 @@ vimcmd_symbol = "[](bold white)"
 
 [username]
 format = "[$user]($style)"
-style_user = "bg:#558FAE fg:#081520"
-style_root = "bg:#558FAE fg:#081520"
+style_user = "bg:#3D998A fg:#01251F"
+style_root = "bg:#3D998A fg:#01251F"
 disabled = false
 show_always = true
 
 [hostname]
 ssh_only = true
 format = "[$hostname ]($style)"
-style = "bg:#5A4D4C fg:#081520"
+style = "bg:#554152 fg:#01251F"
 disabled = false
 
 [time]
 disabled = false
 time_format = "%R"
 format = "[$time]($style)"
-style = "bg:#625C5C fg:#B4AEAE"
+style = "bg:#60575E fg:#B2A9B1"
 use_12hr = true
 
 [aws]

@@ -1,0 +1,3 @@
+module qs.modules.waffle.topBar
+WTopBar 1.0 WTopBar.qml
+WTopBarContent 1.0 WTopBarContent.qml

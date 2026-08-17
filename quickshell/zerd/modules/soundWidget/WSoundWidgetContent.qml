@@ -16,12 +16,20 @@ Rectangle {
     readonly property color trackBg: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.14)
     readonly property color rowBg: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.08)
 
+    // "image-missing" is deliberately never a hit (AppSearch.iconExists
+    // excludes it on purpose, to detect failure), but it was also the
+    // fallback passed to Quickshell.iconPath below - the current icon
+    // theme doesn't ship an icon by that literal name, so a node with no
+    // real match (a bare "java" process, no desktop entry) resolved to
+    // nothing and rendered as a blank gap instead of any icon at all.
+    // application-x-executable is the generic icon used as a fallback
+    // everywhere else in this codebase and reliably exists.
     function iconForNode(node) {
         if (!node) return ""
         let icon = AppSearch.guessIcon(node.properties?.["application.icon-name"] ?? "")
-        if (AppSearch.iconExists(icon)) return Quickshell.iconPath(icon, "image-missing")
+        if (AppSearch.iconExists(icon)) return Quickshell.iconPath(icon, "application-x-executable")
         icon = AppSearch.guessIcon(node.properties?.["node.name"] ?? "")
-        return Quickshell.iconPath(icon, "image-missing")
+        return Quickshell.iconPath(icon, "application-x-executable")
     }
 
     implicitWidth: 300

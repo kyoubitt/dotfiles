@@ -59,6 +59,7 @@ Singleton {
     property bool mediaWidgetOpen: false
     property bool soundWidgetOpen: false
     property bool calendarWidgetOpen: false
+    property bool quickSettingsOpen: false
 
     // Close other waffle popups when one opens (unless allowMultiplePanels is enabled)
     property bool _allowMultiple: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
@@ -129,6 +130,7 @@ Singleton {
                 mediaWidgetOpen = false
                 soundWidgetOpen = false
                 calendarWidgetOpen = false
+                quickSettingsOpen = false
             }
             Notifications.timeoutAll();
             Notifications.markAllRead();
@@ -144,6 +146,7 @@ Singleton {
             controlCenterOpen = false
             soundWidgetOpen = false
             calendarWidgetOpen = false
+            quickSettingsOpen = false
         }
     }
     onSoundWidgetOpenChanged: {
@@ -156,6 +159,7 @@ Singleton {
             controlCenterOpen = false
             mediaWidgetOpen = false
             calendarWidgetOpen = false
+            quickSettingsOpen = false
         }
     }
     onCalendarWidgetOpenChanged: {
@@ -168,6 +172,20 @@ Singleton {
             controlCenterOpen = false
             mediaWidgetOpen = false
             soundWidgetOpen = false
+            quickSettingsOpen = false
+        }
+    }
+    onQuickSettingsOpenChanged: {
+        if (quickSettingsOpen && !_allowMultiple) {
+            searchOpen = false
+            waffleActionCenterOpen = false
+            waffleNotificationCenterOpen = false
+            waffleWidgetsOpen = false
+            waffleClipboardOpen = false
+            controlCenterOpen = false
+            mediaWidgetOpen = false
+            soundWidgetOpen = false
+            calendarWidgetOpen = false
         }
     }
 

@@ -205,3 +205,7 @@ alias witch "xwayland-satellite & sleep 2 && DISPLAY=:2 _JAVA_AWT_WM_NONREPARENT
 alias fortress "~/Downloads/unified/run-with-scoped-xwayland.sh gradle -p ~/Downloads/unified :fortress:run"
 alias monument "~/Downloads/unified/run-with-scoped-xwayland.sh gradle -p ~/Downloads/unified :monument:run"
 alias carpetserver='tmux attach -t carpetserver; or tmux new -s carpetserver -c ~/carpet-test-server "/usr/lib/jvm/java-8-openjdk/bin/java -jar minecraft_server.1.12.2_carpet_test.jar --nogui"'
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/home/zerda/.local/bin" $PATH

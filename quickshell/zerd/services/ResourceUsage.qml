@@ -36,6 +36,17 @@ Singleton {
     property real tempPercentage: Math.min(maxTemp / 100, 1.0)  // Normalized to 100°C max
     property int tempWarningThreshold: 80  // Warning at 80°C
 
+    // GPU utilization (0-1), AMD/Intel only - read directly from the same
+    // hwmon device detectTempSensors already found, via its gpu_busy_percent
+    // sibling file (no separate polling tool like radeontop needed).
+    property real gpuUsage: 0
+
+    // Network throughput in bytes/sec, summed across all non-loopback
+    // interfaces, computed from the delta between poll ticks.
+    property real netDownBytesPerSec: 0
+    property real netUpBytesPerSec: 0
+    property var _previousNetStats
+
     // Disk usage (root partition)
     property real diskTotal: 1
     property real diskUsed: 0
@@ -152,6 +163,30 @@ Singleton {
 	        cpuTemp = Math.round(cpuTempRaw / 1000)
 	        gpuTemp = Math.round(gpuTempRaw / 1000)
 
+	        // GPU utilization (already a 0-100 integer from sysfs)
+	        fileGpuBusy.reload()
+	        gpuUsage = (parseInt(fileGpuBusy.text()) || 0) / 100
+
+	        // Network throughput - sum rx/tx bytes across all real
+	        // interfaces (skip loopback), diff against the previous tick
+	        fileNetDev.reload()
+	        const netLines = fileNetDev.text().split("\n").slice(2)
+	        let rxTotal = 0, txTotal = 0
+	        for (const line of netLines) {
+	            const parts = line.trim().split(/\s+/)
+	            if (parts.length < 10) continue
+	            const iface = parts[0].replace(":", "")
+	            if (iface === "lo") continue
+	            rxTotal += Number(parts[1]) || 0
+	            txTotal += Number(parts[9]) || 0
+	        }
+	        if (root._previousNetStats) {
+	            const elapsedS = (Config.options?.resources?.updateInterval ?? 3000) / 1000
+	            root.netDownBytesPerSec = Math.max(0, (rxTotal - root._previousNetStats.rx) / elapsedS)
+	            root.netUpBytesPerSec = Math.max(0, (txTotal - root._previousNetStats.tx) / elapsedS)
+	        }
+	        root._previousNetStats = { rx: rxTotal, tx: txTotal }
+
             root.updateHistories()
 
             // Disk usage barely changes on human timescales - spawning `df`
@@ -169,10 +204,13 @@ Singleton {
     // These paths are auto-detected at startup
     FileView { id: fileCpuTemp; path: root._cpuTempPath }
     FileView { id: fileGpuTemp; path: root._gpuTempPath }
+    FileView { id: fileGpuBusy; path: root._gpuBusyPath }
+    FileView { id: fileNetDev; path: "/proc/net/dev" }
 
     // Auto-detect temperature sensor paths
     property string _cpuTempPath: ""
     property string _gpuTempPath: ""
+    property string _gpuBusyPath: ""
 
     Component.onCompleted: {
         // Lazy: only start monitoring when a panel/widget requests it.
@@ -191,6 +229,9 @@ Singleton {
                         ;;
                     amdgpu|radeon|nvidia|nouveau|i915)
                         echo "gpu:$hwmon/temp1_input"
+                        if [ -f "$hwmon/device/gpu_busy_percent" ]; then
+                            echo "gpubusy:$hwmon/device/gpu_busy_percent"
+                        fi
                         ;;
                 esac
             done
@@ -212,6 +253,7 @@ Singleton {
                     const [type, path] = parts
                     if (type === "cpu" && !root._cpuTempPath) root._cpuTempPath = path
                     else if (type === "gpu" && !root._gpuTempPath) root._gpuTempPath = path
+                    else if (type === "gpubusy" && !root._gpuBusyPath) root._gpuBusyPath = path
                 }
             }
         }

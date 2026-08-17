@@ -9,7 +9,6 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.modules.waffle.looks
-import qs.modules.waffle.notificationCenter
 
 /**
  * Windows 11 style notification item with swipe-to-dismiss

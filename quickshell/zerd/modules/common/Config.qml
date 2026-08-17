@@ -503,26 +503,9 @@ Singleton {
             }
 
             property JsonObject dock: JsonObject {
-                property bool cardStyle: false
-                property bool enable: false
-                property bool monochromeIcons: true
-                property string position: "bottom" // "top", "bottom", "left", "right"
-                property real height: 60
-                property real iconSize: 35
-                property real hoverRegionHeight: 2
-                property bool pinnedOnStartup: false
-                property bool hoverToReveal: true // When false, only reveals on empty workspace
-                property bool showOnDesktop: true // Show dock when no window is focused (desktop visible)
-                property bool showBackground: true
-                property bool minimizeUnfocused: false // Show dot for unfocused apps
-                property bool enableBlurGlass: true
                 property list<string> pinnedApps: [ // IDs of pinned entries
                     "org.kde.dolphin", "kitty",]
                 property list<string> ignoredAppRegexes: []
-                // Smart indicator settings
-                property bool smartIndicator: true // Show which window is focused
-                property bool showAllWindowDots: true // Show dots for all windows (even inactive apps)
-                property int maxIndicatorDots: 5 // Maximum dots to show
             }
 
             property JsonObject interactions: JsonObject {
@@ -956,6 +939,18 @@ Singleton {
                     property bool monochromeIcons: false
                     property bool tintTrayIcons: false
                 }
+                property JsonObject sideDock: JsonObject {
+                    property bool enable: true
+                    property string edge: "top" // "side" (vertical, right), "top", or "bottom"
+                    // Same shape as waffles.altSwitcher's autoHide/autoHideDelayMs -
+                    // hidden and overlaying (exclusiveZone 0) until the cursor hits
+                    // the screen edge, matching the classic auto-hide dock behavior.
+                    property bool autoHide: false
+                    property int autoHideDelayMs: 500
+                }
+                property JsonObject topBar: JsonObject {
+                    property bool enable: false
+                }
                 property JsonObject calendar: JsonObject {
                     property bool force2CharDayOfWeek: true
                     property string locale: ""
@@ -975,6 +970,8 @@ Singleton {
                     property bool allowMultiplePanels: false // Allow multiple panels open at once (for screenshots)
                 }
                 property JsonObject widgetsPanel: JsonObject {
+                    property bool enable: true
+                    property string edge: "right" // "left" or "right"
                     property bool showDateTime: true
                     property bool showWeather: true
                     property bool showSystem: true

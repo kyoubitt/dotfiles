@@ -33,6 +33,11 @@ Singleton {
         "claude-desktop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/claude.svg",
         "btop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/btop.svg",
         "CMakeSetup": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/cmake.svg",
+        // Thunar's actual icon isn't in Colloid at all (dark or light) -
+        // only hicolor has it - so it was falling through to a generic
+        // mimetype folder glyph instead of Thunar's real branded icon.
+        "org.xfce.thunar": "/usr/share/icons/hicolor/scalable/apps/org.xfce.thunar.svg",
+        "thunar": "/usr/share/icons/hicolor/scalable/apps/org.xfce.thunar.svg",
     })
     property var regexSubstitutions: [
         {
@@ -41,10 +46,15 @@ Singleton {
         },
         {
             "regex": /Minecraft.*/,
-            // Not every icon theme ships a "minecraft" icon (e.g. it's missing
-            // from several dark variants) - try known-good alternates before
-            // giving up on a substitution entirely.
-            "candidates": ["minecraft", "minecraft-launcher", "org.prismlauncher.PrismLauncher"]
+            // Was the generic Colloid grass-block glyph - swapped for
+            // PrismLauncher's own real icon (the launcher actually in use).
+            // Points at the same icon name the pinned PrismLauncher entry
+            // already resolves to (full color) rather than YAMIS's
+            // monochrome rendition - that one was meant to pick up the
+            // dock's accent-color wash, but that wash was removed globally
+            // from DockAppIcon, leaving it rendering as a flat pale-white
+            // blob instead of PrismLauncher's real colors.
+            "replace": "org.prismlauncher.PrismLauncher"
         },
         {
             "regex": /.*polkit.*/,
