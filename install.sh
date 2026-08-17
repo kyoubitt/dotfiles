@@ -7,7 +7,7 @@ IFS=$'\n\t'
 # CONFIGURATION
 # ==========================
 
-readonly REPO_URL="TODO_SET_YOUR_REPO_URL_HERE.git"
+readonly REPO_URL="https://github.com/kyoubitt/dotfiles.git"
 readonly DOTDIR="${HOME}/.dotfiles-zerda"
 readonly CONFIG_DIR="${HOME}/.config"
 readonly BACKUP_DIR="${HOME}/.config_backup_$(date +%Y%m%d_%H%M%S)"
@@ -22,7 +22,7 @@ AUR_HELPER=""
 
 # Progress tracking
 CURRENT_STEP=0
-readonly TOTAL_STEPS=20
+readonly TOTAL_STEPS=19
 
 # Installation summary tracking
 declare -a INSTALL_SUMMARY=()
@@ -1229,6 +1229,26 @@ create_symlinks() {
       fi
     done
     msg "Created ${bin_linked} symlink(s) in ~/.local/bin."
+  fi
+
+  if [[ -d "${DOTDIR}/wallpapers" ]]; then
+    info "Linking wallpapers to ~/Pictures/Wallpapers..."
+    local pictures_dir="${HOME}/Pictures"
+    mkdir -p "${pictures_dir}"
+    local wallpapers_target="${pictures_dir}/Wallpapers"
+
+    if [[ -L "${wallpapers_target}" ]]; then
+      rm -f "${wallpapers_target}"
+    elif [[ -e "${wallpapers_target}" ]]; then
+      warn "Existing ~/Pictures/Wallpapers found, backing it up"
+      mv "${wallpapers_target}" "${wallpapers_target}.backup.$(date +%s)"
+    fi
+
+    if ln -s "${DOTDIR}/wallpapers" "${wallpapers_target}" 2>> "${LOG_FILE}"; then
+      msg "Linked wallpapers to ${wallpapers_target}"
+    else
+      error "Failed to link wallpapers (check log for details)"
+    fi
   fi
 
   # Theming configs (gtk, qt5ct, qt6ct, fontconfig) - individual files only,

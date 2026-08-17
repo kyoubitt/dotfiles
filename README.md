@@ -1,48 +1,13 @@
 # dotfiles
 
-My personal Arch Linux desktop setup, built around [niri](https://github.com/YaLTeR/niri) (a scrollable-tiling Wayland compositor) and a fully custom [Quickshell](https://quickshell.org/) shell.
-
-Wallpaper-driven theming via [wallust](https://codeberg.org/explosion-mental/wallust) - change the wallpaper and the whole system (terminal, bar, notifications, lock screen, cava visualizer, and more) reskins itself to match.
-
-## Screenshots
-
-<table>
-<tr>
-<td colspan="2"><img src=".github/screenshots/bar.png" width="100%" alt="status bar"><br><sub>Status bar - workspaces, taskbar, date/media/volume/weather, system stats, tray, clock</sub></td>
-</tr>
-<tr>
-<td><img src=".github/screenshots/control-center.png" width="100%" alt="control center"><br><sub>Control center - media, quick toggles, sliders, notifications</sub></td>
-<td><img src=".github/screenshots/media-widget.png" width="100%" alt="media widget"><br><sub>Media widget - spinning cover art, cava visualizer</sub></td>
-</tr>
-<tr>
-<td><img src=".github/screenshots/sound-widget.png" width="100%" alt="sound widget"><br><sub>Sound mixer - per-app volume control</sub></td>
-<td><img src=".github/screenshots/calendar-widget.png" width="100%" alt="calendar widget"><br><sub>Calendar widget</sub></td>
-</tr>
-<tr>
-<td><img src=".github/screenshots/fastfetch-1.png" width="100%" alt="terminal and wallpaper 1"></td>
-<td><img src=".github/screenshots/fastfetch-2.png" width="100%" alt="terminal and wallpaper 2"></td>
-</tr>
-</table>
-
-Ghostty + fastfetch, with the terminal palette regenerated to match whatever wallpaper is active.
-
-## What's in here
-
-- **Window manager:** niri
-- **Shell:** a custom-built Quickshell config - status bar, app launcher, a combined quick-settings/notifications control center, a circular media player with a live cava audio visualizer, a sound mixer, and a calendar, all built from scratch to match this setup rather than using an off-the-shelf bar
-- **Terminal:** Ghostty (Kitty/Alacritty also configured)
-- **Shell (the other kind):** Zsh, with Starship as the prompt
-- **Notifications:** Mako
-- **Screen lock:** native QuickShell lock screen (WlSessionLock + PAM)
-- **Wallpaper daemon:** awww
-- **Theming engine:** wallust, generating color palettes from the current wallpaper and pushing them out to every themed app
+My personal Arch Linux desktop setup, built around [niri](https://github.com/YaLTeR/niri) and a custom [Quickshell](https://quickshell.org/) shell.
 
 ## Installing
 
 For Arch and Arch-based distros:
 
 ```bash
-git clone <this-repo-url> ~/.dotfiles-zerda
+git clone https://github.com/kyoubitt/dotfiles.git ~/.dotfiles-zerda
 cd ~/.dotfiles-zerda
 ./install.sh
 ```
