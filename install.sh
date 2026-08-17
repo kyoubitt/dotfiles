@@ -65,6 +65,9 @@ readonly PACMAN_PACKAGES=(
   curl libnotify
   qt5ct qt6ct
   sddm
+  thunar hyprpicker grim slurp satty wl-clipboard cliphist ydotool
+  wireplumber brightnessctl cava wf-recorder playerctl python
+  networkmanager
 )
 
 # ==========================
@@ -906,6 +909,8 @@ verify_all_binaries() {
   local binaries_to_check=(
     niri fish fastfetch mako kitty ghostty starship
     zathura wallust awww
+    thunar hyprpicker grim slurp satty cliphist ydotool
+    wpctl brightnessctl cava wf-recorder playerctl python nmcli
   )
 
   for binary in "${binaries_to_check[@]}"; do
