@@ -264,7 +264,26 @@ list.navigation-sidebar > row:selected image {{
 .caja-pathbar button:checked {{
   background-color: rgba({accent_r}, {accent_g}, {accent_b}, 0.35);
 }}
+decoration {{
+  box-shadow: none;
+  margin: 0;
+  border-radius: 0;
+}}
+decoration:backdrop {{
+  box-shadow: none;
+}}
 '''
+    # The decoration node's own drop-shadow (meant for a normal CSD
+    # window floating over the desktop) still gets painted even though
+    # niri's global geometry-corner-radius/clip-to-geometry window-rule
+    # flattens the window's outer shape to a plain rectangle - clipping
+    # the compositor-visible bounds doesn't stop GTK from painting shadow
+    # pixels inside that rectangle. Once niri's opacity 0.65 window-rule
+    # for thunar blends the whole window against the (blurred) wallpaper,
+    # that internal shadow reads as a dark vignette hugging the top edge
+    # and corners instead of a clean flat tone. Zeroing it out here avoids
+    # touching niri's own config, which already does the right thing for
+    # every other app.
     open(path, 'w').write(css)
 "
 
