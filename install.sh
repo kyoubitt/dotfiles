@@ -145,7 +145,7 @@ usage() {
   cat << EOF
 Usage: ${0##*/} [OPTIONS]
 
-Sevens-Dots Installer - Automated setup for Niri window manager configuration
+Zerda-Dots Installer - Automated setup for Niri window manager configuration
 
 OPTIONS:
   -h, --help      Display this help message and exit
@@ -186,7 +186,7 @@ EOF
 }
 
 version() {
-  printf "Sevens-Dots Installer v2.1\n"
+  printf "Zerda-Dots Installer v2.1\n"
   printf "Defensive Bash Refactored Edition\n"
 }
 
@@ -1372,7 +1372,7 @@ print_header() {
   printf "${GREEN}${BOLD}"
   cat << "EOF"
 ════════════════════════════════════════════════════════════
-  SEVENS-DOTS - Installation Script v2.1
+  ZERDA-DOTS - Installation Script v2.1
   Automated setup for your Niri window manager configuration
 ════════════════════════════════════════════════════════════
 EOF
