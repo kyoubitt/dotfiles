@@ -6,8 +6,14 @@
 # 2. QS has a 2-second startup grace period where it ignores closeConfirm triggers
 # 3. If IPC fails/times out, we fall back to niri's native close-window
 
-# Quick check if quickshell process exists
-if ! pgrep -x quickshell >/dev/null 2>&1; then
+# Quick check if quickshell process exists - it runs via the "qs" symlink
+# (/usr/bin/qs -> /usr/bin/quickshell), and the kernel's process name
+# (comm) stays "qs" either way, so that's what pgrep has to match. This
+# previously checked for "quickshell" and always failed, silently skipping
+# straight to the niri fallback below every time - windows still closed
+# (niri's close-window still ran), but the IPC call to closeConfirm never
+# actually fired.
+if ! pgrep -x qs >/dev/null 2>&1; then
     niri msg action close-window
     exit 0
 fi

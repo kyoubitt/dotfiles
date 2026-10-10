@@ -66,6 +66,74 @@ Scope {
             popupLoader.active = false
         }
     }
+
+    // For OSD-style toasts (volume/brightness) that should replace their
+    // own previous toast in place rather than stack or get silently
+    // deduped against a stale value - addToast()'s own same-source-and-
+    // title dedup would otherwise freeze the display at whatever level it
+    // first showed, since every later call with a different percentage in
+    // the title just gets ignored as "not a duplicate" yet every call with
+    // the SAME percentage gets ignored as "a duplicate". Dropping the old
+    // one first sidesteps that entirely.
+    function showLevelToast(title, message, icon, source) {
+        toasts = toasts.filter(t => t.source !== source)
+        root.addToast(title, message, icon, false, 1500, source, Appearance.colors.colPrimary)
+    }
+
+    // Volume - debounced so holding the scroll wheel doesn't spawn a toast
+    // per tick; each restart just pushes the display further out and the
+    // trailing value after scrolling settles is what actually shows.
+    property bool _audioToastReady: false
+    Timer { interval: 500; running: true; onTriggered: root._audioToastReady = true }
+
+    Timer {
+        id: volumeToastDebounce
+        interval: 120
+        onTriggered: {
+            if (!root._audioToastReady) return
+            const muted = Audio.sink?.audio.muted ?? false
+            const pct = Math.round((Audio.value ?? 0) * 100)
+            root.showLevelToast(
+                muted ? Translation.tr("Muted") : Translation.tr("Volume"),
+                muted ? "" : pct + "%",
+                muted ? "volume_off" : (pct === 0 ? "volume_mute" : pct < 50 ? "volume_down" : "volume_up"),
+                "volume"
+            )
+        }
+    }
+    Connections {
+        target: Audio
+        function onValueChanged() { volumeToastDebounce.restart() }
+    }
+    Connections {
+        target: Audio.sink?.audio ?? null
+        function onMutedChanged() { volumeToastDebounce.restart() }
+    }
+
+    // Brightness - Brightness.brightnessChanged() already only fires after
+    // a monitor's initial read completes (see BrightnessMonitor.ready in
+    // Brightness.qml), so no separate startup guard is needed here the way
+    // volume needed one above.
+    Timer {
+        id: brightnessToastDebounce
+        interval: 120
+        onTriggered: {
+            const focusedName = CompositorService.isNiri ? NiriService.currentOutput : null
+            const mon = Brightness.monitors.find(m => m.screen.name === focusedName) ?? Brightness.monitors[0]
+            if (!mon) return
+            const pct = Math.round((mon.multipliedBrightness ?? 0) * 100)
+            root.showLevelToast(
+                Translation.tr("Brightness"),
+                pct + "%",
+                pct < 50 ? "brightness_low" : "brightness_high",
+                "brightness"
+            )
+        }
+    }
+    Connections {
+        target: Brightness
+        function onBrightnessChanged() { brightnessToastDebounce.restart() }
+    }
     
     // Show the pending reload toast
     function _showReloadToast() {

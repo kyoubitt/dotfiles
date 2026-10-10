@@ -71,7 +71,26 @@ Scope {
             root._busy = true
             debounce.restart()
 
-            // Try cached activeWindow first, fallback to niri query
+            if (!root.confirmEnabled) {
+                // No dialog needed, so there's no reason to go through
+                // NiriService.activeWindow (a QML-side mirror of niri's
+                // focus state, updated reactively off niri's event
+                // stream) at all here - it can lag a beat behind a focus
+                // change that just happened (e.g. this trigger firing
+                // right after switching focus to the window being
+                // closed), which silently closed nothing: this IPC call
+                // still returns success either way, so close-window.sh
+                // never falls back to its own niri call. Calling niri's
+                // close-window action directly acts on niri's own live,
+                // authoritative focus - not a copy of it - so it can't
+                // race like this.
+                Quickshell.execDetached(["niri", "msg", "action", "close-window"])
+                return
+            }
+
+            // Confirm-dialog path still needs the actual window object to
+            // show in the dialog, so it keeps using the cached/queried
+            // window data.
             const win = NiriService.activeWindow
             if (win?.id) {
                 root.processWindow(win)
