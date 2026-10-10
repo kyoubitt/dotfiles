@@ -222,13 +222,22 @@ for relpath in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css', 'gtk-4.0/gtk.css', 'g
     # niri blends the *whole* window against the wallpaper at a flat
     # opacity, those two different opaque base colors blend to two visibly
     # different tints - a seam right at the headerbar/sidebar boundary.
-    # Flatten them to the same surface color so the blended result reads as
-    # one continuous tint instead of a patchwork.
+    #
+    # This used to flatten them to the surface variable (bg blended 45%
+    # toward the accent) rather than bg directly - surface is deliberately
+    # lighter, meant as a raised-panel depth cue elsewhere in the theme,
+    # but here it just recreated the exact same seam it was meant to fix:
+    # a visibly lighter gray toolbar/headerbar against a much darker
+    # .view/.background content area. Matching bg directly is what
+    # actually removing the seam means.
     css += f'''
 .toolbar,
+toolbar,
 box.vertical headerbar,
-leaflet list.navigation-sidebar {{
-  background-color: {surface};
+headerbar,
+leaflet list.navigation-sidebar,
+list.navigation-sidebar {{
+  background-color: {bg};
 }}
 treeview.view:selected {{
   background-color: {accent};

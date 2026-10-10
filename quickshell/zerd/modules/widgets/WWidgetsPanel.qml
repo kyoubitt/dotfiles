@@ -84,27 +84,57 @@ Variants {
         //    the one pinned against the right edge once scrolled to the end
         // Anything else (a window tucked in the left/middle of the screen)
         // leaves the corner clear, so the panel stays up.
-        readonly property bool windowCoversCorner: {
+        //
+        // Recomputed explicitly off NiriService.windows/workspaces changing
+        // (same pattern TaskbarApps.qml uses for its own apps list) rather
+        // than left as a live `readonly property` binding - this body reads
+        // both of those on every single window-layout event (which fire
+        // constantly during drags/resizes), and QML flagged it as a binding
+        // loop under that churn. There was no real cycle to find by reading
+        // the code, but an imperative recompute triggered from Connections
+        // isn't tracked as a binding at all, so the detector simply can't
+        // flag it either way - strictly safer regardless of what the
+        // original trigger was.
+        property bool windowCoversCorner: false
+        function _recomputeWindowCoversCorner() {
             try {
-                if (!(CompositorService.isNiri && NiriService.windows && NiriService.workspaces)) return false
+                if (!(CompositorService.isNiri && NiriService.windows && NiriService.workspaces)) {
+                    panelWindow.windowCoversCorner = false
+                    return
+                }
                 const allWs = Object.values(NiriService.workspaces)
-                if (!allWs || allWs.length === 0) return false
+                if (!allWs || allWs.length === 0) {
+                    panelWindow.windowCoversCorner = false
+                    return
+                }
                 const currentNumber = NiriService.getCurrentWorkspaceNumber()
                 const currentWs = allWs.find(ws => ws.idx === currentNumber)
-                if (!currentWs) return false
+                if (!currentWs) {
+                    panelWindow.windowCoversCorner = false
+                    return
+                }
                 const wins = NiriService.windows.filter(w => w.workspace_id === currentWs.id && w.layout)
-                if (wins.length === 0) return false
+                if (wins.length === 0) {
+                    panelWindow.windowCoversCorner = false
+                    return
+                }
                 const outputWidth = panelWindow.screen.width
                 const colOf = w => w.layout.pos_in_scrolling_layout?.[0] ?? 1
                 const maxCol = Math.max(...wins.map(colOf))
-                return wins.some(w => {
+                panelWindow.windowCoversCorner = wins.some(w => {
                     const tileWidth = w.layout.tile_size?.[0] ?? 0
                     if (tileWidth >= outputWidth - 400) return true
                     return maxCol > 1 && colOf(w) === maxCol
                 })
             } catch (e) {
-                return false
+                panelWindow.windowCoversCorner = false
             }
+        }
+        Component.onCompleted: panelWindow._recomputeWindowCoversCorner()
+        Connections {
+            target: NiriService
+            function onWindowsChanged() { panelWindow._recomputeWindowCoversCorner() }
+            function onWorkspacesChanged() { panelWindow._recomputeWindowCoversCorner() }
         }
 
         // NiriService.inOverview - same property WaffleBackground.qml
