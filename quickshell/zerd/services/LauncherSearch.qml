@@ -140,19 +140,6 @@ Singleton {
     // Combined built-in and user actions
     property var allActions: searchActions.concat(userActionScripts)
 
-    // Dynamically created result objects (resultComp.createObject) are parented to null,
-    // so QML never reclaims them on its own. Track the previous batch and destroy whatever
-    // isn't reused each time `results` recomputes, or every keystroke leaks objects.
-    property list<var> _previousResults: []
-    onResultsChanged: {
-        for (const obj of root._previousResults) {
-            if (obj && results.indexOf(obj) === -1 && typeof obj.destroy === "function") {
-                obj.destroy()
-            }
-        }
-        root._previousResults = results
-    }
-
     property string mathResult: ""
 
     Timer {
@@ -183,7 +170,13 @@ Singleton {
         }
     }
 
-    property list<var> results: {
+    // Plain object literals, not resultComp.createObject() results - the
+    // same bug TaskbarApps.qml had: a null-parented createObject() gets
+    // JavaScript ownership, and the engine's GC can reclaim it while still
+    // referenced from a property (list<var> or otherwise), silently
+    // turning entries to null. Plain objects in a plain `var` sidestep the
+    // whole QObject-lifetime question entirely.
+    property var results: {
         const q = root._debouncedQuery
         if (q === "") return []
 
@@ -199,7 +192,7 @@ Singleton {
         if (q.startsWith(clipboardPrefix)) {
             const searchStr = StringUtils.cleanPrefix(q, clipboardPrefix)
             return Cliphist.fuzzyQuery(searchStr).map(entry => {
-                return resultComp.createObject(null, {
+                return {
                     rawValue: entry,
                     name: StringUtils.cleanCliphistEntry(entry),
                     verb: Translation.tr("Copy"),
@@ -207,7 +200,7 @@ Singleton {
                     iconName: "content_copy",
                     iconType: LauncherSearchResult.IconType.Material,
                     execute: () => Cliphist.copy(entry)
-                })
+                }
             }).filter(Boolean)
         }
 
@@ -216,7 +209,7 @@ Singleton {
             const searchStr = StringUtils.cleanPrefix(q, emojisPrefix)
             return Emojis.fuzzyQuery(searchStr).map(entry => {
                 const emoji = entry.match(/^\s*(\S+)/)?.[1] ?? ""
-                return resultComp.createObject(null, {
+                return {
                     rawValue: entry,
                     name: entry.replace(/^\s*\S+\s+/, ""),
                     iconName: emoji,
@@ -224,7 +217,7 @@ Singleton {
                     verb: Translation.tr("Copy"),
                     type: Translation.tr("Emoji"),
                     execute: () => { Quickshell.clipboardText = emoji }
-                })
+                }
             }).filter(Boolean)
         }
 
@@ -239,7 +232,7 @@ Singleton {
         const startsWithWeb = q.startsWith(webPrefix)
 
         // Math result (priority if starts with number or =)
-        const mathObj = resultComp.createObject(null, {
+        const mathObj = {
             name: root.mathResult,
             verb: Translation.tr("Copy"),
             type: Translation.tr("Math"),
@@ -247,14 +240,14 @@ Singleton {
             iconName: "calculate",
             iconType: LauncherSearchResult.IconType.Material,
             execute: () => { Quickshell.clipboardText = root.mathResult }
-        })
+        }
 
         if (startsWithNumber || startsWithMath) {
             result.push(mathObj)
         }
 
         // Shell command
-        const cmdObj = resultComp.createObject(null, {
+        const cmdObj = {
             name: StringUtils.cleanPrefix(q, shellPrefix).replace("file://", ""),
             verb: Translation.tr("Run"),
             type: Translation.tr("Command"),
@@ -266,14 +259,14 @@ Singleton {
                 cmd = StringUtils.cleanPrefix(cmd, shellPrefix)
                 Quickshell.execDetached(["/usr/bin/bash", "-c", cmd])
             }
-        })
+        }
 
         if (startsWithShell) {
             result.push(cmdObj)
         }
 
         // Web search
-        const webObj = resultComp.createObject(null, {
+        const webObj = {
             name: StringUtils.cleanPrefix(q, webPrefix),
             verb: Translation.tr("Search"),
             type: Translation.tr("Web"),
@@ -284,7 +277,7 @@ Singleton {
                 const baseUrl = Config.options?.search?.engineBaseUrl ?? "https://www.google.com/search?q="
                 Qt.openUrlExternally(baseUrl + encodeURIComponent(searchQuery))
             }
-        })
+        }
 
         if (startsWithWeb) {
             result.push(webObj)
@@ -310,7 +303,7 @@ Singleton {
             }
             seenAppNames.add(nameKey)
 
-            appResults.push(resultComp.createObject(null, {
+            appResults.push({
                 type: Translation.tr("App"),
                 id: entry.id ?? entry.name ?? "",
                 name: entry.name,
@@ -328,7 +321,7 @@ Singleton {
                         Quickshell.execDetached(["/usr/bin/bash", "-c", `${terminal} -e '${entry.command?.join(" ") ?? ""}'`])
                     }
                 }
-            }))
+            })
         }
         result = result.concat(appResults)
 
@@ -336,14 +329,14 @@ Singleton {
         const actionResults = root.allActions.map(action => {
             const actionStr = `${actionPrefix}${action.action}`
             if (actionStr.startsWith(q) || q.startsWith(actionStr)) {
-                return resultComp.createObject(null, {
+                return {
                     name: q.startsWith(actionStr) ? q : actionStr,
                     verb: Translation.tr("Run"),
                     type: Translation.tr("Action"),
                     iconName: "settings_suggest",
                     iconType: LauncherSearchResult.IconType.Material,
                     execute: () => action.execute(q.split(" ").slice(1).join(" "))
-                })
+                }
             }
             return null
         }).filter(Boolean)
@@ -358,10 +351,5 @@ Singleton {
         }
 
         return result
-    }
-
-    Component {
-        id: resultComp
-        LauncherSearchResult {}
     }
 }

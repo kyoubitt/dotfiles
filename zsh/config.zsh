@@ -197,12 +197,6 @@ alias remove='yay -Rns'
 alias shutdown='systemctl poweroff'
 alias du='dust'
 
-alias lowy='java -Djava.awt.headless=false -Dsun.java2d.xrender=true -jar ~/LowYSwampHut/build/libs/LowYSwampHutForFixedSeedGUI-1.3.2.jar'
-alias witch='xwayland-satellite & sleep 2 && DISPLAY=:2 _JAVA_AWT_WM_NONREPARENTING=1 java -Djava.awt.headless=false -Dsun.java2d.xrender=true -jar ~/LowYSwampHut/build/libs/LowYSwampHutForFixedSeedGUI-1.3.2.jar'
-alias fortress='~/Downloads/unified/run-with-scoped-xwayland.sh gradle -p ~/Downloads/unified :fortress:run'
-alias monument='~/Downloads/unified/run-with-scoped-xwayland.sh gradle -p ~/Downloads/unified :monument:run'
-alias carpetserver='tmux attach -t carpetserver || tmux new -s carpetserver -c ~/carpet-test-server "/usr/lib/jvm/java-8-openjdk/bin/java -jar minecraft_server.1.12.2_carpet_test.jar --nogui"'
-
 ###################
 ### Environment ###
 ###################
