@@ -230,13 +230,23 @@ for relpath in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css', 'gtk-4.0/gtk.css', 'g
     # a visibly lighter gray toolbar/headerbar against a much darker
     # .view/.background content area. Matching bg directly is what
     # actually removing the seam means.
+    #
+    # .view and .background themselves also joined this rule - they carry
+    # a literal #393939 nowhere in the named hex->color mapping below, and
+    # the neutral-hex sweep (which should catch any plain gray like this)
+    # turned out to be a near no-op for a low-saturation accent like this
+    # wallpaper's: retinting a color at s=0 to a target saturation that's
+    # also near 0 reproduces almost the same hex, regardless of hue. Direct
+    # assignment here sidesteps relying on that sweep for these two classes.
     css += f'''
 .toolbar,
 toolbar,
 box.vertical headerbar,
 headerbar,
 leaflet list.navigation-sidebar,
-list.navigation-sidebar {{
+list.navigation-sidebar,
+.view,
+.background {{
   background-color: {bg};
 }}
 treeview.view:selected {{
