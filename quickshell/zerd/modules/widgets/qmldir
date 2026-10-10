@@ -1,0 +1,9 @@
+module qs.modules.widgets
+WWidgetsPanel 1.0 WWidgetsPanel.qml
+WCavaVisualizer 1.0 WCavaVisualizer.qml
+WClockCard 1.0 WClockCard.qml
+WCalendarCard 1.0 WCalendarCard.qml
+WWeatherCard 1.0 WWeatherCard.qml
+WMediaCard 1.0 WMediaCard.qml
+WSystemCard 1.0 WSystemCard.qml
+singleton WidgetsState 1.0 WidgetsState.qml

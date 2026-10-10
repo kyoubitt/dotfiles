@@ -2,7 +2,7 @@
 
 backend = "fastresize"
 color_space = "lab"
-palette = "harddark"
+palette = "dark"
 check_contrast = true
 [templates]
 # Consumed by scripts/theme-sync.sh (update_niri_config, update_sddm_theme).

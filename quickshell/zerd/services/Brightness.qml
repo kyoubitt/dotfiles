@@ -138,8 +138,16 @@ Singleton {
         }
 
         function syncBrightness() {
+            if (!monitor.ready) return;
             const brightnessValue = Math.max(monitor.multipliedBrightness, 0)
-            const rawValueRounded = Math.max(Math.floor(brightnessValue * monitor.rawMaxBrightness), 1);
+            // This panel's backlight (amdgpu_bl1) actually blacks out when
+            // written its literal max raw value - a driver/panel quirk, not
+            // a units bug. Cap the internal panel a hair below true max
+            // (imperceptible visually) so 100% in the UI never sends that
+            // exact value. External DDC monitors don't have this quirk, so
+            // only the internal backlight path is capped.
+            const rawMax = isDdc ? monitor.rawMaxBrightness : Math.floor(monitor.rawMaxBrightness * 0.99);
+            const rawValueRounded = Math.max(Math.min(Math.floor(brightnessValue * monitor.rawMaxBrightness), rawMax), 1);
             setProc.command = isDdc ? ["ddcutil", "-b", busNum, "setvcp", "10", rawValueRounded] : ["brightnessctl", "--class", "backlight", "s", rawValueRounded, "--quiet"];
             setProc.startDetached();
         }

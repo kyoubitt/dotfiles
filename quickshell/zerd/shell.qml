@@ -8,13 +8,16 @@ import qs.modules.common
 import qs.modules.closeConfirm
 import qs.modules.controlCenter
 import qs.modules.soundWidget
+import qs.modules.mediaWidget
 import qs.modules.lockScreen
 import qs.modules.waffle.background as WaffleBackgroundModule
 import qs.modules.waffle.sideDock as WaffleSideDockModule
-import qs.modules.waffle.topBar as WaffleTopBarModule
+import qs.modules.widgets as WidgetsModule
 import qs.modules.waffle.startMenu
 import qs.modules.polkit
 import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
+import qs.modules.waffle.notificationCenter as WaffleNotificationCenterModule
+import qs.modules.waffle.clipboard as WaffleClipboardModule
 import qs.modules.wallpaperSelector
 import qs.modules.sessionScreen
 
@@ -106,11 +109,29 @@ ShellRoot {
         component: WaffleSideDockModule.WSideDock {}
     }
 
-    // Top bar: now-playing + system stats (RAM/CPU temp), same blurred-glass
-    // treatment as the side dock. Own enable gate, matching that pattern.
+    // Clock/calendar/weather/media widgets panel - top-right corner,
+    // wallust-themed. Its own always-loaded Variants (per-screen, like
+    // WSideDock), gated on a config toggle that defaults on so it doesn't
+    // need a config-file migration, matching the sideDock.enable pattern.
     LazyLoader {
-        active: Config.ready && (Config.options.waffles?.topBar?.enable ?? true)
-        component: WaffleTopBarModule.WTopBar {}
+        active: Config.ready && (Config.options.widgets?.enable ?? true)
+        component: WidgetsModule.WWidgetsPanel {}
+    }
+
+    // Pin picker flyout for the side dock's pinned-apps row - kept as its
+    // own always-loaded Scope (like CloseConfirm above) rather than nested
+    // inside WSideDock, since it's a separate top-level Scope/PanelWindow,
+    // not dock content. Gated only on GlobalStates.pinPickerOpen internally.
+    LazyLoader {
+        active: Config.ready && (Config.options.waffles?.sideDock?.enable ?? true)
+        component: WaffleSideDockModule.WSideDockPinPicker {}
+    }
+
+    // Right-click context menu for a dock app icon - same reasoning as the
+    // pin picker above.
+    LazyLoader {
+        active: Config.ready && (Config.options.waffles?.sideDock?.enable ?? true)
+        component: WaffleSideDockModule.WSideDockContextMenu {}
     }
 
     // Combined control center (toggles + media + notifications + calendar merged
@@ -123,6 +144,26 @@ ShellRoot {
     LazyLoader {
         active: Config.ready && (Config.options?.enabledPanels ?? []).includes("soundWidget")
         component: WSoundWidget {}
+    }
+
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("mediaWidget")
+        component: WMediaWidget {}
+    }
+
+    // Clipboard history flyout (GlobalStates.waffleClipboardOpen), toggled
+    // from the top bar or `qs ipc call clipboard toggle`.
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("clipboard")
+        component: WaffleClipboardModule.WClipboard {}
+    }
+
+    // Notification center flyout (GlobalStates.waffleNotificationCenterOpen),
+    // showing full notification history - not just active popups. Toggled
+    // from the top bar clock or `qs ipc call notificationCenter toggle`.
+    LazyLoader {
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("notificationCenter")
+        component: WaffleNotificationCenterModule.WNotificationCenter {}
     }
 
     // Wallpaper selector (toggle via IPC / keybind)

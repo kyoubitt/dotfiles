@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -12,7 +11,6 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
-import qs.modules.waffle.startMenu
 
 // Native ext-session-lock-v1 lock screen. This IS a real security surface
 // (WlSessionLock + PamContext against the "login" PAM service) - not a
@@ -125,29 +123,8 @@ Scope {
             // Wallpaper background, blurred via a cached GPU layer effect
             // (only paid for while actually locked) rather than the old
             // always-composited Qt5Compat FastBlur.
-            Image {
-                id: bgSource
+            LockBackdrop {
                 anchors.fill: parent
-                source: Wallpapers.effectiveWallpaperUrl
-                fillMode: Image.PreserveAspectCrop
-                sourceSize.width: width
-                sourceSize.height: height
-                asynchronous: true
-                cache: true
-
-                layer.enabled: Appearance.effectsEnabled
-                layer.effect: MultiEffect {
-                    source: bgSource
-                    anchors.fill: bgSource
-                    blurEnabled: true
-                    blur: 1.0
-                    blurMax: 64
-                }
-            }
-            Rectangle {
-                anchors.fill: parent
-                color: SMColors.bg
-                opacity: 0.55
             }
 
             ColumnLayout {
@@ -161,17 +138,17 @@ Scope {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Appearance.font.family.monospace
                         font.pixelSize: 72
                         font.bold: true
-                        color: SMColors.fg
+                        color: Appearance.colors.colOnLayer0
                     }
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Appearance.font.family.monospace
                         font.pixelSize: 16
-                        color: SMColors.fg
+                        color: Appearance.colors.colOnLayer0
                         opacity: 0.7
                     }
                 }
@@ -197,23 +174,19 @@ Scope {
                         NumberAnimation { target: passwordBoxWrapper; property: "shakeOffset"; to: 0; duration: 40 }
                     }
 
-                RectangularGlow {
-                    anchors.fill: passwordBox
-                    glowRadius: 12
-                    spread: 0.35
-                    color: ColorUtils.applyAlpha(SMColors.fg, 0.35)
-                    cornerRadius: passwordBox.radius + glowRadius
+                StyledRectangularShadow {
+                    target: passwordBox
                 }
 
-                Rectangle {
+                GlassBackground {
                     id: passwordBox
                     anchors.fill: parent
-                    radius: 24
-                    antialiasing: true
-                    color: SMColors.bg
-                    opacity: 0.55
+                    radius: Appearance.rounding.large
+                    fallbackColor: Appearance.colors.colLayer3
+                    screenX: passwordBox.mapToItem(null, 0, 0).x
+                    screenY: passwordBox.mapToItem(null, 0, 0).y
                     border.width: 1.5
-                    border.color: pam.messageIsError ? "#e06c75" : ColorUtils.applyAlpha(SMColors.accent, 0.4)
+                    border.color: pam.messageIsError ? Appearance.colors.colError : ColorUtils.applyAlpha(Appearance.colors.colPrimary, 0.4)
 
                     Behavior on border.color { ColorAnimation { duration: 150 } }
 
@@ -232,8 +205,8 @@ Scope {
                             echoMode: passwordBox.showPassword ? TextInput.Normal : TextInput.Password
                             // Masked, the real glyphs render fully transparent - the icon
                             // row below draws the visible per-character feedback instead.
-                            color: passwordBox.showPassword ? SMColors.fg : "transparent"
-                            font.family: "JetBrainsMono Nerd Font"
+                            color: passwordBox.showPassword ? Appearance.colors.colOnLayer3 : "transparent"
+                            font.family: Appearance.font.family.monospace
                             font.pixelSize: 15
                             clip: true
                             enabled: root.pseudoLock || pam.active || pam.responseRequired
@@ -255,9 +228,9 @@ Scope {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: passwordInput.text.length === 0
                                 text: pam.messageIsError ? "Wrong password" : "Enter Password"
-                                color: SMColors.fg
+                                color: Appearance.colors.colOnLayer3
                                 opacity: 0.5
-                                font.family: "JetBrainsMono Nerd Font"
+                                font.family: Appearance.font.family.monospace
                                 font.pixelSize: 15
                             }
 
@@ -275,7 +248,7 @@ Scope {
                                         height: 7
                                         radius: width / 2
                                         antialiasing: true
-                                        color: SMColors.fg
+                                        color: Appearance.colors.colOnLayer3
                                     }
                                 }
                             }
@@ -285,9 +258,9 @@ Scope {
                             Layout.alignment: Qt.AlignVCenter
                             visible: passwordInput.text.length > 0
                             text: passwordBox.showPassword ? "visibility_off" : "visibility"
-                            font.family: "Material Symbols Rounded"
+                            font.family: Appearance.font.family.iconMaterial
                             font.pixelSize: 18
-                            color: SMColors.fg
+                            color: Appearance.colors.colOnLayer3
                             opacity: 0.6
 
                             MouseArea {
@@ -301,15 +274,16 @@ Scope {
                 }
                 }
 
-                Rectangle {
+                GlassBackground {
+                    id: nowPlayingPill
                     Layout.alignment: Qt.AlignHCenter
                     visible: MprisController.activePlayer !== null
                     implicitWidth: nowPlayingRow.implicitWidth + 24
                     implicitHeight: nowPlayingRow.implicitHeight + 14
                     radius: implicitHeight / 2
-                    antialiasing: true
-                    color: SMColors.bg
-                    opacity: 0.5
+                    fallbackColor: Appearance.colors.colLayer3
+                    screenX: nowPlayingPill.mapToItem(null, 0, 0).x
+                    screenY: nowPlayingPill.mapToItem(null, 0, 0).y
 
                     RowLayout {
                         id: nowPlayingRow
@@ -318,16 +292,16 @@ Scope {
 
                         Text {
                             text: "music_note"
-                            font.family: "Material Symbols Rounded"
+                            font.family: Appearance.font.family.iconMaterial
                             font.pixelSize: 14
-                            color: SMColors.fg
+                            color: Appearance.colors.colOnLayer3
                             opacity: 0.7
                         }
                         Text {
                             text: `${MprisController.activeTrack?.title ?? ""} - ${MprisController.activeTrack?.artist ?? ""}`
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: Appearance.font.family.monospace
                             font.pixelSize: 12
-                            color: SMColors.fg
+                            color: Appearance.colors.colOnLayer3
                             opacity: 0.7
                         }
                     }
@@ -352,7 +326,7 @@ Scope {
                         implicitHeight: 4 + level * 90
                         radius: 4
                         antialiasing: true
-                        color: eqBar.index % 2 === 0 ? SMColors.accent : SMColors.fg
+                        color: eqBar.index % 2 === 0 ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer0
                         opacity: 0.4 + level * 0.6
 
                         Behavior on implicitHeight { NumberAnimation { duration: 70; easing.type: Easing.OutQuad } }

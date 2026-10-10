@@ -72,7 +72,7 @@ if [[ -n "$template_dir" ]]; then
     cp -r "$template_dir" "$generated_dir"
 
     python3 -c "
-import json, re
+import json, re, colorsys
 
 d = json.load(open('$WALLUST_COLORS'))
 
@@ -92,11 +92,30 @@ def shade(h, delta):
     r, g, b = hex_to_rgb(h)
     return rgb_to_hex((r + delta, g + delta, b + delta))
 
+def rel_luminance(rgb):
+    def lin(c):
+        c = c / 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = rgb
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+
+def contrast(hex1, hex2):
+    l1, l2 = rel_luminance(hex_to_rgb(hex1)), rel_luminance(hex_to_rgb(hex2))
+    l1, l2 = max(l1, l2), min(l1, l2)
+    return (l1 + 0.05) / (l2 + 0.05)
+
+def readable_on(bg_hex):
+    # accent is arbitrary per-wallpaper, so unlike the rest of Colloid's
+    # (fixed-contrast) palette, text drawn on top of it needs picking per
+    # run rather than reusing a single palette color.
+    return '#FFFFFF' if contrast(bg_hex, '#FFFFFF') >= contrast(bg_hex, '#1a1a1a') else '#1a1a1a'
+
 bg = d['special']['background']
 fg = d['special']['foreground']
 accent = d['colors']['color4']
 accent_r, accent_g, accent_b = hex_to_rgb(accent)
-surface = blend(bg, accent, 0.15)
+surface = blend(bg, accent, 0.45)
+accent_text = readable_on(accent)
 
 variation = '$variation'
 
@@ -125,6 +144,41 @@ else:
     }
     accent_rgba_old = '60, 132, 247'
 
+# The mapping above only covers the handful of hex tokens Colloid reuses
+# most (background/surface shades, fg, accent) - everything else (borders,
+# disabled rows, tooltips, scrollbars, switches, progress troughs, ~70
+# literals total) is Colloid's own fixed steel-gray, untouched by wallust,
+# which is why those bits still read as mismatched next to the tinted
+# surface. Sweep every hex literal actually present across the theme's own
+# files and retint the neutral ones too - keep each one's lightness, but
+# replace hue/saturation with the accent's (damped) so borders/dividers/etc
+# inherit the same tint the surface already gets. Real brand/status colors
+# (error red, warning yellow, success green, colored symbolic icons) are
+# saturated, not neutral, so the saturation check leaves them alone.
+def hls_from_hex(h):
+    r, g, b = hex_to_rgb(h)
+    return colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+
+accent_h, _accent_l, accent_s = hls_from_hex(accent)
+tint_s = accent_s * 0.35
+
+all_hexes = set()
+for relpath in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css', 'gtk-4.0/gtk.css', 'gtk-4.0/gtk-dark.css'):
+    try:
+        all_hexes.update(re.findall(r'#[0-9A-Fa-f]{6}', open('$generated_dir/' + relpath).read()))
+    except FileNotFoundError:
+        continue
+
+known = {k.lower() for k in mapping}
+for hexcode in all_hexes:
+    if hexcode.lower() in known:
+        continue
+    h, l, s = hls_from_hex(hexcode)
+    if s > 0.12:
+        continue
+    tr, tg, tb = colorsys.hls_to_rgb(accent_h, l, tint_s)
+    mapping[hexcode] = rgb_to_hex((tr * 255, tg * 255, tb * 255))
+
 for relpath in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css', 'gtk-4.0/gtk.css', 'gtk-4.0/gtk-dark.css'):
     path = '$generated_dir/' + relpath
     try:
@@ -142,6 +196,56 @@ for relpath in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css', 'gtk-4.0/gtk.css', 'g
         f'rgba({accent_r}, {accent_g}, {accent_b},',
         css,
     )
+    # Several selectors don't yield to the hex-swap above: sidebar row
+    # selection is a literal gray hex in Dark (#4c4c4c) but an rgba() gray
+    # tuple in Light (rgba(224, 224, 224, ...)); the pathbar's :checked pill
+    # uses alpha(currentColor, ...) - not a color literal at all; and
+    # Thunar's sidebar is actually a GtkListBox (list.navigation-sidebar),
+    # not a GtkTreeView, so its real selection style falls through to the
+    # generic unscoped row:selected { alpha(currentColor, 0.06) } rule,
+    # a near-invisible tint Colloid never scopes a real color to. Appending
+    # wins the cascade at equal specificity, so override all of these
+    # directly instead of trying to pattern-match every shape Colloid uses
+    # for 'gray'.
+    # Tried making .background/.view real rgba() here so niri's existing
+    # global xray+blur window-rule would show wallpaper through - confirmed
+    # by direct test this does nothing (Thunar's surface has no real alpha
+    # support at the GTK/Wayland level, unlike an app author explicitly
+    # opting in). Real transparency for this app has to come from a
+    # compositor-level opacity window-rule instead (niri config.kdl),
+    # same mechanism already used for Spotify there for the same reason -
+    # see the thunar window-rule there.
+    #
+    # Colloid deliberately paints the headerbar/toolbar/sidebar a shade
+    # darker than .view/.background (its own opaque depth cue - shade(-8)
+    # off the base). That's invisible on a fully opaque window, but once
+    # niri blends the *whole* window against the wallpaper at a flat
+    # opacity, those two different opaque base colors blend to two visibly
+    # different tints - a seam right at the headerbar/sidebar boundary.
+    # Flatten them to the same surface color so the blended result reads as
+    # one continuous tint instead of a patchwork.
+    css += f'''
+.toolbar,
+box.vertical headerbar,
+leaflet list.navigation-sidebar {{
+  background-color: {surface};
+}}
+treeview.view:selected {{
+  background-color: {accent};
+  color: {accent_text};
+}}
+list.navigation-sidebar > row:selected {{
+  background-color: {accent};
+}}
+list.navigation-sidebar > row:selected label,
+list.navigation-sidebar > row:selected image {{
+  color: {accent_text};
+}}
+.path-bar.linked:not(.vertical) > button:checked,
+.caja-pathbar button:checked {{
+  background-color: rgba({accent_r}, {accent_g}, {accent_b}, 0.35);
+}}
+'''
     open(path, 'w').write(css)
 "
 

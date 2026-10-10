@@ -17,7 +17,7 @@ Variants {
         readonly property var wDock: Config.options.waffles?.sideDock ?? {}
         readonly property string edge: wDock.edge ?? "side" // "side"/"right" | "left" (vertical) | "top" | "bottom"
         readonly property bool horizontal: edge === "top" || edge === "bottom"
-        readonly property int thickness: wDock.thickness ?? 42
+        readonly property int thickness: wDock.thickness ?? 54
         readonly property bool autoHide: wDock.autoHide ?? false
         readonly property int autoHideDelayMs: wDock.autoHideDelayMs ?? 500
 
@@ -146,12 +146,6 @@ Variants {
                         anchors.fill: parent
                         screen: panelRoot.screen
                         horizontal: false
-                        dockOnLeft: loader.edge === "left"
-                        // Must match WTopBar's thickness - this is only for the
-                        // blurred-wallpaper crop offset math, not positioning
-                        // (niri handles that), but a mismatch here would make
-                        // the crop discontinuous at the seam again.
-                        floatMarginTop: 42
                     }
                 }
             }
@@ -165,8 +159,19 @@ Variants {
                 color: "transparent"
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.namespace: "quickshell:wSideDock"
+                // Full width, like the vertical panel is full height -
+                // controls spread across it (toggles at the start edge,
+                // apps centered, status/power at the end edge), the same
+                // taskbar-style layout WSideDockContent.qml already uses.
                 anchors { left: true; right: true; top: loader.edge === "top"; bottom: loader.edge === "bottom" }
-                implicitHeight: loader.thickness
+                // A little headroom past raw thickness - icons grow on
+                // hover and carry a backplate ring a few px past their own
+                // bounds, which got clipped flush against the bar's edge
+                // without this. +16 was excessive once this was a full
+                // taskbar-height bar rather than a tightly-wrapped pill -
+                // left a visibly empty band above/below the icon row.
+                implicitHeight: loader.thickness + 6
+                margins { top: 12; bottom: 12 }
                 // Reserves space only while actually shown. When autoHide
                 // is off, revealed is permanently true, so this is just
                 // loader.thickness always - identical to the pre-autoHide
@@ -244,6 +249,7 @@ Variants {
                     Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
                     WSideDockContent {
+                        id: dockContent
                         anchors.fill: parent
                         screen: panelRoot.screen
                         horizontal: true

@@ -28,11 +28,21 @@ WPanelPageColumn {
     }
     onFilterTextChanged: filterDebounce.restart()
 
+    // Quickshell's own panels aren't real .desktop entries, so DesktopEntries
+    // never sees them - without these they're simply unfindable from here no
+    // matter what triggers elsewhere (dock icons, keybinds) point at them.
+    readonly property var shellActions: [
+        { name: "Clipboard", icon: "edit-paste", execute: () => { GlobalStates.waffleClipboardOpen = true } },
+        { name: "Notification Center", icon: "notification-symbolic", execute: () => { GlobalStates.waffleNotificationCenterOpen = true } },
+    ]
+
     readonly property var filteredApps: {
         const filter = root.debouncedFilterText.toLowerCase().trim()
-        return DesktopEntries.applications.values
+        const apps = DesktopEntries.applications.values
             .filter(e => !e.noDisplay && (filter.length === 0 || (e.name || "").toLowerCase().includes(filter)))
-            .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+        const actions = root.shellActions
+            .filter(e => filter.length === 0 || e.name.toLowerCase().includes(filter))
+        return [...actions, ...apps].sort((a, b) => (a.name || "").localeCompare(b.name || ""))
     }
 
     function navigateUp() {

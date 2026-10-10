@@ -54,12 +54,27 @@ Singleton {
     property bool waffleWidgetsOpen: false
     property bool waffleAltSwitcherOpen: false
     property bool waffleClipboardOpen: false
+    // Reported live by WNotificationCenterContent's implicitHeight - lets
+    // the clipboard panel (also top-right) stack itself below the
+    // notification center when both are open, instead of the two
+    // overlapping. Wayland gives layer-shell surfaces no way to read each
+    // other's actual on-screen geometry, so this is the only way one panel
+    // can know how tall a *different* panel currently is.
+    property real notificationCenterHeight: 0
     property bool waffleTaskViewOpen: false
     property bool controlCenterOpen: false
     property bool mediaWidgetOpen: false
     property bool soundWidgetOpen: false
     property bool calendarWidgetOpen: false
     property bool quickSettingsOpen: false
+    property bool pinPickerOpen: false
+    property var pinPickerScreen: null
+    property bool dockContextMenuOpen: false
+    property var dockContextMenuScreen: null
+    property real dockContextMenuAnchorX: 0
+    property real dockContextMenuAnchorY: 0
+    property string dockContextMenuAppId: ""
+    property var dockContextMenuToplevels: []
 
     // Close other waffle popups when one opens (unless allowMultiplePanels is enabled)
     property bool _allowMultiple: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
@@ -69,6 +84,8 @@ Singleton {
             waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
             waffleClipboardOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onWaffleActionCenterOpenChanged: {
@@ -77,15 +94,21 @@ Singleton {
             waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
             waffleClipboardOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onWaffleNotificationCenterOpenChanged: {
         if (waffleNotificationCenterOpen) {
+            // Clipboard is exempt - the two are meant to be able to stack
+            // together (see WClipboard.qml's dynamic top margin), not close
+            // each other like the rest of these panels do.
             if (!_allowMultiple) {
                 searchOpen = false
                 waffleActionCenterOpen = false
                 waffleWidgetsOpen = false
-                waffleClipboardOpen = false
+                pinPickerOpen = false
+                dockContextMenuOpen = false
             }
             // Mark notifications as read when opening notification center
             Notifications.timeoutAll();
@@ -98,15 +121,19 @@ Singleton {
             waffleActionCenterOpen = false
             waffleNotificationCenterOpen = false
             waffleClipboardOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onWaffleClipboardOpenChanged: {
+        // Notification center is exempt - see the comment above.
         if (waffleClipboardOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
             waffleTaskViewOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onWaffleTaskViewOpenChanged: {
@@ -116,6 +143,40 @@ Singleton {
             waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
             waffleClipboardOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
+        }
+    }
+    onPinPickerOpenChanged: {
+        if (pinPickerOpen && !_allowMultiple) {
+            searchOpen = false
+            waffleActionCenterOpen = false
+            waffleNotificationCenterOpen = false
+            waffleWidgetsOpen = false
+            waffleClipboardOpen = false
+            waffleTaskViewOpen = false
+            controlCenterOpen = false
+            mediaWidgetOpen = false
+            soundWidgetOpen = false
+            calendarWidgetOpen = false
+            quickSettingsOpen = false
+            dockContextMenuOpen = false
+        }
+    }
+    onDockContextMenuOpenChanged: {
+        if (dockContextMenuOpen && !_allowMultiple) {
+            searchOpen = false
+            waffleActionCenterOpen = false
+            waffleNotificationCenterOpen = false
+            waffleWidgetsOpen = false
+            waffleClipboardOpen = false
+            waffleTaskViewOpen = false
+            controlCenterOpen = false
+            mediaWidgetOpen = false
+            soundWidgetOpen = false
+            calendarWidgetOpen = false
+            quickSettingsOpen = false
+            pinPickerOpen = false
         }
     }
 
@@ -131,6 +192,8 @@ Singleton {
                 soundWidgetOpen = false
                 calendarWidgetOpen = false
                 quickSettingsOpen = false
+                pinPickerOpen = false
+                dockContextMenuOpen = false
             }
             Notifications.timeoutAll();
             Notifications.markAllRead();
@@ -147,6 +210,8 @@ Singleton {
             soundWidgetOpen = false
             calendarWidgetOpen = false
             quickSettingsOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onSoundWidgetOpenChanged: {
@@ -160,6 +225,8 @@ Singleton {
             mediaWidgetOpen = false
             calendarWidgetOpen = false
             quickSettingsOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onCalendarWidgetOpenChanged: {
@@ -173,6 +240,8 @@ Singleton {
             mediaWidgetOpen = false
             soundWidgetOpen = false
             quickSettingsOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
     onQuickSettingsOpenChanged: {
@@ -186,6 +255,8 @@ Singleton {
             mediaWidgetOpen = false
             soundWidgetOpen = false
             calendarWidgetOpen = false
+            pinPickerOpen = false
+            dockContextMenuOpen = false
         }
     }
 
@@ -234,4 +305,26 @@ Singleton {
             screenZoom = Math.max(screenZoom - 0.4, 1)
         }
 	}
+
+    // Cycles the side dock's edge - WSideDock.qml already reads
+    // waffles.sideDock.edge reactively and re-anchors itself, so this only
+    // needs to write the next value through; no reload required.
+    IpcHandler {
+        target: "sideDock"
+
+        function cycleEdge(): void {
+            const order = ["left", "top", "side", "bottom"]
+            const current = Config.options.waffles?.sideDock?.edge ?? "side"
+            const next = order[(order.indexOf(current) + 1) % order.length]
+            Config.setNestedValue("waffles.sideDock.edge", next)
+        }
+
+        function setEdge(edge: string): void {
+            if (!["left", "side", "top", "bottom"].includes(edge)) {
+                console.warn("[GlobalStates] sideDock setEdge: invalid edge", edge)
+                return
+            }
+            Config.setNestedValue("waffles.sideDock.edge", edge)
+        }
+    }
 }

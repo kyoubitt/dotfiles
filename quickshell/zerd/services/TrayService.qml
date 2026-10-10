@@ -21,7 +21,13 @@ Singleton {
     // matches: array of substrings to match in tray id/title OR window app_id/title
     // focusOnly: true = only focus, don't minimize (for apps that crash when minimized)
     readonly property var problematicApps: [
-        { matches: ["spotify"], launch: "spotify-launcher" },
+        // fixedIcon needed here (unlike most of this table) because
+        // Spotify's own SNI tray item reports IconName "spotify-linux-32"
+        // out of IconThemePath "/opt/spotify/icons" - a path outside the
+        // system icon theme search dirs, so AppSearch can't resolve it and
+        // silently falls back to the theme's generic "image-missing" glyph
+        // instead. The real icon name below IS in the normal theme.
+        { matches: ["spotify"], launch: "spotify-launcher", fixedIcon: "spotify" },
         { matches: ["discord canary", "canary"], launch: "discord-canary", focusOnly: true, fixedIcon: "discord-canary" },
         { matches: ["discord ptb", "ptb"], launch: "discord-ptb", focusOnly: true, fixedIcon: "discord-ptb" },
         { matches: ["discord", "com.discordapp.discord"], launch: "discord", focusOnly: true, fixedIcon: "discord" },
@@ -32,7 +38,10 @@ Singleton {
         { matches: ["telegram", "Telegram", "org.telegram"], launch: "org.telegram.desktop" },
         { matches: ["signal", "Signal"], launch: "signal-desktop" },
         { matches: ["element", "Element"], launch: "element-desktop" },
-        { matches: ["steam", "Steam"], launch: "steam" },
+        // Steam reports its tray icon as a path under ~/.local/share/Steam,
+        // which doesn't resolve here, so it fell back to the broken-image
+        // placeholder. The theme's own "steam" icon is the real one.
+        { matches: ["steam", "Steam"], launch: "steam", fixedIcon: "steam" },
         { matches: ["skype", "Skype"], launch: "skypeforlinux" },
         { matches: ["viber", "Viber"], launch: "viber" },
         { matches: ["zoom", "Zoom"], launch: "zoom" },

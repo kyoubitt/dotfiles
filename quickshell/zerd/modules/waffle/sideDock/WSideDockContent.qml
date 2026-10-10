@@ -6,6 +6,7 @@ import Qt5Compat.GraphicalEffects as GE
 import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
+import Quickshell.Services.SystemTray
 import qs
 import qs.services
 import qs.modules.common
@@ -19,14 +20,6 @@ Item {
 
     property var screen: null
     property bool horizontal: false
-    property bool dockOnLeft: true
-    property real floatMarginTop: 0
-
-    // Fade the whole dock in on first load instead of just snapping into
-    // existence - the one moment every other hover/press animation in
-    // here can't cover on its own.
-    opacity: 0
-    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
     // --- Wifi radio state via rfkill, not Network.qml -----------------
     // Network.qml is nmcli-only, but this machine runs iwd + systemd-networkd
@@ -49,10 +42,7 @@ Item {
         }
     }
     Timer { interval: 4000; running: true; repeat: true; onTriggered: wifiStatusProc.running = true }
-    Component.onCompleted: {
-        wifiStatusProc.running = true
-        root.opacity = 1
-    }
+    Component.onCompleted: wifiStatusProc.running = true
 
     Process { id: wifiToggleProc }
     Timer { id: wifiRecheckTimer; interval: 400; onTriggered: wifiStatusProc.running = true }
@@ -71,6 +61,10 @@ Item {
     function cycleBrightness() {
         const mon = Brightness.getMonitorForScreen(root.screen) ?? Brightness.monitors[0]
         if (!mon) return
+        // Plain wrap-around cycle through the full preset range. Safe now
+        // that 100% no longer sends the panel's literal max raw value
+        // (see Brightness.qml's syncBrightness) - it used to look like the
+        // screen going dark specifically at "max", not a wraparound issue.
         mon.setBrightness(root.nextPreset(root.brightnessPresets, mon.brightness))
     }
 
@@ -79,92 +73,12 @@ Item {
         Audio.setSinkVolume(root.nextPreset(root.volumePresets, Audio.value))
     }
 
-    // Blurred wallpaper strip, cropped from the same absolute screen
-    // coordinates the top bar uses (xOff/yOff = where this panel actually
-    // sits on screen) - see WTopBarContent's matching comment. Its crop
-    // ends exactly at y = floatMarginTop, which is where this one begins,
-    // so the blurred result is continuous across the seam.
-    Item {
-        id: bgLayer
-        anchors.fill: parent
-
-        readonly property real screenW: root.screen?.width ?? bgLayer.width
-        readonly property real screenH: root.screen?.height ?? bgLayer.height
-        readonly property real xOff: root.horizontal ? 0 : (root.dockOnLeft ? 0 : Math.max(0, screenW - bgLayer.width))
-        readonly property real yOff: root.horizontal ? 0 : root.floatMarginTop
-
-        layer.enabled: true
-        layer.effect: GE.OpacityMask {
-            maskSource: Rectangle {
-                width: bgLayer.width
-                height: bgLayer.height
-                // Square corners - the vertical dock runs flush against the
-                // top bar and the bottom screen edge, rounded caps there
-                // would leave a notch right at the seam.
-                radius: root.horizontal ? bgLayer.height / 2 : 0
-            }
-        }
-
-        Image {
-            id: wallpaperCrop
-            // visible:false alone used to kill this outright - Qt skips
-            // scene-graph rendering for invisible items, so the
-            // ShaderEffectSource below (hideSource:true) had nothing to
-            // actually capture and the blur was compositing an empty
-            // texture; the dock's "backdrop" was just the flat black tint
-            // the whole time, letting whatever's behind it read through.
-            // layer.enabled here is the fix: it gives this item its own
-            // texture that keeps updating regardless of visible, so it can
-            // stay hidden (no raw/unblurred frame ever flashes through)
-            // while still feeding the blur a live capture.
-            visible: false
-            layer.enabled: true
-            source: Wallpapers.effectiveWallpaperUrl
-            asynchronous: true
-            cache: true
-            fillMode: Image.PreserveAspectCrop
-            x: -bgLayer.xOff
-            y: -bgLayer.yOff
-            width: bgLayer.screenW
-            height: bgLayer.screenH
-            sourceSize.width: width
-            sourceSize.height: height
-        }
-
-        Item {
-            anchors.fill: parent
-            visible: Wallpapers.effectiveWallpaperUrl !== "" && wallpaperCrop.status === Image.Ready
-
-            ShaderEffectSource {
-                id: blurSource
-                sourceItem: wallpaperCrop
-                // wallpaperCrop is already shifted by (-xOff, -yOff) above,
-                // so its own local (0,0) is where this dock sits on
-                // screen - offsetting the crop rect by xOff/yOff *again*
-                // here was sampling a doubly-shifted, unrelated strip of
-                // the wallpaper (that's what the odd-colored smear was).
-                sourceRect: Qt.rect(0, 0, bgLayer.width, bgLayer.height)
-                textureSize: Qt.size(bgLayer.width, bgLayer.height)
-                hideSource: true
-                live: true
-                smooth: true
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: blurSource
-                saturation: 0.12
-                blurEnabled: true
-                blurMax: 64
-                blur: 1
-            }
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            color: ColorUtils.applyAlpha("#000000", 0.45)
-        }
-    }
+    // No shared backdrop behind the whole bar anymore - it was a live
+    // blurred+darkened crop of the wallpaper (see git history if this
+    // needs resurrecting), but even after fixing its size/shape it still
+    // read as too strong a visual element in its own right. The individual
+    // GhostPill/battery-pill backgrounds already carry enough structure on
+    // their own; the gaps between them are just the plain wallpaper now.
 
     // A bare glyph, dim at rest, that only picks up a faint circle on
     // hover, and a low-alpha accent tint (not a solid fill) when active.
@@ -340,27 +254,38 @@ Item {
         property alias spacing: inner.spacing
         property real padding: 5
         property bool horizontal: false
-        property color fillColor: ColorUtils.applyAlpha("#000000", 0.22)
-        // A subtle border by default, not just on the pinned-apps pill -
-        // the fill alone reads fine over a bright patch of wallpaper, but
-        // over a dark one (night sky, a shadowed silhouette) the 22% black
-        // fill barely differs from the dock's own already-dark backdrop,
-        // so the pill's edge all but disappears and it stops reading as
-        // "a grouped control" at all. A thin outline holds up regardless
-        // of what's behind it.
-        property color borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.18)
+        // A black fill (even at high alpha) is invisible against a wallpaper
+        // patch that's already near-black - there's no contrast for a dark
+        // overlay to add, however opaque it gets. A light fill (off
+        // SMColors.fg, the dock's light foreground tone) instead always
+        // reads as a distinct lighter patch no matter how dark the backdrop
+        // is, which a dark fill fundamentally can't guarantee. Paired with
+        // a drop shadow so the pill also separates itself on a *light*
+        // patch of wallpaper, where a faint fill alone would wash out.
+        property color fillColor: ColorUtils.applyAlpha(SMColors.fg, 0.14)
+        property color borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.35)
         property real borderWidth: 1
 
         implicitWidth: inner.implicitWidth + padding * 2
         implicitHeight: inner.implicitHeight + padding * 2
 
         Rectangle {
+            id: pillBg
             anchors.fill: parent
             radius: (pill.horizontal ? height : width) / 2
             antialiasing: true
             color: pill.fillColor
             border.width: pill.borderWidth
             border.color: pill.borderColor
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Qt.rgba(0, 0, 0, 0.55)
+                shadowBlur: 0.5
+                shadowVerticalOffset: 0
+                shadowHorizontalOffset: 0
+            }
         }
 
         Grid {
@@ -382,6 +307,15 @@ Item {
         id: appBtn
         required property string appId
         property var toplevels: []
+        // Set when this icon represents a tray-only app with no open
+        // window (Steam/Discord/etc. minimized to the system tray) - see
+        // TrayService.qml. Changes both the click behavior and the resting
+        // opacity below.
+        property var trayItem: null
+        // Needed only for the right-click context menu below, which lives
+        // in its own top-level Scope/PanelWindow and has to be told which
+        // screen to open on - nothing else on this icon touches it.
+        property var screen: null
         // Off inside the pinned pill - the pill already gives that whole
         // group a background, so every icon getting its own on top of it
         // just doubled up into a muddy grey blob.
@@ -392,6 +326,11 @@ Item {
         property bool pinned: false
         readonly property bool running: appBtn.toplevels.length > 0
         readonly property bool active: appBtn.toplevels.some(t => t.activated)
+        // Rounded-square rather than a full circle - a squircle app tile
+        // (macOS/GNOME-style) instead of the old circular mask, shared by
+        // the icon mask, its backplate outline, and its active-state glow
+        // so all three stay one consistent shape.
+        readonly property real iconCornerRatio: 0.28
         readonly property var desktopEntry: DesktopEntries.byId(appBtn.appId) ?? DesktopEntries.heuristicLookup(appBtn.appId)
         readonly property string displayName: appBtn.desktopEntry?.name ?? appBtn.appId
         readonly property bool hovered: mouse.containsMouse
@@ -399,12 +338,32 @@ Item {
         // Ctrl+right-click gesture used to be the only way to do this,
         // but that's an easy combo to botch (a trackpad's right-click
         // gesture doesn't always carry the modifier through cleanly) and
-        // it failed completely silently either way.
+        // it failed completely silently either way. Still left as a quick
+        // fallback below.
         signal togglePin()
+
+        // Opens the right-click context menu near this icon. mapToItem(null, ...)
+        // maps into this icon's own containing Window (the dock's own
+        // PanelWindow) rather than full multi-monitor desktop coordinates -
+        // the context menu's PanelWindow is anchored to fill that exact
+        // same screen edge-to-edge, so that window-local point is directly
+        // usable there without any cross-window coordinate translation.
+        function openContextMenu(mouseEvent) {
+            const p = appBtn.mapToItem(null, mouseEvent.x, mouseEvent.y)
+            GlobalStates.dockContextMenuAppId = appBtn.appId
+            GlobalStates.dockContextMenuToplevels = appBtn.toplevels
+            GlobalStates.dockContextMenuScreen = appBtn.screen
+            GlobalStates.dockContextMenuAnchorX = p.x
+            GlobalStates.dockContextMenuAnchorY = p.y
+            GlobalStates.dockContextMenuOpen = true
+        }
 
         implicitWidth: 33
         implicitHeight: 33
-        opacity: appBtn.running ? 1 : 0.45
+        // Three resting states: fully on (focused/has a window), fully
+        // dim (not running at all), and a middle ground for "running in
+        // the background with no window" - distinct from either extreme.
+        opacity: appBtn.running ? 1 : (appBtn.trayItem ? 0.75 : 0.45)
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
         scale: mouse.pressed ? 0.88 : 1.0
@@ -416,13 +375,15 @@ Item {
         // ring rather than a filled hazy circle - matches the pinned
         // pill's own outline treatment instead of competing with it, and
         // reads as crisp lines instead of another soft blob stacked on
-        // top of the icon underneath.
+        // top of the icon underneath. Rounded-square to match the icon
+        // mask's own shape below - a circular outline around a squircle
+        // icon read as two mismatched shapes stacked on each other.
         Rectangle {
             visible: appBtn.showBackplate
             anchors.centerIn: parent
             width: appIconMask.width + 8
             height: width
-            radius: width / 2
+            radius: width * appBtn.iconCornerRatio
             antialiasing: true
             color: "transparent"
             border.width: 1
@@ -435,31 +396,38 @@ Item {
         // a separate layered Rectangle rather than folded into the icon's
         // own effect, since combining mask+colorize+shadow in one
         // MultiEffect was silently breaking the icon's rendering entirely
-        // (nothing showed, no errors).
+        // (nothing showed, no errors). Sized off appIconMask (the actual
+        // visible circle after clipping), not appIcon (the bigger,
+        // unclipped zoomed source image behind it) - sizing off the latter
+        // made this circle overhang well past the icon's real edge, so its
+        // own hard boundary showed as a second ring next to the backplate
+        // ring instead of hiding behind the icon like a proper glow.
         Rectangle {
             visible: appBtn.active
             anchors.centerIn: parent
-            width: appIcon.width * 1.15
+            width: appIconMask.width * 0.9
             height: width
-            radius: width / 2
+            radius: width * appBtn.iconCornerRatio
             color: SMColors.accent
 
             layer.enabled: true
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 shadowColor: SMColors.accent
-                shadowBlur: 1.0
+                shadowBlur: 0.7
+                shadowOpacity: 0.45
                 shadowVerticalOffset: 0
                 shadowHorizontalOffset: 0
             }
         }
 
-        // Every icon cropped to a perfect circle regardless of its own
-        // art's shape. Most icon themes bake in transparent padding
-        // around the actual glyph (a folder, a hexagon...), so masking
-        // the image at its natural size only clips that empty margin
-        // into a circle - the visible glyph inside still reads as
-        // whatever shape it was drawn as. Rendering the image oversized
+        // Every icon cropped to a rounded square (a squircle app tile,
+        // like macOS/GNOME dock icons) regardless of its own art's shape.
+        // Most icon themes bake in transparent padding around the actual
+        // glyph (a folder, a hexagon...), so masking the image at its
+        // natural size only clips that empty margin into the mask shape -
+        // the visible glyph inside still reads as whatever shape it was
+        // drawn as. Rendering the image oversized
         // and centered, then clipping to the mask's bounds, zooms past
         // that padding so the glyph fills the circle edge to edge. Some
         // upstream app icons (Firefox) bake in their own soft drop-shadow
@@ -491,7 +459,17 @@ Item {
                 width: parent.width * appBtn.iconZoom
                 height: width
                 fillMode: Image.PreserveAspectCrop
-                source: AppSearch.getIconSource(appBtn.appId, "image-missing")
+                // Tray-derived icons (appBtn.trayItem set) go through
+                // TrayService.getSafeIcon first - a tray item's own
+                // self-reported icon name/path is sometimes unresolvable
+                // (e.g. Spotify's points outside the system icon theme
+                // dirs entirely), and that service's problematicApps table
+                // already carries the right fixedIcon override for those.
+                // Everything else keeps using AppSearch directly, same as
+                // always.
+                source: appBtn.trayItem
+                    ? AppSearch.resolveIcon(TrayService.getSafeIcon(appBtn.trayItem), "image-missing")
+                    : AppSearch.getIconSource(appBtn.appId, "image-missing")
                 sourceSize.width: 96
                 sourceSize.height: 96
             }
@@ -509,7 +487,7 @@ Item {
                 maskSource: Rectangle {
                     width: appIconMask.width
                     height: appIconMask.height
-                    radius: width / 2
+                    radius: width * appBtn.iconCornerRatio
                     antialiasing: true
                 }
             }
@@ -526,12 +504,32 @@ Item {
                     appBtn.togglePin()
                     return
                 }
+                // Tray-derived icon (no window to focus/close/menu) - left
+                // click focuses the app's existing window if TrayService
+                // can find one, otherwise launches/restores it. Right and
+                // middle click are no-ops here; there's nothing for them
+                // to do yet.
+                if (appBtn.trayItem) {
+                    if (mouseEvent.button === Qt.LeftButton) {
+                        if (!TrayService.smartToggle(appBtn.trayItem)) appBtn.trayItem.activate()
+                    }
+                    return
+                }
+                // Right-click now opens a menu (Pin/Unpin, Close) instead
+                // of instantly closing the focused window - that instant
+                // close had no confirmation and was easy to trigger by
+                // accident. Middle-click is still the fast, un-menu'd way
+                // to close a window, unchanged.
+                if (mouseEvent.button === Qt.RightButton) {
+                    appBtn.openContextMenu(mouseEvent)
+                    return
+                }
                 if (!appBtn.running) {
                     if (mouseEvent.button === Qt.LeftButton) appBtn.desktopEntry?.execute()
                     return
                 }
                 const tls = appBtn.toplevels
-                if (mouseEvent.button === Qt.MiddleButton || mouseEvent.button === Qt.RightButton) {
+                if (mouseEvent.button === Qt.MiddleButton) {
                     const focused = tls.find(t => t.activated) ?? tls[0]
                     focused.close()
                     return
@@ -583,7 +581,30 @@ Item {
             }
         }
 
-        WToolTip { text: appBtn.displayName }
+        // Up to 3 short segments under the icon when more than one window
+        // of this app is open - the same "how many windows" signal the
+        // real Windows 11 taskbar gives per icon. An overlay past the
+        // icon's own bottom edge rather than added layout space (like the
+        // hover-badge above already does), so it doesn't need to grow this
+        // icon's implicitWidth/Height or care which edge the dock is on.
+        Row {
+            visible: appBtn.toplevels.length > 1
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.bottom
+            anchors.topMargin: 1
+            spacing: 2
+
+            Repeater {
+                model: Math.min(appBtn.toplevels.length, 3)
+                delegate: Rectangle {
+                    width: 6
+                    height: 2
+                    radius: 1
+                    antialiasing: true
+                    color: appBtn.active ? SMColors.accent : ColorUtils.applyAlpha(SMColors.fg, 0.6)
+                }
+            }
+        }
     }
 
     // Built once whenever NiriService.windows changes (a plain array
@@ -602,20 +623,20 @@ Item {
         anchors {
             top: !root.horizontal ? parent.top : undefined
             left: root.horizontal ? parent.left : undefined
-            topMargin: !root.horizontal ? 24 : 0
-            leftMargin: root.horizontal ? 24 : 0
+            topMargin: !root.horizontal ? 28 : 0
+            leftMargin: root.horizontal ? 28 : 0
             horizontalCenter: !root.horizontal ? parent.horizontalCenter : undefined
             verticalCenter: root.horizontal ? parent.verticalCenter : undefined
         }
-        spacing: 16
+        spacing: 20
         columns: root.horizontal ? -1 : 1
         rows: root.horizontal ? 1 : -1
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter
 
         GhostPill {
-            padding: 6
-            spacing: 8
+            padding: 7
+            spacing: 10
             horizontal: root.horizontal
 
             DockArcGauge {
@@ -634,7 +655,7 @@ Item {
         // Bare dots directly on the dock's blurred background - no extra
         // pill chrome layered on top of it.
         Grid {
-            spacing: 9
+            spacing: 11
             columns: root.horizontal ? -1 : 1
             rows: root.horizontal ? 1 : -1
             horizontalItemAlignment: Grid.AlignHCenter
@@ -696,7 +717,7 @@ Item {
     // --- Pinned launchers (in a soft pill, running or not) above the
     // currently-running, unpinned apps (bare on the dock's background - a
     // pill wrapper there read as clutter, not "a taskbar").
-    readonly property var pinnedAppIds: (Config.options?.dock?.pinnedApps ?? []).map(id => id.toLowerCase())
+    readonly property var pinnedAppIds: DockPins.pinnedAppIds
 
     // Minecraft's window app_id ("Minecraft* 1.21.11", version-suffixed and
     // unstable) has no real desktop icon of its own - AppSearch's regex
@@ -711,40 +732,77 @@ Item {
     }
 
     readonly property var pinnedApps: root.pinnedAppIds.map(pid => {
-        const runningEntries = TaskbarApps.apps.filter(a => root.taskbarGroupKey(a.appId) === pid)
+        const runningEntries = TaskbarApps.apps.filter(a => a && root.taskbarGroupKey(a.appId) === pid)
         return {
             appId: runningEntries[0]?.appId ?? pid,
             toplevels: runningEntries.reduce((acc, a) => acc.concat(a.toplevels), [])
         }
     })
-    readonly property var unpinnedRunningApps: TaskbarApps.apps.filter(a => !root.pinnedAppIds.includes(root.taskbarGroupKey(a.appId)))
+    // TaskbarApps.apps can momentarily hold a stale/null entry mid-recompute
+    // (e.g. right as pinnedApps changes under it, which now happens a lot
+    // more often via the pin picker's rapid pin/unpin) - guard rather than
+    // let a transient null blow up this whole binding.
+    readonly property var unpinnedRunningApps: TaskbarApps.apps.filter(a => a && !root.pinnedAppIds.includes(root.taskbarGroupKey(a.appId)))
+
+    // Apps running in the background with no open window at all - Steam,
+    // Discord, etc. minimized to the system tray. TrayService.problematicApps
+    // is also the only reliable way to tell a real app's tray icon apart
+    // from an applet (NetworkManager, Bluetooth...) since the tray protocol
+    // itself carries no such distinction - so only tray items matching that
+    // table ever show here, not every random tray icon.
+    readonly property var backgroundApps: {
+        const result = []
+        const seen = new Set()
+        for (const item of SystemTray.items.values) {
+            if (!item || !item.id) continue
+            // Applets (network, bluetooth, volume...) are Hardware or
+            // SystemServices in the tray protocol; actual apps are
+            // ApplicationStatus or Communications. Only the latter get
+            // their own background slot.
+            if (item.category === Category.Hardware || item.category === Category.SystemServices) continue
+            // Passive means the app asked to be hidden.
+            if (item.status === Status.Passive) continue
+            // Known apps keep their curated launch command and matching
+            // patterns; anything else is shown under its own tray id/title.
+            const known = TrayService.getProblematicAppInfo(item)
+            const info = known ?? {
+                launch: item.id,
+                matches: [item.id, item.title ?? ""].filter(m => m.length > 0)
+            }
+            const key = info.launch.toLowerCase()
+            if (seen.has(key)) continue
+            // Each match pattern checked against the pinned list, and the
+            // running windows, so a pinned or already-open app never shows
+            // up here a second time.
+            const isPinned = root.pinnedAppIds.some(pid => info.matches.some(m => pid.includes(m.toLowerCase())))
+            if (isPinned) continue
+            const hasWindow = TaskbarApps.apps.some(a => a && info.matches.some(m => a.appId.toLowerCase().includes(m.toLowerCase())))
+            if (hasWindow) continue
+            seen.add(key)
+            result.push({ appId: info.launch, trayItem: item })
+        }
+        return result
+    }
 
     // Ctrl+right-click any dock icon to pin/unpin it - see DockAppIcon's
-    // togglePin signal. Mirrors TrayService's pin()/unpin() pattern
-    // (Config.setNestedValue on a plain string list) just under the
-    // dock's own config key.
-    function isAppPinned(appId) {
-        return root.pinnedAppIds.includes(appId.toLowerCase())
-    }
-    function pinApp(appId) {
-        const pins = Config.options?.dock?.pinnedApps ?? []
-        if (root.isAppPinned(appId)) return
-        Config.setNestedValue("dock.pinnedApps", pins.concat([appId]))
-    }
-    function unpinApp(appId) {
-        const pins = Config.options?.dock?.pinnedApps ?? []
-        Config.setNestedValue("dock.pinnedApps", pins.filter(p => p.toLowerCase() !== appId.toLowerCase()))
-    }
-    function toggleAppPin(appId) {
-        if (root.isAppPinned(appId)) root.unpinApp(appId)
-        else root.pinApp(appId)
-    }
+    // togglePin signal. Actual pin state lives in DockPins (services/) now,
+    // not here - the pin picker and right-click menu below are separate
+    // top-level Scopes that need the same read/write surface this root
+    // Item used to own alone.
+    function isAppPinned(appId) { return DockPins.isAppPinned(appId) }
+    function pinApp(appId) { DockPins.pinApp(appId) }
+    function unpinApp(appId) { DockPins.unpinApp(appId) }
+    function toggleAppPin(appId) { DockPins.toggleAppPin(appId) }
 
+    // Continues the left-to-right chain from topGroup when horizontal
+    // (see its comment above) instead of centering on root's own width,
+    // which would read root's width back while root's width is itself
+    // derived from this chain.
     Grid {
-        visible: root.pinnedApps.length > 0 || root.unpinnedRunningApps.length > 0
+        id: appsGroup
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 14
+        spacing: 18
         columns: root.horizontal ? -1 : 1
         rows: root.horizontal ? 1 : -1
         horizontalItemAlignment: Grid.AlignHCenter
@@ -753,15 +811,17 @@ Item {
         // A dim outline capsule rather than a filled tint - the filled
         // grey pill was landing at almost the same color as every icon's
         // own backplate behind it, so pinned vs. unpinned read as one
-        // muddy grey mass instead of two distinct groups.
+        // muddy grey mass instead of two distinct groups. Always visible
+        // now (even with zero pins) since it also hosts the "add pin"
+        // trigger - that needs to stay reachable, not disappear along with
+        // the last pinned icon.
         GhostPill {
-            visible: root.pinnedApps.length > 0
-            padding: 6
+            padding: 7
             spacing: 6
             horizontal: root.horizontal
             fillColor: "transparent"
             borderWidth: 1
-            borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.25)
+            borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.35)
 
             Repeater {
                 model: root.pinnedApps
@@ -769,16 +829,31 @@ Item {
                     required property var modelData
                     appId: modelData.appId
                     toplevels: modelData.toplevels
+                    screen: root.screen
                     showBackplate: false
                     pinned: true
                     onTogglePin: root.toggleAppPin(appId)
                 }
             }
+
+            // Opens the searchable pin picker (WSideDockPinPicker) - the
+            // only way to pin an app that isn't already running, since
+            // every DockAppIcon's own pin badge only exists for apps that
+            // already have a dock icon to hover.
+            DockFlatIcon {
+                icon: "add"
+                baseSize: 20
+                hoverSize: 26
+                onClicked: {
+                    GlobalStates.pinPickerScreen = root.screen
+                    GlobalStates.pinPickerOpen = true
+                }
+            }
         }
 
         Grid {
-            visible: root.unpinnedRunningApps.length > 0
-            spacing: 8
+            visible: root.unpinnedRunningApps.length > 0 || root.backgroundApps.length > 0
+            spacing: 9
             columns: root.horizontal ? -1 : 1
             rows: root.horizontal ? 1 : -1
             horizontalItemAlignment: Grid.AlignHCenter
@@ -790,29 +865,212 @@ Item {
                     required property var modelData
                     appId: modelData.appId
                     toplevels: modelData.toplevels
+                    screen: root.screen
+                    onTogglePin: root.toggleAppPin(appId)
+                }
+            }
+
+            Repeater {
+                model: root.backgroundApps
+                delegate: DockAppIcon {
+                    required property var modelData
+                    appId: modelData.appId
+                    trayItem: modelData.trayItem
+                    screen: root.screen
                     onTogglePin: root.toggleAppPin(appId)
                 }
             }
         }
     }
 
-    // --- Utility blobs, pinned to the dock's "end" edge (bottom when
-    // vertical, right when horizontal) - volume bare, do-not-disturb/wifi/
-    // bluetooth grouped in a pill, power bare on its own.
+    // --- Utility blobs - volume bare, do-not-disturb/wifi/bluetooth
+    // grouped in a pill, power bare on its own. Pinned to the dock's
+    // "end" edge - bottom when vertical, right when horizontal.
     Grid {
         anchors {
             bottom: !root.horizontal ? parent.bottom : undefined
             right: root.horizontal ? parent.right : undefined
-            bottomMargin: !root.horizontal ? 14 : 0
-            rightMargin: root.horizontal ? 14 : 0
+            bottomMargin: !root.horizontal ? 18 : 0
+            rightMargin: root.horizontal ? 18 : 0
             horizontalCenter: !root.horizontal ? parent.horizontalCenter : undefined
             verticalCenter: root.horizontal ? parent.verticalCenter : undefined
         }
-        spacing: 14
+        spacing: 18
         columns: root.horizontal ? -1 : 1
         rows: root.horizontal ? 1 : -1
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter
+
+        // Only on laptops - Battery.available reflects UPower's own
+        // isLaptopBattery check, so this is simply absent on a desktop.
+        // A plain icon+percentage stack rather than DockArcGauge's ring -
+        // the actual number reads faster than an arc for battery
+        // specifically. Wrapped in the same GhostPill capsule every other
+        // control here uses rather than floating bare - without a
+        // boundary it was the one item that didn't read as "a control"
+        // next to the ringed/backplated ones around it.
+        // A standalone Rectangle rather than GhostPill - GhostPill's
+        // `content` alias reparents any child into its own internal Grid,
+        // which doesn't leave a clean way to add a plain click handler
+        // (a MouseArea declared inside it becomes a third grid row, not an
+        // overlay), and wrapping GhostPill in an outer Item to hold that
+        // MouseArea instead turned into an implicit-size forwarding chain
+        // fragile enough it was rendering broken - as the first item in
+        // this Grid, that took every item after it down with it. Same
+        // visual recipe as GhostPill, just self-contained.
+        Rectangle {
+            id: batteryPill
+            visible: Battery.available
+            implicitWidth: battContent.implicitWidth + 12
+            implicitHeight: battContent.implicitHeight + 12
+            radius: (root.horizontal ? height : width) / 2
+            antialiasing: true
+            // Same light-fill recipe as GhostPill now, not a black overlay -
+            // see its comment. Kept as its own Rectangle rather than
+            // switched to GhostPill itself (see the comment above this one
+            // on why).
+            color: ColorUtils.applyAlpha(SMColors.fg, 0.14)
+            border.width: 1
+            border.color: ColorUtils.applyAlpha(SMColors.fg, 0.35)
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Qt.rgba(0, 0, 0, 0.55)
+                shadowBlur: 0.5
+                shadowVerticalOffset: 0
+                shadowHorizontalOffset: 0
+            }
+
+            property bool expanded: false
+            // Under 50%, not "not at 100%" - that first cut read as red
+            // almost all the time, which isn't the "needs attention" this
+            // is supposed to signal.
+            readonly property bool isLow: Battery.percentage < 0.50
+            readonly property color statusColor: batteryPill.isLow ? "#E58C8C" : "#8BC34A"
+
+            // "3h 42m until full/empty" - click to reveal. UPower reports
+            // both in seconds; 0 means "unknown" (e.g. just plugged in,
+            // still calculating), so hide the line rather than show a
+            // bogus "0m".
+            readonly property real detailSeconds: Battery.isCharging ? Battery.timeToFull : Battery.timeToEmpty
+            function formattedDetail() {
+                const mins = Math.round(batteryPill.detailSeconds / 60)
+                const h = Math.floor(mins / 60)
+                const m = mins % 60
+                const duration = h > 0 ? `${h}h ${m}m` : `${m}m`
+                return Battery.isCharging
+                    ? Translation.tr("%1 until full").arg(duration)
+                    : Translation.tr("%1 until empty").arg(duration)
+            }
+
+            Grid {
+                id: battContent
+                anchors.centerIn: parent
+                spacing: 1
+                columns: root.horizontal ? -1 : 1
+                rows: root.horizontal ? 1 : -1
+                horizontalItemAlignment: Grid.AlignHCenter
+                verticalItemAlignment: Grid.AlignVCenter
+
+                // Drawn as an actual landscape battery shape (body + fill
+                // bar + terminal nub) rather than a Material Symbol glyph -
+                // those are drawn upright/portrait, and a naive 90°
+                // rotation kept flipping the little details (the charge
+                // notches, the nub) into the wrong place. Plain shapes give
+                // exact control over the sideways look instead.
+                Item {
+                    id: battShape
+                    // Bumped from 20x10 - at the old size the fill bar and
+                    // border read as a muddy sliver with almost no room for
+                    // the charge notch between them.
+                    implicitWidth: 25
+                    implicitHeight: 13
+
+                    Rectangle {
+                        id: battBody
+                        width: parent.width - battNub.width - 1
+                        height: parent.height
+                        radius: 3
+                        antialiasing: true
+                        color: "transparent"
+                        border.width: 1.4
+                        border.color: batteryPill.statusColor
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 2
+                            radius: 1.5
+                            antialiasing: true
+                            color: "transparent"
+                            clip: true
+
+                            Rectangle {
+                                width: parent.width * Math.max(0.08, Battery.percentage)
+                                height: parent.height
+                                radius: 1.5
+                                antialiasing: true
+                                color: batteryPill.statusColor
+                                Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                            }
+                        }
+
+                        // Charging had no visual signal at all before this -
+                        // a bolt cut into the fill, in the body's own outline
+                        // color so it reads against either an empty or full
+                        // bar without needing its own background chip.
+                        MaterialSymbol {
+                            visible: Battery.isCharging
+                            anchors.centerIn: parent
+                            iconSize: 9
+                            text: "bolt"
+                            color: SMColors.bg
+
+                            layer.enabled: true
+                            layer.effect: MultiEffect {
+                                shadowEnabled: true
+                                shadowColor: batteryPill.statusColor
+                                shadowBlur: 0.8
+                                shadowOpacity: 0.9
+                                shadowVerticalOffset: 0
+                                shadowHorizontalOffset: 0
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        id: battNub
+                        width: 2.5
+                        height: 5
+                        radius: 1.2
+                        antialiasing: true
+                        color: batteryPill.statusColor
+                        anchors.left: battBody.right
+                        anchors.leftMargin: 1
+                        anchors.verticalCenter: battBody.verticalCenter
+                    }
+                }
+                Text {
+                    text: Math.round(Battery.percentage * 100) + "%"
+                    font.pixelSize: 10
+                    color: batteryPill.isLow ? batteryPill.statusColor : ColorUtils.applyAlpha(SMColors.fg, 0.85)
+                }
+                Text {
+                    visible: batteryPill.expanded && batteryPill.detailSeconds > 0
+                    opacity: visible ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                    text: batteryPill.formattedDetail()
+                    font.pixelSize: 9
+                    color: ColorUtils.applyAlpha(SMColors.fg, 0.65)
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: batteryPill.expanded = !batteryPill.expanded
+            }
+        }
 
         DockArcGauge {
             icon: (Audio.sink?.audio.muted ?? false) ? "volume_off" : "volume_up"
@@ -823,8 +1081,8 @@ Item {
         }
 
         GhostPill {
-            padding: 6
-            spacing: 10
+            padding: 7
+            spacing: 12
             horizontal: root.horizontal
 
             DockFlatIcon {

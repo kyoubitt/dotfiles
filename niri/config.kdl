@@ -67,6 +67,8 @@ binds {
     Mod+B hotkey-overlay-title="Open Browser: Firefox" { spawn-sh "firefox"; }
     Mod+E hotkey-overlay-title="File Manager: Thunar" { spawn-sh "thunar"; }
     Mod+W hotkey-overlay-title="Open Wallpaper Selector" { spawn-sh "qs -c zerd ipc call wallpaperSelector toggle"; }
+    Mod+Shift+W hotkey-overlay-title="Toggle Widgets Panel" { spawn-sh "qs -c zerd ipc call widgetsPanel toggle"; }
+    Mod+Shift+D hotkey-overlay-title="Cycle Dock Edge" { spawn-sh "qs -c zerd ipc call sideDock cycleEdge"; }
 
     // Media Keys
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh volume_up"; }
@@ -106,26 +108,6 @@ binds {
     Mod+Shift+End { move-column-to-last; }
     Mod+Home { focus-column-first; }
     Mod+End { focus-column-last; }
-
-    // Monitor Management
-    Mod+Ctrl+Left { focus-monitor-left; }
-    Mod+Ctrl+Right { focus-monitor-right; }
-    Mod+Ctrl+Up { focus-monitor-up; }
-    Mod+Ctrl+Down { focus-monitor-down; }
-    Mod+Ctrl+H { focus-monitor-left; }
-    Mod+Ctrl+L { focus-monitor-right; }
-    Mod+Ctrl+K { focus-monitor-up; }
-    Mod+Ctrl+J { focus-monitor-down; }
-
-    // Move windows to different monitors
-    Mod+Shift+Ctrl+Left { move-column-to-monitor-left; }
-    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
-    Mod+Shift+Ctrl+Up { move-column-to-monitor-up; }
-    Mod+Shift+Ctrl+Down { move-column-to-monitor-down; }
-    Mod+Shift+Ctrl+H { move-column-to-monitor-left; }
-    Mod+Shift+Ctrl+L { move-column-to-monitor-right; }
-    Mod+Shift+Ctrl+K { move-column-to-monitor-up; }
-    Mod+Shift+Ctrl+J { move-column-to-monitor-down; }
 
     // Workspace Management
     Mod+Escape hotkey-overlay-title="Open Overview" repeat=false { toggle-overview; }
@@ -195,15 +177,15 @@ layout {
 
     focus-ring {
         width 2
-        active-color "#4FC6B3bb"
-        inactive-color "#4FC6B3bb"
+        active-color "#858585bb"
+        inactive-color "#858585bb"
     }
 
 
 
     insert-hint {
         off
-        color "#0F1114"
+        color "#141414"
 }
 
 }
@@ -256,6 +238,14 @@ window-rule {
 window-rule {
     match app-id=r#"^Spotify$"#
     opacity 0.90
+}
+
+// Thunar's GTK3 surface has no real per-pixel alpha support either (tested:
+// giving its theme rgba() backgrounds did nothing), so same fix as Spotify -
+// blend the whole window at the compositor level instead.
+window-rule {
+    match app-id=r#"^thunar$"#
+    opacity 0.65
 }
 
 window-rule {
@@ -377,6 +367,7 @@ window-rule {
     match app-id="com.mitchellh.ghostty"
     geometry-corner-radius 0
     clip-to-geometry true
+    default-column-width { proportion 0.5; }
 }
 
 window-rule {

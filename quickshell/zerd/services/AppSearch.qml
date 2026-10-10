@@ -33,6 +33,18 @@ Singleton {
         "claude-desktop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/claude.svg",
         "btop": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/btop.svg",
         "CMakeSetup": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/cmake.svg",
+        // Same Dark->Light symlink resolution failure as above - LibreOffice's
+        // per-app icons all live only behind that symlink in every Colloid variant.
+        "libreoffice-writer": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-writer.svg",
+        "libreoffice-calc": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-calc.svg",
+        "libreoffice-impress": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-impress.svg",
+        "libreoffice-draw": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-draw.svg",
+        "libreoffice-base": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-base.svg",
+        "libreoffice-math": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-math.svg",
+        "libreoffice-startcenter": "/usr/share/icons/Colloid-Purple-Light/apps/scalable/libreoffice-startcenter.svg",
+        // Cursor's icon id isn't in any installed icon theme (hicolor or Colloid) at
+        // all - only the app's own bundled pixmap has it, so point straight at that.
+        "co.anysphere.cursor": "/usr/share/pixmaps/co.anysphere.cursor.png",
         // Thunar's actual icon isn't in Colloid at all (dark or light) -
         // only hicolor has it - so it was falling through to a generic
         // mimetype folder glyph instead of Thunar's real branded icon.
@@ -139,13 +151,21 @@ Singleton {
     function guessIcon(str) {
         if (!str || str.length == 0) return "image-missing";
 
-        // Quickshell's desktop entry lookup
+        // Quickshell's desktop entry lookup. Its resolved icon id can still be one
+        // of the ones broken by the theme's symlink issue (e.g. "btop" heuristically
+        // matches btop.desktop via its Exec name, short-circuiting straight back to
+        // the same unresolvable id) - so substitutions must be checked against
+        // whatever candidate we end up with, not skipped whenever heuristics hit.
         const entry = DesktopEntries.heuristicLookup(str);
-        if (entry) return entry.icon;
+        const candidate = entry ? entry.icon : str;
+        if (/btop|cursor|libre/i.test(str)) {
+            console.log(`[AppSearch DEBUG] str='${str}' entry=${entry ? entry.name : 'null'} candidate='${candidate}' sub=${substitutions[candidate]}`)
+        }
 
         // Normal substitutions
-        if (substitutions[str]) return substitutions[str];
-        if (substitutions[str.toLowerCase()]) return substitutions[str.toLowerCase()];
+        if (substitutions[candidate]) return substitutions[candidate];
+        if (substitutions[candidate.toLowerCase()]) return substitutions[candidate.toLowerCase()];
+        if (entry) return entry.icon;
 
         // Regex substitutions
         for (let i = 0; i < regexSubstitutions.length; i++) {

@@ -1,3 +1,7 @@
 module qs.modules.waffle.sideDock
 WSideDock 1.0 WSideDock.qml
 WSideDockContent 1.0 WSideDockContent.qml
+WSideDockPinPicker 1.0 WSideDockPinPicker.qml
+WSideDockPinPickerContent 1.0 WSideDockPinPickerContent.qml
+WSideDockContextMenu 1.0 WSideDockContextMenu.qml
+WSideDockContextMenuContent 1.0 WSideDockContextMenuContent.qml

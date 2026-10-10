@@ -10,7 +10,6 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
-import qs.modules.waffle.startMenu
 
 Scope {
     id: root
@@ -19,48 +18,55 @@ Scope {
         id: sessionButton
         required property string icon
         required property string label
-        readonly property bool hovered: buttonMouse.containsMouse
         signal activated()
 
         spacing: 10
 
-        Rectangle {
+        Item {
             Layout.alignment: Qt.AlignHCenter
-            width: 120
-            height: 120
-            radius: width / 2
-            antialiasing: true
-            color: SMColors.accent
-            opacity: sessionButton.hovered ? 0.85 : 0.5
-            scale: sessionButton.hovered ? 1.06 : 1.0
+            implicitWidth: 120
+            implicitHeight: 120
 
-            Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-
-            Text {
-                anchors.centerIn: parent
-                text: sessionButton.icon
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 42
-                color: SMColors.fg
+            StyledRectangularShadow {
+                target: sessionButtonRipple
+                radius: Appearance.rounding.full
             }
 
-            MouseArea {
-                id: buttonMouse
+            RippleButton {
+                id: sessionButtonRipple
                 anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: sessionButton.activated()
+                buttonRadius: Appearance.rounding.full
+                pointingHandCursor: true
+
+                colBackground: "transparent"
+                colBackgroundHover: Appearance.colors.colPrimary
+                colRipple: Appearance.colors.colPrimaryActive
+
+                scale: sessionButtonRipple.buttonHovered ? 1.06 : 1.0
+                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                releaseAction: () => sessionButton.activated()
+
+                contentItem: Text {
+                    anchors.fill: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: sessionButton.icon
+                    font.family: Appearance.font.family.iconMaterial
+                    font.pixelSize: 42
+                    color: sessionButtonRipple.buttonHovered ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
             }
         }
 
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: sessionButton.label
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Appearance.font.family.monospace
             font.pixelSize: 15
             font.bold: true
-            color: SMColors.fg
+            color: Appearance.colors.colOnLayer0
         }
     }
 
@@ -94,29 +100,8 @@ Scope {
             // Real frosted-glass backdrop: the actual wallpaper, blurred live,
             // rather than a flat dimmed rectangle - static power-menu tools
             // can't do this without a pre-baked screenshot.
-            Image {
-                id: bgSource
+            LockBackdrop {
                 anchors.fill: parent
-                source: Wallpapers.effectiveWallpaperUrl
-                fillMode: Image.PreserveAspectCrop
-                sourceSize.width: width
-                sourceSize.height: height
-                asynchronous: true
-                cache: true
-
-                layer.enabled: Appearance.effectsEnabled
-                layer.effect: MultiEffect {
-                    source: bgSource
-                    anchors.fill: bgSource
-                    blurEnabled: true
-                    blur: 1.0
-                    blurMax: 64
-                }
-            }
-            Rectangle {
-                anchors.fill: parent
-                color: SMColors.bg
-                opacity: 0.45
             }
 
             // Entrance: fade + rise, so it feels like something actually
@@ -150,17 +135,17 @@ Scope {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale().toString(DateTime.clock.date, "hh:mm AP")
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Appearance.font.family.monospace
                         font.pixelSize: 72
                         font.bold: true
-                        color: SMColors.fg
+                        color: Appearance.colors.colOnLayer0
                     }
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Appearance.font.family.monospace
                         font.pixelSize: 18
-                        color: SMColors.fg
+                        color: Appearance.colors.colOnLayer0
                         opacity: 0.7
                     }
                 }
@@ -219,12 +204,17 @@ Scope {
                     // parent's opacity multiplies into every child, which
                     // is what made the album art look washed out/hazy
                     // rather than just the background being translucent.
-                    Rectangle {
+                    StyledRectangularShadow {
+                        target: nowPlayingCardBg
+                    }
+
+                    GlassBackground {
+                        id: nowPlayingCardBg
                         anchors.fill: parent
-                        radius: 20
-                        antialiasing: true
-                        color: "gray"
-                        opacity: 0.35
+                        radius: Appearance.rounding.large
+                        fallbackColor: Appearance.colors.colLayer3
+                        screenX: nowPlayingCardBg.mapToItem(null, 0, 0).x
+                        screenY: nowPlayingCardBg.mapToItem(null, 0, 0).y
                     }
 
                     ColumnLayout {
@@ -247,7 +237,7 @@ Scope {
                                 height: 56
                                 radius: 12
                                 antialiasing: true
-                                color: SMColors.bg
+                                color: Appearance.colors.colLayer3
                                 clip: true
 
                                 Image {
@@ -264,9 +254,9 @@ Scope {
                                     anchors.centerIn: parent
                                     visible: nowPlayingArt.status !== Image.Ready
                                     text: "music_note"
-                                    font.family: "Material Symbols Rounded"
+                                    font.family: Appearance.font.family.iconMaterial
                                     font.pixelSize: 22
-                                    color: SMColors.accent
+                                    color: Appearance.colors.colPrimary
                                 }
                             }
 
@@ -275,17 +265,17 @@ Scope {
                                 spacing: 1
                                 MarqueeText {
                                     Layout.fillWidth: true
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Appearance.font.family.monospace
                                     font.pixelSize: 15
                                     font.bold: true
-                                    color: SMColors.fg
+                                    color: Appearance.colors.colOnLayer3
                                     text: MprisController.activeTrack?.title ?? ""
                                 }
                                 MarqueeText {
                                     Layout.fillWidth: true
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: Appearance.font.family.monospace
                                     font.pixelSize: 12
-                                    color: SMColors.fg
+                                    color: Appearance.colors.colOnLayer3
                                     opacity: 0.65
                                     text: MprisController.activeTrack?.artist ?? ""
                                 }
@@ -296,8 +286,8 @@ Scope {
                             Layout.fillWidth: true
                             progress: (MprisController.activePlayer && MprisController.activePlayer.length > 0)
                                 ? Math.max(0, Math.min(1, MprisController.activePlayer.position / MprisController.activePlayer.length)) : 0
-                            accentColor: SMColors.accent
-                            dimColor: ColorUtils.applyAlpha(SMColors.fg, 0.25)
+                            accentColor: Appearance.colors.colPrimary
+                            dimColor: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.25)
                             amplitude: 4
                             animate: MprisController.isPlaying
                             onSeekRequested: fraction => {
@@ -313,23 +303,23 @@ Scope {
 
                             Text {
                                 text: "skip_previous"
-                                font.family: "Material Symbols Rounded"
+                                font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 20
-                                color: SMColors.fg
+                                color: Appearance.colors.colOnLayer3
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.previous() }
                             }
                             Text {
                                 text: MprisController.isPlaying ? "pause" : "play_arrow"
-                                font.family: "Material Symbols Rounded"
+                                font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 24
-                                color: SMColors.fg
+                                color: Appearance.colors.colOnLayer3
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.togglePlaying() }
                             }
                             Text {
                                 text: "skip_next"
-                                font.family: "Material Symbols Rounded"
+                                font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 20
-                                color: SMColors.fg
+                                color: Appearance.colors.colOnLayer3
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.next() }
                             }
                         }
@@ -363,7 +353,7 @@ Scope {
                                     implicitHeight: 4 + level * 22
                                     radius: width / 2
                                     antialiasing: true
-                                    color: SMColors.accent
+                                    color: Appearance.colors.colPrimary
                                     opacity: 0.45 + level * 0.55
 
                                     Behavior on implicitHeight { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }

@@ -4,17 +4,14 @@ FluentIcon 1.0 FluentIcon.qml
 WButton 1.0 WButton.qml
 WBorderedButton 1.0 WBorderedButton.qml
 WBorderlessButton 1.0 WBorderlessButton.qml
-WSwitch 1.0 WSwitch.qml
 WText 1.0 WText.qml
 WTextInput 1.0 WTextInput.qml
 WToolTip 1.0 WToolTip.qml
 WToolTipContent 1.0 WToolTipContent.qml
 WPane 1.0 WPane.qml
-WScrollBar 1.0 WScrollBar.qml
 WBarAttachedPanelContent 1.0 WBarAttachedPanelContent.qml
 WPanelPageColumn 1.0 WPanelPageColumn.qml
 WRectangularShadow 1.0 WRectangularShadow.qml
 WAmbientShadow 1.0 WAmbientShadow.qml
-AcrylicRectangle 1.0 AcrylicRectangle.qml
 BodyRectangle 1.0 BodyRectangle.qml
 FooterRectangle 1.0 FooterRectangle.qml

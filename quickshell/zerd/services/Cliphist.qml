@@ -22,6 +22,7 @@ Singleton {
         name: Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`),
         entry: a
     }))
+    onEntriesChanged: root._updateTimestamps()
 
     function _log(...args): void {
         if (Quickshell.env("QS_DEBUG") === "1") console.log(...args);
@@ -51,6 +52,88 @@ Singleton {
 
     function entryIsImage(entry) {
         return !!(/^\d+\t\[\[.*binary data.*\d+x\d+.*\]\]$/.test(entry))
+    }
+
+    function idOf(entry) {
+        return entry.split("\t")[0]
+    }
+
+    // cliphist's own `list` only gives a single-line, whitespace-collapsed
+    // preview and no size - real multi-line/code previews and byte counts
+    // need the full decoded entry, fetched lazily per-row below.
+    property string thumbnailDir: FileUtils.trimFileProtocol(`${Directories.cache}/media/clipboard-thumbs`)
+    property var contentCache: ({})
+    property var sizeCache: ({})
+
+    Component {
+        id: decodeComponent
+        Process {
+            id: dproc
+            required property string entryId
+            required property string entryText
+            required property bool asImage
+            command: asImage
+                ? ["/usr/bin/bash", "-c", `mkdir -p '${root.thumbnailDir}' && printf '${StringUtils.shellSingleQuoteEscape(entryText)}' | ${root.cliphistBinary} decode > '${root.thumbnailDir}/${entryId}'`]
+                : ["/usr/bin/bash", "-c", `printf '${StringUtils.shellSingleQuoteEscape(entryText)}' | ${root.cliphistBinary} decode`]
+            stdout: StdioCollector {
+                id: collector
+            }
+            onExited: (exitCode, exitStatus) => {
+                if (exitCode === 0) {
+                    if (dproc.asImage) {
+                        root.sizeCache = Object.assign({}, root.sizeCache, { [dproc.entryId]: -1 })
+                        root.contentCache = Object.assign({}, root.contentCache, { [dproc.entryId]: `file://${root.thumbnailDir}/${dproc.entryId}` })
+                    } else {
+                        const text = collector.text
+                        root.contentCache = Object.assign({}, root.contentCache, { [dproc.entryId]: text })
+                        root.sizeCache = Object.assign({}, root.sizeCache, { [dproc.entryId]: text.length })
+                    }
+                }
+                dproc.destroy()
+            }
+        }
+    }
+
+    // Only called for rows actually scrolled into view - decoding all ~400
+    // entries up front would mean spawning hundreds of processes at once.
+    function requestContent(entry) {
+        const id = root.idOf(entry)
+        if (root.contentCache[id] !== undefined) return
+        const isImage = root.entryIsImage(entry)
+        decodeComponent.createObject(root, { entryId: id, entryText: entry, asImage: isImage }).running = true
+    }
+
+    // First-seen timestamps - cliphist tracks entries by an incrementing id,
+    // not by time, so "how long ago" has to be tracked ourselves.
+    property var entryTimestamps: ({})
+    property string timestampsPath: FileUtils.trimFileProtocol(`${Directories.state}/user/clipboard-timestamps.json`)
+
+    function _updateTimestamps() {
+        const next = {}
+        for (const entry of root.entries) {
+            const id = root.idOf(entry)
+            next[id] = root.entryTimestamps[id] ?? Date.now()
+        }
+        root.entryTimestamps = next
+        timestampsFileView.setText(JSON.stringify(next))
+    }
+
+    FileView {
+        id: timestampsFileView
+        path: Qt.resolvedUrl(root.timestampsPath)
+        onLoaded: {
+            try {
+                root.entryTimestamps = JSON.parse(timestampsFileView.text())
+            } catch (e) {
+                root.entryTimestamps = {}
+            }
+        }
+        onLoadFailed: (error) => {
+            if (error === FileViewError.FileNotFound) {
+                root.entryTimestamps = {}
+                timestampsFileView.setText("{}")
+            }
+        }
     }
 
     function refresh() {

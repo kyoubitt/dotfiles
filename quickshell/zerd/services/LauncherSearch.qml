@@ -140,6 +140,19 @@ Singleton {
     // Combined built-in and user actions
     property var allActions: searchActions.concat(userActionScripts)
 
+    // Dynamically created result objects (resultComp.createObject) are parented to null,
+    // so QML never reclaims them on its own. Track the previous batch and destroy whatever
+    // isn't reused each time `results` recomputes, or every keystroke leaks objects.
+    property list<var> _previousResults: []
+    onResultsChanged: {
+        for (const obj of root._previousResults) {
+            if (obj && results.indexOf(obj) === -1 && typeof obj.destroy === "function") {
+                obj.destroy()
+            }
+        }
+        root._previousResults = results
+    }
+
     property string mathResult: ""
 
     Timer {
