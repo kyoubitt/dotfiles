@@ -39,3 +39,8 @@ temp.md
 
 # Local AI assistant tooling artifacts - not part of the actual dotfiles
 .claude/
+
+# Local backups made while editing configs
+*.bak
+*.bak[0-9]*
+*.bak-*

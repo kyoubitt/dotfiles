@@ -1,0 +1,36 @@
+module qs.modules.music
+singleton MusicApi 1.0 MusicApi.qml
+singleton MusicStore 1.0 MusicStore.qml
+MusicWindow 1.0 MusicWindow.qml
+Shell 1.0 Shell.qml
+Sidebar 1.0 Sidebar.qml
+NowPanel 1.0 NowPanel.qml
+NavBar 1.0 NavBar.qml
+PlayerBar 1.0 PlayerBar.qml
+Immersive 1.0 Immersive.qml
+Cookie 1.0 parts/Cookie.qml
+WavySeek 1.0 parts/WavySeek.qml
+Card 1.0 parts/Card.qml
+Shelf 1.0 parts/Shelf.qml
+TrackRow 1.0 parts/TrackRow.qml
+Header 1.0 parts/Header.qml
+Pill 1.0 parts/Pill.qml
+HomeView 1.0 views/HomeView.qml
+SearchView 1.0 views/SearchView.qml
+LikedView 1.0 views/LikedView.qml
+LibraryView 1.0 views/LibraryView.qml
+PlaylistView 1.0 views/PlaylistView.qml
+AlbumView 1.0 views/AlbumView.qml
+ArtistView 1.0 views/ArtistView.qml
+StatsView 1.0 views/StatsView.qml
+ProfileView 1.0 views/ProfileView.qml
+Backdrop 1.0 Backdrop.qml
+singleton LyricsStore 1.0 LyricsStore.qml
+singleton EchoPlayer 1.0 EchoPlayer.qml
+singleton Playback 1.0 Playback.qml
+singleton SoloistPlayer 1.0 SoloistPlayer.qml
+LyricsView 1.0 LyricsView.qml
+LyricsSide 1.0 LyricsSide.qml
+TrackTable 1.0 parts/TrackTable.qml
+EText 1.0 parts/EText.qml
+Spectrum 1.0 parts/Spectrum.qml
