@@ -18,4 +18,4 @@ Modified version. Based on iNiR by snowarch (https://github.com/snowarch/inir). 
 
 ## Orbit (music)
 
-`quickshell/zerd/modules/music/` is a Spotify client written in QML, opened with `Mod+Shift+M` or from the app menu. It needs Spotify Premium and your own free Spotify developer app: put its Client ID in `music.clientId` in `~/.config/zerda-shell/config.json` (nothing secret is stored in this repo). Playback goes through Spotify's Soloist player when it is installed (`~/.local/bin/soloist`, API key in `~/.config/soloist/api-key`), or through the Spotify app. Not affiliated with Spotify.
+`quickshell/zerd/modules/music/` is a Spotify client written in QML, opened with `Mod+Shift+M` or from the app menu. It needs Spotify Premium and your own free Spotify developer app: put its Client ID in `music.clientId` in `~/.config/zerda-shell/config.json`. Playback goes through Spotify's Soloist player when it is installed (`~/.local/bin/soloist`, API key in `~/.config/soloist/api-key`), or through the Spotify app. Not affiliated with Spotify.
