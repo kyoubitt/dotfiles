@@ -10,63 +10,58 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.bars
 
 Scope {
     id: root
 
+    // A tonal tile with the icon, the name and the key that does it. Hover and the keyboard focus lift it and fill it
+    // with the accent; the destructive ones (reboot, shut down) fill with the warning colour instead.
     component SessionButton: ColumnLayout {
         id: sessionButton
         required property string icon
         required property string label
+        property string hint: ""
+        property bool danger: false
         signal activated()
+        readonly property color tone: sessionButton.danger ? BarStyle.danger : BarStyle.accent
 
-        spacing: 10
+        spacing: 12
 
-        Item {
+        Rectangle {
+            id: tile
             Layout.alignment: Qt.AlignHCenter
-            implicitWidth: 120
-            implicitHeight: 120
+            implicitWidth: 96
+            implicitHeight: 96
+            radius: 48
+            readonly property bool lit: tileHover.hovered || tileTap.pressed
+            color: lit ? Qt.rgba(sessionButton.tone.r, sessionButton.tone.g, sessionButton.tone.b, 0.92) : Qt.rgba(0, 0, 0, 0.32)
+            border.width: 1
+            border.color: lit ? "transparent" : Qt.rgba(1, 1, 1, 0.14)
+            scale: tileTap.pressed ? 0.94 : (lit ? 1.05 : 1)
+            Behavior on color { ColorAnimation { duration: 110 } }
+            Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
-            StyledRectangularShadow {
-                target: sessionButtonRipple
-                radius: Appearance.rounding.full
+            Text {
+                anchors.centerIn: parent
+                text: sessionButton.icon
+                font.family: Appearance.font.family.iconMaterial
+                font.pixelSize: 38
+                color: tile.lit ? BarStyle.onAccent : "#ffffff"
+                Behavior on color { ColorAnimation { duration: 110 } }
             }
-
-            RippleButton {
-                id: sessionButtonRipple
-                anchors.fill: parent
-                buttonRadius: Appearance.rounding.full
-                pointingHandCursor: true
-
-                colBackground: "transparent"
-                colBackgroundHover: Appearance.colors.colPrimary
-                colRipple: Appearance.colors.colPrimaryActive
-
-                scale: sessionButtonRipple.buttonHovered ? 1.06 : 1.0
-                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-
-                releaseAction: () => sessionButton.activated()
-
-                contentItem: Text {
-                    anchors.fill: parent
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    text: sessionButton.icon
-                    font.family: Appearance.font.family.iconMaterial
-                    font.pixelSize: 42
-                    color: sessionButtonRipple.buttonHovered ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                }
-            }
+            HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
+            TapHandler { id: tileTap; onTapped: sessionButton.activated() }
         }
 
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: sessionButton.label
-            font.family: Appearance.font.family.monospace
-            font.pixelSize: 15
-            font.bold: true
-            color: Appearance.colors.colOnLayer0
+            font.pixelSize: 14
+            font.weight: Font.Medium
+            color: "#ffffff"
+            opacity: tile.lit ? 1 : 0.7
+            Behavior on opacity { NumberAnimation { duration: 110 } }
         }
     }
 
@@ -87,7 +82,7 @@ Scope {
             property list<real> visualizerPoints: []
             Process {
                 id: cavaProc
-                running: MprisController.isPlaying
+                running: NowPlaying.isPlaying
                 onRunningChanged: { if (!running) panelWindow.visualizerPoints = [] }
                 command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/media_widget_config.txt`]
                 stdout: SplitParser {
@@ -116,6 +111,15 @@ Scope {
 
                 focus: true
                 Keys.onEscapePressed: GlobalStates.sessionOpen = false
+                Keys.onPressed: event => {
+                    const k = event.key
+                    const go = (cmd) => { GlobalStates.sessionOpen = false; Quickshell.execDetached(cmd); event.accepted = true }
+                    if (k === Qt.Key_L) go(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
+                    else if (k === Qt.Key_S) go(["systemctl", "suspend"])
+                    else if (k === Qt.Key_R) go(["systemctl", "reboot"])
+                    else if (k === Qt.Key_U) go(["systemctl", "poweroff"])
+                    else if (k === Qt.Key_E) go(["niri", "msg", "action", "quit", "--skip-confirmation"])
+                }
 
                 Component.onCompleted: {
                     entranceAnim.start()
@@ -152,11 +156,21 @@ Scope {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 36
+                    spacing: 28
 
+                    SessionButton {
+                        icon: "logout"
+                        label: "Log out"
+                        hint: "E"
+                        onActivated: {
+                            GlobalStates.sessionOpen = false
+                            Quickshell.execDetached(["niri", "msg", "action", "quit", "--skip-confirmation"])
+                        }
+                    }
                     SessionButton {
                         icon: "lock"
                         label: "Lock"
+                        hint: "L"
                         onActivated: {
                             GlobalStates.sessionOpen = false
                             Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
@@ -165,6 +179,7 @@ Scope {
                     SessionButton {
                         icon: "bedtime"
                         label: "Sleep"
+                        hint: "S"
                         onActivated: {
                             GlobalStates.sessionOpen = false
                             Quickshell.execDetached(["systemctl", "suspend"])
@@ -173,6 +188,8 @@ Scope {
                     SessionButton {
                         icon: "restart_alt"
                         label: "Reboot"
+                        hint: "R"
+                        danger: true
                         onActivated: {
                             GlobalStates.sessionOpen = false
                             Quickshell.execDetached(["systemctl", "reboot"])
@@ -180,7 +197,9 @@ Scope {
                     }
                     SessionButton {
                         icon: "power_settings_new"
-                        label: "Shutdown"
+                        label: "Shut down"
+                        hint: "U"
+                        danger: true
                         onActivated: {
                             GlobalStates.sessionOpen = false
                             Quickshell.execDetached(["systemctl", "poweroff"])
@@ -194,7 +213,7 @@ Scope {
                 // with the clock and buttons.
                 Item {
                     id: nowPlayingCard
-                    visible: MprisController.activePlayer !== null
+                    visible: NowPlaying.player !== null
                     Layout.alignment: Qt.AlignHCenter
                     Layout.topMargin: 8
                     implicitWidth: 300
@@ -243,7 +262,7 @@ Scope {
                                 Image {
                                     id: nowPlayingArt
                                     anchors.fill: parent
-                                    source: MprisController.activePlayer?.trackArtUrl ?? ""
+                                    source: NowPlaying.player?.trackArtUrl ?? ""
                                     fillMode: Image.PreserveAspectCrop
                                     sourceSize.width: width
                                     sourceSize.height: height
@@ -269,7 +288,7 @@ Scope {
                                     font.pixelSize: 15
                                     font.bold: true
                                     color: Appearance.colors.colOnLayer3
-                                    text: MprisController.activeTrack?.title ?? ""
+                                    text: NowPlaying.activeTrack?.title ?? ""
                                 }
                                 MarqueeText {
                                     Layout.fillWidth: true
@@ -277,22 +296,22 @@ Scope {
                                     font.pixelSize: 12
                                     color: Appearance.colors.colOnLayer3
                                     opacity: 0.65
-                                    text: MprisController.activeTrack?.artist ?? ""
+                                    text: NowPlaying.activeTrack?.artist ?? ""
                                 }
                             }
                         }
 
                         WavySeekbar {
                             Layout.fillWidth: true
-                            progress: (MprisController.activePlayer && MprisController.activePlayer.length > 0)
-                                ? Math.max(0, Math.min(1, MprisController.activePlayer.position / MprisController.activePlayer.length)) : 0
+                            progress: (NowPlaying.player && NowPlaying.player.length > 0)
+                                ? Math.max(0, Math.min(1, NowPlaying.player.position / NowPlaying.player.length)) : 0
                             accentColor: Appearance.colors.colPrimary
                             dimColor: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.25)
                             amplitude: 4
-                            animate: MprisController.isPlaying
+                            animate: NowPlaying.isPlaying
                             onSeekRequested: fraction => {
-                                if (!MprisController.activePlayer || MprisController.activePlayer.length <= 0) return
-                                MprisController.activePlayer.position = fraction * MprisController.activePlayer.length
+                                if (!NowPlaying.player || NowPlaying.player.length <= 0) return
+                                NowPlaying.player.position = fraction * NowPlaying.player.length
                             }
                         }
 
@@ -306,21 +325,21 @@ Scope {
                                 font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 20
                                 color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.previous() }
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.previous() }
                             }
                             Text {
-                                text: MprisController.isPlaying ? "pause" : "play_arrow"
+                                text: NowPlaying.isPlaying ? "pause" : "play_arrow"
                                 font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 24
                                 color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.togglePlaying() }
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.togglePlaying() }
                             }
                             Text {
                                 text: "skip_next"
                                 font.family: Appearance.font.family.iconMaterial
                                 font.pixelSize: 20
                                 color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.next() }
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.next() }
                             }
                         }
 

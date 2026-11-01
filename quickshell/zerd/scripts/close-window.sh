@@ -1,27 +1,8 @@
 #!/bin/bash
-# Close window - tries QS first (for confirm dialog), falls back to niri
-#
-# Race condition protection:
-# 1. Script checks if QS process exists before attempting IPC
-# 2. QS has a 2-second startup grace period where it ignores closeConfirm triggers
-# 3. If IPC fails/times out, we fall back to niri's native close-window
-
-# Quick check if quickshell process exists - it runs via the "qs" symlink
-# (/usr/bin/qs -> /usr/bin/quickshell), and the kernel's process name
-# (comm) stays "qs" either way, so that's what pgrep has to match. This
-# previously checked for "quickshell" and always failed, silently skipping
-# straight to the niri fallback below every time - windows still closed
-# (niri's close-window still ran), but the IPC call to closeConfirm never
-# actually fired.
-if ! pgrep -x qs >/dev/null 2>&1; then
-    niri msg action close-window
+# Mod+Q: ask the shell, which closes the focused window itself (after a confirm card if
+# `closeConfirm.enabled` is on). Only when the shell cannot be reached does niri close it.
+# One path or the other, never both, so a second window is never closed by accident.
+if timeout 1 qs -c zerd ipc call closeConfirm trigger >/dev/null 2>&1; then
     exit 0
 fi
-
-# Try IPC - QS will ignore if in startup grace period
-if timeout 0.2 qs -c zerd ipc call closeConfirm trigger 2>/dev/null; then
-    exit 0
-fi
-
-# Fallback
-niri msg action close-window
+exec niri msg action close-window

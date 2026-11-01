@@ -23,7 +23,6 @@ Singleton {
     property bool overlayOpen: false
     property bool overviewOpen: false
     property bool altSwitcherOpen: false
-    property bool clipboardOpen: false
     property bool screenLocked: false
     property bool screenLockContainsCharacters: false
     property bool screenUnlockFailed: false
@@ -49,18 +48,11 @@ Singleton {
     property var activeTaskViewMenu: null  // Track which WindowThumbnail has its menu open
     // Waffle-specific states
     property bool searchOpen: false
+    // Orbit (the music window) is opened from inside the shell, not by starting another process
+    property int musicRequest: 0
     property bool waffleActionCenterOpen: false
-    property bool waffleNotificationCenterOpen: false
     property bool waffleWidgetsOpen: false
     property bool waffleAltSwitcherOpen: false
-    property bool waffleClipboardOpen: false
-    // Reported live by WNotificationCenterContent's implicitHeight - lets
-    // the clipboard panel (also top-right) stack itself below the
-    // notification center when both are open, instead of the two
-    // overlapping. Wayland gives layer-shell surfaces no way to read each
-    // other's actual on-screen geometry, so this is the only way one panel
-    // can know how tall a *different* panel currently is.
-    property real notificationCenterHeight: 0
     property bool waffleTaskViewOpen: false
     property bool controlCenterOpen: false
     property bool mediaWidgetOpen: false
@@ -81,9 +73,7 @@ Singleton {
     onSearchOpenChanged: {
         if (searchOpen && !_allowMultiple) {
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             pinPickerOpen = false
             dockContextMenuOpen = false
         }
@@ -91,47 +81,15 @@ Singleton {
     onWaffleActionCenterOpenChanged: {
         if (waffleActionCenterOpen && !_allowMultiple) {
             searchOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             pinPickerOpen = false
             dockContextMenuOpen = false
-        }
-    }
-    onWaffleNotificationCenterOpenChanged: {
-        if (waffleNotificationCenterOpen) {
-            // Clipboard is exempt - the two are meant to be able to stack
-            // together (see WClipboard.qml's dynamic top margin), not close
-            // each other like the rest of these panels do.
-            if (!_allowMultiple) {
-                searchOpen = false
-                waffleActionCenterOpen = false
-                waffleWidgetsOpen = false
-                pinPickerOpen = false
-                dockContextMenuOpen = false
-            }
-            // Mark notifications as read when opening notification center
-            Notifications.timeoutAll();
-            Notifications.markAllRead();
         }
     }
     onWaffleWidgetsOpenChanged: {
         if (waffleWidgetsOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
-            waffleClipboardOpen = false
-            pinPickerOpen = false
-            dockContextMenuOpen = false
-        }
-    }
-    onWaffleClipboardOpenChanged: {
-        // Notification center is exempt - see the comment above.
-        if (waffleClipboardOpen && !_allowMultiple) {
-            searchOpen = false
-            waffleActionCenterOpen = false
-            waffleWidgetsOpen = false
-            waffleTaskViewOpen = false
             pinPickerOpen = false
             dockContextMenuOpen = false
         }
@@ -140,9 +98,7 @@ Singleton {
         if (waffleTaskViewOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             pinPickerOpen = false
             dockContextMenuOpen = false
         }
@@ -151,9 +107,7 @@ Singleton {
         if (pinPickerOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             waffleTaskViewOpen = false
             controlCenterOpen = false
             mediaWidgetOpen = false
@@ -167,9 +121,7 @@ Singleton {
         if (dockContextMenuOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             waffleTaskViewOpen = false
             controlCenterOpen = false
             mediaWidgetOpen = false
@@ -185,9 +137,7 @@ Singleton {
             if (!_allowMultiple) {
                 searchOpen = false
                 waffleActionCenterOpen = false
-                waffleNotificationCenterOpen = false
                 waffleWidgetsOpen = false
-                waffleClipboardOpen = false
                 mediaWidgetOpen = false
                 soundWidgetOpen = false
                 calendarWidgetOpen = false
@@ -203,9 +153,7 @@ Singleton {
         if (mediaWidgetOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             controlCenterOpen = false
             soundWidgetOpen = false
             calendarWidgetOpen = false
@@ -218,9 +166,7 @@ Singleton {
         if (soundWidgetOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             controlCenterOpen = false
             mediaWidgetOpen = false
             calendarWidgetOpen = false
@@ -233,9 +179,7 @@ Singleton {
         if (calendarWidgetOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             controlCenterOpen = false
             mediaWidgetOpen = false
             soundWidgetOpen = false
@@ -248,9 +192,7 @@ Singleton {
         if (quickSettingsOpen && !_allowMultiple) {
             searchOpen = false
             waffleActionCenterOpen = false
-            waffleNotificationCenterOpen = false
             waffleWidgetsOpen = false
-            waffleClipboardOpen = false
             controlCenterOpen = false
             mediaWidgetOpen = false
             soundWidgetOpen = false
@@ -327,4 +269,31 @@ Singleton {
             Config.setNestedValue("waffles.sideDock.edge", edge)
         }
     }
+
+    // For the vendored iRiS cards (modules/iris)
+    property bool widgetEditMode: false
+
+    // Floating dock (modules/iris/dock). The edit/bubble parts of the original
+    // are not ported; these stay at their idle values so the dock reads them.
+    property bool irisEdit: false
+    property string irisEditTarget: ""
+    property string irisEditSelection: ""
+    property bool irisDockShown: false
+    property var irisDockMenuRequest: null
+    property var irisDockBody: ({})
+    property var irisDockSlide: null
+    property bool irisBubbleDrag: false
+    property bool irisLauncherOpen: false
+    property bool settingsOpen: false
+    property bool focusMode: false             // DND, caffeine and night light on; bar and dock tucked away
+    // Bar popup: { kind, x } or null. Opened by a bar item, drawn by BarPopupHost.
+    property var barPopup: null
+    property var irisAbsorbed: ({})
+    property bool controlPanelOpen: false
+    property string sidebarLeftPresentationOutput: ""
+    property string sidebarRightPresentationOutput: ""
+    function quietIrisLevels(): void {}
+    property var focusedScreen: null
+    property bool shellEntryReady: true
+    function openSettings(): void {}
 }

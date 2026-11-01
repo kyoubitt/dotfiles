@@ -13,12 +13,12 @@ Scope {
     property var targetWindow: null
     property bool dialogVisible: false
 
-    // Startup grace period - ignore IPC calls for first 2 seconds after QS starts
+    // Startup grace period - ignore IPC calls for the first moments after QS starts
     // This prevents accidental window closes when QS restarts after a crash
     property bool _startupGrace: true
     Timer {
         id: startupGraceTimer
-        interval: 2000
+        interval: 600
         running: true
         onTriggered: root._startupGrace = false
     }
@@ -27,7 +27,7 @@ Scope {
     property bool _busy: false
     Timer {
         id: debounce
-        interval: 200
+        interval: 600
         onTriggered: root._busy = false
     }
 
@@ -49,8 +49,17 @@ Scope {
         }
     }
 
+    // Worth asking about: games, terminals, editors, browsers and the like, or a window with unsaved work.
+    function isImportant(win): bool {
+        const id = String(win?.app_id ?? "").toLowerCase()
+        const title = String(win?.title ?? "").trim()
+        if (/^[*•●]/.test(title)) return true
+        const apps = Config.options?.closeConfirm?.apps ?? []
+        return apps.some(a => id.includes(String(a).toLowerCase()))
+    }
+
     function processWindow(win): void {
-        if (root.confirmEnabled) {
+        if (root.confirmEnabled && root.isImportant(win)) {
             root.targetWindow = win
             root.dialogVisible = true
         } else {
@@ -119,6 +128,18 @@ Scope {
         targetWindow = null
     }
 
+    // For an app that ignores the close request: end its process.
+    function forceQuit(): void {
+        const pid = targetWindow?.pid
+        // One process can own several windows (ghostty runs as a single instance): killing it would end them all,
+        // so with sibling windows only this one is closed.
+        const siblings = (NiriService.windows ?? []).filter(w => w.pid === pid && w.id !== targetWindow?.id).length
+        if (pid && siblings === 0) Quickshell.execDetached(["kill", "-9", String(pid)])
+        else if (targetWindow) closeWindowFast(targetWindow)
+        dialogVisible = false
+        targetWindow = null
+    }
+
     function cancel(): void {
         dialogVisible = false
         targetWindow = null
@@ -156,10 +177,11 @@ Scope {
 
                     Component {
                         id: waffleContent
-                        WCloseConfirmContent {
+                        CloseConfirmCard {
                             targetWindow: root.targetWindow
                             onConfirm: root.confirmClose()
                             onCancel: root.cancel()
+                            onForce: root.forceQuit()
                         }
                     }
                 }

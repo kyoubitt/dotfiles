@@ -35,7 +35,7 @@ Scope {
     property list<real> visualizerPoints: []
     Process {
         id: cavaProc
-        running: root.locked && MprisController.isPlaying
+        running: root.locked && NowPlaying.isPlaying
         onRunningChanged: { if (!running) root.visualizerPoints = [] }
         command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/lockscreen_config.txt`]
         stdout: SplitParser {
@@ -48,6 +48,21 @@ Scope {
     // --- PAM auth: uses the "login" service (owned by util-linux, not
     // gtklock) so this keeps working regardless of gtklock being installed. ---
     property bool authBusy: false
+    // True from the moment a password is handed to PAM until it answers;
+    // drives the progress bar. `failed` colours the field after a bad try.
+    property bool verifying: false
+    property bool failed: false
+    // Set by LockSurface when it comes up. If a lock is requested and no
+    // surface appears, the watchdog below releases the lock rather than leave
+    // the screen blank with nothing to type a password into.
+    property bool surfaceShown: false
+    readonly property bool canType: pam.active || pam.responseRequired
+    // A password typed while PAM was still busy (answering the last attempt
+    // or restarting) is held here and sent as soon as PAM asks for it.
+    property string pendingPassword: ""
+    // True for the short fade-out after a correct password, before the lock drops.
+    property bool unlocking: false
+    property double _submitAt: 0
 
     PamContext {
         id: pam
@@ -57,21 +72,40 @@ Scope {
             console.log(`[LockScreen] pam message="${pam.message}" error=${pam.messageIsError} responseRequired=${pam.responseRequired} responseVisible=${pam.responseVisible}`)
         }
 
+        onResponseRequiredChanged: {
+            if (pam.responseRequired && root.pendingPassword.length > 0) {
+                const queued = root.pendingPassword
+                root.pendingPassword = ""
+                root.verifying = true
+                root._submitAt = Date.now()
+                console.log("[LockScreen] sending queued password")
+                pam.respond(queued)
+            }
+        }
+
         onCompleted: result => {
             root.authBusy = false
+            console.log(`[LockScreen] pam completed in ${Date.now() - root._submitAt}ms: ${PamResult.toString(result)}`)
             if (result === PamResult.Success) {
+                root.verifying = false
+                root.pendingPassword = ""
                 root.failCount = 0
-                root.locked = false
+                // Short fade-out, then drop the lock.
+                root.unlocking = true
+                unlockTimer.start()
             } else {
-                console.log(`[LockScreen] pam completed with failure: ${PamResult.toString(result)}`)
                 root.failCount += 1
-                shakeRequested()
+                const queued = root.pendingPassword.length > 0
+                root.verifying = queued
+                root.failed = !queued
+                if (!queued) shakeRequested()
                 retryTimer.start()
             }
         }
 
         onError: error => {
             root.authBusy = false
+            root.verifying = false
             console.log(`[LockScreen] pam error: ${PamError.toString(error)}`)
             retryTimer.start()
         }
@@ -80,8 +114,34 @@ Scope {
     signal shakeRequested()
 
     Timer {
+        interval: 2500
+        running: root.locked && !root.surfaceShown
+        onTriggered: {
+            console.warn("[LockScreen] no lock surface appeared, releasing the lock")
+            root.locked = false
+            Quickshell.execDetached(["/usr/bin/notify-send", "-u", "critical", "Lock screen failed to load", "Unlocked for safety."])
+        }
+    }
+    signal refocusRequested()
+
+    // niri can drop keyboard focus from the lock surface after resume; poke
+    // the password field back into focus while locked.
+    Timer {
+        interval: 2000
+        repeat: true
+        running: root.locked
+        onTriggered: root.refocusRequested()
+    }
+
+    Timer {
+        id: unlockTimer
+        interval: 260
+        onTriggered: root.locked = false
+    }
+
+    Timer {
         id: retryTimer
-        interval: 500
+        interval: 100
         onTriggered: {
             if (root.locked && !pam.active) {
                 root.authBusy = true
@@ -94,11 +154,19 @@ Scope {
         GlobalStates.screenLocked = locked
         if (locked) {
             failCount = 0
+            failed = false
+            verifying = false
+            unlocking = false
+            pendingPassword = ""
             if (!pseudoLock) {
                 authBusy = true
                 pam.start()
             }
         } else {
+            surfaceShown = false
+            unlocking = false
+            pendingPassword = ""
+            unlockTimer.stop()
             if (pam.active) pam.abort()
             pseudoLock = false
         }
@@ -109,7 +177,16 @@ Scope {
             root.locked = false
             return
         }
-        if (pam.active && text.length > 0) pam.respond(text)
+        if (text.length === 0) return
+        if (pam.responseRequired) {
+            root.verifying = true
+            root._submitAt = Date.now()
+            pam.respond(text)
+        } else if (pam.active || retryTimer.running || root.verifying) {
+            // PAM is busy: hold the password and send it when it asks.
+            root.pendingPassword = text
+            root.verifying = true
+        }
     }
 
     WlSessionLock {
@@ -120,219 +197,9 @@ Scope {
             id: surface
             color: "transparent"
 
-            // Wallpaper background, blurred via a cached GPU layer effect
-            // (only paid for while actually locked) rather than the old
-            // always-composited Qt5Compat FastBlur.
-            LockBackdrop {
+            LockSurface {
                 anchors.fill: parent
-            }
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 28
-                width: 460
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 4
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
-                        font.family: Appearance.font.family.monospace
-                        font.pixelSize: 72
-                        font.bold: true
-                        color: Appearance.colors.colOnLayer0
-                    }
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
-                        font.family: Appearance.font.family.monospace
-                        font.pixelSize: 16
-                        color: Appearance.colors.colOnLayer0
-                        opacity: 0.7
-                    }
-                }
-
-                Item {
-                    id: passwordBoxWrapper
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: 320
-                    Layout.preferredHeight: 48
-
-                    property real shakeOffset: 0
-                    transform: Translate { x: passwordBoxWrapper.shakeOffset }
-
-                    Connections {
-                        target: root
-                        function onShakeRequested() { shakeAnim.start() }
-                    }
-
-                    SequentialAnimation {
-                        id: shakeAnim
-                        NumberAnimation { target: passwordBoxWrapper; property: "shakeOffset"; to: -10; duration: 40 }
-                        NumberAnimation { target: passwordBoxWrapper; property: "shakeOffset"; to: 10; duration: 80 }
-                        NumberAnimation { target: passwordBoxWrapper; property: "shakeOffset"; to: 0; duration: 40 }
-                    }
-
-                StyledRectangularShadow {
-                    target: passwordBox
-                }
-
-                GlassBackground {
-                    id: passwordBox
-                    anchors.fill: parent
-                    radius: Appearance.rounding.large
-                    fallbackColor: Appearance.colors.colLayer3
-                    screenX: passwordBox.mapToItem(null, 0, 0).x
-                    screenY: passwordBox.mapToItem(null, 0, 0).y
-                    border.width: 1.5
-                    border.color: pam.messageIsError ? Appearance.colors.colError : ColorUtils.applyAlpha(Appearance.colors.colPrimary, 0.4)
-
-                    Behavior on border.color { ColorAnimation { duration: 150 } }
-
-                    property bool showPassword: false
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 14
-                        spacing: 8
-
-                        TextInput {
-                            id: passwordInput
-                            Layout.fillWidth: true
-                            verticalAlignment: TextInput.AlignVCenter
-                            echoMode: passwordBox.showPassword ? TextInput.Normal : TextInput.Password
-                            // Masked, the real glyphs render fully transparent - the icon
-                            // row below draws the visible per-character feedback instead.
-                            color: passwordBox.showPassword ? Appearance.colors.colOnLayer3 : "transparent"
-                            font.family: Appearance.font.family.monospace
-                            font.pixelSize: 15
-                            clip: true
-                            enabled: root.pseudoLock || pam.active || pam.responseRequired
-
-                            Component.onCompleted: passwordInput.forceActiveFocus()
-
-                            onAccepted: {
-                                if (root.pseudoLock) {
-                                    root.submitPassword(text)
-                                    return
-                                }
-                                if (pam.active && text.length > 0) {
-                                    root.submitPassword(text)
-                                    text = ""
-                                }
-                            }
-
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                visible: passwordInput.text.length === 0
-                                text: pam.messageIsError ? "Wrong password" : "Enter Password"
-                                color: Appearance.colors.colOnLayer3
-                                opacity: 0.5
-                                font.family: Appearance.font.family.monospace
-                                font.pixelSize: 15
-                            }
-
-                            // Per-character mask: plain filled circle per typed character.
-                            Row {
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 4
-                                visible: !passwordBox.showPassword && passwordInput.text.length > 0
-
-                                Repeater {
-                                    model: passwordInput.text.length
-                                    delegate: Rectangle {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 7
-                                        height: 7
-                                        radius: width / 2
-                                        antialiasing: true
-                                        color: Appearance.colors.colOnLayer3
-                                    }
-                                }
-                            }
-                        }
-
-                        Text {
-                            Layout.alignment: Qt.AlignVCenter
-                            visible: passwordInput.text.length > 0
-                            text: passwordBox.showPassword ? "visibility_off" : "visibility"
-                            font.family: Appearance.font.family.iconMaterial
-                            font.pixelSize: 18
-                            color: Appearance.colors.colOnLayer3
-                            opacity: 0.6
-
-                            MouseArea {
-                                anchors.fill: parent
-                                anchors.margins: -6
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: passwordBox.showPassword = !passwordBox.showPassword
-                            }
-                        }
-                    }
-                }
-                }
-
-                GlassBackground {
-                    id: nowPlayingPill
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: MprisController.activePlayer !== null
-                    implicitWidth: nowPlayingRow.implicitWidth + 24
-                    implicitHeight: nowPlayingRow.implicitHeight + 14
-                    radius: implicitHeight / 2
-                    fallbackColor: Appearance.colors.colLayer3
-                    screenX: nowPlayingPill.mapToItem(null, 0, 0).x
-                    screenY: nowPlayingPill.mapToItem(null, 0, 0).y
-
-                    RowLayout {
-                        id: nowPlayingRow
-                        anchors.centerIn: parent
-                        spacing: 8
-
-                        Text {
-                            text: "music_note"
-                            font.family: Appearance.font.family.iconMaterial
-                            font.pixelSize: 14
-                            color: Appearance.colors.colOnLayer3
-                            opacity: 0.7
-                        }
-                        Text {
-                            text: `${MprisController.activeTrack?.title ?? ""} - ${MprisController.activeTrack?.artist ?? ""}`
-                            font.family: Appearance.font.family.monospace
-                            font.pixelSize: 12
-                            color: Appearance.colors.colOnLayer3
-                            opacity: 0.7
-                        }
-                    }
-                }
-            }
-
-            RowLayout {
-                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 40; rightMargin: 40; bottomMargin: 28 }
-                spacing: 6
-                visible: MprisController.isPlaying
-
-                Repeater {
-                    model: 64
-                    delegate: Rectangle {
-                        id: eqBar
-                        required property int index
-                        readonly property real level: root.visualizerPoints.length > 0
-                            ? Math.max(0, Math.min(1, (root.visualizerPoints[Math.min(eqBar.index, root.visualizerPoints.length - 1)] ?? 0) / 1000))
-                            : 0
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignBottom
-                        implicitHeight: 4 + level * 90
-                        radius: 4
-                        antialiasing: true
-                        color: eqBar.index % 2 === 0 ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer0
-                        opacity: 0.4 + level * 0.6
-
-                        Behavior on implicitHeight { NumberAnimation { duration: 70; easing.type: Easing.OutQuad } }
-                        Behavior on opacity { NumberAnimation { duration: 70 } }
-                    }
-                }
+                lock: root
             }
         }
     }

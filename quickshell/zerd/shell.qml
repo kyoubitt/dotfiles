@@ -6,19 +6,16 @@
 
 import qs.modules.common
 import qs.modules.closeConfirm
-import qs.modules.controlCenter
-import qs.modules.soundWidget
-import qs.modules.mediaWidget
 import qs.modules.lockScreen
+import qs.modules.bars as BarsModule
+import qs.modules.music as MusicModule
+import qs.modules.dock2 as Dock2Module
+import qs.modules.iris.dock as IrisDockModule
 import qs.modules.waffle.background as WaffleBackgroundModule
 import qs.modules.waffle.sideDock as WaffleSideDockModule
-import qs.modules.widgets as WidgetsModule
 import qs.modules.waffle.startMenu
 import qs.modules.polkit
 import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
-import qs.modules.waffle.notificationCenter as WaffleNotificationCenterModule
-import qs.modules.waffle.clipboard as WaffleClipboardModule
-import qs.modules.wallpaperSelector
 import qs.modules.sessionScreen
 
 import QtQuick
@@ -46,11 +43,12 @@ ShellRoot {
         Hyprsunset.load();
         FirstRunExperience.load();
         ConflictKiller.load();
+        MusicModule.Playback.ping();      // Orbit's player object exists from the start, so the bar can show its last song
     }
 
     // Default panel set for first run / corrupted config.
     readonly property list<string> defaultPanels: [
-        "wBackground", "wStartMenu", "wPolkit", "wNotificationPopup", "wallpaperSelector"
+        "wBackground", "wStartMenu", "wPolkit", "wNotificationPopup"
     ]
 
     Connections {
@@ -94,7 +92,7 @@ ShellRoot {
 
     // Notification popups
     LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wNotificationPopup")
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wNotificationPopup") && (Config.options?.bars?.notifications?.engine ?? "rice") === "waffle"
         component: WaffleNotificationPopupModule.WaffleNotificationPopup {}
     }
 
@@ -109,13 +107,40 @@ ShellRoot {
         component: WaffleSideDockModule.WSideDock {}
     }
 
-    // Clock/calendar/weather/media widgets panel - top-right corner,
-    // wallust-themed. Its own always-loaded Variants (per-screen, like
-    // WSideDock), gated on a config toggle that defaults on so it doesn't
-    // need a config-file migration, matching the sideDock.enable pattern.
     LazyLoader {
-        active: Config.ready && (Config.options.widgets?.enable ?? true)
-        component: WidgetsModule.WWidgetsPanel {}
+        active: Config.ready && ["macos", "pill", "panel"].includes(Config.options?.dock?.kind ?? "")
+        component: Dock2Module.ClassicDock {}
+    }
+
+    // qs -c zerd ipc call dockkind set <iris|macos|pill|panel|off>
+    IpcHandler {
+        target: "dockkind"
+        function set(kind: string): string {
+            if (!["iris", "macos", "pill", "panel", "off"].includes(kind)) return "unknown kind"
+            Config.setNestedValue(["dock", "kind"], kind)
+            return kind
+        }
+        function get(): string { return Config.options?.dock?.kind ?? "iris" }
+    }
+
+    // Floating bars (modules/bars), each behind its own switch.
+    // The music client (its window exists only while open).
+    MusicModule.MusicWindow {}
+
+    LazyLoader {
+        active: Config.ready && (Config.options?.bars?.top?.enable ?? false)
+        component: BarsModule.TopBar {}
+    }
+    LazyLoader {
+        active: Config.ready && (Config.options?.bars?.side?.enable ?? false)
+        component: BarsModule.SideBar {}
+    }
+
+    // Floating dock (modules/iris/dock), off until iris.dock.enable is set.
+    // Independent of the side dock above.
+    LazyLoader {
+        active: Config.ready && (Config.options?.dock?.kind ?? "iris") === "iris" && (Config.options?.iris?.dock?.enable ?? false)
+        component: IrisDockModule.IrisDockHost {}
     }
 
     // Pin picker flyout for the side dock's pinned-apps row - kept as its
@@ -132,44 +157,6 @@ ShellRoot {
     LazyLoader {
         active: Config.ready && (Config.options.waffles?.sideDock?.enable ?? true)
         component: WaffleSideDockModule.WSideDockContextMenu {}
-    }
-
-    // Combined control center (toggles + media + notifications + calendar merged
-    // into one panel) - independent panel, not nested under waffle
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("controlCenter")
-        component: WControlCenter {}
-    }
-
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("soundWidget")
-        component: WSoundWidget {}
-    }
-
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("mediaWidget")
-        component: WMediaWidget {}
-    }
-
-    // Clipboard history flyout (GlobalStates.waffleClipboardOpen), toggled
-    // from the top bar or `qs ipc call clipboard toggle`.
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("clipboard")
-        component: WaffleClipboardModule.WClipboard {}
-    }
-
-    // Notification center flyout (GlobalStates.waffleNotificationCenterOpen),
-    // showing full notification history - not just active popups. Toggled
-    // from the top bar clock or `qs ipc call notificationCenter toggle`.
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("notificationCenter")
-        component: WaffleNotificationCenterModule.WNotificationCenter {}
-    }
-
-    // Wallpaper selector (toggle via IPC / keybind)
-    LazyLoader {
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wallpaperSelector")
-        component: WallpaperSelector {}
     }
 
     // Session/power menu (toggle via IPC / keybind)

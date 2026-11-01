@@ -3,6 +3,9 @@ pragma ComponentBehavior: Bound
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.desktopWidgets
+import qs.modules.bars
+import qs.modules.iris.dock
 import qs.modules.waffle.startMenu
 import QtQuick
 import QtQuick.Effects
@@ -38,6 +41,8 @@ Variants {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:wBackground"
+        // Click-to-type for the notes and to-do cards; apps keep the keyboard otherwise.
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
 
@@ -97,15 +102,11 @@ Variants {
             anchors.fill: parent
             clip: true
 
-            Image {
+            // Draws the picture and changes it with a transition (fade, wipe, circle, blinds, zoom...).
+            WallpaperStage {
                 id: wallpaper
                 anchors.fill: parent
-                fillMode: Image.PreserveAspectCrop
                 source: panelRoot.wallpaperUrl
-                asynchronous: true
-                cache: true
-                sourceSize.width: panelRoot.width
-                sourceSize.height: panelRoot.height
 
                 layer.enabled: Appearance.effectsEnabled && panelRoot.blurProgress > 0
                 layer.effect: MultiEffect {
@@ -134,5 +135,19 @@ Variants {
             }
         }
 
+        // Floating desktop cards (media, clock, weather, stats, greeting,
+        // timer panel...), drawn in the wallpaper layer so apps cover them.
+        WidgetLayer {
+            anchors.fill: parent
+        }
+
+        // The music spectrum as a soft hill along the bottom of the screen, part of the wallpaper layer so apps cover it
+        // (Settings > Dock > Spectrum).
+        Loader {
+            active: (Config.options?.iris?.dock?.cava?.style ?? "wave") === "wave" && (Config.options?.iris?.dock?.cava?.enable ?? true)
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: Math.min(260, Math.round(parent.height * 0.24))
+            sourceComponent: IrisDockWave { }
+        }
     }
 }

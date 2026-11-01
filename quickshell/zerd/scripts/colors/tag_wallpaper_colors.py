@@ -50,20 +50,24 @@ def thumb_path(full_path: str) -> str | None:
     return None
 
 
-def classify_path(full: str) -> tuple[str, str]:
+def classify_path(full: str) -> tuple[str, str, int]:
     """Return (full_path, color_name). Runs in a worker process."""
     import colorsys
     from collections import Counter
     try:
         from PIL import Image
     except ImportError:
-        return (full, "Monochrome")
+        return (full, "Monochrome", 50)
 
     src = thumb_path(full) or full
     try:
-        img = Image.open(src).convert("RGB")
+        img = Image.open(src)
+        try: img.draft("RGB", (128, 128))
+        except Exception: pass
+        img = img.convert("RGB")
         img = img.resize((32, 32), Image.BILINEAR)
         pixels = list(img.getdata())
+        light = int(sum(0.299 * r + 0.587 * g + 0.114 * b for r, g, b in pixels) / len(pixels) / 255 * 100)
 
         def bucket(r, g, b):
             h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
@@ -82,15 +86,15 @@ def classify_path(full: str) -> tuple[str, str]:
         # Ignore monochrome when counting dominant color if other colors exist
         non_mono = {k: v for k, v in counts.items() if k != "Monochrome"}
         if not non_mono:
-            return (full, "Monochrome")
+            return (full, "Monochrome", light)
         dominant = max(non_mono, key=non_mono.__getitem__)
         # Only use dominant if it's at least 20% of non-monochrome pixels
         total_non_mono = sum(non_mono.values())
         if non_mono[dominant] / total_non_mono < 0.20:
-            return (full, "Monochrome")
-        return (full, dominant)
+            return (full, "Monochrome", light)
+        return (full, dominant, light)
     except Exception:
-        return (full, "Monochrome")
+        return (full, "Monochrome", 50)
 
 
 
@@ -134,34 +138,34 @@ def main():
             fp = f"{st.st_mtime_ns}:{st.st_size}"
             all_files.append((full, fp))
 
-    cached_results: dict[str, str] = {}
+    cached_results: dict[str, tuple] = {}
     needs_work: list[str] = []
 
     for full, fp in all_files:
         entry = cache.get(full)
-        if entry and entry.get("fingerprint") == fp:
-            cached_results[full] = entry["color"]
+        if entry and entry.get("fingerprint") == fp and "light" in entry:
+            cached_results[full] = (entry["color"], entry["light"])
         else:
             needs_work.append(full)
 
     # Classify uncached files in parallel
-    new_results: dict[str, str] = {}
+    new_results: dict[str, tuple] = {}
     if needs_work:
         workers = min(os.cpu_count() or 4, len(needs_work), 8)
         with ProcessPoolExecutor(max_workers=workers) as ex:
             futs = {ex.submit(classify_path, p): p for p in needs_work}
             for fut in as_completed(futs):
-                full, color = fut.result()
-                new_results[full] = color
+                full, color, light = fut.result()
+                new_results[full] = (color, light)
                 fp_map = {f: fp for f, fp in all_files}
-                cache[full] = {"fingerprint": fp_map.get(full, ""), "color": color}
+                cache[full] = {"fingerprint": fp_map.get(full, ""), "color": color, "light": light}
         dirty = True
 
     # Emit in walk order (stable), flush each line immediately
     fp_map = {f: fp for f, fp in all_files}
     for full, _fp in all_files:
-        color = cached_results.get(full) or new_results.get(full, "Monochrome")
-        print(f"{full}\t{color}", flush=True)
+        color, light = cached_results.get(full) or new_results.get(full, ("Monochrome", 50))
+        print(f"{full}\t{color}\t{light}\t{int(_fp.split(':')[0]) // 10**9}", flush=True)
 
     if dirty:
         save_cache(cache)

@@ -27,6 +27,7 @@ Singleton {
     readonly property color brightBlack: colors[8]
 
     FileView {
+        id: colorsFile
         path: Qt.resolvedUrl(`${Directories.genericCache}/wallust/colors.json`)
         watchChanges: true
         onFileChanged: reload()
@@ -42,4 +43,10 @@ Singleton {
             } catch (e) {}
         }
     }
+
+    // wallust writes the file a moment after the wallpaper is applied, and a replaced file can slip past the file
+    // watcher: read it again shortly after every wallpaper change so the colours never lag behind.
+    readonly property string _wallpaper: Config.options?.background?.wallpaperPath ?? ""
+    on_WallpaperChanged: recheck.restart()
+    Timer { id: recheck; interval: 1800; onTriggered: colorsFile.reload() }
 }

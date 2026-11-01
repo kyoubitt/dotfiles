@@ -119,6 +119,15 @@ ApplicationWindow {
             }
         }
 
+        StyledText {
+            Layout.leftMargin: 12
+            Layout.bottomMargin: 6
+            opacity: 0.6
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: Appearance.colors.colOnLayer0
+            text: "Modified version. Based on iNiR by snowarch (https://github.com/snowarch/inir)"
+        }
+
         Rectangle {
             color: Appearance.m3colors.m3surfaceContainerLow
             radius: Appearance.rounding.windowRounding - root.contentPadding

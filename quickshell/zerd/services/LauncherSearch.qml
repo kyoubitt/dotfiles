@@ -151,6 +151,8 @@ Singleton {
             if (expr.startsWith(mathPrefix)) {
                 expr = expr.slice(mathPrefix.length)
             }
+            // friendlier operators: 2 x 3, 2×3, 6÷2; and a real minus in the answer is copied as "-"
+            expr = expr.replace(/(\d|\))\s*[x\u00d7]\s*(?=[\d(.])/gi, "$1*").replace(/\u00f7/g, "/")
             mathProc.calculateExpression(expr)
         }
     }
@@ -226,7 +228,7 @@ Singleton {
 
         // Build results
         let result = []
-        const startsWithNumber = /^\d/.test(q)
+        const startsWithNumber = /^\s*[-+(.]*\s*\d/.test(q) || /^\s*[-+]?\s*\(/.test(q) || /^\s*(sqrt|sin|cos|tan|log|ln|abs|pi|e\^)/i.test(q)
         const startsWithMath = q.startsWith(mathPrefix)
         const startsWithShell = q.startsWith(shellPrefix)
         const startsWithWeb = q.startsWith(webPrefix)
@@ -239,7 +241,7 @@ Singleton {
             fontType: LauncherSearchResult.FontType.Monospace,
             iconName: "calculate",
             iconType: LauncherSearchResult.IconType.Material,
-            execute: () => { Quickshell.clipboardText = root.mathResult }
+            execute: () => { Quickshell.clipboardText = String(root.mathResult).replace(/\u2212/g, "-") }
         }
 
         if (startsWithNumber || startsWithMath) {

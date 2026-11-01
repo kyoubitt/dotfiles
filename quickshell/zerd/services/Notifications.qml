@@ -112,6 +112,9 @@ Singleton {
         }
     }
     property int unread: 0
+    // Plain counters for the UI: `list` is edited in place, which never notifies a `.length` binding.
+    property int count: 0
+    property int revision: 0
     property var filePath: Directories.notificationsPath
     property list<Notif> list: []
     // Hard cap on retained history - each entry is a live QtObject that
@@ -126,7 +129,7 @@ Singleton {
     property var _cachedPopupAppNameList: []
     property bool _groupsDirty: true
     
-    property bool popupInhibited: (GlobalStates?.sidebarRightOpen ?? false) || (GlobalStates?.waffleNotificationCenterOpen ?? false) || silent
+    property bool popupInhibited: (GlobalStates?.sidebarRightOpen ?? false) || (GlobalStates?.barPopup?.kind === "notifications") || silent
     property var latestTimeForApp: ({})
     
     // Debounce timer for group updates - 100ms is sufficient for responsive UI
@@ -149,6 +152,8 @@ Singleton {
     }
     
     onListChanged: {
+        root.count = root.list.length
+        root.revision++
         root._groupsDirty = true
         groupUpdateTimer.restart()
     }
@@ -359,6 +364,12 @@ Singleton {
         root.discard(id); // Emit signal
     }
 
+    // Notification appName ("Spotify") and compositor appId ("spotify-launcher")
+    // rarely match verbatim; compare on alphanumerics only.
+    function _normalizeAppKey(name): string {
+        return String(name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
+    }
+
     function discardAllNotifications() {
         const removed = root.list;
         root.list = []
@@ -475,6 +486,8 @@ Singleton {
     }
 
     function triggerListChange() {
+        root.count = root.list.length
+        root.revision++
         root._groupsDirty = true
         root._updateGroups()
     }
@@ -583,4 +596,7 @@ Singleton {
             }
         }
     }
+
+    // For the vendored iRiS controls card
+    readonly property bool manualDndActive: silent
 }

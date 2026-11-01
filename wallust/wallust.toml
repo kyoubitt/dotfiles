@@ -7,6 +7,5 @@ check_contrast = true
 [templates]
 # Consumed by scripts/theme-sync.sh (update_niri_config, update_sddm_theme).
 wallust-json = { src = "wallust-colors.json", dst = "~/.cache/wallust/colors.json" }
-mako = { src = "mako", dst = "~/.config/mako/config" }
 zathurarc = { src = "zathurarc", dst = "~/.config/zathura/zathurarc" }
 starship = { src = "starship", dst = "~/.config/starship/starship.toml" }

@@ -30,7 +30,7 @@ Scope {
     PanelWindow {
         id: panelWindow
         // Hide during GameMode to avoid input interference
-        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.waffleNotificationCenterOpen && !GameMode.active
+        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GameMode.active
 
         screen: CompositorService.isNiri
             ? Quickshell.screens.find(s => s.name === NiriService.currentOutput) ?? Quickshell.screens[0]
@@ -66,15 +66,31 @@ Scope {
         }
 
         color: "transparent"
-        implicitWidth: 380
-        implicitHeight: Math.min(listview.contentHeight + 16, (screen?.height ?? 800) * 0.7)
+        implicitWidth: 300
+        implicitHeight: Math.min(listview.contentHeight + 24, (screen?.height ?? 800) * 0.7)
+
+        // This window's own absolute screen origin, computed from the same
+        // anchor/margin logic above - Wayland's layer-shell protocol
+        // doesn't hand a client its own placed position back, so each card
+        // composes this with its own mapToItem(null, ...) position (see
+        // WNotificationGroup.qml) for backdrop blur alignment.
+        readonly property real resolvedScreenWidth: screen?.width ?? 1920
+        readonly property real resolvedScreenHeight: screen?.height ?? 1080
+        readonly property real screenX: (root.isCenter || root.isTopCenter)
+            ? (resolvedScreenWidth - implicitWidth) / 2
+            : (root.isLeft ? root.edgeMargin : resolvedScreenWidth - root.edgeMargin - implicitWidth)
+        readonly property real screenY: root.isCenter
+            ? (resolvedScreenHeight - implicitHeight) / 2
+            : ((root.isTop || root.isTopCenter) ? root.barClearance : resolvedScreenHeight - root.edgeMargin - implicitHeight)
 
         WNotificationListView {
             id: listview
             anchors {
                 fill: parent
-                margins: 8
+                margins: 12
             }
+            windowScreenX: panelWindow.screenX
+            windowScreenY: panelWindow.screenY
         }
     }
 }

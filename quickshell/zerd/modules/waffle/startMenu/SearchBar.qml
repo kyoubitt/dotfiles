@@ -39,12 +39,13 @@ FooterRectangle {
             rightMargin: root.horizontalPadding
             verticalCenter: parent.verticalCenter
         }
-        implicitHeight: content.implicitHeight + 32
-        radius: 15
+        implicitHeight: content.implicitHeight + 24
+        radius: height / 2
         antialiasing: true
-        color: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.12)
+        color: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.09)
         border.width: 2
-        border.color: searchInput.activeFocus ? SMColors.fg : ColorUtils.mix(SMColors.fg, SMColors.bg, 0.25)
+        border.color: searchInput.activeFocus ? SMColors.accent : "transparent"
+        Behavior on border.color { ColorAnimation { duration: 120 } }
 
         RowLayout {
             id: content

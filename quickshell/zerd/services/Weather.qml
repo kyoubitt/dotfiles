@@ -51,6 +51,9 @@ Singleton {
         result.windDir = current.winddir16Point ?? "N";
         result.wCode = current.weatherCode ?? "113";
         result.city = root.location.name || "Unknown";
+        const today = apiData.today;
+        result.high = root.useUSCS ? (today?.maxtempF ?? "--") + "°" : (today?.maxtempC ?? "--") + "°";
+        result.low = root.useUSCS ? (today?.mintempF ?? "--") + "°" : (today?.mintempC ?? "--") + "°";
 
         if (root.useUSCS) {
             result.temp = (current.temp_F ?? 0) + "°F";
@@ -68,6 +71,27 @@ Singleton {
             result.press = (current.pressure ?? 0) + " hPa";
         }
 
+        // Next 24 h in 3 h steps and a 3-day outlook, from the same response.
+        const days = apiData.days ?? [];
+        const nowH = new Date().getHours();
+        const steps = [];
+        for (const d of days.slice(0, 2)) {
+            for (const h of (d.hourly ?? [])) {
+                const hh = Math.floor(parseInt(h.time) / 100);
+                steps.push({ day: d.date, hour: hh, temp: root.useUSCS ? h.tempF : h.tempC, code: h.weatherCode, rain: parseInt(h.chanceofrain ?? 0) });
+            }
+        }
+        const todayStr = days[0]?.date ?? "";
+        const from = steps.findIndex(x => x.day !== todayStr || x.hour + 3 > nowH);
+        result.hourly = steps.slice(Math.max(0, from), Math.max(0, from) + 8);
+        result.daily = days.slice(0, 3).map(d => ({
+            date: d.date,
+            high: root.useUSCS ? d.maxtempF : d.maxtempC,
+            low: root.useUSCS ? d.mintempF : d.mintempC,
+            code: d.hourly?.[4]?.weatherCode ?? "113"
+        }));
+
+        root.lastUpdated = Date.now();
         root.data = result;
         console.info("[Weather] Updated:", result.temp, result.city);
     }
@@ -84,7 +108,7 @@ Singleton {
         if (!root.location.valid || fetcher.running) return;
         
         const city = encodeURIComponent(root.location.name.split(',')[0].trim());
-        const cmd = `curl -s --max-time 15 'wttr.in/${city}?format=j1' | jq '{current: .current_condition[0], astronomy: .weather[0].astronomy[0]}'`;
+        const cmd = `curl -s --max-time 15 'wttr.in/${city}?format=j1' | jq '{current: .current_condition[0], astronomy: .weather[0].astronomy[0], today: .weather[0] | {maxtempC, mintempC, maxtempF, mintempF}, days: [.weather[] | {date, maxtempC, mintempC, maxtempF, mintempF, hourly: [.hourly[] | {time, tempC, tempF, weatherCode, chanceofrain}]}]}'`;
         fetcher.command = ["/usr/bin/bash", "-c", cmd];
         fetcher.running = true;
     }
@@ -238,4 +262,11 @@ Singleton {
             if (running) Qt.callLater(() => root.getData())
         }
     }
+
+    // For the vendored iRiS weather card
+    property double lastUpdated: 0
+    readonly property string updatedLabel: lastUpdated > 0 ? Qt.formatTime(new Date(lastUpdated), "hh:mm") : ""
+    readonly property bool stale: lastUpdated > 0 && (Date.now() - lastUpdated) > 3600000
+    property bool showVisibleCity: false
+    readonly property string visibleCity: data.city ?? ""
 }

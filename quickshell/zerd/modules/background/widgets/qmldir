@@ -1,0 +1,6 @@
+module qs.modules.background.widgets
+singleton DesktopWidgetIdentity 1.0 DesktopWidgetIdentity.qml
+singleton DesktopWidgetStacks 1.0 DesktopWidgetStacks.qml
+AbstractBackgroundWidget 1.0 AbstractBackgroundWidget.qml
+singleton DesktopWidgetShapes 1.0 DesktopWidgetShapes.qml
+WidgetSurface 1.0 WidgetSurface.qml

@@ -1,3 +1,0 @@
-module qs.modules.controlCenter
-WControlCenter 1.0 WControlCenter.qml
-WControlCenterContent 1.0 WControlCenterContent.qml

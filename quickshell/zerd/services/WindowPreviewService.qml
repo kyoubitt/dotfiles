@@ -147,6 +147,16 @@ Singleton {
         captureProcess.running = true
     }
     
+    // Thumbnails for the given windows only, without losing the clipboard (see scripts/capture-previews.sh).
+    function captureIds(ids): void {
+        if (capturing || !ids || ids.length === 0) return
+        if (!initialized) initialize()
+        capturing = true
+        captureProcess.idsToCapture = ids
+        captureProcess.command = ["/usr/bin/bash", Quickshell.shellPath("scripts/capture-previews.sh")].concat(ids.map(i => String(i)))
+        captureProcess.running = true
+    }
+
     // Capture ALL windows (force refresh)
     function captureAllWindows(): void {
         if (capturing) return

@@ -259,4 +259,9 @@ Singleton {
         id: thumbgenFallbackProc
         onExited: root.thumbnailGenerated(thumbgenProc.directory)
     }
+
+    function stillUrlFor(path: string): string {
+        if (!path) return ""
+        return path.startsWith("file://") ? path : "file://" + path
+    }
 }

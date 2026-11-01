@@ -1,4 +1,0 @@
-module qs.modules.waffle.notificationCenter
-WNotificationAppIcon 1.0 WNotificationAppIcon.qml
-WNotificationCenter 1.0 WNotificationCenter.qml
-WNotificationCenterContent 1.0 WNotificationCenterContent.qml

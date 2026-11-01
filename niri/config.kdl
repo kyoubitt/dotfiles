@@ -39,6 +39,13 @@ cursor {
     hide-after-inactive-ms 5000
 }
 
+gestures {
+    // A press in the top-left corner opened the overview; the screenshot overlay needs the corners (overview: Mod+Escape).
+    hot-corners {
+        off
+    }
+}
+
 overview {
     zoom 0.65
     backdrop-color "#000000b3"
@@ -59,6 +66,7 @@ binds {
     // Shortcuts Panel
     Mod+Shift+Escape { show-hotkey-overlay; }
     Mod+A hotkey-overlay-title="Application Launcher" { spawn-sh "qs -c zerd ipc call search toggle"; }
+    Mod+Shift+A hotkey-overlay-title="Pin list" { spawn-sh "qs -c zerd ipc call dock launcher"; }
 
     // Application Shortcuts
     Mod+Return hotkey-overlay-title="Open Terminal: Ghostty" { spawn-sh "ghostty"; }
@@ -66,9 +74,9 @@ binds {
     Mod+Shift+E hotkey-overlay-title="Power Menu" { spawn-sh "qs -c zerd ipc call sessionScreen toggle"; }
     Mod+B hotkey-overlay-title="Open Browser: Firefox" { spawn-sh "firefox"; }
     Mod+E hotkey-overlay-title="File Manager: Thunar" { spawn-sh "thunar"; }
-    Mod+W hotkey-overlay-title="Open Wallpaper Selector" { spawn-sh "qs -c zerd ipc call wallpaperSelector toggle"; }
-    Mod+Shift+W hotkey-overlay-title="Toggle Widgets Panel" { spawn-sh "qs -c zerd ipc call widgetsPanel toggle"; }
-    Mod+Shift+D hotkey-overlay-title="Cycle Dock Edge" { spawn-sh "qs -c zerd ipc call sideDock cycleEdge"; }
+    Mod+V hotkey-overlay-title="Clipboard History" { spawn-sh "qs -c zerd ipc call clipboard toggle"; }
+    Mod+W hotkey-overlay-title="Wallpapers" repeat=false { spawn-sh "qs -c zerd ipc call wallpaper toggle"; }
+    Mod+Shift+W hotkey-overlay-title="Toggle Desktop Widgets" { spawn-sh "qs -c zerd ipc call widgets toggleAll"; }
 
     // Media Keys
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh volume_up"; }
@@ -83,7 +91,7 @@ binds {
     XF86AudioPrev allow-when-locked=true { spawn-sh "~/.config/scripts/media-control.sh prev_track"; }
 
     // Window Management
-    Mod+Q { spawn-sh "~/.config/quickshell/zerd/scripts/close-window.sh"; }
+    Mod+Q repeat=false { spawn-sh "~/.config/quickshell/zerd/scripts/close-window.sh"; }
     Mod+H { focus-column-left; }
     Mod+J { focus-workspace-down; }
     Mod+K { focus-workspace-up; }
@@ -139,7 +147,8 @@ binds {
     Mod+Shift+7 { move-column-to-workspace 7; }
     Mod+Shift+8 { move-column-to-workspace 8; }
     Mod+Shift+9 { move-column-to-workspace 9; }
-    Mod+Tab { focus-workspace-previous; }
+    Alt+Tab hotkey-overlay-title="Window Switcher" { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/switcher-key.sh next"; }
+    Alt+Shift+Tab hotkey-overlay-title="Window Switcher (back)" { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/switcher-key.sh prev"; }
 
     // Layout Controls
     Mod+C { center-column; }
@@ -156,9 +165,15 @@ binds {
     Mod+Shift+T { switch-focus-between-floating-and-tiling; }
     Mod+F { fullscreen-window; }
     Mod+M { maximize-column; }
+    // Orbit: open it, or bring it back into view if it is already open
+    Mod+Shift+M hotkey-overlay-title="Orbit (music)" { spawn-sh "qs -c zerd ipc call music launch"; }
 
     // Utils
-    Mod+S { screenshot; }
+    Mod+S hotkey-overlay-title="Screenshot" repeat=false { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/screenshot-key.sh region"; }
+    Print hotkey-overlay-title="Screenshot" repeat=false { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/screenshot-key.sh region"; }
+    Shift+Print hotkey-overlay-title="Screenshot: whole screen" repeat=false { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/screenshot-key.sh screen"; }
+    Alt+Print hotkey-overlay-title="Screenshot: a window" repeat=false { spawn "sh" "-c" "$HOME/.config/quickshell/zerd/scripts/screenshot-key.sh window"; }
+    Mod+Alt+S hotkey-overlay-title="Screenshot (niri)" { screenshot; }
     Mod+Shift+S hotkey-overlay-title="Open in Satty" { spawn-sh "satty --filename \"$(find ~/Pictures/Screenshots -name '*.png' -printf '%T@ %p\\n' | sort -n | tail -1 | cut -d' ' -f2-)\""; }
     Mod+Ctrl+S { screenshot-window write-to-disk=true; }
     Mod+P hotkey-overlay-title="Pick Color" { spawn-sh "hyprpicker -a -n"; }
@@ -177,8 +192,8 @@ layout {
 
     focus-ring {
         width 2
-        active-color "#858585bb"
-        inactive-color "#858585bb"
+        active-color "#91BFF4bb"
+        inactive-color "#91BFF4bb"
     }
 
 
@@ -192,6 +207,7 @@ layout {
 
 // Animation Settings
 animations {
+    slowdown 0.8
     workspace-switch {
         spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
 }
@@ -200,8 +216,22 @@ animations {
         curve "ease-out-quad"
 }
     window-close {
-        duration-ms 200
-        curve "ease-out-cubic"
+        duration-ms 240
+        curve "linear"
+        // Shrinks a little, drifts up and fades out; the ease-out is done in the shader.
+        custom-shader r"
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                float p = niri_clamped_progress;
+                float e = 1.0 - pow(1.0 - p, 3.0);
+                float s = 1.0 - 0.07 * e;
+                vec2 g = (coords_geo.xy - vec2(0.5)) / s + vec2(0.5);
+                g.y += 0.025 * e / s;
+                vec3 t = niri_geo_to_tex * vec3(g, 1.0);
+                vec4 color = texture2D(niri_tex, t.st);
+                if (g.x < 0.0 || g.x > 1.0 || g.y < 0.0 || g.y > 1.0) color = vec4(0.0);
+                return color * (1.0 - e);
+            }
+        "
 }
     horizontal-view-movement {
         spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
@@ -276,6 +306,15 @@ window-rule {
     match app-id=r#"org\.kde\.polkit-kde-authentication-agent-1"#
     match title=r#".*Authentication.*"#
     open-floating true
+}
+
+// Screenshare picker - the portal can't attach it to the app asking for it,
+// so it opened unfocused and hid behind fullscreen windows (Vesktop).
+// Forcing focus pulls it on top.
+window-rule {
+    match app-id=r#"^xdg-desktop-portal-gnome$"#
+    open-floating true
+    open-focused true
 }
 
 // Password managers
@@ -359,8 +398,11 @@ window-rule {
 
 
 window-rule {
-    match app-id="satty"
-    open-maximized true
+    // The screenshot editor (modules/bars/ScreenshotEditor.qml): a floating window in the middle, not a tile.
+    match title="^zerd-screenshot$"
+    open-floating true
+    default-column-width { fixed 1280; }
+    default-window-height { fixed 820; }
 }
 
 window-rule {
@@ -387,3 +429,28 @@ window-rule {
     match app-id="code"
     opacity 0.75
 }
+
+window-rule {
+    // The shell's settings window (modules/bars/SettingsWindow.qml).
+    match title="^zerd-settings$"
+    open-floating true
+    default-column-width { fixed 940; }
+    default-window-height { fixed 640; }
+}
+
+window-rule {
+    // File chooser opened from the settings (profile picture): a floating dialog, not a tile.
+    match title="^Profile picture"
+    open-floating true
+    default-column-width { fixed 900; }
+    default-window-height { fixed 600; }
+}
+
+window-rule {
+    // Murmur (modules/music): a real app window, so it opens maximised, not as a small floating card.
+    match title="^Orbit$"
+    open-maximized true
+    // Focus it when it opens, so it comes to the front instead of sitting off-screen next to the focused window.
+    open-focused true
+}
+

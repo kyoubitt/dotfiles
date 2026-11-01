@@ -70,4 +70,18 @@ Singleton {
         Quickshell.execDetached(["mkdir", "-p", `${userActions}`])
         Quickshell.execDetached(["rm", "-rf", `${tempImages}`])
     }
+
+    // For the vendored iRiS cards (modules/iris): profile picture lookup and
+    // a cache folder for their generated files.
+    readonly property string stateUserPath: `${FileUtils.trimFileProtocol(Directories.genericCache)}/iris`
+    readonly property var userAvatarPaths: [
+        Config.options?.account?.avatar ?? "",
+        userAvatarPathAccountsService,
+        userAvatarPathRicersAndWeirdSystems,
+        userAvatarPathRicersAndWeirdSystems2,
+    ].filter(p => p && p.length > 0)
+    readonly property string userAvatarSourcePrimary: userAvatarPaths.length > 0 ? userAvatarPaths[0] : ""
+    function avatarSourceAt(index: int): string {
+        return index >= 0 && index < userAvatarPaths.length ? "file://" + userAvatarPaths[index] : ""
+    }
 }

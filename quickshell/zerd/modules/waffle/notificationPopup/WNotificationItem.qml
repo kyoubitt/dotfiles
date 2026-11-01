@@ -9,6 +9,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.modules.waffle.looks
+import qs.modules.waffle.startMenu
 
 /**
  * Windows 11 style notification item with swipe-to-dismiss
@@ -34,6 +35,59 @@ Item {
 
     function dismiss() {
         Notifications.discardNotification(notifId)
+    }
+
+    // A discarded notification's image provider handle (image://qsimage/
+    // <id>/1) gets freed by the service immediately, but this delegate can
+    // stay alive briefly for the list's remove transition - if the Image
+    // element re-requests during that window it hits a torn-down handle
+    // ("Requested image from unknown handle"). Gating on actual presence in
+    // Notifications.list (not just `notification` staying non-null) closes
+    // that window regardless of transition timing.
+    readonly property bool notifStillAlive: Notifications.list.some(n => n.notificationId === root.notifId)
+
+    // A frosted, hover-growing pill button - the same recipe as the dock's
+    // GhostPill/DockFlatIcon (WSideDockContent.qml), replacing the flat
+    // default-Qt WBorderedButton look. Scoped to this file rather than
+    // edited in place on WButton/WBorderedButton, since those are shared
+    // with the unrelated close-confirm dialog. No custom default property -
+    // callers mix a visual icon/text with a non-visual WToolTip as
+    // children, and a `list<Item>`-typed content alias rejects WToolTip
+    // outright; Item's own default `data` property accepts both, so
+    // children anchor themselves to `parent` directly instead.
+    component NotifPillButton: Item {
+        id: pillBtn
+        property bool primary: false
+        readonly property bool hovered: mouse.containsMouse
+        signal clicked()
+
+        implicitHeight: 32
+        implicitWidth: 40
+
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            antialiasing: true
+            color: pillBtn.primary
+                ? ColorUtils.applyAlpha(WallustColors.cyan, pillBtn.hovered ? 0.45 : 0.35)
+                : ColorUtils.applyAlpha(SMColors.fg, pillBtn.hovered ? 0.18 : 0.14)
+            border.width: 1
+            border.color: pillBtn.primary
+                ? ColorUtils.applyAlpha(WallustColors.cyan, 0.6)
+                : ColorUtils.applyAlpha(SMColors.fg, 0.35)
+            Behavior on color { ColorAnimation { duration: 150 } }
+
+            scale: mouse.pressed ? 0.96 : 1.0
+            Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+        }
+
+        MouseArea {
+            id: mouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: pillBtn.clicked()
+        }
     }
 
     // Swipe to dismiss
@@ -105,7 +159,7 @@ Item {
                     implicitWidth: 6
                     implicitHeight: 6
                     radius: 3
-                    color: Looks.colors.danger
+                    color: WallustColors.red
 
                     SequentialAnimation on opacity {
                         running: root.isCritical && Looks.transition.enabled
@@ -120,47 +174,79 @@ Item {
                     text: root.notifSummary
                     font.pixelSize: Looks.font.pixelSize.normal
                     font.weight: Looks.font.weight.strong
-                    color: root.isCritical ? Looks.colors.danger : Looks.colors.fg
+                    color: root.isCritical ? WallustColors.red : SMColors.fg
                     elide: Text.ElideRight
                 }
             }
 
-            // Image - larger and better presented
-            // Some apps (e.g. Claude Code) send their app icon through the
-            // same "image" hint real hero/preview images use, with no way
-            // to tell the two apart from here - capped low enough that a
-            // mistaken icon doesn't dominate the whole notification card.
+            // Image - larger and better presented for a genuine wide
+            // hero/preview image. Some apps (e.g. Claude Code) send their
+            // own app icon through this same "image" hint instead - those
+            // are near-square, so they get a small squircle avatar
+            // treatment instead of being stretched edge-to-edge, which used
+            // to zoom a small icon into an unrecognizable, banded-looking
+            // sliver.
             Rectangle {
-                visible: root.hasImage
-                Layout.fillWidth: true
-                implicitHeight: imageContent.status === Image.Ready
-                    ? Math.min(imageContent.implicitHeight, 72)
-                    : 60
-                radius: Looks.radius.medium
-                color: Looks.colors.bg1Base
+                id: imageBox
+                // Set once, imperatively, from Image.onStatusChanged below -
+                // not a live binding off imageContent.implicitWidth/Height.
+                // Those two feed back into this box's own implicitWidth
+                // (via fillMode, which this flag also drives), which made a
+                // readonly-property version of this a genuine binding loop
+                // ("Binding loop detected for property 'isIconShaped'",
+                // confirmed firing repeatedly in the live log).
+                property bool isIconShaped: false
+                // Also hides itself once the backing notification is gone
+                // (post-discard) and on a failed decode - a bad/garbled
+                // decode used to render as raw visual noise instead of just
+                // not showing anything.
+                visible: root.hasImage && root.notifStillAlive && imageContent.status !== Image.Error
+                Layout.fillWidth: !imageBox.isIconShaped
+                Layout.alignment: Qt.AlignLeft
+                implicitWidth: imageBox.isIconShaped ? 48 : 300
+                implicitHeight: imageBox.isIconShaped ? 48
+                    : (imageContent.status === Image.Ready ? Math.min(imageContent.implicitHeight, 72) : 60)
+                radius: imageBox.isIconShaped ? implicitWidth * 0.28 : Looks.radius.medium
+                antialiasing: imageBox.isIconShaped
+                color: ColorUtils.applyAlpha(SMColors.fg, 0.08)
                 clip: true
 
                 Image {
                     id: imageContent
                     anchors.fill: parent
-                    source: root.notifImage
-                    sourceSize.width: parent.width
-                    sourceSize.height: 72
-                    fillMode: Image.PreserveAspectCrop
+                    // Cleared once the notification is gone instead of
+                    // staying bound to root.notifImage - stops this Image
+                    // re-requesting the image://qsimage/<id>/1 provider
+                    // handle after Notifications.qml has already freed it.
+                    source: root.notifStillAlive ? root.notifImage : ""
+                    // Fixed, generous decode cap - not tied to the final
+                    // display size (which now depends on the image's own
+                    // aspect ratio) - a raster source larger than this
+                    // downscales, smaller never gets artificially upscaled.
+                    sourceSize.width: 300
+                    sourceSize.height: 300
+                    fillMode: imageBox.isIconShaped ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                     asynchronous: true
                     smooth: true
+
+                    onStatusChanged: {
+                        if (status === Image.Ready) {
+                            const aspect = implicitHeight > 0 ? implicitWidth / implicitHeight : 1
+                            imageBox.isIconShaped = aspect > 0.75 && aspect < 1.34
+                        }
+                    }
 
                     // Loading placeholder
                     Rectangle {
                         anchors.fill: parent
                         visible: imageContent.status === Image.Loading
-                        color: Looks.colors.bg1Base
+                        color: ColorUtils.applyAlpha(SMColors.fg, 0.08)
 
                         WText {
                             anchors.centerIn: parent
                             text: Translation.tr("Loading...")
                             font.pixelSize: Looks.font.pixelSize.small
-                            color: Looks.colors.subfg
+                            color: ColorUtils.applyAlpha(SMColors.fg, 0.7)
                         }
                     }
                 }
@@ -171,7 +257,7 @@ Item {
                 Layout.fillWidth: true
                 text: NotificationUtils.processNotificationBody(root.notifBody, root.notifAppName || root.notifSummary).replace(/\n/g, "<br/>")
                 font.pixelSize: Looks.font.pixelSize.normal
-                color: Looks.colors.subfg
+                color: ColorUtils.applyAlpha(SMColors.fg, 0.7)
                 wrapMode: Text.Wrap
                 textFormat: Text.RichText
                 maximumLineCount: 5
@@ -185,21 +271,21 @@ Item {
                 spacing: 6
 
                 // Dismiss button
-                WBorderedButton {
-                    implicitHeight: 32
+                NotifPillButton {
+                    id: dismissBtn
                     implicitWidth: 40
                     onClicked: root.dismiss()
 
-                    WToolTip {
-                        text: Translation.tr("Dismiss")
-                        visible: parent.hovered
-                    }
-
-                    contentItem: FluentIcon {
+                    FluentIcon {
                         anchors.centerIn: parent
                         icon: "dismiss"
                         implicitSize: 14
-                        color: Looks.colors.fg
+                        color: SMColors.fg
+                    }
+
+                    WToolTip {
+                        text: Translation.tr("Dismiss")
+                        visible: dismissBtn.hovered
                     }
                 }
 
@@ -207,23 +293,28 @@ Item {
                 Repeater {
                     model: root.notifActions
 
-                    delegate: WBorderedButton {
+                    delegate: NotifPillButton {
+                        id: actionBtn
                         required property var modelData
                         required property int index
                         Layout.fillWidth: true
-                        implicitHeight: 32
-                        // First action is primary - use accent color
-                        colBackground: index === 0 ? Looks.colors.accent : Looks.colors.bg2
-                        colBackgroundHover: index === 0 ? Looks.colors.accentHover : Looks.colors.bg2Hover
-                        colBackgroundActive: index === 0 ? Looks.colors.accentActive : Looks.colors.bg2Active
-                        
+                        // First action is primary - gets the wallust-synced
+                        // accent tint instead of a flat near-opaque fill.
+                        primary: index === 0
+
                         onClicked: Notifications.attemptInvokeAction(root.notifId, modelData.identifier)
 
-                        contentItem: WText {
-                            text: modelData.text
+                        WText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: Math.min(implicitWidth, actionBtn.width - 12)
+                            // Falls back to the raw identifier so a button
+                            // never renders fully blank, regardless of what
+                            // a given app puts in its action payload.
+                            text: actionBtn.modelData.text || actionBtn.modelData.identifier
                             font.pixelSize: Looks.font.pixelSize.small
-                            font.weight: index === 0 ? Looks.font.weight.strong : Looks.font.weight.regular
-                            color: index === 0 ? Looks.colors.accentFg : Looks.colors.fg
+                            font.weight: actionBtn.index === 0 ? Looks.font.weight.strong : Looks.font.weight.regular
+                            color: SMColors.fg
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
                         }
@@ -231,9 +322,8 @@ Item {
                 }
 
                 // Copy button
-                WBorderedButton {
+                NotifPillButton {
                     id: copyBtn
-                    implicitHeight: 32
                     implicitWidth: 40
                     property bool copied: false
 
@@ -260,14 +350,14 @@ Item {
 
                     WToolTip {
                         text: copyBtn.copied ? Translation.tr("Copied!") : Translation.tr("Copy")
-                        visible: parent.hovered
+                        visible: copyBtn.hovered
                     }
 
-                    contentItem: FluentIcon {
+                    FluentIcon {
                         anchors.centerIn: parent
                         icon: copyBtn.copied ? "checkmark" : "copy"
                         implicitSize: 14
-                        color: copyBtn.copied ? Looks.colors.accent : Looks.colors.fg
+                        color: copyBtn.copied ? WallustColors.cyan : SMColors.fg
                     }
                 }
             }

@@ -38,6 +38,10 @@ Singleton {
         { matches: ["telegram", "Telegram", "org.telegram"], launch: "org.telegram.desktop" },
         { matches: ["signal", "Signal"], launch: "signal-desktop" },
         { matches: ["element", "Element"], launch: "element-desktop" },
+        // Notion Electron's tray item has no IconName at all (pixmap only),
+        // so it fell back to image-missing. The theme's "notion" is the
+        // real logo.
+        { matches: ["notion"], launch: "notion-electron", fixedIcon: "notion" },
         // Steam reports its tray icon as a path under ~/.local/share/Steam,
         // which doesn't resolve here, so it fell back to the broken-image
         // placeholder. The theme's own "steam" icon is the real one.

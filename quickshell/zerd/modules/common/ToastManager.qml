@@ -90,7 +90,7 @@ Scope {
         id: volumeToastDebounce
         interval: 120
         onTriggered: {
-            if (!root._audioToastReady) return
+            if (!root._audioToastReady || (Config.options?.bars?.osd?.enable ?? true)) return
             const muted = Audio.sink?.audio.muted ?? false
             const pct = Math.round((Audio.value ?? 0) * 100)
             root.showLevelToast(
@@ -118,6 +118,7 @@ Scope {
         id: brightnessToastDebounce
         interval: 120
         onTriggered: {
+            if (Config.options?.bars?.osd?.enable ?? true) return
             const focusedName = CompositorService.isNiri ? NiriService.currentOutput : null
             const mon = Brightness.monitors.find(m => m.screen.name === focusedName) ?? Brightness.monitors[0]
             if (!mon) return
@@ -158,7 +159,7 @@ Scope {
             root.addToast(
                 "Quickshell reloaded",
                 "",
-                "refresh",
+                "check_circle",
                 false,
                 2000,
                 "reload",
@@ -168,7 +169,7 @@ Scope {
             root.addToast(
                 "Niri config reloaded",
                 "",
-                "settings",
+                "check_circle",
                 false,
                 2000,
                 "reload",
@@ -276,6 +277,15 @@ Scope {
             
             implicitHeight: toastColumn.implicitHeight + 20
             color: "transparent"
+
+            // This window's own absolute screen origin - fixed, since it's
+            // anchored top+left+right (full width) with a 10px top margin.
+            // Wayland's layer-shell protocol doesn't hand a client its own
+            // placed position back, so each toast composes this with its
+            // own mapToItem(null, ...) position to get its true screen
+            // position for backdrop blur alignment.
+            readonly property real screenX: 0
+            readonly property real screenY: 10
             
             ColumnLayout {
                 id: toastColumn
@@ -298,7 +308,9 @@ Scope {
                         duration: modelData.duration
                         source: modelData.source
                         accentColor: modelData.accentColor
-                        
+                        windowScreenX: popup.screenX
+                        windowScreenY: popup.screenY
+
                         opacity: 1
                         scale: 1
                         

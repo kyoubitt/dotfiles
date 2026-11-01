@@ -596,16 +596,6 @@ Singleton {
         currentOutputWorkspaces = outputWs
     }
 
-    function workspacePreviewPath(wsId) {
-        // Ruta de snapshot legacy (no usada)
-        return "/tmp/qs-niri-preview-" + wsId + ".png"
-    }
-
-    // Stub: snapshots desactivados; mantenido para no romper llamadas previas.
-    function snapshotWorkspace(wsId, force) {
-        return
-    }
-
     function send(request) {
         if (!CompositorService.isNiri || !requestSocket.connected)
             return false

@@ -52,6 +52,14 @@ Item {
         wifiRecheckTimer.restart()
     }
 
+    // Shared capsule thickness for every pill down the dock (brightness/
+    // nightlight, battery, notif/wifi/bluetooth) so they line up into one
+    // straight column instead of each one sizing itself to its own icon
+    // count and zigzagging in and out. Derived from the pinned-apps pill,
+    // the one cluster whose size is locked in by the actual icon size
+    // (33px) and can't shrink to match the others.
+    readonly property real dockPillThickness: 47
+
     readonly property var brightnessPresets: [0.05, 0.10, 0.15, 0.25, 0.50, 0.75, 1.0]
     readonly property var volumePresets: [0, 0.25, 0.50, 0.75, 1.0]
     function nextPreset(presets, current) {
@@ -265,9 +273,18 @@ Item {
         property color fillColor: ColorUtils.applyAlpha(SMColors.fg, 0.14)
         property color borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.35)
         property real borderWidth: 1
+        // Floor on the pill's own thickness (width when vertical, height
+        // when horizontal) - lets every pill down the dock share one
+        // consistent capsule size regardless of how few/small its own
+        // icons are, so the dock reads as one straight column instead of
+        // each pill zigzagging in and out to its own content's size.
+        property real minThickness: 0
 
-        implicitWidth: inner.implicitWidth + padding * 2
-        implicitHeight: inner.implicitHeight + padding * 2
+        implicitWidth: pill.horizontal ? inner.implicitWidth + padding * 2
+            : Math.max(pill.minThickness, inner.implicitWidth + padding * 2)
+        implicitHeight: pill.horizontal
+            ? Math.max(pill.minThickness, inner.implicitHeight + padding * 2)
+            : inner.implicitHeight + padding * 2
 
         Rectangle {
             id: pillBg
@@ -638,6 +655,7 @@ Item {
             padding: 7
             spacing: 10
             horizontal: root.horizontal
+            minThickness: root.dockPillThickness
 
             DockArcGauge {
                 icon: "light_mode"
@@ -819,6 +837,7 @@ Item {
             padding: 7
             spacing: 6
             horizontal: root.horizontal
+            minThickness: root.dockPillThickness
             fillColor: "transparent"
             borderWidth: 1
             borderColor: ColorUtils.applyAlpha(SMColors.fg, 0.35)
@@ -921,8 +940,11 @@ Item {
         Rectangle {
             id: batteryPill
             visible: Battery.available
-            implicitWidth: battContent.implicitWidth + 12
-            implicitHeight: battContent.implicitHeight + 12
+            implicitWidth: root.horizontal ? battContent.implicitWidth + 12
+                : Math.max(root.dockPillThickness, battContent.implicitWidth + 12)
+            implicitHeight: root.horizontal
+                ? Math.max(root.dockPillThickness, battContent.implicitHeight + 12)
+                : battContent.implicitHeight + 12
             radius: (root.horizontal ? height : width) / 2
             antialiasing: true
             // Same light-fill recipe as GhostPill now, not a black overlay -
@@ -1084,6 +1106,7 @@ Item {
             padding: 7
             spacing: 12
             horizontal: root.horizontal
+            minThickness: root.dockPillThickness
 
             DockFlatIcon {
                 icon: Notifications.silent ? "notifications_off" : "notifications"

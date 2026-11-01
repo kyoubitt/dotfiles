@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.modules.common
 
 // Wallust-driven palette for the widgets panel (modules/widgets/) -
 // deliberately separate from SMColors (which is material-color-generated
@@ -23,7 +24,10 @@ Singleton {
     property color bgCard: alpha("#1E1614", 0.68)
     property color textPrimary: "#E0C097"
     property color textSecondary: "#A08A75"
-    property color accent: "#D4A373"
+    property color wallAccent: "#D4A373"
+    // A colour picked in settings wins over the wallpaper's.
+    readonly property string pick: Config.options?.colours?.accent ?? ""
+    property color accent: root.pick.length > 0 ? root.pick : root.wallAccent
     // Translucent warm-tinted hairline, not a flat gray - reads as part
     // of the glass rather than a hard outline.
     property color cardBorder: alpha("#E0C097", 0.13)
@@ -53,7 +57,7 @@ Singleton {
             }
             if (special.foreground) root.textPrimary = special.foreground
             if (colors.color8) root.textSecondary = colors.color8
-            if (colors.color4) root.accent = colors.color4
+            if (colors.color4) root.wallAccent = colors.color4
         } catch (e) {
             console.warn("[WallustTheme] Failed to apply colors:", e)
         }
@@ -66,4 +70,10 @@ Singleton {
         onFileChanged: reload()
         onLoaded: root.applyColors(JSON.parse(fv.text()))
     }
+
+    // wallust writes the file a moment after the wallpaper is applied, and a replaced file can slip past the file
+    // watcher: read it again shortly after every wallpaper change so the colours never lag behind.
+    readonly property string _wallpaper: Config.options?.background?.wallpaperPath ?? ""
+    on_WallpaperChanged: recheck.restart()
+    Timer { id: recheck; interval: 1800; onTriggered: fv.reload() }
 }

@@ -12,11 +12,16 @@ import qs.services
 ListView {
     id: root
 
-    spacing: 8
+    spacing: 12
     cacheBuffer: 300
 
     property int dragIndex: -1
     property real dragDistance: 0
+
+    // Passed straight through to each delegate - see
+    // WaffleNotificationPopup.qml for where this is computed.
+    property real windowScreenX: 0
+    property real windowScreenY: 0
 
     function resetDrag() {
         dragIndex = -1
@@ -98,5 +103,7 @@ ListView {
         width: root.width
         notificationGroup: Notifications.popupGroupsByAppName[modelData]
         qmlParent: root
+        windowScreenX: root.windowScreenX
+        windowScreenY: root.windowScreenY
     }
 }

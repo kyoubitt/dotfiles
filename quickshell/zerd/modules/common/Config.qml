@@ -19,6 +19,20 @@ Singleton {
         configFileView.writeAdapter();
     }
 
+    // Read a nested option by dotted path ("a.b.c") with a fallback, for the vendored
+    // iNiR widgets that use it. Reads happen inside the caller's binding, so it updates.
+    function getNestedValue(nestedKey, fallback) {
+        const keys = Array.isArray(nestedKey) ? nestedKey
+            : typeof nestedKey === "string" ? nestedKey.split(".") : []
+        if (keys.length === 0) return fallback
+        let obj = root.options
+        for (let i = 0; i < keys.length; ++i) {
+            if (obj === undefined || obj === null) return fallback
+            obj = obj[keys[i]]
+        }
+        return obj === undefined || obj === null ? fallback : obj
+    }
+
     function setNestedValue(nestedKey, value) {
         let keys = [];
         if (Array.isArray(nestedKey)) {
@@ -233,6 +247,276 @@ Singleton {
             property JsonObject powerProfiles: JsonObject {
                 property bool restoreOnStart: true
                 property string preferredProfile: "" // "power-saver" | "balanced" | "performance"
+            }
+
+            property JsonObject lock: JsonObject {
+                property bool showNotifications: true
+            }
+
+            // Second dock family (modules/dock2): style macos | pill | panel.
+            // Off by default; turn off iris.dock.enable when using it.
+            property JsonObject dock2: JsonObject {
+                property bool enable: false
+                property string style: "macos"
+                property int iconSize: 44
+                property bool reserve: false
+                property list<string> controls: []
+            }
+
+            // Floating bars (modules/bars), off by default. `reserve` makes
+            // windows stop at the bar; otherwise it floats over them.
+            property JsonObject bars: JsonObject {
+                // Notification banners: "rice" is the shell's own, "waffle" the old Waffle ones. `rules` are "app|silent" or "app|mute".
+                property JsonObject notifications: JsonObject {
+                    property string engine: "rice"
+                    property string position: "top"
+                    property int width: 380
+                    property list<string> rules: ["Spotify|mute"]
+                }
+                // The desktop widget board: grid size in px (0 = none), automatic locking to it, and whether it is drawn.
+                property JsonObject board: JsonObject {
+                    property int grid: 32
+                    property bool snap: true
+                    property bool showGrid: true
+                }
+                // Side panels: the pointer resting on the screen edge opens the quick panel; sections of the right panel remember open/closed.
+                property JsonObject osd: JsonObject {
+                    // The pill that confirms volume, brightness, mic, caps/num lock, layout and play/pause.
+                    property bool enable: true
+                    property string position: "bottom"
+                    property int timeout: 1500
+                }
+                property JsonObject clipboard: JsonObject {
+                    // Text snippets kept at the top of the clipboard palette.
+                    property list<string> pinned: []
+                }
+                property JsonObject sidebars: JsonObject {
+                    property bool edgeHover: true
+                    property string edgeSide: "both"
+                    property list<string> expanded: ["today", "calendar", "timer", "clipboard", "tasks", "widgets"]
+                    // Right panel: section order and the ones switched off (names as in RightSections).
+                    property list<string> rightOrder: []
+                    property list<string> leftOrder: []
+                    property list<string> rightHidden: []
+                    // A focus (pomodoro) lap turns do not disturb on, and off again after.
+                    property bool focusDnd: true
+                }
+                property JsonObject top: JsonObject {
+                    property bool enable: false
+                    property int height: 34
+                    // Off: the bar is always there. On: it slides away and returns when the pointer rests on the top edge.
+                    property bool autoHide: false
+                    // Slide away only when a fullscreen window and an ordinary one share the workspace.
+                    property bool smartHide: true
+                    // The pointer has to rest on the top edge before the bar slides in; off = only the `bar` IPC brings it back.
+                    property bool revealOnHover: true
+                    // The focused window's title in the left group. Off: titles can show private chats.
+                    property bool showFocus: false
+                    property bool showTools: true
+                    property string workspaceStyle: "pills"
+                    property bool trayHidePinned: false
+                    // Tray ids kept out of the bar (still listed in the tray popup) and how many icons show before the overflow button.
+                    property list<string> trayHidden: []
+                    property int trayMax: 6
+                    property list<string> controls: ["brightness", "dnd"]
+                    property int margin: 8
+                    property bool reserve: true
+                }
+                property JsonObject side: JsonObject {
+                    property bool enable: false
+                    property int width: 44
+                    property list<string> controls: ["brightness", "dnd"]
+                    property int margin: 8
+                    property bool reserve: false
+                }
+            }
+
+            // Floating dock (modules/iris/dock). Off by default; the side dock
+            // is untouched and has its own pins.
+            property JsonObject iris: JsonObject {
+                // Apps the launcher leaves out of its list (substrings of the entry id or name, any case). They are
+                // still found by typing their name, and pinned ones always show.
+                property JsonObject launcher: JsonObject {
+                    property list<string> hidden: ["qt assistant", "qt linguist", "qt widgets designer", "qt d-bus viewer", "qt v4l2", "avahi", "bssh", "bvnc", "openjdk", "hardware locality", "lstopo", "kvantum", "qt5 settings", "qt6 settings", "bulk rename", "cmake", "mcontrolcenter", "btop", "htop", "yazi", "pandl", "alloy", "thunar preferences", "vim", "xclicker", "mpv media"]
+                }
+                property JsonObject dock: JsonObject {
+                    property bool enable: false
+                    property list<string> controls: []
+                    property string edge: "bottom"
+                    property bool launcher: true
+                    property bool autoHide: true
+                    property int iconSize: 40
+                    property bool notch: false
+                    property string material: "inherit"
+                    property bool magnification: true
+                    property int magnifySize: 150
+                    property bool badges: true
+                    property bool reorder: true
+                    property string arrange: "pinned"
+                    property list<string> pinnedApps: ["firefox", "vesktop", "spotify", "steam", "obsidian"]
+                }
+            }
+
+            // Floating cards on the wallpaper. Each has an on/off switch and
+            // a corner anchor ("topLeft", "bottomRight", "centerLeft", ...)
+            // with pixel margins from that corner.
+            property JsonObject desktopWidgets: JsonObject {
+                property bool showWeatherCity: false
+                property JsonObject media: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topLeft"
+                    property int mx: 80
+                    property int my: 110
+                }
+                property JsonObject clock: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomLeft"
+                    property int mx: 80
+                    property int my: 60
+                }
+                property JsonObject weather: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomLeft"
+                    property int mx: 264
+                    property int my: 60
+                }
+                property JsonObject rings: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomRight"
+                    property int mx: 74
+                    property int my: 252
+                }
+                property JsonObject greeting: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomRight"
+                    property int mx: 60
+                    property int my: 60
+                }
+                property JsonObject calendar: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomLeft"
+                    property int mx: 80
+                    property int my: 260
+                }
+                property JsonObject wind: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomLeft"
+                    property int mx: 264
+                    property int my: 60
+                }
+                property JsonObject agenda: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topLeft"
+                    property int mx: 80
+                    property int my: 320
+                }
+                property JsonObject cookieClock: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerRight"
+                    property int mx: 120
+                    property int my: -120
+                }
+                property JsonObject pixelClock: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerRight"
+                    property int mx: 80
+                    property int my: 120
+                }
+                property JsonObject stackedClock: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerLeft"
+                    property int mx: 420
+                    property int my: -120
+                }
+                property JsonObject shape: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerLeft"
+                    property int mx: 420
+                    property int my: 120
+                }
+                property JsonObject visualizer: JsonObject {
+                    property bool enable: false
+                    property string anchor: "bottomLeft"
+                    property int mx: 500
+                    property int my: 60
+                }
+                property JsonObject controls: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topRight"
+                    property int mx: 80
+                    property int my: 110
+                }
+                property JsonObject date: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topRight"
+                    property int mx: 480
+                    property int my: 110
+                }
+                property JsonObject day: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topRight"
+                    property int mx: 480
+                    property int my: 310
+                }
+                property JsonObject battery: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topLeft"
+                    property int mx: 500
+                    property int my: 110
+                }
+                property JsonObject uptime: JsonObject {
+                    property bool enable: false
+                    property string anchor: "topLeft"
+                    property int mx: 500
+                    property int my: 310
+                }
+                property JsonObject worldClock: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerRight"
+                    property int mx: 480
+                    property int my: 0
+                    property list<string> timezones: ["America/New_York", "Europe/London", "Asia/Tokyo"]
+                }
+                property JsonObject todo: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerLeft"
+                    property int mx: 80
+                    property int my: 0
+                }
+                property JsonObject notes: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerLeft"
+                    property int mx: 420
+                    property int my: 0
+                    property string text: ""
+                }
+                property JsonObject timer: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerRight"
+                    property int mx: 80
+                    property int my: 0
+                }
+            }
+
+            // The music client's own Spotify app: each person makes a free one at developer.spotify.com and pastes its
+            // client ID here (it lives in the user's config, never in the repo).
+            property JsonObject music: JsonObject {
+                property string clientId: ""
+                // "app" drives the Spotify desktop app; "echo" plays through librespot (a small player, Spotify app can stay closed)
+                property string engine: "app"
+            }
+
+            // The accent: empty follows the wallpaper, a hex colour overrides it everywhere the bar's colours reach.
+            property JsonObject colours: JsonObject {
+                property string accent: ""
+            }
+
+            property JsonObject account: JsonObject {
+                // Absolute path to a profile picture; empty falls back to
+                // AccountsService / ~/.face, then the first letter.
+                property string avatar: ""
+                // The name shown in settings; empty uses the login name.
+                property string name: ""
             }
 
             property JsonObject idle: JsonObject {
@@ -490,6 +774,9 @@ Singleton {
 
             property JsonObject closeConfirm: JsonObject {
                 property bool enabled: false
+                // Only these ask first (app id contains one of them, case-insensitive); everything else closes at once.
+                // A title that starts with *, • or ● (unsaved work) always asks.
+                property list<string> apps: ["minecraft", "prism", "steam_app", "ghostty", "kitty", "alacritty", "foot", "wezterm", "code", "cursor", "zed", "kate", "gedit", "obs", "firefox", "chromium", "brave", "zen", "libreoffice", "gimp", "krita", "blender", "kdenlive"]
             }
 
             property JsonObject conflictKiller: JsonObject {
@@ -498,6 +785,8 @@ Singleton {
             }
 
             property JsonObject dock: JsonObject {
+                // Which dock shows: iris | macos | pill | panel | off
+                property string kind: "iris"
                 property list<string> pinnedApps: [ // IDs of pinned entries
                     "org.kde.dolphin", "kitty",]
                 property list<string> ignoredAppRegexes: []

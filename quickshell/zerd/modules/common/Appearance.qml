@@ -75,7 +75,7 @@ Singleton {
 
     // Helper for calculating effective animation duration
     function calcEffectiveDuration(baseDuration) {
-        return animationsEnabled ? baseDuration : 0
+        return animationsEnabled ? Math.round(baseDuration * 0.8) : 0
     }
 
     m3colors: QtObject {
@@ -627,4 +627,10 @@ Singleton {
     }
 
     syntaxHighlightingTheme: root.m3colors.darkmode ? "Monokai" : "ayu Light"
+
+    // For the vendored iRiS cards (modules/iris): no compositor blur here, and
+    // the wallpaper's dominant colour is taken from the Material palette.
+    readonly property bool compositorBlurActive: false
+    readonly property bool angelEverywhere: false
+    readonly property color wallpaperDominantColor: m3colors.m3primaryContainer
 }

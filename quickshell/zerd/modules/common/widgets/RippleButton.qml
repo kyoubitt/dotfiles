@@ -21,6 +21,11 @@ Button {
     property real buttonEffectiveRadius: root.down ? root.buttonRadiusPressed : root.buttonRadius
     property int rippleDuration: 1200
     property bool rippleEnabled: true
+    // Accepted so iRiS buttons (modules/iris/components) can set them;
+    // this button has no cookie morph, press scale or state fade of its own.
+    property bool stateTransitionsEnabled: true
+    property bool pressScaleEnabled: true
+    property bool cookieMorphing: false
     property var downAction // When left clicking (down)
     property var releaseAction // When left clicking (release)
     property var altAction // When right clicking

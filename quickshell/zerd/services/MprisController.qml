@@ -209,4 +209,9 @@ Singleton {
 			GlobalStates.osdMediaOpen = true;
 		}
 	}
+
+	// For the vendored iNiR visualizer widget.
+	function effectiveArtUrl(player: var): string { return player?.trackArtUrl ?? ""; }
+	function titleOf(player: var): string { return player?.trackTitle ?? ""; }
+	function artistOf(player: var): string { return player?.trackArtist ?? ""; }
 }

@@ -36,7 +36,7 @@ SUDO_PID=""
 
 # Expected configuration folders in the repo
 readonly CONFIG_FOLDERS=(
-  niri fish zsh fastfetch mako ghostty starship
+  niri fish zsh fastfetch ghostty starship
   zathura wallust scripts quickshell
 )
 
@@ -59,7 +59,7 @@ readonly AUR_PACKAGES=(
 
 # Official repository packages
 readonly PACMAN_PACKAGES=(
-  niri fish fastfetch mako kitty ghostty starship
+  niri fish fastfetch kitty ghostty starship
   zathura zathura-pdf-mupdf ttf-jetbrains-mono-nerd
   qt5-wayland qt6-wayland polkit-gnome ffmpeg imagemagick unzip jq
   curl libnotify
@@ -907,7 +907,7 @@ verify_all_binaries() {
   info "Verifying all required binaries are installed..."
   local missing_binaries=()
   local binaries_to_check=(
-    niri fish fastfetch mako kitty ghostty starship
+    niri fish fastfetch kitty ghostty starship
     zathura wallust awww
     thunar hyprpicker grim slurp satty cliphist ydotool
     wpctl brightnessctl cava wf-recorder playerctl python nmcli
@@ -1342,10 +1342,26 @@ create_systemd_services() {
   local service_dir="${HOME}/.config/systemd/user"
   mkdir -p "${service_dir}"
   install_low_battery_notify_service "${service_dir}"
+  enable_cliphist_service
 
   systemctl --user daemon-reload >> "${LOG_FILE}" 2>&1 || warn "Failed to reload systemd daemon."
 
   msg "Systemd services configured."
+}
+
+enable_cliphist_service() {
+  # Package-provided unit (from the cliphist package itself, not this repo)
+  # that runs `wl-paste --watch cliphist store` - without it nothing ever
+  # gets written to clipboard history, so the clipboard panel stays
+  # permanently empty even though its own QML/service code is correct.
+  if [[ ! -f /usr/lib/systemd/user/cliphist.service ]]; then
+    warn "cliphist.service not found (is the cliphist package installed?), skipping."
+    return
+  fi
+
+  systemctl --user enable --now cliphist.service >> "${LOG_FILE}" 2>&1 \
+    && info "Enabled: cliphist.service" \
+    || warn "Failed to enable cliphist.service"
 }
 
 install_low_battery_notify_service() {

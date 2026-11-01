@@ -13,7 +13,7 @@ Singleton {
     property var clock: SystemClock {
         id: clock
         precision: {
-            if ((Config.options?.time?.secondPrecision ?? false) || GlobalStates.screenLocked)
+            if ((Config.options?.time?.secondPrecision ?? false) || (Config.options?.time?.format ?? "").includes("ss") || GlobalStates.screenLocked)
                 return SystemClock.Seconds;
             return SystemClock.Minutes;
         }
@@ -57,4 +57,6 @@ Singleton {
 
         path: "/proc/uptime"
     }
+
+    readonly property string timeDisplay: time
 }

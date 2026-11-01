@@ -43,6 +43,13 @@ Singleton {
     
     // True if ANY window in ANY workspace is fullscreen (for toast suppression)
     property bool hasAnyFullscreenWindow: false
+
+    // Per-output answer for the floating dock: only the focused window counts
+    // (a fullscreen-sized window on another workspace must not hide it).
+    function hasFullscreenOnOutput(outputName: string): bool {
+        void NiriService.windows
+        return root.isWindowFullscreen(NiriService.activeWindow)
+    }
     
     // Suppress niri reload toast briefly after GameMode changes
     property bool suppressNiriToast: false
@@ -76,7 +83,7 @@ Singleton {
     readonly property string _discoverOverlayServiceName: "discover-overlay.service"
 
     // Fullscreen detection threshold (allow small margin for bar/gaps)
-    readonly property int _marginThreshold: 60
+    readonly property int _marginThreshold: 4   // a real fullscreen window covers the whole output; a maximised one leaves the bar strip (50 px)
 
     // With "gaps 0" in niri config, an ordinary single maximized window is
     // geometrically indistinguishable from a true fullscreen one (niri's IPC has no

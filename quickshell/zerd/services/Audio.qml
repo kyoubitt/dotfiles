@@ -188,7 +188,9 @@ Singleton {
             const epsilon = 0.0005;
             const prev = root._roundVolume(lastVolume);
 
-            if ((newVolume - prev) > (maxAllowedIncrease + epsilon)) {
+            // From silence (0) any rise is allowed: reverting it would pin the
+            // volume at 0 for anything that sets it directly.
+            if (prev > 0.005 && (newVolume - prev) > (maxAllowedIncrease + epsilon)) {
                 sink.audio.volume = prev;
                 root.sinkProtectionTriggered(Translation.tr("Illegal increment"));
             } else if (Math.round(newVolume * 100) / 100 > maxAllowed || newVolume > root.hardMaxValue) {
@@ -272,4 +274,7 @@ Singleton {
             root.toggleMicMute();
         }
     }
+
+    // For the vendored iRiS controls card
+    readonly property bool micMuted: source?.audio?.muted ?? false
 }

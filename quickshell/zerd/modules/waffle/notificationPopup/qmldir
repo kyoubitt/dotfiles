@@ -4,3 +4,4 @@ WaffleNotificationPopup 1.0 WaffleNotificationPopup.qml
 WNotificationListView 1.0 WNotificationListView.qml
 WNotificationGroup 1.0 WNotificationGroup.qml
 WNotificationItem 1.0 WNotificationItem.qml
+WNotificationAppIcon 1.0 WNotificationAppIcon.qml

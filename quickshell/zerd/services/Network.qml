@@ -52,8 +52,36 @@ Singleton {
         enableWifiProc.exec(["/usr/bin/nmcli", "radio", "wifi", cmd]);
     }
 
+    // This machine runs iwd + systemd-networkd with NetworkManager off, so
+    // nmcli never reflects reality; rfkill does, whichever manager is in use.
     function toggleWifi(): void {
-        enableWifi(!wifiEnabled);
+        wifiEnabled = !wifiEnabled; // optimistic, reconciled by the next rfkill poll
+        rfkillToggleProc.exec(["rfkill", "toggle", "wifi"]);
+        rfkillTimer.restart();
+    }
+
+    Process {
+        id: rfkillToggleProc
+    }
+    Process {
+        id: rfkillProc
+        command: ["rfkill", "--json", "list", "wifi"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const dev = JSON.parse(text).rfkilldevices?.[0]
+                    root.wifiEnabled = dev ? (dev.soft === "unblocked" && dev.hard === "unblocked") : false
+                } catch (e) {}
+            }
+        }
+    }
+    Timer {
+        id: rfkillTimer
+        interval: 4000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (!rfkillProc.running) rfkillProc.running = true
     }
 
     function rescanWifi(): void {
@@ -329,4 +357,8 @@ Singleton {
 
         WifiAccessPoint {}
     }
+
+    // For the vendored iRiS weather card
+    readonly property bool online: true
+    readonly property string offlineReason: ""
 }

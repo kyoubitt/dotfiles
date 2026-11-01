@@ -114,4 +114,7 @@ Singleton {
         id: fileOsRelease
         path: "/etc/os-release"
     }
+
+    readonly property string displayName: username
+    property string hostname: ""
 }

@@ -170,4 +170,6 @@ Singleton {
             translationReader.contentLoaded({});
         }
     }
+
+    readonly property var locale: Qt.locale()
 }

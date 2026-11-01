@@ -15,6 +15,10 @@ parse_volume() {
 }
 
 notify() {
+  # The shell's OSD pill (modules/bars/Osd.qml) replaces the banners. It hears volume and mic
+  # changes from PipeWire; brightness is changed outside the shell, so tell it directly.
+  [[ "$1" == "Brightness" ]] && { qs -c zerd ipc call osd display brightness "$3" >/dev/null 2>&1 & }
+  return 0
   local body=""
   [[ "$SHOW_TEXT" == true ]] && body="$4"
   notify-send --app-name="$1" --expire-time="$NOTIFICATION_TIMEOUT" --transient \

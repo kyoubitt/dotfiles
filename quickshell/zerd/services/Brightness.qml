@@ -153,7 +153,8 @@ Singleton {
         }
 
         function setBrightness(value: real): void {
-            value = Math.max(0, Math.min(1, value));
+            // Never 100 %: sending the panel's literal maximum makes the screen go dark.
+            value = Math.max(0, Math.min(0.99, value));
             monitor.brightness = value;
         }
 

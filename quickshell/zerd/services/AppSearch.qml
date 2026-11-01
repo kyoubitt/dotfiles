@@ -149,6 +149,7 @@ Singleton {
     }
 
     function guessIcon(str) {
+        if (/^(org\.)?quickshell$/i.test(String(str ?? ""))) return Directories.assetsPath + "/icons/zerd.svg"
         if (!str || str.length == 0) return "image-missing";
 
         // Quickshell's desktop entry lookup. Its resolved icon id can still be one
@@ -237,6 +238,28 @@ Singleton {
         }
         // Icon name - resolve via theme
         return Quickshell.iconPath(icon, fallback);
+    }
+
+    // Desktop entry for a window class / desktop id, tolerant of case and the
+    // reverse-domain prefix (org.gnome.Nautilus <-> nautilus).
+    function lookupDesktopEntry(appId) {
+        if (!appId || appId.length === 0) return null
+        const direct = DesktopEntries.heuristicLookup(appId)
+        if (direct) return direct
+        const lowered = String(appId).toLowerCase()
+        const tail = lowered.split(".").pop()
+        for (const entry of DesktopEntries.applications.values) {
+            const id = String(entry.id ?? "").toLowerCase().replace(/\.desktop$/, "")
+            const wm = String(entry.startupClass ?? "").toLowerCase()
+            if (id === lowered || wm === lowered || id.split(".").pop() === tail) return entry
+        }
+        return null
+    }
+
+    function launchEntry(entry): bool {
+        if (!entry) return false
+        (entry.originalEntry ?? entry).execute()
+        return true
     }
 
     // Resolves an icon name/path directly (for when you already have the icon from a DesktopEntry)

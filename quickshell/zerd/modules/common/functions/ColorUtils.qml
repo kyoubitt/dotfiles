@@ -188,4 +188,16 @@ Singleton {
         let b = (targetColor.b - baseColor.b * invA) / overlayOpacity;
         return Qt.rgba(clamp01(r), clamp01(g), clamp01(b), overlayOpacity);
     }
+
+    // WCAG relative luminance (0..1) and contrast ratio (1..21).
+    function relativeLuminance(c) {
+        c = Qt.color(c)
+        const lin = v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+        return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b)
+    }
+    function contrastRatio(a, b) {
+        const la = relativeLuminance(Qt.color(a))
+        const lb = relativeLuminance(Qt.color(b))
+        return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+    }
 }
