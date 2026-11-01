@@ -1,0 +1,2 @@
+module qs.modules.iris.frame
+singleton IrisFrame 1.0 IrisFrame.qml

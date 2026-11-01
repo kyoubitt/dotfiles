@@ -1,0 +1,26 @@
+module qs.modules.iris.widgets
+IrisWidgetFace 1.0 IrisWidgetFace.qml
+FaceText 1.0 FaceText.qml
+FaceFigure 1.0 FaceFigure.qml
+singleton IrisFaceData 1.0 IrisFaceData.qml
+FaceDial 1.0 FaceDial.qml
+IrisClockFace 1.0 IrisClockFace.qml
+FaceAvatar 1.0 FaceAvatar.qml
+FaceAction 1.0 FaceAction.qml
+IrisProfileFace 1.0 IrisProfileFace.qml
+IrisWeatherFace 1.0 IrisWeatherFace.qml
+IrisVitalsFace 1.0 IrisVitalsFace.qml
+IrisNowPlayingFace 1.0 IrisNowPlayingFace.qml
+IrisStackDots 1.0 IrisStackDots.qml
+IrisCalendarFace 1.0 IrisCalendarFace.qml
+IrisDateFace 1.0 IrisDateFace.qml
+IrisDayFace 1.0 IrisDayFace.qml
+IrisBatteryFace 1.0 IrisBatteryFace.qml
+IrisUptimeFace 1.0 IrisUptimeFace.qml
+IrisWorldClockFace 1.0 IrisWorldClockFace.qml
+IrisTodoFace 1.0 IrisTodoFace.qml
+IrisNotesFace 1.0 IrisNotesFace.qml
+IrisTimerFace 1.0 IrisTimerFace.qml
+IrisControlsFace 1.0 IrisControlsFace.qml
+FaceHeader 1.0 FaceHeader.qml
+IrisAgendaFace 1.0 IrisAgendaFace.qml

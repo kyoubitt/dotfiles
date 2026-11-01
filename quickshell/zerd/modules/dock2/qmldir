@@ -1,0 +1,4 @@
+module qs.modules.dock2
+ClassicDock 1.0 ClassicDock.qml
+ClassicDockBar 1.0 ClassicDockBar.qml
+DockControls 1.0 DockControls.qml

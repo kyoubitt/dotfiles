@@ -1,0 +1,19 @@
+module qs.modules.iris.components
+IrisArtwork 1.0 IrisArtwork.qml
+IrisClock 1.0 IrisClock.qml
+IrisNumber 1.0 IrisNumber.qml
+IrisImage 1.0 IrisImage.qml
+IrisGlassEdge 1.0 IrisGlassEdge.qml
+IrisCapsuleSlider 1.0 IrisCapsuleSlider.qml
+IrisText 1.0 IrisText.qml
+IrisWheelIntent 1.0 IrisWheelIntent.qml
+IrisPulse 1.0 IrisPulse.qml
+IrisButton 1.0 IrisButton.qml
+IrisIconButton 1.0 IrisIconButton.qml
+IrisBadge 1.0 IrisBadge.qml
+IrisBubbleGrip 1.0 IrisBubbleGrip.qml
+IrisSurface 1.0 IrisSurface.qml
+IrisBubbleFace 1.0 IrisBubbleFace.qml
+IrisDesktopMenu 1.0 IrisDesktopMenu.qml
+IrisMorphSurface 1.0 IrisMorphSurface.qml
+IrisConfigDrag 1.0 IrisConfigDrag.qml
