@@ -1,0 +1,84 @@
+module qs.modules.bars
+singleton BarStyle 1.0 BarStyle.qml
+singleton NetLink 1.0 NetLink.qml
+singleton BarState 1.0 BarState.qml
+singleton BarTools 1.0 BarTools.qml
+singleton NotifRules 1.0 NotifRules.qml
+singleton WidgetRegistry 1.0 WidgetRegistry.qml
+singleton BarActivity 1.0 BarActivity.qml
+BarText 1.0 BarText.qml
+BarIcon 1.0 BarIcon.qml
+BarPill 1.0 BarPill.qml
+BarCava 1.0 BarCava.qml
+WorkspacesFace 1.0 WorkspacesFace.qml
+MediaFace 1.0 MediaFace.qml
+SysMonFace 1.0 SysMonFace.qml
+ClockFace 1.0 ClockFace.qml
+VolumeFace 1.0 VolumeFace.qml
+NetFace 1.0 NetFace.qml
+BatteryFace 1.0 BatteryFace.qml
+TrayFace 1.0 TrayFace.qml
+WeatherFace 1.0 WeatherFace.qml
+FocusFace 1.0 FocusFace.qml
+PowerFace 1.0 PowerFace.qml
+TopBar 1.0 TopBar.qml
+SideBar 1.0 SideBar.qml
+ControlsFace 1.0 ControlsFace.qml
+IslandFace 1.0 IslandFace.qml
+StatusFace 1.0 StatusFace.qml
+BarPopupHost 1.0 BarPopupHost.qml
+BarCava 1.0 BarCava.qml
+ControlsFace 1.0 ControlsFace.qml
+ToolsFace 1.0 ToolsFace.qml
+KeyboardFace 1.0 KeyboardFace.qml
+BarRing 1.0 BarRing.qml
+WeatherPopup 1.0 WeatherPopup.qml
+MediaPopup 1.0 MediaPopup.qml
+SystemPopup 1.0 SystemPopup.qml
+BarSlider 1.0 BarSlider.qml
+VolumePopup 1.0 VolumePopup.qml
+BrightnessPopup 1.0 BrightnessPopup.qml
+NetworkPopup 1.0 NetworkPopup.qml
+NotificationsPopup 1.0 NotificationsPopup.qml
+BarTip 1.0 BarTip.qml
+TrayPopup 1.0 TrayPopup.qml
+BatteryPopup 1.0 BatteryPopup.qml
+Sidebars 1.0 Sidebars.qml
+InfoFace 1.0 InfoFace.qml
+EndFace 1.0 EndFace.qml
+CalendarCard 1.0 CalendarCard.qml
+QuickHeader 1.0 QuickHeader.qml
+QuickToggles 1.0 QuickToggles.qml
+QuickSliders 1.0 QuickSliders.qml
+QuickMedia 1.0 QuickMedia.qml
+QuickRings 1.0 QuickRings.qml
+ClockPopup 1.0 ClockPopup.qml
+ActivityChips 1.0 ActivityChips.qml
+BarMarquee 1.0 BarMarquee.qml
+AccordionSection 1.0 AccordionSection.qml
+TasksSection 1.0 TasksSection.qml
+NotesSection 1.0 NotesSection.qml
+TimerSection 1.0 TimerSection.qml
+ClipboardSection 1.0 ClipboardSection.qml
+WidgetBoard 1.0 WidgetBoard.qml
+NotifPopups 1.0 NotifPopups.qml
+NotifRulesSection 1.0 NotifRulesSection.qml
+RightSections 1.0 RightSections.qml
+CalculatorSection 1.0 CalculatorSection.qml
+ConverterSection 1.0 ConverterSection.qml
+SectionStack 1.0 SectionStack.qml
+Osd 1.0 Osd.qml
+AppSwitcher 1.0 AppSwitcher.qml
+ScreenshotTool 1.0 ScreenshotTool.qml
+ScreenshotsSection 1.0 ScreenshotsSection.qml
+ScreenshotEditor 1.0 ScreenshotEditor.qml
+ShotButton 1.0 ShotButton.qml
+AnnotationLayer 1.0 AnnotationLayer.qml
+AnnotationTools 1.0 AnnotationTools.qml
+AnnotationStyle 1.0 AnnotationStyle.qml
+singleton WallpaperState 1.0 WallpaperState.qml
+WallpaperStage 1.0 WallpaperStage.qml
+WallpaperPicker 1.0 WallpaperPicker.qml
+SettingsWindow 1.0 SettingsWindow.qml
+singleton Profiles 1.0 Profiles.qml
+singleton NiriBinds 1.0 NiriBinds.qml
