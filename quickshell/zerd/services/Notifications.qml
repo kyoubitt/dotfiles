@@ -373,6 +373,7 @@ Singleton {
     // Clearing is instant on screen; the destroying and the D-Bus "closed" replies (one each) trickle out
     // in small batches so a few hundred notifications never freeze the shell.
     property var _cleanup: []
+    Timer { id: cleanupDelay; interval: 300; onTriggered: cleanupTimer.restart() }
     Timer {
         id: cleanupTimer
         interval: 16; repeat: true
@@ -393,7 +394,7 @@ Singleton {
         removed.forEach((notif) => { notif?.timer?.stop(); jobs.push(() => notif?.destroy()) })
         notifServer.trackedNotifications.values.slice().forEach((notif) => { jobs.push(() => notif.dismiss()) })
         root._cleanup = root._cleanup.concat(jobs)
-        cleanupTimer.restart()
+        cleanupDelay.restart()      // after the panels have dropped their cards, so none reads a destroyed notification
         root.discardAll();
     }
 

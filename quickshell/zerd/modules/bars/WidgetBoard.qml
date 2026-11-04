@@ -46,11 +46,14 @@ Scope {
             const c = root.cfg(card.name)
             if (c) s[card.name] = { enable: c.enable, anchor: c.anchor, mx: c.mx, my: c.my }
         }
+        s["__scales"] = [].concat(Config.options?.desktopWidgets?.scales ?? [])
         return s
     }
     function pushUndo(): void { root.undoStack = root.undoStack.concat([root.snapshot()]).slice(-60); root.redoStack = [] }
     function restore(s: var): void {
+        if (s["__scales"] && Config.options?.desktopWidgets) Config.options.desktopWidgets.scales = s["__scales"]
         for (const n in s) {
+            if (n === "__scales") continue
             const c = root.cfg(n)
             if (!c) continue
             c.anchor = s[n].anchor; c.mx = s[n].mx; c.my = s[n].my
@@ -78,7 +81,9 @@ Scope {
             const d = WidgetRegistry.defaults[card.name], c = root.cfg(card.name)
             if (d && c) { c.anchor = d.anchor; c.mx = d.mx; c.my = d.my }
         }
+        if (Config.options?.desktopWidgets) Config.options.desktopWidgets.scales = []
     }
+    function setCardScale(name: string, v: real): void { root.pushUndo(); WidgetRegistry.setScale(name, v) }
     function removeCard(name: string): void { root.pushUndo(); DesktopWidgets.set(name, false) }
     // Lines a card up with the screen: left / centre / right, top / middle / bottom.
     function alignTo(name: string, mode: string, W: real, H: real): void {
@@ -301,9 +306,13 @@ Scope {
                         name: frame.modelData.name
                         screenRef: win.screen
                         enabled: false
-                        onLoaded: WidgetRegistry.report(frame.modelData.name, live.width, live.height)
-                        onWidthChanged: WidgetRegistry.report(frame.modelData.name, live.width, live.height)
-                        onHeightChanged: WidgetRegistry.report(frame.modelData.name, live.width, live.height)
+                        readonly property real cs: WidgetRegistry.scaleOf(frame.modelData.name)
+                        scale: cs
+                        transformOrigin: Item.TopLeft
+                        onCsChanged: WidgetRegistry.report(frame.modelData.name, live.width * cs, live.height * cs)
+                        onLoaded: WidgetRegistry.report(frame.modelData.name, live.width * cs, live.height * cs)
+                        onWidthChanged: WidgetRegistry.report(frame.modelData.name, live.width * cs, live.height * cs)
+                        onHeightChanged: WidgetRegistry.report(frame.modelData.name, live.width * cs, live.height * cs)
                     }
                     HoverHandler { id: dragHover }
                     // Name tag on hover or selection.
@@ -347,6 +356,25 @@ Scope {
                             }
                             frame.dragging = false
                             win.ghost = null; win.guideX = -1; win.guideY = -1
+                        }
+                    }
+                    // size steps for the selected card
+                    Row {
+                        visible: frame.selected
+                        anchors { right: parent.right; bottom: parent.top; bottomMargin: 6 }
+                        spacing: 4
+                        Repeater {
+                            model: [{ l: "S", v: 0.8 }, { l: "M", v: 1 }, { l: "L", v: 1.25 }]
+                            delegate: Rectangle {
+                                id: sz
+                                required property var modelData
+                                readonly property bool on: Math.abs(WidgetRegistry.scaleOf(frame.modelData.name) - modelData.v) < 0.01
+                                width: 28; height: 24; radius: 12
+                                color: on ? BarStyle.accent : BarStyle.surface
+                                border.width: 1; border.color: on ? BarStyle.accent : BarStyle.border
+                                BarText { anchors.centerIn: parent; text: sz.modelData.l; font.pixelSize: 11; font.weight: Font.DemiBold; color: sz.on ? BarStyle.onAccent : BarStyle.text }
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.setCardScale(frame.modelData.name, sz.modelData.v) }
+                            }
                         }
                     }
                     Rectangle {

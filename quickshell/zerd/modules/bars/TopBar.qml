@@ -179,7 +179,7 @@ Scope {
                 width: parent.width
                 height: parent.height
                 y: win.shown ? 0 : -(win.barHeight + win.margin + 6)
-                opacity: win.shown ? 1 : 0
+                opacity: win.shown && !BarState.editingBar ? 1 : 0
                 Behavior on y { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                 Behavior on opacity { NumberAnimation { duration: 110 } }
 

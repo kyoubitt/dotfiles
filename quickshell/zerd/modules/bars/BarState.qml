@@ -24,6 +24,8 @@ Singleton {
     property real panelEnter: 1
     // The widget board (arrange desktop cards) is open.
     property bool board: false
+    // The bar editor shows its own live copy of the bar, so the real one steps out of sight meanwhile.
+    property bool editingBar: false
     // Bumped to ask the quick panel's clipboard section to take the cursor (Mod+V).
     property int clipboardRequest: 0
     function openClipboard(): void {

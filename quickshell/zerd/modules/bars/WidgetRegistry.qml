@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.modules.common
 
 // Every desktop card: its name in `Config.options.desktopWidgets`, a label, an icon and its size on screen.
 Singleton {
@@ -54,6 +55,22 @@ Singleton {
         notes: { anchor: "centerLeft", mx: 420, my: 0 },
         timer: { anchor: "centerRight", mx: 80, my: 0 }
     })
+    // Size step of a card: 0.8, 1 or 1.25.
+    function scaleOf(name: string): real {
+        const l = Config.options?.desktopWidgets?.scales ?? []
+        for (const e of l) {
+            const i = String(e).lastIndexOf("|")
+            if (String(e).slice(0, i) === name) return Number(String(e).slice(i + 1)) || 1
+        }
+        return 1
+    }
+    function setScale(name: string, v: real): void {
+        const t = Config.options?.desktopWidgets
+        if (!t) return
+        const next = [].concat(t.scales ?? []).filter(e => !String(e).startsWith(name + "|"))
+        if (Math.abs(v - 1) > 0.01) next.push(name + "|" + v)
+        t.scales = next
+    }
     // Real sizes, reported by the live cards once they are loaded (the table above is only the first guess).
     property var measured: ({})
     function report(name: string, w: real, h: real): void {

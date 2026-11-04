@@ -377,6 +377,8 @@ Singleton {
             // with pixel margins from that corner.
             property JsonObject desktopWidgets: JsonObject {
                 property bool showWeatherCity: false
+                // per-card size steps, "name|factor" (small 0.8, medium 1, large 1.25); a card not listed is medium
+                property list<string> scales: []
                 property JsonObject media: JsonObject {
                     property bool enable: false
                     property string anchor: "topLeft"

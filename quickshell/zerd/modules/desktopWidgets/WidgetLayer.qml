@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.modules.common
 import qs.services
+import qs.modules.bars
 import qs.modules.iris.host
 import qs.modules.iris.widgets
 import qs.modules.iris.style
@@ -23,13 +24,16 @@ Item {
         required property string name
         readonly property var cfg: Config.options?.desktopWidgets?.[name] ?? ({})
         readonly property string anchorName: cfg.anchor ?? "topLeft"
+        readonly property real cs: WidgetRegistry.scaleOf(name)
+        scale: cs
+        transformOrigin: Item.TopLeft
 
         sourceComponent: Component { CardView { name: placed.name; screenRef: root.screenRef } }
         active: root.visible && (cfg.enable ?? false)
-        x: Math.round(anchorName.endsWith("Right") ? root.width - width - (cfg.mx ?? 0)
-            : anchorName.endsWith("Left") ? (cfg.mx ?? 0) : (root.width - width) / 2)
-        y: Math.round(anchorName.startsWith("bottom") ? root.height - height - (cfg.my ?? 0)
-            : anchorName.startsWith("top") ? (cfg.my ?? 0) : (root.height - height) / 2)
+        x: Math.round(anchorName.endsWith("Right") ? root.width - width * cs - (cfg.mx ?? 0)
+            : anchorName.endsWith("Left") ? (cfg.mx ?? 0) : (root.width - width * cs) / 2)
+        y: Math.round(anchorName.startsWith("bottom") ? root.height - height * cs - (cfg.my ?? 0)
+            : anchorName.startsWith("top") ? (cfg.my ?? 0) : (root.height - height * cs) / 2)
     }
 
     readonly property var screenRef: QsWindow.window?.screen ?? null
