@@ -115,7 +115,7 @@ Singleton {
         if (root.sloppySearch) {
             const results = _cachedList.map(obj => ({
                 entry: obj,
-                score: Levendist.computeScore(obj.name.toLowerCase(), search.toLowerCase())
+                score: Levendist.computeScore(String(obj.name ?? "").toLowerCase(), search.toLowerCase())
             })).filter(item => item.score > root.scoreThreshold)
                 .sort((a, b) => b.score - a.score)
             return results

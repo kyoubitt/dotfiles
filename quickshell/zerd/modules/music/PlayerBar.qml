@@ -7,6 +7,20 @@ import qs.modules.bars
 // the middle, and lyrics, devices, the right panel, volume and full screen on the right.
 Item {
     id: root
+
+    property int sleepMinutes: 0
+    property int sleepSeconds: 0
+    Timer {
+        interval: 1000; repeat: true; running: root.sleepSeconds > 0
+        onTriggered: {
+            root.sleepSeconds--
+            if (root.sleepSeconds <= 0) {
+                root.sleepMinutes = 0
+                if (Playback.isPlaying) Playback.toggle()
+                MusicStore.tell("Sleep timer: paused")
+            }
+        }
+    }
     height: 108
     signal openImmersive()
 
@@ -98,6 +112,16 @@ Item {
         // ---- lyrics, devices, the right panel, volume, full screen
         Row {
             anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter } spacing: 4
+            // sleep timer: each tap steps off, 15, 30, 60 minutes; the music pauses when it runs out
+            Tool {
+                visible: !MusicStore.narrow
+                icon: "bedtime"; on: root.sleepSeconds > 0
+                onTapped: {
+                    const next = { 0: 15, 15: 30, 30: 60, 60: 0 }[root.sleepMinutes] ?? 0
+                    root.sleepMinutes = next; root.sleepSeconds = next * 60
+                    MusicStore.tell(next > 0 ? "Sleep timer: " + next + " min" : "Sleep timer off")
+                }
+            }
             Tool { visible: !MusicStore.narrow; icon: "lyrics"; onTapped: root.openImmersive() }
             Tool { visible: !MusicStore.narrow; icon: "queue_music"; onTapped: { MusicStore.nowOpen = true } }
             Tool { visible: !MusicStore.narrow; icon: "devices"; onTapped: MusicStore.go("profile", null) }

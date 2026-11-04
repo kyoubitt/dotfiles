@@ -35,7 +35,7 @@ Singleton {
         clipboardRequest++
     }
     function toggleClipboard(): void { if (sidebar === "left") closeAll(); else openClipboard() }
-    function openBoard(): void { closeAll(); board = true }
+    function openBoard(): void { closeAll(); GlobalStates.settingsOpen = false; board = true }
     function toggleBoard(): void { if (board) board = false; else openBoard() }
     function toggleSidebar(side: string): void {
         GlobalStates.barPopup = null

@@ -18,12 +18,19 @@ Singleton {
     readonly property bool nightLight: Hyprsunset.active
     property int recordSeconds: 0
     property string recordFile: ""
+    // recordings go where OBS saves its own (read from the OBS profile), so they all land in one folder
+    property string recordDir: Quickshell.env("HOME") + "/Videos/OBS Recordings"
+    Process {
+        running: true
+        command: ["sh", "-c", "grep -h '^RecFilePath=' \"$HOME\"/.config/obs-studio/basic/profiles/*/basic.ini 2>/dev/null | head -1 | cut -d= -f2-"]
+        stdout: StdioCollector { onStreamFinished: { const t = text.trim(); if (t.length > 0) root.recordDir = t } }
+    }
 
     function toggleRecording(): void {
         if (recorder.running) { recorder.running = false; return }
-        root.recordFile = Quickshell.env("HOME") + "/Videos/rec-" + Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss") + ".mp4"
+        root.recordFile = root.recordDir + "/" + Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss") + ".mp4"
         root.recordSeconds = 0
-        recorder.command = ["wf-recorder", "-f", root.recordFile]
+        recorder.command = ["sh", "-c", "mkdir -p \"$1\" && exec wf-recorder -f \"$2\"", "sh", root.recordDir, root.recordFile]
         recorder.running = true
     }
     // Do not disturb while a focus lap runs; undone after, but only if this turned it on.

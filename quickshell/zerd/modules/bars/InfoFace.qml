@@ -1,9 +1,19 @@
 import QtQuick
+import qs.modules.common
 import qs.services
 
 // Left info capsule: cpu / memory / gpu, then the weather. Each half opens its popup.
 BarPill {
     id: root
+
+    readonly property var opts: Config.options?.bars?.top ?? ({})
+    readonly property bool cpuOn: opts.showCpu ?? true
+    readonly property bool memOn: opts.showMemory ?? true
+    readonly property bool gpuOn: (opts.showGpu ?? true) && ResourceUsage.gpuAvailable
+    readonly property bool weatherOn: opts.showWeather ?? true
+    readonly property bool sysShown: cpuOn || memOn || gpuOn
+    readonly property bool weatherShown: weatherOn && Weather.data.temp !== "--°C" && Weather.data.temp !== "--°F"
+    visible: sysShown || weatherShown
 
     Component.onCompleted: ResourceUsage.keepAlive()
     Component.onDestruction: ResourceUsage.releaseKeepAlive()
@@ -17,23 +27,25 @@ BarPill {
     }
 
     Item {
+        id: sysItem
+        visible: root.sysShown
         implicitWidth: sys.implicitWidth
         implicitHeight: 24
         Row {
             id: sys
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
-            Stat { icon: "memory"; value: ResourceUsage.cpuUsage }
-            Stat { icon: "developer_board"; value: ResourceUsage.memoryUsedPercentage }
-            Stat { visible: ResourceUsage.gpuAvailable; icon: "videogame_asset"; value: ResourceUsage.gpuUsage }
+            Stat { visible: root.cpuOn; icon: "memory"; value: ResourceUsage.cpuUsage }
+            Stat { visible: root.memOn; icon: "developer_board"; value: ResourceUsage.memoryUsedPercentage }
+            Stat { visible: root.gpuOn; icon: "videogame_asset"; value: ResourceUsage.gpuUsage }
         }
         MouseArea { anchors.fill: parent; anchors.margins: -3; cursorShape: Qt.PointingHandCursor; onClicked: root.openPopup("system") }
         BarTip { text: "System" }
     }
-    Rectangle { visible: weather.visible; width: 1; height: 14; color: BarStyle.border }
+    Rectangle { visible: root.weatherShown && root.sysShown; width: 1; height: 14; color: BarStyle.border }
     Item {
         id: weather
-        visible: Weather.data.temp !== "--°C" && Weather.data.temp !== "--°F"
+        visible: root.weatherShown
         implicitWidth: wRow.implicitWidth
         implicitHeight: 24
         Row {

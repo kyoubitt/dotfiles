@@ -313,6 +313,18 @@ Singleton {
                     // The focused window's title in the left group. Off: titles can show private chats.
                     property bool showFocus: false
                     property bool showTools: true
+                    // Which block sits in which box (Edit bar in Settings): left, middle, right or hidden.
+                    property list<string> layoutLeft: ["workspaces", "info"]
+                    property list<string> layoutMiddle: ["island"]
+                    property list<string> layoutRight: ["tools", "keyboard", "status", "tray", "end"]
+                    property list<string> layoutHidden: ["focus"]
+                    // Single items inside the Info and Status blocks.
+                    property bool showCpu: true
+                    property bool showMemory: true
+                    property bool showGpu: true
+                    property bool showWeather: true
+                    property bool showBluetooth: true
+                    property bool showBattery: true
                     property string workspaceStyle: "pills"
                     property bool trayHidePinned: false
                     // Tray ids kept out of the bar (still listed in the tray popup) and how many icons show before the overflow button.
@@ -337,6 +349,7 @@ Singleton {
                 // Apps the launcher leaves out of its list (substrings of the entry id or name, any case). They are
                 // still found by typing their name, and pinned ones always show.
                 property JsonObject launcher: JsonObject {
+                    property list<string> recent: []
                     property list<string> hidden: ["qt assistant", "qt linguist", "qt widgets designer", "qt d-bus viewer", "qt v4l2", "avahi", "bssh", "bvnc", "openjdk", "hardware locality", "lstopo", "kvantum", "qt5 settings", "qt6 settings", "bulk rename", "cmake", "mcontrolcenter", "btop", "htop", "yazi", "pandl", "alloy", "thunar preferences", "vim", "xclicker", "mpv media"]
                 }
                 property JsonObject dock: JsonObject {

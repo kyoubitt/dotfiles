@@ -61,11 +61,12 @@ Scope {
         { name: "Bar", icon: "toolbar", rows: [
             { t: "toggle", label: "Hide the bar until the pointer is at the top", hint: "Rest the pointer on the top edge to bring it back", path: "bars.top.autoHide", def: false },
             { t: "toggle", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true },
-            { t: "toggle", label: "Show the focused window's title", hint: "Off keeps private chat titles out of the bar", path: "bars.top.showFocus", def: false },
-            { t: "toggle", label: "Show the tools capsule", path: "bars.top.showTools", def: true },
             { t: "choice", label: "Workspaces", path: "bars.top.workspaceStyle", opts: ["pills", "numbers"], def: "pills" },
             { t: "step", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
-            { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 }
+            { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 },
+            { t: "actions", label: "Layout", hint: "Drag the blocks where you want them, hide what you don't use. Window titles can show private chats, so that block starts hidden", acts: [
+                { text: "Edit bar layout", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "open"] },
+                { text: "Reset to default", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "reset"] } ] },
         ] },
         { name: "Dock", icon: "dock_to_bottom", rows: [
             { t: "toggle", label: "Hide the dock until the pointer is at the edge", hint: "Rest the pointer on the screen edge to show it", path: "iris.dock.autoHide", def: true },
@@ -73,7 +74,6 @@ Scope {
             { t: "choice", label: "Style", hint: "Tiles: every icon on its own dark square in a flat plate. Classic: the floating pill", path: "iris.dock.style", opts: ["tiles", "classic"], def: "tiles" },
             { t: "toggle", label: "Spectrum", hint: "Moves with the music while a song plays", path: "iris.dock.cava.enable", def: true },
             { t: "choice", label: "Spectrum style", hint: "Wave: a soft hill along the bottom of the screen. Inside: bars in the dock plate", path: "iris.dock.cava.style", opts: ["wave", "inside"], def: "wave" },
-            { t: "choice", label: "Edge", path: "iris.dock.edge", opts: ["bottom", "left", "right", "top"], def: "bottom" },
             { t: "step", label: "Icon size", path: "iris.dock.iconSize", min: 28, max: 64, by: 2, def: 40 },
             { t: "toggle", label: "Magnify icons under the pointer", path: "iris.dock.magnification", def: true },
             { t: "toggle", label: "Badges", path: "iris.dock.badges", def: true },
@@ -251,17 +251,22 @@ Scope {
                             id: row
                             required property var modelData
                             required property int index
-                            readonly property bool block: ["list", "profiles", "binds", "cards", "swatches", "overview"].includes(modelData.t)
+                            // long lists of choices (the date formats) wrap under the label instead of running off the card
+                            readonly property bool wrap: modelData.t === "choice" && (modelData.opts?.length ?? 0) > 5
+                            // buttons with a long hint sit under the text, never under the words
+                            readonly property bool stack: modelData.t === "actions" && (modelData.hint?.length ?? 0) > 46
+                            readonly property bool block: row.wrap || row.stack || ["list", "profiles", "binds", "cards", "swatches", "overview"].includes(modelData.t)
                             readonly property var value: Config.getNestedValue(modelData.path, modelData.def)
-                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : (row.modelData.hint || row.modelData.where ? 64 : 54)
+                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : row.wrap ? labelCol.height + wrapRow.height + 42 : row.stack ? labelCol.height + 30 + 44 : (row.modelData.hint || row.modelData.where ? 64 : 54)
                             Rectangle { visible: row.index < rowRep.count - 1; anchors.bottom: parent.bottom; x: 18; width: parent.width - 36; height: 1; color: BarStyle.border; opacity: 0.7 }
                             Column {
+                                id: labelCol
                                 x: 18; y: row.block ? 14 : Math.round((parent.height - height) / 2)
                                 visible: row.modelData.t !== "user"
                                 width: row.block ? parent.width - 36 : (row.modelData.t === "choice" ? Math.max(120, parent.width - chipsRow.width - 64) : parent.width - 260)
                                 spacing: 2
                                 BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.label }
-                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; font.pixelSize: 12; color: BarStyle.subtext
+                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; wrapMode: row.block ? Text.WordWrap : Text.NoWrap; maximumLineCount: row.block ? 2 : 1; font.pixelSize: 12; color: BarStyle.subtext
                                     text: (row.modelData.where ? row.modelData.where + (row.modelData.hint ? "  ·  " : "") : "") + (row.modelData.hint ?? "") }
                             }
                             // the person: picture, name, and buttons to change them
@@ -363,7 +368,8 @@ Scope {
                             // buttons that run something
                             Row {
                                 visible: row.modelData.t === "actions"
-                                anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
+                                x: row.stack ? 18 : row.width - width - 14
+                                y: row.stack ? labelCol.y + labelCol.height + 12 : Math.round((row.height - height) / 2)
                                 spacing: 6
                                 Repeater {
                                     model: row.modelData.acts ?? []
@@ -655,36 +661,46 @@ Scope {
                                     color: row.value ? BarStyle.onAccent : BarStyle.subtext
                                     Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                                     Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                                    BarIcon { anchors.centerIn: parent; visible: row.value; name: "check"; size: 16; color: BarStyle.accent }
+                                    BarIcon { anchors.centerIn: parent; visible: !!row.value; name: "check"; size: 16; color: BarStyle.accent }
                                 }
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, !row.value) }
                             }
                             // choice chips
                             Rectangle {
-                                visible: row.modelData.t === "choice"
+                                visible: row.modelData.t === "choice" && !row.wrap
                                 anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
                                 width: chipsRow.width + 8; height: 38; radius: 19; color: BarStyle.surface
                             }
+                            // choice chips: one row for a few choices, wrapped under the label for many
+                            Component {
+                                id: chipC
+                                Rectangle {
+                                    id: chip
+                                    required property var modelData
+                                    readonly property var v: typeof modelData === "object" ? modelData.v : modelData
+                                    readonly property bool on: row.value === v
+                                    width: chipText.implicitWidth + 22; height: 30; radius: 15
+                                    color: on ? BarStyle.accent : (chipHov.hovered ? BarStyle.plateHover : (row.wrap ? BarStyle.surface : "transparent"))
+                                    Behavior on color { ColorAnimation { duration: 90 } }
+                                    BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.on ? BarStyle.onAccent : BarStyle.text }
+                                    HoverHandler { id: chipHov }
+                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, chip.v) }
+                                }
+                            }
                             Row {
                                 id: chipsRow
-                                visible: row.modelData.t === "choice"
+                                visible: row.modelData.t === "choice" && !row.wrap
                                 anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
                                 spacing: 2
-                                Repeater {
-                                    model: row.modelData.opts ?? []
-                                    delegate: Rectangle {
-                                        id: chip
-                                        required property var modelData
-                                        readonly property var v: typeof modelData === "object" ? modelData.v : modelData
-                                        readonly property bool on: row.value === v
-                                        width: chipText.implicitWidth + 22; height: 30; radius: 15
-                                        color: on ? BarStyle.accent : (chipHov.hovered ? BarStyle.plateHover : "transparent")
-                                        Behavior on color { ColorAnimation { duration: 90 } }
-                                        BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.on ? BarStyle.onAccent : BarStyle.text }
-                                        HoverHandler { id: chipHov }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, chip.v) }
-                                    }
-                                }
+                                Repeater { model: row.wrap ? [] : (row.modelData.opts ?? []); delegate: chipC }
+                            }
+                            Flow {
+                                id: wrapRow
+                                visible: row.wrap
+                                x: 18; y: labelCol.y + labelCol.height + 12
+                                width: row.width - 36
+                                spacing: 6
+                                Repeater { model: row.wrap ? (row.modelData.opts ?? []) : []; delegate: chipC }
                             }
                             // stepper
                             Row {

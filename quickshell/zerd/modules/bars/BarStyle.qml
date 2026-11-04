@@ -23,6 +23,16 @@ Singleton {
     readonly property int gap: 6
     readonly property int padding: 10
 
+    // One look for every card, panel and chip: the same corners, the same hairline edge, the same shadow and motion.
+    readonly property int radiusSmall: 14
+    readonly property int radiusMedium: 18
+    readonly property int radiusLarge: 22
+    readonly property color edge: Qt.rgba(1, 1, 1, 0.07)
+    readonly property real shadowOpacity: 0.3
+    readonly property int motionFast: 100
+    readonly property int motionNormal: 160
+    readonly property int motionSlow: 260
+
     // wttr.in weather codes -> Material symbol and plain text.
     function weatherIcon(code: var): string {
         const c = parseInt(code)

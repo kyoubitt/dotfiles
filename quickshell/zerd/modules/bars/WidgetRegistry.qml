@@ -29,6 +29,31 @@ Singleton {
         { name: "visualizer", cat: "Media", title: "Visualizer", icon: "equalizer", w: 360, h: 120 },
         { name: "shape", cat: "Fun", title: "Shape", icon: "interests", w: 200, h: 200 }
     ]
+    // Where each card sits out of the box (the same values as the settings defaults): what Reset puts back.
+    readonly property var defaults: ({
+        media: { anchor: "topLeft", mx: 80, my: 110 },
+        clock: { anchor: "bottomLeft", mx: 80, my: 60 },
+        weather: { anchor: "bottomLeft", mx: 264, my: 60 },
+        rings: { anchor: "bottomRight", mx: 74, my: 252 },
+        greeting: { anchor: "bottomRight", mx: 60, my: 60 },
+        calendar: { anchor: "bottomLeft", mx: 80, my: 260 },
+        wind: { anchor: "bottomLeft", mx: 264, my: 60 },
+        agenda: { anchor: "topLeft", mx: 80, my: 320 },
+        cookieClock: { anchor: "centerRight", mx: 120, my: -120 },
+        pixelClock: { anchor: "centerRight", mx: 80, my: 120 },
+        stackedClock: { anchor: "centerLeft", mx: 420, my: -120 },
+        shape: { anchor: "centerLeft", mx: 420, my: 120 },
+        visualizer: { anchor: "bottomLeft", mx: 500, my: 60 },
+        controls: { anchor: "topRight", mx: 80, my: 110 },
+        date: { anchor: "topRight", mx: 480, my: 110 },
+        day: { anchor: "topRight", mx: 480, my: 310 },
+        battery: { anchor: "topLeft", mx: 500, my: 110 },
+        uptime: { anchor: "topLeft", mx: 500, my: 310 },
+        worldClock: { anchor: "centerRight", mx: 480, my: 0 },
+        todo: { anchor: "centerLeft", mx: 80, my: 0 },
+        notes: { anchor: "centerLeft", mx: 420, my: 0 },
+        timer: { anchor: "centerRight", mx: 80, my: 0 }
+    })
     // Real sizes, reported by the live cards once they are loaded (the table above is only the first guess).
     property var measured: ({})
     function report(name: string, w: real, h: real): void {

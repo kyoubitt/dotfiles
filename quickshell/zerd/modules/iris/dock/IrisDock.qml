@@ -535,7 +535,9 @@ Item {
                 color: root.tileStyle ? "transparent" : IrisStyle.surface
                 border.width: root.tileStyle ? 0 : 1
                 notchBottom: root.tileStyle
-                opacity: window.revealed || window.edgeOffset > -window.dockHeight ? 1 : 0
+                // nothing to show (no running apps, no launcher, no pieces): no empty plate on the edge
+                readonly property bool hollow: root.entries.length === 0 && !root.showLauncher && root.pieces.length === 0 && !GlobalStates.irisEdit
+                opacity: !hollow && (window.revealed || window.edgeOffset > -window.dockHeight) ? 1 : 0
 
                 // the spectrum behind the icons (Settings > Dock > Spectrum)
                 IrisDockCava {

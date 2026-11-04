@@ -12,8 +12,8 @@ Flickable {
     clip: true
     boundsBehavior: Flickable.StopAtBounds
     Component.onCompleted: {
-        MusicApi.playlist(root.list.id, j => root.info = j)
-        MusicApi.playlistItems(root.list.id, t => root.tracks = t, t => root.tracks = t)
+        MusicApi.playlist(root.list?.id, j => root.info = j)
+        MusicApi.playlistItems(root.list?.id, t => root.tracks = t, t => root.tracks = t)
     }
     Header {
         id: head
@@ -23,9 +23,9 @@ Flickable {
         title: root.list?.name ?? ""
         subtitle: (root.info?.owner?.display_name ?? root.list?.owner?.display_name ?? "") + (root.tracks.length > 0 ? "  ·  " + root.tracks.length + " songs" : "")
         actions: [
-            Pill { text: MusicStore.playingContext(root.list.uri) ? "Pause" : "Play"; icon: MusicStore.playingContext(root.list.uri) ? "pause" : "play_arrow"; onTapped: MusicStore.toggleContext(root.list.uri) },
+            Pill { text: MusicStore.playingContext(root.list?.uri) ? "Pause" : "Play"; icon: MusicStore.playingContext(root.list?.uri) ? "pause" : "play_arrow"; onTapped: MusicStore.toggleContext(root.list?.uri) },
             Pill { text: "Shuffle+"; icon: "shuffle"; filled: false; onTapped: MusicStore.shufflePlus(root.list) },
-            Pill { text: MusicStore.isPinned(root.list.id) ? "Unpin" : "Pin"; icon: "keep"; filled: false; onTapped: MusicStore.togglePin(root.list.id) }
+            Pill { text: MusicStore.isPinned(root.list?.id) ? "Unpin" : "Pin"; icon: "keep"; filled: false; onTapped: MusicStore.togglePin(root.list?.id) }
         ]
     }
     TrackTable {

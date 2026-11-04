@@ -61,6 +61,8 @@ NotesSection 1.0 NotesSection.qml
 TimerSection 1.0 TimerSection.qml
 ClipboardSection 1.0 ClipboardSection.qml
 WidgetBoard 1.0 WidgetBoard.qml
+BarEditor 1.0 BarEditor.qml
+NotifIcon 1.0 NotifIcon.qml
 NotifPopups 1.0 NotifPopups.qml
 NotifRulesSection 1.0 NotifRulesSection.qml
 RightSections 1.0 RightSections.qml

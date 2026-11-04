@@ -41,7 +41,7 @@ Item {
     property real regionBrightnessSpread: 0.1
 
     property real scaleFactor: 1
-    property int widgetCardRadius: 28
+    property int widgetCardRadius: 22     // the shell's large corner (BarStyle.radiusLarge)
     property int cornerRadiusOverride: -1
     property int widgetTitleWeight: Font.DemiBold
     property string timeFormat: "system"

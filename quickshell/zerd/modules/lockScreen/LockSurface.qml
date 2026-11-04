@@ -270,7 +270,7 @@ Item {
                 selectionColor: root.accent
                 font.family: Appearance.font.family.expressive
                 font.pixelSize: 16
-                renderType: Text.NativeRendering
+                renderType: Text.QtRendering
                 clip: true
                 focus: true
 

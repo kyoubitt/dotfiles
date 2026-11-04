@@ -23,6 +23,9 @@ Scope {
         function add(name: string): void { root.add(name) }
         function remove(name: string): void { DesktopWidgets.set(name, false) }
         function tidy(): void { root.tidy() }
+        function undo(): void { root.undo() }
+        function redo(): void { root.redo() }
+        function reset(): void { root.resetAll() }
     }
 
     function cfg(name: string): var { return Config.options?.desktopWidgets?.[name] ?? null }
@@ -34,8 +37,62 @@ Scope {
         const y = a.startsWith("bottom") ? H - card.h - (c?.my ?? 0) : a.startsWith("top") ? (c?.my ?? 0) : (H - card.h) / 2
         return Qt.point(Math.round(x), Math.round(y))
     }
+    // ---- Undo / redo / reset: a snapshot of every card's switch and place is kept before each change.
+    property var undoStack: []
+    property var redoStack: []
+    function snapshot(): var {
+        const s = {}
+        for (const card of WidgetRegistry.cards) {
+            const c = root.cfg(card.name)
+            if (c) s[card.name] = { enable: c.enable, anchor: c.anchor, mx: c.mx, my: c.my }
+        }
+        return s
+    }
+    function pushUndo(): void { root.undoStack = root.undoStack.concat([root.snapshot()]).slice(-60); root.redoStack = [] }
+    function restore(s: var): void {
+        for (const n in s) {
+            const c = root.cfg(n)
+            if (!c) continue
+            c.anchor = s[n].anchor; c.mx = s[n].mx; c.my = s[n].my
+            DesktopWidgets.set(n, s[n].enable)
+        }
+    }
+    function undo(): void {
+        if (root.undoStack.length === 0) return
+        const last = root.undoStack[root.undoStack.length - 1]
+        root.redoStack = root.redoStack.concat([root.snapshot()])
+        root.undoStack = root.undoStack.slice(0, -1)
+        root.restore(last)
+    }
+    function redo(): void {
+        if (root.redoStack.length === 0) return
+        const next = root.redoStack[root.redoStack.length - 1]
+        root.undoStack = root.undoStack.concat([root.snapshot()])
+        root.redoStack = root.redoStack.slice(0, -1)
+        root.restore(next)
+    }
+    // Every card back to where it sits out of the box (the switches stay as they are). Undo brings the old places back.
+    function resetAll(): void {
+        root.pushUndo()
+        for (const card of WidgetRegistry.cards) {
+            const d = WidgetRegistry.defaults[card.name], c = root.cfg(card.name)
+            if (d && c) { c.anchor = d.anchor; c.mx = d.mx; c.my = d.my }
+        }
+    }
+    function removeCard(name: string): void { root.pushUndo(); DesktopWidgets.set(name, false) }
+    // Lines a card up with the screen: left / centre / right, top / middle / bottom.
+    function alignTo(name: string, mode: string, W: real, H: real): void {
+        const p = root.posOf(name, W, H), sz = WidgetRegistry.sizeOf(name), m = 40
+        let x = p.x, y = p.y
+        if (mode === "left") x = m; else if (mode === "centre") x = (W - sz.w) / 2; else if (mode === "right") x = W - sz.w - m
+        else if (mode === "top") y = m; else if (mode === "middle") y = (H - sz.h) / 2; else if (mode === "bottom") y = H - sz.h - m
+        root.place(name, x, y, W, H)
+    }
+    Timer { id: nudgeTimer; interval: 700 }
+
+    function place(name: string, x: real, y: real, W: real, H: real): void { root.pushUndo(); root.placeRaw(name, x, y, W, H) }
     // Writes a top-left position back as the nearest anchor plus margins.
-    function place(name: string, x: real, y: real, W: real, H: real): void {
+    function placeRaw(name: string, x: real, y: real, W: real, H: real): void {
         const c = root.cfg(name), card = WidgetRegistry.sizeOf(name)
         if (!c) return
         x = Math.round(Math.max(0, Math.min(W - card.w, x)))
@@ -57,12 +114,15 @@ Scope {
         if (!c) return
         const s = Quickshell.screens[0], card = WidgetRegistry.sizeOf(name)
         const at = WidgetRegistry.snap((s.width - card.w) / 2, (s.height - card.h) / 2, card.w, card.h, s.width, s.height, [], root.grid, root.lock, false)
+        root.pushUndo()
         DesktopWidgets.set(name, true)
-        root.place(name, at.x, at.y, s.width, s.height)
+        root.placeRaw(name, at.x, at.y, s.width, s.height)
     }
     function nudge(name: string, dx: int, dy: int): void {
         const s = Quickshell.screens[0], p = root.posOf(name, s.width, s.height)
-        root.place(name, p.x + dx, p.y + dy, s.width, s.height)
+        if (!nudgeTimer.running) root.pushUndo()      // one undo step for a run of key presses
+        nudgeTimer.restart()
+        root.placeRaw(name, p.x + dx, p.y + dy, s.width, s.height)
     }
     // Rectangles of the other enabled cards, for snapping and overlap checks.
     function rects(except: string, W: real, H: real): var {
@@ -95,12 +155,13 @@ Scope {
     function tidy(): void {
         const s = Quickshell.screens[0]
         const g = Math.max(8, root.grid)
+        root.pushUndo()
         let x = Math.ceil(60 / g) * g, y = Math.ceil(110 / g) * g, rowH = 0
         for (const card of WidgetRegistry.cards) {
             if (!DesktopWidgets.enabled(card.name)) continue
             const sz = WidgetRegistry.sizeOf(card.name)
             if (x + sz.w > s.width - 60) { x = Math.ceil(60 / g) * g; y += Math.ceil((rowH + 16) / g) * g; rowH = 0 }
-            root.place(card.name, x, y, s.width, s.height)
+            root.placeRaw(card.name, x, y, s.width, s.height)
             x += Math.ceil((sz.w + 16) / g) * g; rowH = Math.max(rowH, sz.h)
         }
     }
@@ -134,13 +195,18 @@ Scope {
                 focus: true
                 Keys.onEscapePressed: { if (win.pickerOpen) win.pickerOpen = false; else BarState.board = false }
                 Keys.onPressed: event => {
+                    if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Z) {
+                        if (event.modifiers & Qt.ShiftModifier) root.redo(); else root.undo()
+                        event.accepted = true; return
+                    }
+                    if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Y) { root.redo(); event.accepted = true; return }
                     const step = (event.modifiers & Qt.ShiftModifier) ? Math.max(1, root.grid) : 1
                     if (win.selected === "") return
                     if (event.key === Qt.Key_Left) root.nudge(win.selected, -step, 0)
                     else if (event.key === Qt.Key_Right) root.nudge(win.selected, step, 0)
                     else if (event.key === Qt.Key_Up) root.nudge(win.selected, 0, -step)
                     else if (event.key === Qt.Key_Down) root.nudge(win.selected, 0, step)
-                    else if (event.key === Qt.Key_Delete) { DesktopWidgets.set(win.selected, false); win.selected = "" }
+                    else if (event.key === Qt.Key_Delete) { root.removeCard(win.selected); win.selected = "" }
                     else return
                     event.accepted = true
                 }
@@ -184,7 +250,7 @@ Scope {
             Rectangle {
                 visible: win.ghost !== null
                 x: win.ghost?.x ?? 0; y: win.ghost?.y ?? 0; width: win.ghost?.w ?? 0; height: win.ghost?.h ?? 0
-                radius: 22; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.12)
+                radius: BarStyle.radiusLarge; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.12)
                 border.width: 2; border.color: BarStyle.accent
             }
             BarText { anchors.horizontalCenter: parent.horizontalCenter; y: 56; text: "Drag a card. It locks to the grid; hold Alt to place it freely. Arrows nudge, Delete removes."; color: "#ffffffbb"; font.pixelSize: 12 }
@@ -212,16 +278,21 @@ Scope {
                     }
                     readonly property var size: WidgetRegistry.sizeOf(modelData.name)
                     width: size.w; height: size.h
-                    radius: 22
+                    radius: BarStyle.radiusLarge
                     color: "transparent"
                     border.width: selected || dragging ? 2 : (dragHover.hovered ? 1 : 0)
                     border.color: overlaps ? BarStyle.danger : (selected || dragging ? BarStyle.accent : BarStyle.border)
-                    opacity: dragging ? 0.8 : 1
+                    opacity: dragging ? 0.92 : 1
                     Behavior on opacity { NumberAnimation { duration: 100 } }
+                    // Picked up: it lifts a little and its shadow grows; dropped: it springs into place.
+                    scale: dragging ? 1.04 : 1
+                    Behavior on scale { SpringAnimation { spring: 6; damping: 0.5; epsilon: 0.002 } }
+                    Rectangle { z: -2; visible: frame.dragging; anchors { fill: parent; leftMargin: -10; rightMargin: -10; topMargin: -2; bottomMargin: -18 } radius: 32; color: "#000000"; opacity: 0.16 }
+                    Rectangle { z: -1; visible: frame.dragging; anchors { fill: parent; leftMargin: -4; rightMargin: -4; topMargin: 2; bottomMargin: -10 } radius: 26; color: "#000000"; opacity: 0.22 }
                     Binding on x { when: !frame.dragging; value: frame.target.x }
                     Binding on y { when: !frame.dragging; value: frame.target.y }
-                    Behavior on x { enabled: !frame.dragging; NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
-                    Behavior on y { enabled: !frame.dragging; NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+                    Behavior on x { enabled: !frame.dragging; SpringAnimation { spring: 5; damping: 0.55; epsilon: 0.25 } }
+                    Behavior on y { enabled: !frame.dragging; SpringAnimation { spring: 5; damping: 0.55; epsilon: 0.25 } }
                     z: dragging ? 10 : (selected ? 5 : 1)
 
                     // The card itself, live; input is the board's, not the card's.
@@ -283,7 +354,7 @@ Scope {
                         width: 26; height: 26; radius: 13
                         color: closeArea.pressed ? BarStyle.border : BarStyle.plateHover
                         BarIcon { anchors.centerIn: parent; name: "close"; size: 14 }
-                        MouseArea { id: closeArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: DesktopWidgets.set(frame.modelData.name, false) }
+                        MouseArea { id: closeArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.removeCard(frame.modelData.name) }
                     }
                 }
             }
@@ -354,7 +425,39 @@ Scope {
                         BarIcon { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; name: row.added ? "check_circle" : "add_circle"; size: 20; color: row.added ? BarStyle.accent : BarStyle.subtext }
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: { if (row.added) DesktopWidgets.set(row.modelData.name, false); else { root.add(row.modelData.name); win.selected = row.modelData.name } }
+                            onClicked: { if (row.added) root.removeCard(row.modelData.name); else { root.add(row.modelData.name); win.selected = row.modelData.name } }
+                        }
+                    }
+                }
+            }
+
+            // ---- Align: with a card selected, line it up with the screen.
+            Rectangle {
+                id: alignBar
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: toolbar.top
+                anchors.bottomMargin: win.pickerOpen ? 484 : 12
+                visible: opacity > 0
+                opacity: win.selected !== "" && !win.pickerOpen ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 110 } }
+                width: alignRow.implicitWidth + 20; height: 44; radius: 22
+                color: BarStyle.surface; border.width: 1; border.color: BarStyle.border
+                MouseArea { anchors.fill: parent }
+                Row {
+                    id: alignRow
+                    anchors.centerIn: parent; spacing: 2
+                    Repeater {
+                        model: [{ m: "left", i: "align_horizontal_left" }, { m: "centre", i: "align_horizontal_center" }, { m: "right", i: "align_horizontal_right" },
+                                { m: "top", i: "align_vertical_top" }, { m: "middle", i: "align_vertical_center" }, { m: "bottom", i: "align_vertical_bottom" }]
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: 34; height: 34; radius: 17
+                            color: ah.hovered ? BarStyle.plateHover : "transparent"
+                            Behavior on color { ColorAnimation { duration: 90 } }
+                            BarIcon { anchors.centerIn: parent; name: parent.modelData.i; size: 18 }
+                            HoverHandler { id: ah }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.alignTo(win.selected, parent.modelData.m, win.width, win.height) }
+                            BarTip { text: "Align " + parent.modelData.m }
                         }
                     }
                 }
@@ -411,6 +514,10 @@ Scope {
                     Pill { icon: root.lock ? "grid_on" : "open_with"; label: root.lock ? "Snap" : "Free"; on: root.lock; onTapped: root.setBoard("snap", !root.lock) }
                     Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.border }
                     Pill { icon: "auto_fix_high"; label: "Tidy"; onTapped: root.tidy() }
+                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.border }
+                    Pill { icon: "undo"; label: "Undo"; opacity: root.undoStack.length > 0 ? 1 : 0.4; onTapped: root.undo() }
+                    Pill { icon: "redo"; label: "Redo"; opacity: root.redoStack.length > 0 ? 1 : 0.4; onTapped: root.redo() }
+                    Pill { icon: "restart_alt"; label: "Reset"; onTapped: root.resetAll() }
                     Pill { label: "Done"; primary: true; onTapped: BarState.board = false }
                 }
             }

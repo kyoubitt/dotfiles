@@ -40,7 +40,6 @@ Rectangle {
         x: Math.round((root.width - implicitWidth) / 2)
         y: Math.round((root.height - implicitHeight) / 2)
         flow: root.vertical ? Grid.TopToBottom : Grid.LeftToRight
-        rows: root.vertical ? Math.max(1, visibleChildren.length) : 1
         columns: root.vertical ? 1 : Math.max(1, visibleChildren.length)
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter

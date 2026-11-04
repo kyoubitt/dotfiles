@@ -1,10 +1,10 @@
 import QtQuick
 import qs.modules.common
 
-// Natively rendered, unhinted text, same recipe as the lock screen.
+// Qt-rendered text: clean greyscale edges. Native rendering paints coloured subpixel fringes on the shell's see-through windows.
 Text {
     color: BarStyle.text
-    renderType: Text.NativeRendering
+    renderType: Text.QtRendering
     font.family: Appearance.font.family.expressive
     font.pixelSize: BarStyle.fontSize
     font.weight: Font.Medium

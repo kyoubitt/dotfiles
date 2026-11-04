@@ -27,7 +27,7 @@ StyledText {
     font.letterSpacing: role === IrisText.Display ? IrisStyle.tracking(IrisStyle.typeDisplay)
         : role === IrisText.Metric ? IrisStyle.tracking(IrisStyle.typeTitleLarge) : 0
     font.variableAxes: ({})
-    renderType: Text.NativeRendering
+    renderType: Text.QtRendering
     font.hintingPreference: Font.PreferNoHinting
     font.kerning: true
     font.preferShaping: true

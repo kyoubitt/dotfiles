@@ -38,7 +38,7 @@ BarPill {
     component Divider: Rectangle { width: 1; height: 14; color: BarStyle.border }
 
     Tool { tip: "Screenshot"; icon: "screenshot_region"; onTapped: Quickshell.execDetached(["niri", "msg", "action", "screenshot"]) }
-    Tool { tip: BarTools.recording ? "Stop recording  " + BarTools.clock(BarTools.recordSeconds) : "Record screen (saved to Videos)"; icon: BarTools.recording ? "stop_circle" : "screen_record"; lit: BarTools.recording; onTapped: BarTools.toggleRecording() }
+    Tool { tip: BarTools.recording ? "Stop recording  " + BarTools.clock(BarTools.recordSeconds) : "Record screen (saved to OBS Recordings)"; icon: BarTools.recording ? "stop_circle" : "screen_record"; lit: BarTools.recording; onTapped: BarTools.toggleRecording() }
     Tool { tip: "Colour picker"; icon: "colorize"; onTapped: Quickshell.execDetached(["hyprpicker", "-a"]) }
     Divider {}
     Tool { tip: "Clipboard"; icon: "content_paste"; onTapped: root.openPopup("clipboard") }

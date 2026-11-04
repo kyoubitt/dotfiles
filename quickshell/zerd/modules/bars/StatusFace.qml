@@ -1,5 +1,6 @@
 import QtQuick
 import qs
+import qs.modules.common
 import qs.services
 
 // One capsule for the system status: cpu/memory, brightness, volume,
@@ -89,15 +90,15 @@ BarPill {
         tint: (NetLink.iwd ? NetLink.connected || NetLink.ethUp : Network.ethernet || Network.wifiEnabled) ? BarStyle.text : BarStyle.subtext
     }
     Part {
-        visible: BluetoothStatus.available
+        visible: BluetoothStatus.available && (Config.options?.bars?.top?.showBluetooth ?? true)
         popup: "network"
         tip: BluetoothStatus.connected ? BluetoothStatus.activeDeviceSummary() : (BluetoothStatus.enabled ? "Bluetooth" : "Bluetooth off")
         icon: !BluetoothStatus.enabled ? "bluetooth_disabled" : BluetoothStatus.connected ? "bluetooth_connected" : "bluetooth"
         lit: BluetoothStatus.connected
         tint: BarStyle.subtext
     }
-    Divider { visible: Battery.available }
-    Part { visible: Battery.available; popup: "battery"; tip: "Battery " + Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " charging" : ""); icon: Battery.isCharging ? "battery_charging_full" : "battery_full"; label: Math.round(Battery.percentage * 100) + "%"; tint: Battery.isCritical ? BarStyle.danger : BarStyle.text }
+    Divider { visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true) }
+    Part { visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true); popup: "battery"; tip: "Battery " + Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " charging" : ""); icon: Battery.isCharging ? "battery_charging_full" : "battery_full"; label: Math.round(Battery.percentage * 100) + "%"; tint: Battery.isCritical ? BarStyle.danger : BarStyle.text }
     Divider {}
     Part {
         popup: "notifications"

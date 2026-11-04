@@ -64,7 +64,7 @@ Row {
             anchors.centerIn: parent
             text: ring.icon
             color: ring.lit ? IrisStyle.inkOnAccent : IrisStyle.text
-            renderType: Text.NativeRendering
+            renderType: Text.QtRendering
             font.family: Appearance.font.family.iconMaterial
             font.pixelSize: 18
             font.hintingPreference: Font.PreferNoHinting

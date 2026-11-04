@@ -90,7 +90,7 @@ Item {
             font.pixelSize: Math.max(8, Math.round(root.r * 0.2))
             font.weight: IrisStyle.weight(Font.DemiBold)
             font.features: ({ "tnum": 1 })
-            renderType: Text.NativeRendering
+            renderType: Text.QtRendering
         }
     }
 
@@ -103,7 +103,7 @@ Item {
         font.family: root.face.fontMain
         font.pixelSize: Math.max(8, Math.round(root.r * 0.16))
         font.weight: IrisStyle.weight(Font.DemiBold)
-        renderType: Text.NativeRendering
+        renderType: Text.QtRendering
     }
 
     Shape {

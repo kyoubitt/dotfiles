@@ -99,7 +99,7 @@ Scope {
                 function ipc(target: string, fn: string): void { Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", target, fn]) }
                 readonly property var actions: [
                     { title: Translation.tr("Lock screen"), icon: "lock", keys: ["lock"], run: () => card.ipc("lockScreen", "lock") },
-                    { title: Translation.tr("Sleep"), icon: "bedtime", keys: ["suspend", "sleep"], run: () => Quickshell.execDetached(["systemctl", "suspend"]) },
+                    { title: Translation.tr("Sleep"), icon: "bedtime", keys: ["suspend", "sleep"], run: () => Quickshell.execDetached(["sh", "-c", "sleep 1; systemctl suspend"]) },
                     { title: Translation.tr("Restart"), icon: "restart_alt", keys: ["reboot", "restart"], run: () => Quickshell.execDetached(["systemctl", "reboot"]) },
                     { title: Translation.tr("Shut down"), icon: "power_settings_new", keys: ["poweroff", "shutdown"], run: () => Quickshell.execDetached(["systemctl", "poweroff"]) },
                     { title: Translation.tr("Log out"), icon: "logout", keys: ["logout", "exit"], run: () => Quickshell.execDetached(["niri", "msg", "action", "quit"]) },
@@ -175,7 +175,7 @@ Scope {
                         color: IrisStyle.text
                         selectionColor: IrisStyle.accent
                         font.pixelSize: 13
-                        renderType: Text.NativeRendering
+                        renderType: Text.QtRendering
                         font.hintingPreference: Font.PreferNoHinting
                         clip: true
                         focus: true

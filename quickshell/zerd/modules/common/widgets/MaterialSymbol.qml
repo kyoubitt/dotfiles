@@ -40,7 +40,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         
-        renderType: (!root.useNerd && root.fill !== 0) ? Text.CurveRendering : Text.NativeRendering
+        renderType: (!root.useNerd && root.fill !== 0) ? Text.CurveRendering : Text.QtRendering
         font {
             hintingPreference: Font.PreferFullHinting
             family: (root.useNerd && root.hasNerdGlyph) 

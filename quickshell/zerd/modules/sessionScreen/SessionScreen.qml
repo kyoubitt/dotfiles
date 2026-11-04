@@ -115,7 +115,7 @@ Scope {
                     const k = event.key
                     const go = (cmd) => { GlobalStates.sessionOpen = false; Quickshell.execDetached(cmd); event.accepted = true }
                     if (k === Qt.Key_L) go(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
-                    else if (k === Qt.Key_S) go(["systemctl", "suspend"])
+                    else if (k === Qt.Key_S) go(["sh", "-c", "sleep 1; systemctl suspend"])
                     else if (k === Qt.Key_R) go(["systemctl", "reboot"])
                     else if (k === Qt.Key_U) go(["systemctl", "poweroff"])
                     else if (k === Qt.Key_E) go(["niri", "msg", "action", "quit", "--skip-confirmation"])
@@ -182,7 +182,7 @@ Scope {
                         hint: "S"
                         onActivated: {
                             GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "suspend"])
+                            Quickshell.execDetached(["sh", "-c", "sleep 1; systemctl suspend"])
                         }
                     }
                     SessionButton {

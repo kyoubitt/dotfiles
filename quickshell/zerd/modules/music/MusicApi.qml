@@ -246,7 +246,7 @@ Singleton {
         root.call("GET", base, null, (s, j) => {
             if (s !== 200) { done([]); return }
             pagesOf[0] = toTracks(j)
-            const total = Math.min(j.total ?? 0, 1000)
+            const total = Math.min(j?.total ?? 0, 1000)
             const count = Math.max(1, Math.ceil(total / 100))
             if (count === 1) { done(assemble(1)); return }
             if (partial) partial(assemble(1))

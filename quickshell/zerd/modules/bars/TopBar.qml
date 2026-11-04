@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQml.Models
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -29,6 +30,7 @@ Scope {
     WallpaperPicker {}
     SettingsWindow {}
     WidgetBoard {}
+    BarEditor {}
     LazyLoader { active: (Config.options?.bars?.notifications?.engine ?? "rice") === "rice"; component: NotifPopups {} }
 
     property string debug: ""
@@ -97,6 +99,36 @@ Scope {
             readonly property bool revealOnHover: options.revealOnHover ?? true
             readonly property bool shown: !autoHide || pointerOn || top.forced || GlobalStates.barPopup !== null || (BarState.sidebar !== "" && !win.mixedFullscreen)
 
+            // Which block sits where (Settings > Bar). Order inside a side is fixed, so moving a block never scrambles the rest.
+            readonly property var defaultSide: ({ workspaces: "left", info: "left", focus: "hidden", island: "middle", tools: "right", keyboard: "right", status: "right", tray: "right", end: "right" })
+            readonly property var layout: {
+                const l = { left: [].concat(options.layoutLeft ?? []), middle: [].concat(options.layoutMiddle ?? []), right: [].concat(options.layoutRight ?? []), hidden: [].concat(options.layoutHidden ?? []) }
+                const seen = {}
+                for (const k in l) for (const id of l[k]) seen[id] = true
+                for (const id of win.blockOrder) if (!seen[id]) l[win.defaultSide[id] === "hidden" ? "hidden" : win.defaultSide[id]].push(id)
+                return l
+            }
+            function blocks(where: string): var {
+                return win.layout[where].filter(id => win.blockOrder.includes(id)).map(id => ({ type: id }))
+            }
+            // The free gap between the left and right groups. The middle group sits in it, and the song title
+            // shrinks to what is left, so the groups never run into each other.
+            readonly property real freeGap: right.x - (left.x + left.width) - 24
+            readonly property real titleMax: win.layout.middle.includes("island") ? Math.max(0, Math.min(220, win.freeGap - 175)) : 220
+            readonly property var blockOrder: ["workspaces", "info", "focus", "island", "tools", "keyboard", "status", "tray", "end"]
+            readonly property DelegateChooser chooser: DelegateChooser {
+                role: "type"
+                DelegateChoice { roleValue: "workspaces"; WorkspacesFace { thickness: win.barHeight; output: win.modelData.name } }
+                DelegateChoice { roleValue: "info"; InfoFace { thickness: win.barHeight } }
+                DelegateChoice { roleValue: "focus"; FocusFace { thickness: win.barHeight; maxTextWidth: 300 } }
+                DelegateChoice { roleValue: "island"; IslandFace { thickness: win.barHeight; maxTextWidth: win.titleMax } }
+                DelegateChoice { roleValue: "tools"; ToolsFace { thickness: win.barHeight } }
+                DelegateChoice { roleValue: "keyboard"; KeyboardFace { thickness: win.barHeight } }
+                DelegateChoice { roleValue: "status"; StatusFace { thickness: win.barHeight; parentScreen: win.screen } }
+                DelegateChoice { roleValue: "tray"; TrayFace { thickness: win.barHeight; window: win } }
+                DelegateChoice { roleValue: "end"; EndFace { thickness: win.barHeight } }
+            }
+
             screen: modelData
             color: "transparent"
             visible: !hiddenByState
@@ -154,16 +186,15 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    WorkspacesFace { thickness: win.barHeight; output: win.modelData.name }
-                    InfoFace { thickness: win.barHeight }
-                    FocusFace { visible: win.options.showFocus ?? false; thickness: win.barHeight; maxTextWidth: 300 }
+                    Repeater { model: win.blocks("left"); delegate: win.chooser }
                 }
                 Row {
                     id: centre
-                    x: Math.round((parent.width - width) / 2)
+                    x: Math.max(left.x + left.width + 12, Math.min(Math.round((parent.width - width) / 2), right.x - width - 12))
                     anchors.verticalCenter: parent.verticalCenter
+                    spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    IslandFace { thickness: win.barHeight }
+                    Repeater { model: win.blocks("middle"); delegate: win.chooser }
                 }
                 Row {
                     id: right
@@ -171,11 +202,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    ToolsFace { visible: win.options.showTools ?? true; thickness: win.barHeight }
-                    KeyboardFace { thickness: win.barHeight }
-                    StatusFace { thickness: win.barHeight; parentScreen: win.screen }
-                    TrayFace { thickness: win.barHeight; window: win }
-                    EndFace { thickness: win.barHeight }
+                    Repeater { model: win.blocks("right"); delegate: win.chooser }
                 }
             }
         }

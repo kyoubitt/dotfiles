@@ -27,8 +27,8 @@ Item {
     }
     // play
     Item {
-        x: art.x + art.width - 52; y: art.y + art.height - 52 - (root.hot ? 0 : -10)
-        width: 44; height: 44; opacity: root.hot ? 1 : 0
+        x: art.x + art.width - 52; y: art.y + art.height - 52 - (root.hot ? 0 : -4)
+        width: 44; height: 44; opacity: root.hot ? 1 : 0.88
         Behavior on y { SpringAnimation { spring: 4; damping: 0.35 } }
         Behavior on opacity { NumberAnimation { duration: 120 } }
         Cookie { anchors.fill: parent; color: MusicStore.accent; lobes: 8; amp: 0.07; spin: true; spinMs: 10000 }

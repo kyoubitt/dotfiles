@@ -74,7 +74,8 @@ Column {
             width: parent.width
             spacing: 6
             Repeater {
-                model: root.items
+                // Only the first 30 are shown, so only those are built; a stable id keeps cards alive when the list changes.
+                model: ScriptModel { objectProp: "notificationId"; values: root.items.slice(0, 30) }
                 delegate: Rectangle {
                     id: card
                     required property var modelData
@@ -84,7 +85,7 @@ Column {
                     visible: index < 30
                     width: list.width
                     height: visible ? content.implicitHeight + 20 : 0
-                    radius: 14
+                    radius: BarStyle.radiusSmall
                     color: cardAreaHv.hovered ? Qt.lighter(BarStyle.plateHover, 1.15) : BarStyle.plateHover
                     border.width: critical ? 1 : 0
                     border.color: BarStyle.danger
@@ -129,7 +130,7 @@ Column {
                                 color: BarStyle.subtext
                                 font.pixelSize: 12
                                 font.family: Appearance.font.family.expressive
-                                renderType: Text.NativeRendering
+                                renderType: Text.QtRendering
                             }
                             Row {
                                 visible: card.modelData.actions.length > 0

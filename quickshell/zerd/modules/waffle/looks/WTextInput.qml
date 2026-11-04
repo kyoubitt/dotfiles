@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 TextInput {
     id: root
-    renderType: Text.NativeRendering
+    renderType: Text.QtRendering
     verticalAlignment: Text.AlignVCenter
     color: Looks.colors.fg
 

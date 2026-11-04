@@ -60,7 +60,7 @@ Singleton {
             album: { name: d?.parent?.entity?.decorations?.identity?.name ?? "", images: covers.length > 0 ? [{ url: covers[covers.length - 1].url }] : [] } }
     }
 
-    Process { running: true; command: ["sh", "-c", "command -v soloist >/dev/null && echo y"]; stdout: StdioCollector { onStreamFinished: root.installed = text.trim() === "y" } }
+    Process { running: true; command: ["sh", "-c", "PATH=\"$HOME/.local/bin:$PATH\"; command -v soloist >/dev/null && echo y"]; stdout: StdioCollector { onStreamFinished: root.installed = text.trim() === "y" } }
     Process { running: true; command: ["sh", "-c", "test -s \"$HOME/.config/soloist/api-key\" && echo y"]; stdout: StdioCollector { onStreamFinished: root.hasKey = text.trim() === "y" } }
 
     Connections { target: MusicStore; function onActiveChanged() { if (MusicStore.active && root.wanted) root.start() } }
@@ -95,7 +95,7 @@ Singleton {
         if (daemon.running) return
         root.note = ""
         // a Soloist left over from before a shell reload keeps running: reuse it instead of fighting it for the data directory
-        daemon.command = ["sh", "-c", "D=\"" + root.dir + "\"; mkdir -p \"$D\"; if pgrep -x soloist >/dev/null && [ -s \"$D/ws.port\" ]; then exec sleep 2147483647; fi; rm -f \"$D/ws.port\"; exec soloist -n Orbit -k \"$(cat \"$HOME/.config/soloist/api-key\")\" -D \"$D\" --ws 127.0.0.1:0 -i 60"]
+        daemon.command = ["sh", "-c", "PATH=\"$HOME/.local/bin:$PATH\"; D=\"" + root.dir + "\"; mkdir -p \"$D\"; if pgrep -x soloist >/dev/null && [ -s \"$D/ws.port\" ]; then exec sleep 2147483647; fi; rm -f \"$D/ws.port\"; exec soloist -n Orbit -k \"$(cat \"$HOME/.config/soloist/api-key\")\" -D \"$D\" --ws 127.0.0.1:0 -i 60"]
         daemon.running = true
         bridgeStart.restart()
     }

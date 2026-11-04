@@ -370,18 +370,30 @@ Singleton {
         return String(name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
     }
 
+    // Clearing is instant on screen; the destroying and the D-Bus "closed" replies (one each) trickle out
+    // in small batches so a few hundred notifications never freeze the shell.
+    property var _cleanup: []
+    Timer {
+        id: cleanupTimer
+        interval: 16; repeat: true
+        onTriggered: {
+            for (let i = 0; i < 12 && root._cleanup.length > 0; i++) {
+                const job = root._cleanup.pop()
+                try { job() } catch (e) {}
+            }
+            if (root._cleanup.length === 0) cleanupTimer.stop()
+        }
+    }
     function discardAllNotifications() {
         const removed = root.list;
         root.list = []
         triggerListChange()
-        removed.forEach((notif) => {
-            notif?.timer?.stop();
-            notif?.destroy();
-        })
         notifFileView.setText(stringifyList(root.list));
-        notifServer.trackedNotifications.values.forEach((notif) => {
-            notif.dismiss()
-        })
+        const jobs = []
+        removed.forEach((notif) => { notif?.timer?.stop(); jobs.push(() => notif?.destroy()) })
+        notifServer.trackedNotifications.values.slice().forEach((notif) => { jobs.push(() => notif.dismiss()) })
+        root._cleanup = root._cleanup.concat(jobs)
+        cleanupTimer.restart()
         root.discardAll();
     }
 

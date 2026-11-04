@@ -170,7 +170,7 @@ Item {
                     id: pb
                     visible: MusicStore.libShown
                     width: 36; height: 36; radius: 18; anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-                    color: MusicStore.accent; opacity: (itH.hovered || pbH.hovered) ? 1 : 0; scale: pbH.hovered ? 1.08 : 1
+                    color: MusicStore.accent; opacity: (itH.hovered || pbH.hovered) ? 1 : (it.playing ? 0.9 : 0); scale: pbH.hovered ? 1.08 : 1
                     Behavior on opacity { NumberAnimation { duration: 90 } }
                     Behavior on scale { NumberAnimation { duration: 90 } }
                     BarIcon { anchors.centerIn: parent; name: MusicStore.playingContext(it.item.uri) ? "pause" : "play_arrow"; fill: 1; size: 22; color: MusicStore.onAccent }

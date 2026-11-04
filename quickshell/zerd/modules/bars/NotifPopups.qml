@@ -87,6 +87,16 @@ Scope {
                     // The default action is what a click does; only real, labelled ones become buttons.
                     readonly property var buttons: (modelData.actions ?? []).filter(a => a.text && a.text.length > 0 && a.identifier !== "default").slice(0, 3)
                     property bool entered: false
+                    // "now", "3 min ago" ... kept fresh while the banner is up
+                    property int tick: 0
+                    readonly property string age: {
+                        void card.tick
+                        const t = card.modelData.time ?? 0
+                        const ms = Date.now() - (t > 1e12 ? t : t * 1000)
+                        const m = Math.floor(ms / 60000)
+                        return m < 1 ? "now" : m < 60 ? m + " min ago" : Math.floor(m / 60) + " h ago"
+                    }
+                    Timer { interval: 20000; repeat: true; running: true; onTriggered: card.tick++ }
                     width: column.width
                     height: body.implicitHeight + 24
                     opacity: entered ? 1 - Math.min(0.85, Math.abs(swipe.translation.x) / width) : 0
@@ -108,16 +118,30 @@ Scope {
                     // A flat opaque card: no tint, a border only when it is urgent, a soft shadow underneath.
                     Rectangle {
                         anchors.fill: parent; anchors.topMargin: 4; anchors.leftMargin: 3; anchors.rightMargin: 3; anchors.bottomMargin: -4
-                        radius: 22; color: "#000000"; opacity: 0.32; z: -2
+                        radius: BarStyle.radiusLarge; color: "#000000"; opacity: BarStyle.shadowOpacity; z: -2
                         layer.enabled: true
                         layer.effect: MultiEffect { blurEnabled: true; blur: 0.5; blurMax: 20 }
                     }
                     Rectangle {
                         anchors.fill: parent
-                        radius: 22
+                        radius: BarStyle.radiusLarge
                         color: BarStyle.surface
-                        border.width: card.critical ? 1 : 0
-                        border.color: Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.7)
+                        border.width: 1
+                        border.color: card.critical ? Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.7) : BarStyle.edge
+                    }
+                    // urgent: a soft red glow along the left edge that breathes
+                    Rectangle {
+                        visible: card.critical
+                        anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+                        width: parent.width * 0.4; radius: BarStyle.radiusLarge
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0; color: Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.22) }
+                            GradientStop { position: 1; color: "transparent" }
+                        }
+                        SequentialAnimation on opacity { running: card.critical; loops: Animation.Infinite
+                            NumberAnimation { to: 0.35; duration: 1600; easing.type: Easing.InOutSine }
+                            NumberAnimation { to: 1; duration: 1600; easing.type: Easing.InOutSine } }
                     }
                     Row {
                         id: body
@@ -126,30 +150,22 @@ Scope {
                         width: parent.width - 26
                         // The app's own icon; a sender picture (an avatar, cover art) takes the main spot and
                         // the app icon moves to a small badge on its corner.
-                        Item {
+                        NotifIcon {
                             id: iconBox
-                            width: 38; height: 38
-                            readonly property string appIcon: card.modelData.appIcon.length > 0 ? card.modelData.appIcon : root.iconFor(card.modelData.appName)
-                            readonly property bool hasImage: card.modelData.image.length > 0
-                            // a picture that came with the notification (an avatar, cover art) in a rounded square
-                            ClippingRectangle {
-                                visible: iconBox.hasImage
-                                anchors.fill: parent; radius: 12; color: BarStyle.plateHover
-                                IconImage { anchors.fill: parent; source: iconBox.hasImage ? card.modelData.image : ""; mipmap: true }
-                            }
-                            // otherwise the app's own icon, as it is
-                            SmartAppIcon { visible: !iconBox.hasImage; anchors.centerIn: parent; icon: iconBox.appIcon; iconSize: 38 }
-                            // with a picture, the app icon is a small badge on its corner
-                            SmartAppIcon { visible: iconBox.hasImage; x: 22; y: 22; icon: iconBox.appIcon; iconSize: 18 }
+                            size: 42
+                            appIcon: card.modelData.appIcon.length > 0 ? card.modelData.appIcon : root.iconFor(card.modelData.appName)
+                            image: card.modelData.image
                         }
                         Column {
-                            width: parent.width - 38 - 12
-                            spacing: 1
-                            Item {
-                                width: parent.width; height: summaryText.implicitHeight
-                                BarText { id: summaryText; width: parent.width - timeText.implicitWidth - 8; text: card.modelData.summary.length > 0 ? card.modelData.summary : card.modelData.appName; font.pixelSize: 13; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                                BarText { id: timeText; anchors.right: parent.right; text: "now"; font.pixelSize: 12; color: BarStyle.subtext }
+                            width: parent.width - 42 - 12
+                            spacing: 2
+                            // who sent it, and how long ago
+                            BarText {
+                                width: parent.width; elide: Text.ElideRight
+                                text: card.modelData.appName + "  ·  " + card.age
+                                font.pixelSize: 11; font.weight: Font.DemiBold; color: BarStyle.subtext
                             }
+                            BarText { width: parent.width; elide: Text.ElideRight; text: card.modelData.summary.length > 0 ? card.modelData.summary : card.modelData.appName; font.pixelSize: 14; font.weight: Font.DemiBold }
                             Text {
                                 visible: card.modelData.body.length > 0
                                 width: parent.width
@@ -161,9 +177,8 @@ Scope {
                                 color: BarStyle.subtext
                                 font.pixelSize: 13
                                 font.family: Appearance.font.family.expressive
-                                renderType: Text.NativeRendering
+                                renderType: Text.QtRendering
                             }
-                            BarText { visible: card.modelData.summary.length > 0 && card.modelData.summary !== card.modelData.appName; text: card.modelData.appName; font.pixelSize: 11; color: BarStyle.subtext; width: Math.min(implicitWidth, parent.width); elide: Text.ElideRight }
                             Flow {
                                 visible: card.buttons.length > 0 || hover.hovered
                                 topPadding: 8

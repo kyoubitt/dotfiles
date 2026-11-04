@@ -171,7 +171,7 @@ Scope {
             // ---- Filters along the top: they fade in with the pointer, a search, or Tab
             Item {
                 id: chips
-                readonly property bool on: root.query.length > 0 || root.chipsPinned || topHover.hovered
+                readonly property bool on: true
                 width: chipRow.implicitWidth; height: 40
                 x: Math.round((win.width - width) / 2); y: Math.round(win.height * 0.07)
                 opacity: win.shown * (on ? 1 : 0.0)
