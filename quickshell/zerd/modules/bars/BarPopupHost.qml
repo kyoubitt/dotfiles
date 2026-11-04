@@ -53,7 +53,7 @@ Scope {
                 height: body.implicitHeight + 2 * pad
                 x: Math.round(Math.max(8, Math.min(win.width - width - 8, (root.popup?.x ?? 0) - width / 2)))
                 y: 54
-                radius: 20
+                radius: BarStyle.radiusLarge
                 antialiasing: true
                 color: BarStyle.surface
                 border.width: 1

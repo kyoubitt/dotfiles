@@ -157,7 +157,7 @@ Column {
         property bool connected: false
         property var details: []
         width: 320; height: 64 + (root.info ? details.length * 22 + 10 : 0)
-        radius: 18
+        radius: BarStyle.radiusMedium
         color: connected ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.16) : BarStyle.plateHover
         border.width: 1; border.color: connected ? BarStyle.accent : BarStyle.border
         clip: true
@@ -283,7 +283,7 @@ Column {
                         id: pwRow
                         visible: root.iwd ? root.askSsid === modelData.ssid : (modelData.ap?.askingPassword ?? false)
                         width: 320; height: visible ? 48 : 0
-                        radius: 14
+                        radius: BarStyle.radiusSmall
                         color: BarStyle.plateHover
                         border.width: 1
                         border.color: pwInput.activeFocus ? BarStyle.accent : BarStyle.border

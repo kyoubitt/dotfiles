@@ -406,7 +406,7 @@ Scope {
                                 visible: row.modelData.t === "overview"
                                 x: 14; y: 14; width: parent.width - 28; spacing: 14
                                 Rectangle {
-                                    width: parent.width; height: 128; radius: 22
+                                    width: parent.width; height: 128; radius: BarStyle.radiusLarge
                                     gradient: Gradient {
                                         orientation: Gradient.Horizontal
                                         GradientStop { position: 0; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.28) }
@@ -423,7 +423,7 @@ Scope {
                                     // the wallpaper in use
                                     Rectangle {
                                         anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
-                                        width: 170; height: 96; radius: 14; color: BarStyle.surface; clip: true
+                                        width: 170; height: 96; radius: BarStyle.radiusMedium; color: BarStyle.surface; clip: true
                                         Image { anchors.fill: parent; source: WallpaperState.thumbUrl(WallpaperState.current); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 340 }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "open"]) }
                                         Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 26; color: "#99000000"
@@ -470,7 +470,7 @@ Scope {
                                             id: pc
                                             required property var modelData
                                             required property int index
-                                            width: Math.floor((overviewCol.width - 20) / 3); height: 84; radius: 20
+                                            width: Math.floor((overviewCol.width - 20) / 3); height: 84; radius: BarStyle.radiusMedium
                                             color: pcHov.hovered ? BarStyle.plateHover : "transparent"
                                             border.width: 1; border.color: BarStyle.border
                                             Behavior on color { ColorAnimation { duration: 90 } }

@@ -24,7 +24,7 @@ Column {
     }
 
     Rectangle {
-        width: parent.width; height: 70; radius: 16
+        width: parent.width; height: 70; radius: BarStyle.radiusMedium
         color: BarStyle.plateHover
         BarText { x: 14; y: 8; width: parent.width - 28; text: root.expr.length > 0 ? root.expr : " "; horizontalAlignment: Text.AlignRight; color: BarStyle.subtext; elide: Text.ElideLeft }
         BarText { x: 14; y: 30; width: parent.width - 28; text: root.preview.length > 0 ? root.preview : "0"; horizontalAlignment: Text.AlignRight; font.pixelSize: 24; font.weight: Font.DemiBold; elide: Text.ElideLeft; color: root.preview.length > 0 ? BarStyle.text : BarStyle.subtext }
@@ -37,7 +37,7 @@ Column {
             delegate: Rectangle {
                 required property string modelData
                 readonly property bool op: ["÷", "×", "−", "+", "="].includes(modelData)
-                width: parent.cell; height: 38; radius: 14
+                width: parent.cell; height: 38; radius: BarStyle.radiusSmall
                 color: modelData === "=" ? BarStyle.accent : (ma.pressed ? BarStyle.border : (op || modelData === "C" ? BarStyle.plateHover : "transparent"))
                 border.width: modelData === "=" || op || modelData === "C" ? 0 : 1; border.color: BarStyle.border
                 Behavior on color { ColorAnimation { duration: 90 } }

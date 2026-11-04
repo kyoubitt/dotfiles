@@ -62,7 +62,7 @@ Column {
                 delegate: Rectangle {
                     required property var modelData
                     readonly property bool on: PowerProfiles.profile === modelData.profile
-                    width: (300 - 12) / 3; height: 56; radius: 16
+                    width: (300 - 12) / 3; height: 56; radius: BarStyle.radiusMedium
                     color: on ? BarStyle.accent : BarStyle.plateHover
                     Behavior on color { ColorAnimation { duration: 110 } }
                     Column {

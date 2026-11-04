@@ -8,7 +8,7 @@ ClippingRectangle {
     id: root
 
     implicitHeight: media.implicitHeight + 28
-    radius: 22
+    radius: BarStyle.radiusLarge
     color: BarStyle.plateHover
 
     Image {

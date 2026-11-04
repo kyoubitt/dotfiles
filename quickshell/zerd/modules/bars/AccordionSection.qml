@@ -29,7 +29,7 @@ Item {
 
     Rectangle {
         id: header
-        width: parent.width; height: 48; radius: 16
+        width: parent.width; height: 48; radius: BarStyle.radiusMedium
         color: hdAreaHv.hovered ? BarStyle.plateHover : "transparent"
         border.width: 1; border.color: BarStyle.border
         Behavior on color { ColorAnimation { duration: 100 } }

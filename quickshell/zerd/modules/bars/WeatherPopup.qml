@@ -50,7 +50,7 @@ Column {
             property string icon
             property string value
             property string label
-            width: 106; height: 52; radius: 14
+            width: 106; height: 52; radius: BarStyle.radiusSmall
             color: BarStyle.plateHover
             opacity: 0.9
             Column {

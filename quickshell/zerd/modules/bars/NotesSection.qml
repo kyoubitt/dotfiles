@@ -7,7 +7,7 @@ Rectangle {
     id: root
 
     implicitHeight: 150
-    radius: 16
+    radius: BarStyle.radiusMedium
     color: BarStyle.plateHover
     border.width: 1
     border.color: edit.activeFocus ? BarStyle.accent : BarStyle.border

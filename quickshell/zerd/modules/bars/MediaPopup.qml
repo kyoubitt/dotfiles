@@ -38,7 +38,7 @@ Column {
         visible: root.p !== null
         spacing: 14
         ClippingRectangle {
-            width: 96; height: 96; radius: 18
+            width: 96; height: 96; radius: BarStyle.radiusMedium
             color: BarStyle.plateHover
             Image {
                 anchors.fill: parent
