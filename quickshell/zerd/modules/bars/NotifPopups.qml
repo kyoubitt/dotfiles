@@ -189,37 +189,37 @@ Scope {
                                 spacing: 6
                                 Repeater {
                                     model: card.buttons
-                                    delegate: Rectangle {
+                                    delegate: BarButton {
+                                        id: actBtn
                                         required property var modelData
-                                        width: actionText.implicitWidth + 24; height: 28; radius: 14
-                                        color: actionHover.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.09)
-                                        Behavior on color { ColorAnimation { duration: 90 } }
-                                        BarText { id: actionText; anchors.centerIn: parent; text: parent.modelData.text; font.pixelSize: 12; font.weight: Font.Medium }
-                                        HoverHandler { id: actionHover }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Notifications.attemptInvokeAction(card.modelData.notificationId, parent.modelData.identifier) }
+                                        tone: "tonal"
+                                        width: actionText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
+                                        onTapped: Notifications.attemptInvokeAction(card.modelData.notificationId, actBtn.modelData.identifier)
+                                        BarText { id: actionText; anchors.centerIn: parent; text: actBtn.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: actBtn.ink }
                                     }
                                 }
                                 // quiet this app from here
-                                Rectangle {
+                                BarButton {
+                                    id: muteBtn
                                     visible: hover.hovered
-                                    width: muteText.implicitWidth + 24; height: 28; radius: 14
-                                    color: "transparent"; border.width: 1; border.color: BarStyle.border
-                                    BarText { id: muteText; anchors.centerIn: parent; text: "Mute " + card.modelData.appName; font.pixelSize: 11; color: BarStyle.subtext; width: Math.min(implicitWidth, 120); elide: Text.ElideRight }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NotifRules.setMode(card.modelData.appName, "silent") }
+                                    tone: "outlined"
+                                    width: muteText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
+                                    onTapped: NotifRules.setMode(card.modelData.appName, "silent")
+                                    BarText { id: muteText; anchors.centerIn: parent; text: "Mute " + card.modelData.appName; font.pixelSize: 11; color: muteBtn.inkSoft; width: Math.min(implicitWidth, 120); elide: Text.ElideRight }
                                 }
                             }
                         }
                     }
                     // dismiss: a small circle on the top-left corner, only while the pointer is on the card
-                    Rectangle {
-                        x: 5; y: 5; width: 22; height: 22; radius: 11
+                    BarButton {
+                        id: closeBtn
+                        x: 6; y: 6; width: 24; height: 24; radius: 12
+                        tone: "tonal"
                         opacity: hover.hovered ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                        color: closeHover.hovered ? BarStyle.plateHover : BarStyle.surface
-                        border.width: 1; border.color: BarStyle.border
-                        BarIcon { anchors.centerIn: parent; name: "close"; size: 13 }
-                        HoverHandler { id: closeHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { enabled: hover.hovered; onTapped: Notifications.discardNotification(card.modelData.notificationId) }
+                        enabled: hover.hovered
+                        Behavior on opacity { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
+                        onTapped: Notifications.discardNotification(card.modelData.notificationId)
+                        BarIcon { anchors.centerIn: parent; name: "close"; size: 14; color: closeBtn.ink }
                     }
                     HoverHandler {
                         id: hover
