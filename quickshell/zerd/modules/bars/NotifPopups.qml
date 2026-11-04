@@ -83,7 +83,7 @@ Scope {
                 delegate: Item {
                     id: card
                     required property var modelData
-                    readonly property bool critical: modelData.urgency === "critical"
+                    readonly property bool critical: String(modelData.urgency).toLowerCase() === "critical"
                     // The default action is what a click does; only real, labelled ones become buttons.
                     readonly property var buttons: (modelData.actions ?? []).filter(a => a.text && a.text.length > 0 && a.identifier !== "default").slice(0, 3)
                     property bool entered: false
@@ -153,8 +153,11 @@ Scope {
                         NotifIcon {
                             id: iconBox
                             size: 42
-                            appIcon: card.modelData.appIcon.length > 0 ? card.modelData.appIcon : root.iconFor(card.modelData.appName)
+                            appName: card.modelData.appName
+                            appIcon: card.modelData.appIcon
+                            summary: card.modelData.summary
                             image: card.modelData.image
+                            critical: card.critical
                         }
                         Column {
                             width: parent.width - 42 - 12

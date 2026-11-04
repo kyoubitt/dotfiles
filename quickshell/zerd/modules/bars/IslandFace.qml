@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Widgets
 import qs
 import qs.services
 
@@ -73,16 +72,6 @@ BarPill {
         id: mediaPart
         visible: root.player !== null && !root.vertical
         spacing: 8
-        // the cover of what plays
-        Item {
-            id: artPart
-            visible: coverImg.status === Image.Ready
-            width: 24; height: 24
-            ClippingRectangle {
-                anchors.fill: parent; radius: 8; color: BarStyle.plateHover
-                Image { id: coverImg; anchors.fill: parent; source: NowPlaying.player?.trackArtUrl ?? ""; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize: Qt.size(48, 48) }
-            }
-        }
         // Play / pause is its own target; the rest opens the player.
         Item {
             width: 24; height: 24

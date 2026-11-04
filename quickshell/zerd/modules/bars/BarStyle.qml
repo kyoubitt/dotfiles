@@ -13,8 +13,10 @@ Singleton {
     readonly property color surface: Qt.rgba(WallustTheme.bgBase.r, WallustTheme.bgBase.g, WallustTheme.bgBase.b, 1)
     readonly property color plateHover: Qt.lighter(WallustTheme.bgCard, 1.25)
     readonly property color border: WallustTheme.cardBorder
-    readonly property color text: WallustTheme.textPrimary
-    readonly property color subtext: WallustTheme.textSecondary
+    // The wallpaper's text colours, lifted toward white so small text stays crisp on the dark plates.
+    function lift(c: color, t: real): color { return Qt.rgba(c.r + (1 - c.r) * t, c.g + (1 - c.g) * t, c.b + (1 - c.b) * t, 1) }
+    readonly property color text: lift(WallustTheme.textPrimary, 0.42)
+    readonly property color subtext: lift(WallustTheme.textSecondary, 0.3)
     readonly property color accent: WallustTheme.accent
     readonly property color onAccent: WallustTheme.textOnAccent
 

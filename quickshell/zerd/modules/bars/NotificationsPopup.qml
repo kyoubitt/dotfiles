@@ -81,7 +81,7 @@ Column {
                     required property var modelData
                     required property int index
                     property bool expanded: false
-                    readonly property bool critical: modelData.urgency === "critical"
+                    readonly property bool critical: String(modelData.urgency).toLowerCase() === "critical"
                     visible: index < 30
                     width: list.width
                     height: visible ? content.implicitHeight + 20 : 0
@@ -101,14 +101,13 @@ Column {
                         x: 10; y: 10
                         spacing: 10
                         width: card.width - 20
-                        ClippingRectangle {
-                            width: 32; height: 32; radius: 10
-                            color: BarStyle.plate
-                            IconImage {
-                                anchors.fill: parent
-                                source: card.modelData.image.length > 0 ? card.modelData.image : Quickshell.iconPath(card.modelData.appIcon, "dialog-information")
-                                mipmap: true
-                            }
+                        NotifIcon {
+                            size: 32
+                            appName: card.modelData.appName
+                            appIcon: card.modelData.appIcon
+                            summary: card.modelData.summary
+                            image: card.modelData.image
+                            critical: card.critical
                         }
                         Column {
                             width: parent.width - 32 - 22 - 20

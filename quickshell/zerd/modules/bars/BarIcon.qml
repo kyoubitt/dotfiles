@@ -19,7 +19,7 @@ Item {
         color: root.color
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        renderType: Text.QtRendering
+        renderType: Text.NativeRendering
         font.family: Appearance.font.family.iconMaterial
         font.pixelSize: Math.round(root.size)
         font.hintingPreference: Font.PreferNoHinting
