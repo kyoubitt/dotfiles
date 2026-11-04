@@ -22,7 +22,23 @@ Scope {
     // An icon name for an app that did not send one: its desktop entry, or the best guess.
     function iconFor(app: string): string { return AppSearch.lookupDesktopEntry(app)?.icon || AppSearch.guessIcon(app) }
     readonly property var raw: Notifications.popupList ?? []
-    readonly property var shown: raw.filter(n => NotifRules.modeOf(n.appName) === "normal").slice(-3).reverse()
+    readonly property var visibleRaw: raw.filter(n => NotifRules.modeOf(n.appName) === "normal")
+    // repeats from one app share a banner: the newest one shows, with a count ("Messages · 3 new")
+    readonly property var counts: {
+        const m = {}
+        for (const n of root.visibleRaw) m[n.appName] = (m[n.appName] ?? 0) + 1
+        return m
+    }
+    readonly property var shown: {
+        const seen = {}, out = []
+        for (const n of root.visibleRaw.slice().reverse()) {
+            if (seen[n.appName]) continue
+            seen[n.appName] = true
+            out.push(n)
+            if (out.length === 3) break
+        }
+        return out
+    }
 
     // Rules act as banners arrive. Done a moment later, outside the change that announced them:
     // dismissing a banner edits the list that triggered the check.
@@ -165,7 +181,7 @@ Scope {
                             // who sent it, and how long ago
                             BarText {
                                 width: parent.width; elide: Text.ElideRight
-                                text: card.modelData.appName + "  ·  " + card.age
+                                text: card.modelData.appName + ((root.counts[card.modelData.appName] ?? 1) > 1 ? " · " + root.counts[card.modelData.appName] + " new" : "") + "  ·  " + card.age
                                 font.pixelSize: 11; font.weight: Font.DemiBold; color: BarStyle.subtext
                             }
                             BarText { width: parent.width; elide: Text.ElideRight; text: card.modelData.summary.length > 0 ? card.modelData.summary : card.modelData.appName; font.pixelSize: 14; font.weight: Font.DemiBold }
