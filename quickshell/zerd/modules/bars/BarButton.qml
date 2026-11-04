@@ -10,6 +10,9 @@ Item {
     property bool toggled: false
     property real radius: BarStyle.radiusSmall
     property bool rippleEnabled: true
+    // a filled button uses these; Orbit tints them from the cover
+    property color accentColor: BarStyle.accent
+    property color onAccentColor: BarStyle.onAccent
     readonly property bool hovered: hov.hovered
     readonly property bool pressed: ma.pressed
     default property alias content: slot.data
@@ -18,12 +21,12 @@ Item {
     signal middle()
 
     readonly property bool onAccentFill: tone === "filled" || (toggled && tone === "filled")
-    readonly property color fill: tone === "filled" ? BarStyle.accent
+    readonly property color fill: tone === "filled" ? accentColor
         : tone === "plain" || tone === "outlined" ? (toggled ? BarStyle.accentContainer : "transparent")
         : (toggled ? BarStyle.accentContainer : BarStyle.card)
     // the colour of what sits on the button
-    readonly property color ink: tone === "filled" ? BarStyle.onAccent : (toggled ? BarStyle.onAccentContainer : BarStyle.text)
-    readonly property color inkSoft: tone === "filled" ? BarStyle.onAccent : (toggled ? BarStyle.onAccentContainer : BarStyle.subtext)
+    readonly property color ink: tone === "filled" ? onAccentColor : (toggled ? BarStyle.onAccentContainer : BarStyle.text)
+    readonly property color inkSoft: tone === "filled" ? onAccentColor : (toggled ? BarStyle.onAccentContainer : BarStyle.subtext)
 
     scale: pressed ? Math.max(0.94, Math.min(0.995, 1 - 2 / Math.max(width, height))) : 1
     Behavior on scale { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }

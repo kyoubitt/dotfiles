@@ -312,11 +312,11 @@ Scope {
                         y: Math.round((win.areaH - height) / 2)
                         width: 120; height: win.barH - 6; radius: height / 2
                         color: "transparent"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.3)
-                        BarText { anchors.centerIn: parent; text: modelData; font.pixelSize: 11; color: "#ffffff88" }
+                        BarText { anchors.centerIn: parent; text: modelData; font.pixelSize: 11; color: Qt.rgba(1, 1, 1, 0.53) }
                     }
                 }
 
-                BarText { x: win.cx; y: win.areaH + 22; text: "Drag a block in the bar above to move it, or down into Hidden to take it off the bar."; font.pixelSize: 13; color: "#ffffffbb" }
+                BarText { x: win.cx; y: win.areaH + 22; text: "Drag a block in the bar above to move it, or down into Hidden to take it off the bar."; font.pixelSize: 13; color: Qt.rgba(1, 1, 1, 0.73) }
 
                 // hidden blocks
                 Rectangle {
@@ -324,8 +324,8 @@ Scope {
                     readonly property bool target: win.dragId !== "" && win.drop.zone === "hidden"
                     color: target ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.14) : Qt.rgba(1, 1, 1, 0.06)
                     border.width: target ? 2 : 1; border.color: target ? BarStyle.accent : BarStyle.edge
-                    BarText { x: 20; y: 14; text: "Hidden"; font.pixelSize: 12; font.weight: Font.DemiBold; color: "#ffffffaa" }
-                    BarText { visible: root.layout.hidden.length === 0; anchors.centerIn: parent; text: "Nothing hidden. Drop a block here to hide it"; font.pixelSize: 12; color: "#ffffff66" }
+                    BarText { x: 20; y: 14; text: "Hidden"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
+                    BarText { visible: root.layout.hidden.length === 0; anchors.centerIn: parent; text: "Nothing hidden. Drop a block here to hide it"; font.pixelSize: 12; color: Qt.rgba(1, 1, 1, 0.4) }
                     Flow {
                         id: hiddenFlow
                         x: 14; y: 42; width: parent.width - 28; spacing: 8
@@ -377,7 +377,7 @@ Scope {
                 Rectangle {
                     x: win.cx; y: win.optY; width: win.cw; height: 118; radius: BarStyle.radiusLarge + 2
                     color: Qt.rgba(1, 1, 1, 0.06); border.width: 1; border.color: BarStyle.edge
-                    BarText { x: 20; y: 14; text: "Inside the blocks"; font.pixelSize: 12; font.weight: Font.DemiBold; color: "#ffffffaa" }
+                    BarText { x: 20; y: 14; text: "Inside the blocks"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
                     Column {
                         x: 14; y: 40; spacing: 10
                         Repeater {
@@ -386,7 +386,7 @@ Scope {
                                 id: swRow
                                 required property string modelData
                                 spacing: 8
-                                BarText { width: 150; height: 32; verticalAlignment: Text.AlignVCenter; leftPadding: 6; text: swRow.modelData; font.pixelSize: 12; color: "#ffffffcc" }
+                                BarText { width: 150; height: 32; verticalAlignment: Text.AlignVCenter; leftPadding: 6; text: swRow.modelData; font.pixelSize: 12; color: Qt.rgba(1, 1, 1, 0.8) }
                                 Repeater {
                                     model: root.switches.filter(d => d.g === swRow.modelData)
                                     delegate: Rectangle {

@@ -258,7 +258,7 @@ Scope {
                 radius: BarStyle.radiusLarge; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.12)
                 border.width: 2; border.color: BarStyle.accent
             }
-            BarText { anchors.horizontalCenter: parent.horizontalCenter; y: 56; text: "Drag a card. It locks to the grid; hold Alt to place it freely. Arrows nudge, Delete removes."; color: "#ffffffbb"; font.pixelSize: 12 }
+            BarText { anchors.horizontalCenter: parent.horizontalCenter; y: 56; text: "Drag a card. It locks to the grid; hold Alt to place it freely. Arrows nudge, Delete removes."; color: Qt.rgba(1, 1, 1, 0.73); font.pixelSize: 12 }
 
             Repeater {
                 model: WidgetRegistry.cards.filter(c => DesktopWidgets.enabled(c.name))
