@@ -66,6 +66,9 @@ ShellRoot {
         }
     }
 
+    // Frees script garbage every few minutes, so the shell does not creep up in memory over a long session.
+    Timer { interval: 300000; repeat: true; running: true; onTriggered: gc() }
+
     // === Panel Loaders ===
     // Waffle background is enabled so overview/backdrop blur can render.
     LazyLoader {

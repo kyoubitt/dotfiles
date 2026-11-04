@@ -8,17 +8,25 @@ import qs.services
 // Sizes and colours shared by the bars. Colours come straight from the
 // wallust palette, so a wallpaper change re-tints every bar.
 Singleton {
-    readonly property color plate: WallustTheme.bgBase
-    // Same colour, fully opaque: for popups, panels and tooltips that sit over arbitrary windows.
-    readonly property color surface: Qt.rgba(WallustTheme.bgBase.r, WallustTheme.bgBase.g, WallustTheme.bgBase.b, 1)
-    readonly property color plateHover: Qt.lighter(WallustTheme.bgCard, 1.25)
-    readonly property color border: WallustTheme.cardBorder
-    // The wallpaper's text colours, lifted toward white so small text stays crisp on the dark plates.
-    function lift(c: color, t: real): color { return Qt.rgba(c.r + (1 - c.r) * t, c.g + (1 - c.g) * t, c.b + (1 - c.b) * t, 1) }
-    readonly property color text: lift(WallustTheme.textPrimary, 0.42)
-    readonly property color subtext: lift(WallustTheme.textSecondary, 0.3)
+    // The shell's one set of colours: iNiR's Material 3 layers and text (Appearance.colors, from the wallpaper), with the
+    // accent from the wallpaper's palette or the one picked in Settings. Everything else reads these.
+    readonly property var c: Appearance.colors
+    readonly property color plate: c.colLayer1                    // bar capsules, panels
+    readonly property color surface: c.colLayer1                  // popups, tooltips, anything over windows
+    readonly property color card: c.colLayer2                     // a card on a panel
+    readonly property color cardHigh: c.colLayer3                 // a card on a card, chips
+    readonly property color text: c.colOnLayer1
+    readonly property color subtext: c.colSubtext
+    readonly property color border: c.colOutlineVariant
     readonly property color accent: WallustTheme.accent
     readonly property color onAccent: WallustTheme.textOnAccent
+    // tonal accent: the accent faintly over the surface, for selected chips, tonal buttons, icon tiles
+    readonly property color accentContainer: Qt.tint(c.colLayer2, Qt.rgba(accent.r, accent.g, accent.b, 0.26))
+    readonly property color onAccentContainer: Qt.tint(c.colOnLayer1, Qt.rgba(accent.r, accent.g, accent.b, 0.35))
+    // state layers: the text colour faintly over a surface (hover 8 %, press 12 %)
+    readonly property color plateHover: Qt.tint(plate, Qt.rgba(text.r, text.g, text.b, 0.08))
+    readonly property color plateActive: Qt.tint(plate, Qt.rgba(text.r, text.g, text.b, 0.12))
+    readonly property color cardHover: Qt.tint(card, Qt.rgba(text.r, text.g, text.b, 0.08))
 
     readonly property int fontSize: 13
     readonly property int iconSize: 18
@@ -28,14 +36,17 @@ Singleton {
     readonly property int padding: 10
 
     // One look for every card, panel and chip: the same corners, the same hairline edge, the same shadow and motion.
-    readonly property int radiusSmall: 14
-    readonly property int radiusMedium: 18
-    readonly property int radiusLarge: 22
-    readonly property color edge: Qt.rgba(1, 1, 1, 0.07)
+    readonly property int radiusSmall: 12      // buttons, fields
+    readonly property int radiusMedium: 17     // cards
+    readonly property int radiusLarge: 23      // panels, banners
+    readonly property int radiusXL: 30         // big surfaces
+    readonly property color edge: Qt.rgba(border.r, border.g, border.b, 0.55)
     readonly property real shadowOpacity: 0.3
-    readonly property int motionFast: 100
-    readonly property int motionNormal: 160
-    readonly property int motionSlow: 260
+    readonly property int motionFast: 200      // iNiR elementMoveFast
+    readonly property int motionNormal: 300    // iNiR elementResize
+    readonly property int motionSlow: 500      // iNiR elementMove (expressive)
+    readonly property var easeExpressive: [0.38, 1.21, 0.22, 1.0, 1, 1]
+    readonly property var easeEmphasized: [0.05, 0.7, 0.1, 1.0, 1, 1]
 
     // wttr.in weather codes -> Material symbol and plain text.
     function weatherIcon(code: var): string {
@@ -61,7 +72,7 @@ Singleton {
         return BarStyle.subtext
     }
     // Warnings and "critical" stay red whatever the wallpaper is: one place to change it.
-    readonly property color danger: Qt.hsla(0.012, 0.72, 0.68, 1)
+    readonly property color danger: c.colError
     readonly property color warm: "#e8a77c"
     readonly property color cool: "#7fb6e6"
     function weatherText(code: var): string {
