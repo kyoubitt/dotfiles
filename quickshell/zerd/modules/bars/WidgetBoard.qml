@@ -439,22 +439,17 @@ Scope {
                         width: list.width; height: 28
                         BarText { x: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 4; text: parent.section; font.pixelSize: 11; color: BarStyle.subtext }
                     }
-                    delegate: Rectangle {
+                    delegate: BarButton {
                         id: row
+                        tone: "plain"
                         required property var modelData
                         readonly property bool added: DesktopWidgets.enabled(modelData.name)
-                        width: list.width; height: 44; radius: 14
-                        color: rowHover.hovered ? BarStyle.plateHover : "transparent"
-                        Behavior on color { ColorAnimation { duration: 90 } }
-                        HoverHandler { id: rowHover }
+                        width: list.width; height: 46; radius: BarStyle.radiusSmall
+                        onTapped: { if (row.added) root.removeCard(row.modelData.name); else { root.add(row.modelData.name); win.selected = row.modelData.name } }
                         BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: row.modelData.icon; size: 20; fill: 1; color: row.added ? BarStyle.accent : BarStyle.subtext }
                         BarText { x: 44; anchors.verticalCenter: parent.verticalCenter; text: row.modelData.title; color: row.added ? BarStyle.subtext : BarStyle.text }
                         BarText { anchors.right: parent.right; anchors.rightMargin: 40; anchors.verticalCenter: parent.verticalCenter; text: row.modelData.w + "×" + row.modelData.h; font.pixelSize: 11; color: BarStyle.subtext }
                         BarIcon { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; name: row.added ? "check_circle" : "add_circle"; size: 20; color: row.added ? BarStyle.accent : BarStyle.subtext }
-                        MouseArea {
-                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: { if (row.added) root.removeCard(row.modelData.name); else { root.add(row.modelData.name); win.selected = row.modelData.name } }
-                        }
                     }
                 }
             }
@@ -503,25 +498,21 @@ Scope {
                 color: BarStyle.surface
                 border.width: 1; border.color: BarStyle.border
                 MouseArea { anchors.fill: parent }
-                component Pill: Rectangle {
+                component Pill: BarButton {
                     id: pill
                     property string label
                     property string icon: ""
                     property bool on: false
                     property bool primary: false
-                    signal tapped()
-                    height: 38; width: pr.implicitWidth + 24; radius: 19
-                    color: primary ? BarStyle.accent : (on ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.22) : (pm.pressed ? BarStyle.border : "transparent"))
-                    border.width: primary ? 0 : 1
-                    border.color: on ? BarStyle.accent : BarStyle.border
-                    Behavior on color { ColorAnimation { duration: 100 } }
+                    tone: primary ? "filled" : "outlined"
+                    toggled: on
+                    height: 38; width: pr.implicitWidth + 26; radius: 19
                     Row {
                         id: pr
                         anchors.centerIn: parent; spacing: 6
-                        BarIcon { visible: pill.icon.length > 0; anchors.verticalCenter: parent.verticalCenter; name: pill.icon; size: 16; color: pill.primary ? BarStyle.onAccent : (pill.on ? BarStyle.accent : BarStyle.text) }
-                        BarText { anchors.verticalCenter: parent.verticalCenter; text: pill.label; font.pixelSize: 12; font.weight: pill.primary ? Font.DemiBold : Font.Medium; color: pill.primary ? BarStyle.onAccent : (pill.on ? BarStyle.accent : BarStyle.text) }
+                        BarIcon { visible: pill.icon.length > 0; anchors.verticalCenter: parent.verticalCenter; name: pill.icon; size: 16; color: pill.primary || pill.on ? pill.ink : pill.inkSoft }
+                        BarText { anchors.verticalCenter: parent.verticalCenter; text: pill.label; font.pixelSize: 12; font.weight: pill.primary ? Font.DemiBold : Font.Medium; color: pill.ink }
                     }
-                    MouseArea { id: pm; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: pill.tapped() }
                 }
                 Row {
                     id: bar

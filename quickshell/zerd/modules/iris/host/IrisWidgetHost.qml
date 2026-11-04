@@ -23,7 +23,8 @@ Item {
     property real screenHeight: screenRef?.height ?? 1080
 
     // Palette: the wallust colours of the current wallpaper.
-    property color irisPlate: WallustTheme.bgBase
+    // the shell's second surface layer, so a card matches the panels and notifications
+    property color irisPlate: Appearance.colors.colLayer2
     property color irisAccent: WallustTheme.accent
     property color irisAccent2: WallustColors.green
     property color irisAccent3: WallustTheme.accent
@@ -31,8 +32,8 @@ Item {
 
     // Material: an opaque plate, never wallpaper glass.
     property string irisMaterial: "panel"
-    property real irisSurfaceOpacity: 0.86
-    property string irisOutline: "auto"
+    property real irisSurfaceOpacity: 0.95
+    property string irisOutline: "always"
     property bool irisRim: false
     property bool legibleAlways: true
     property bool inkOnLight: false
@@ -41,7 +42,7 @@ Item {
     property real regionBrightnessSpread: 0.1
 
     property real scaleFactor: 1
-    property int widgetCardRadius: 22     // the shell's large corner (BarStyle.radiusLarge)
+    property int widgetCardRadius: 23     // the shell's large corner (BarStyle.radiusLarge)
     property int cornerRadiusOverride: -1
     property int widgetTitleWeight: Font.DemiBold
     property string timeFormat: "system"
