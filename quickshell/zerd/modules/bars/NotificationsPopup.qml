@@ -35,19 +35,20 @@ Column {
         Row {
             anchors.right: parent.right
             spacing: 6
-            Rectangle {
+            BarButton {
+                id: dndBtn
                 visible: !root.compact
-                width: 30; height: 30; radius: 15
-                color: Notifications.silent ? BarStyle.accent : BarStyle.plateHover
-                Behavior on color { ColorAnimation { duration: 110 } }
-                BarIcon { anchors.centerIn: parent; name: Notifications.silent ? "notifications_off" : "notifications"; size: 16; fill: 1; color: Notifications.silent ? BarStyle.onAccent : BarStyle.subtext }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Notifications.toggleSilent() }
+                tone: "tonal"; toggled: Notifications.silent
+                width: 34; height: 34; radius: 17
+                onTapped: Notifications.toggleSilent()
+                BarIcon { anchors.centerIn: parent; name: Notifications.silent ? "notifications_off" : "notifications"; size: 18; fill: Notifications.silent ? 1 : 0; color: dndBtn.ink }
             }
-            Rectangle {
+            BarButton {
                 visible: root.items.length > 0
-                width: clearText.implicitWidth + 20; height: 30; radius: 15; color: BarStyle.plateHover
-                BarText { id: clearText; anchors.centerIn: parent; text: "Clear all"; font.pixelSize: 12 }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Notifications.discardAllNotifications() }
+                tone: "tonal"
+                width: clearText.implicitWidth + 24; height: 34; radius: 17
+                onTapped: Notifications.discardAllNotifications()
+                BarText { id: clearText; anchors.centerIn: parent; text: "Clear all"; font.pixelSize: 12; font.weight: Font.Medium }
             }
         }
     }
@@ -61,10 +62,30 @@ Column {
         BarText { anchors.horizontalCenter: parent.horizontalCenter; text: Notifications.silent ? "Do not disturb is on" : "You're all caught up"; color: BarStyle.subtext }
     }
 
+    // One card per app, newest first: the two latest notifications while closed, up to eight when open.
+    readonly property var groups: {
+        const m = {}
+        for (const n of root.items) {
+            const g = m[n.appName] ?? (m[n.appName] = { app: n.appName, items: [], time: 0 })
+            g.items.push(n)
+            if ((n.time ?? 0) > g.time) g.time = n.time ?? 0
+        }
+        const out = Object.values(m)
+        for (const g of out) g.items.sort((a, b) => (b.time ?? 0) - (a.time ?? 0))
+        return out.sort((a, b) => b.time - a.time)
+    }
+    function ageOf(t: real): string {
+        const ms = Date.now() - (t > 1e12 ? t : t * 1000)
+        const m = Math.floor(ms / 60000)
+        return m < 1 ? "Now" : m < 60 ? m + "m" : m < 1440 ? Math.floor(m / 60) + "h" : "Yesterday"
+    }
+    property int tick: 0
+    Timer { interval: 30000; repeat: true; running: root.visible; onTriggered: root.tick++ }
+
     Flickable {
         visible: root.items.length > 0
         width: parent.width
-        height: Math.min(list.implicitHeight, 420)
+        height: Math.min(list.implicitHeight, 460)
         contentHeight: list.implicitHeight
         clip: true
         boundsBehavior: Flickable.StopAtBounds
@@ -72,86 +93,110 @@ Column {
         Column {
             id: list
             width: parent.width
-            spacing: 6
+            spacing: 8
             Repeater {
-                // Only the first 30 are shown, so only those are built; a stable id keeps cards alive when the list changes.
-                model: ScriptModel { objectProp: "notificationId"; values: root.items.slice(0, 30) }
-                delegate: Rectangle {
-                    id: card
+                model: ScriptModel { objectProp: "app"; values: root.groups.slice(0, 12) }
+                delegate: BarCard {
+                    id: group
                     required property var modelData
-                    required property int index
                     property bool expanded: false
-                    readonly property bool critical: String(modelData.urgency).toLowerCase() === "critical"
-                    visible: index < 30
+                    readonly property var items: modelData.items
+                    readonly property bool critical: items.some(n => String(n.urgency).toLowerCase() === "critical")
                     width: list.width
-                    height: visible ? content.implicitHeight + 20 : 0
-                    radius: BarStyle.radiusSmall
-                    color: cardAreaHv.hovered ? Qt.lighter(BarStyle.plateHover, 1.15) : BarStyle.plateHover
-                    border.width: critical ? 1 : 0
-                    border.color: BarStyle.danger
-                    Behavior on color { ColorAnimation { duration: 100 } }
+                    pad: 12
+                    color: critical ? Qt.tint(BarStyle.card, Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.14)) : BarStyle.card
+                    Behavior on implicitHeight { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
                     clip: true
 
-                    MouseArea { id: cardArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: card.expanded = !card.expanded }
-
-                    HoverHandler { id: cardAreaHv }
-
-                    Row {
-                        id: content
-                        x: 10; y: 10
-                        spacing: 10
-                        width: card.width - 20
+                    // the group header: icon, app, count, age, close
+                    Item {
+                        id: head
+                        width: parent.width; height: 40
                         NotifIcon {
-                            size: 32
-                            appName: card.modelData.appName
-                            appIcon: card.modelData.appIcon
-                            summary: card.modelData.summary
-                            image: card.modelData.image
-                            critical: card.critical
+                            id: gIcon
+                            size: 36
+                            appName: group.modelData.app
+                            appIcon: group.items[0].appIcon
+                            summary: group.items[0].summary
+                            image: ""
+                            critical: group.critical
                         }
                         Column {
-                            width: parent.width - 32 - 22 - 20
-                            spacing: 1
-                            Row {
-                                spacing: 6
-                                BarText { text: card.modelData.appName; font.pixelSize: 11; color: BarStyle.subtext; width: Math.min(implicitWidth, 150); elide: Text.ElideRight }
-                                BarText { text: NotificationUtils.getFriendlyNotifTimeString(card.modelData.time); font.pixelSize: 11; color: BarStyle.subtext }
-                            }
-                            BarText { width: parent.width; text: card.modelData.summary; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                            Text {
-                                visible: card.modelData.body.length > 0
+                            x: 46; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 46 - 70
+                            BarText { text: group.modelData.app; width: parent.width; elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.DemiBold }
+                            BarText { text: group.items.length > 1 ? group.items.length + " notifications" : "1 notification"; font.pixelSize: 11; color: BarStyle.subtext }
+                        }
+                        Row {
+                            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                            spacing: 6
+                            BarText { anchors.verticalCenter: parent.verticalCenter; text: { void root.tick; return root.ageOf(group.modelData.time) } font.pixelSize: 11; color: BarStyle.subtext }
+                            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: group.expanded ? "expand_less" : "expand_more"; size: 20; color: BarStyle.subtext }
+                        }
+                    }
+                    // the notifications
+                    Column {
+                        y: 48; width: parent.width; spacing: group.expanded ? 6 : 3
+                        Repeater {
+                            model: group.items.slice(0, group.expanded ? 8 : 2)
+                            delegate: Item {
+                                id: row
+                                required property var modelData
+                                required property int index
+                                readonly property var buttons: (modelData.actions ?? []).filter(a => a.text && a.text.length > 0 && a.identifier !== "default").slice(0, 3)
                                 width: parent.width
-                                text: card.modelData.body
-                                textFormat: Text.PlainText
-                                wrapMode: Text.Wrap
-                                maximumLineCount: card.expanded ? 8 : 2
-                                elide: Text.ElideRight
-                                color: BarStyle.subtext
-                                font.pixelSize: 12
-                                font.family: Appearance.font.family.expressive
-                                renderType: Text.QtRendering
-                            }
-                            Row {
-                                visible: card.modelData.actions.length > 0
-                                topPadding: 6
-                                spacing: 6
-                                Repeater {
-                                    model: card.modelData.actions.slice(0, 3)
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        width: actText.implicitWidth + 18; height: 26; radius: 13
-                                        color: BarStyle.accent
-                                        BarText { id: actText; anchors.centerIn: parent; text: parent.modelData.text; font.pixelSize: 11; color: BarStyle.onAccent }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Notifications.attemptInvokeAction(card.modelData.notificationId, parent.modelData.identifier) }
+                                height: rowCol.implicitHeight + 8
+                                opacity: !group.expanded && index === 1 && group.items.length > 2 ? 0.55 : 1
+                                Column {
+                                    id: rowCol
+                                    x: 4; y: 4; width: parent.width - 8 - 26; spacing: 2
+                                    BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.summary.length > 0 ? row.modelData.summary : row.modelData.appName; font.pixelSize: 13; font.weight: Font.DemiBold }
+                                    Text {
+                                        visible: row.modelData.body.length > 0
+                                        width: parent.width
+                                        text: row.modelData.body; textFormat: Text.PlainText
+                                        wrapMode: Text.Wrap; maximumLineCount: group.expanded ? 6 : 1; elide: Text.ElideRight
+                                        color: BarStyle.subtext; font.pixelSize: 12; font.family: Appearance.font.family.expressive
+                                        renderType: Text.QtRendering
                                     }
+                                    Flow {
+                                        visible: group.expanded && row.buttons.length > 0
+                                        topPadding: 6; width: parent.width; spacing: 6
+                                        Repeater {
+                                            model: row.buttons
+                                            delegate: BarButton {
+                                                id: actBtn
+                                                required property var modelData
+                                                tone: "tonal"; width: actText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
+                                                onTapped: Notifications.attemptInvokeAction(row.modelData.notificationId, actBtn.modelData.identifier)
+                                                BarText { id: actText; anchors.centerIn: parent; text: actBtn.modelData.text; font.pixelSize: 12; font.weight: Font.Medium }
+                                            }
+                                        }
+                                    }
+                                }
+                                // dismiss this one
+                                BarButton {
+                                    id: dismissBtn
+                                    visible: group.expanded
+                                    tone: "plain"; width: 24; height: 24; radius: 12
+                                    anchors { right: parent.right; top: parent.top; topMargin: 2 }
+                                    onTapped: Notifications.discardNotification(row.modelData.notificationId)
+                                    BarIcon { anchors.centerIn: parent; name: "close"; size: 14; color: dismissBtn.inkSoft }
                                 }
                             }
                         }
-                        Item {
-                            width: 22; height: 22
-                            BarIcon { anchors.centerIn: parent; name: "close"; size: 14; color: BarStyle.subtext }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Notifications.discardNotification(card.modelData.notificationId) }
+                    }
+                    // click opens / closes the group, middle-click dismisses it, drag sideways dismisses it
+                    MouseArea {
+                        anchors.fill: parent; z: -1
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.MiddleButton) { for (const n of group.items.slice()) Notifications.discardNotification(n.notificationId) }
+                            else group.expanded = !group.expanded
                         }
+                    }
+                    DragHandler {
+                        yAxis.enabled: false; target: null
+                        onActiveChanged: if (!active && Math.abs(translation.x) > 70) { for (const n of group.items.slice()) Notifications.discardNotification(n.notificationId) }
                     }
                 }
             }
