@@ -27,12 +27,11 @@ Item {
         Config.options.bars.sidebars.expanded = next
     }
 
-    Rectangle {
+    BarButton {
         id: header
+        tone: "tonal"
         width: parent.width; height: 48; radius: BarStyle.radiusMedium
-        color: hdAreaHv.hovered ? BarStyle.plateHover : "transparent"
-        border.width: 1; border.color: BarStyle.border
-        Behavior on color { ColorAnimation { duration: 100 } }
+        onTapped: root.toggle()
         BarIcon { x: 14; anchors.verticalCenter: parent.verticalCenter; name: root.icon; size: 18; fill: 1; color: root.open ? BarStyle.accent : BarStyle.subtext }
         Column {
             x: 44; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 44 - 40
@@ -41,8 +40,6 @@ Item {
         }
         BarIcon { anchors.right: parent.right; anchors.rightMargin: 14; anchors.verticalCenter: parent.verticalCenter; name: "expand_more"; size: 18; color: BarStyle.subtext; rotation: root.open ? 180 : 0
             Behavior on rotation { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } } }
-        MouseArea { id: hdArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.toggle() }
-        HoverHandler { id: hdAreaHv }
     }
     Item {
         id: bodyHolder
