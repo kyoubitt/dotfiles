@@ -48,6 +48,8 @@ Column {
         }
     }
 
+    BatteryWave { width: parent.width; level: root.pct; tone: root.tone; charging: root.charging }
+
     Column {
         spacing: 6
         BarText { text: "Power profile"; font.pixelSize: 11; color: BarStyle.subtext }
@@ -59,19 +61,19 @@ Column {
                     { name: "Balanced", icon: "balance", profile: PowerProfile.Balanced },
                     { name: "Performance", icon: "bolt", profile: PowerProfile.Performance, needs: PowerProfiles.hasPerformanceProfile }
                 ].filter(p => p.needs !== false)
-                delegate: Rectangle {
+                delegate: BarButton {
+                    id: pt
                     required property var modelData
                     readonly property bool on: PowerProfiles.profile === modelData.profile
-                    width: (300 - 12) / 3; height: 56; radius: BarStyle.radiusMedium
-                    color: on ? BarStyle.accent : BarStyle.plateHover
-                    Behavior on color { ColorAnimation { duration: 110 } }
+                    tone: "tonal"; toggled: on
+                    width: (300 - 12) / 3; height: 56; radius: pt.pressed ? BarStyle.radiusSmall : BarStyle.radiusMedium
+                    onTapped: PowerProfiles.profile = pt.modelData.profile
                     Column {
                         anchors.centerIn: parent
                         spacing: 2
-                        BarIcon { anchors.horizontalCenter: parent.horizontalCenter; name: parent.parent.modelData.icon; size: 18; fill: 1; color: parent.parent.on ? BarStyle.onAccent : BarStyle.subtext }
-                        BarText { anchors.horizontalCenter: parent.horizontalCenter; text: parent.parent.modelData.name; font.pixelSize: 11; color: parent.parent.on ? BarStyle.onAccent : BarStyle.text }
+                        BarIcon { anchors.horizontalCenter: parent.horizontalCenter; name: pt.modelData.icon; size: 20; fill: pt.on ? 1 : 0; color: pt.on ? BarStyle.accent : pt.inkSoft }
+                        BarText { anchors.horizontalCenter: parent.horizontalCenter; text: pt.modelData.name; font.pixelSize: 11; color: pt.ink }
                     }
-                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: PowerProfiles.profile = parent.modelData.profile }
                 }
             }
         }

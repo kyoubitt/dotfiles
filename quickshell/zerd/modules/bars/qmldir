@@ -65,6 +65,7 @@ BarEditor 1.0 BarEditor.qml
 BarButton 1.0 BarButton.qml
 BarCard 1.0 BarCard.qml
 BarSwitch 1.0 BarSwitch.qml
+BatteryWave 1.0 BatteryWave.qml
 NotifIcon 1.0 NotifIcon.qml
 NotifPopups 1.0 NotifPopups.qml
 NotifRulesSection 1.0 NotifRulesSection.qml
