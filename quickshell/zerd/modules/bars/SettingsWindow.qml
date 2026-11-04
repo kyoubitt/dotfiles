@@ -374,14 +374,13 @@ Scope {
                                 spacing: 6
                                 Repeater {
                                     model: row.modelData.acts ?? []
-                                    delegate: Rectangle {
+                                    delegate: BarButton {
                                         id: ab
                                         required property var modelData
-                                        width: abText.implicitWidth + 28; height: 30; radius: 15
-                                        color: abHov.hovered ? BarStyle.plateHover : BarStyle.accent
-                                        BarText { id: abText; anchors.centerIn: parent; text: ab.modelData.text; font.pixelSize: 12; color: BarStyle.onAccent }
-                                        HoverHandler { id: abHov }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(ab.modelData.cmd) }
+                                        tone: "filled"
+                                        width: abText.implicitWidth + 30; height: 34; radius: 17
+                                        onTapped: Quickshell.execDetached(ab.modelData.cmd)
+                                        BarText { id: abText; anchors.centerIn: parent; text: ab.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: ab.ink }
                                     }
                                 }
                             }
@@ -648,23 +647,11 @@ Scope {
                             }
 
                             // switch (Material 3: outlined track when off, the knob grows and shows a tick when on)
-                            Rectangle {
+                            BarSwitch {
                                 visible: row.modelData.t === "toggle"
                                 anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
-                                width: 52; height: 32; radius: 16
-                                color: row.value ? BarStyle.accent : BarStyle.surface
-                                border.width: row.value ? 0 : 2; border.color: BarStyle.subtext
-                                Behavior on color { ColorAnimation { duration: 110 } }
-                                Rectangle {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: row.value ? 24 : 16; height: width; radius: width / 2
-                                    x: row.value ? parent.width - width - 4 : 8
-                                    color: row.value ? BarStyle.onAccent : BarStyle.subtext
-                                    Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                                    Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                                    BarIcon { anchors.centerIn: parent; visible: !!row.value; name: "check"; size: 16; color: BarStyle.accent }
-                                }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, !row.value) }
+                                checked: !!row.value
+                                onToggled: Config.setNestedValue(row.modelData.path, !row.value)
                             }
                             // choice chips
                             Rectangle {
@@ -675,17 +662,16 @@ Scope {
                             // choice chips: one row for a few choices, wrapped under the label for many
                             Component {
                                 id: chipC
-                                Rectangle {
+                                BarButton {
                                     id: chip
                                     required property var modelData
                                     readonly property var v: typeof modelData === "object" ? modelData.v : modelData
                                     readonly property bool on: row.value === v
-                                    width: chipText.implicitWidth + 22; height: 30; radius: 15
-                                    color: on ? BarStyle.accent : (chipHov.hovered ? BarStyle.plateHover : (row.wrap ? BarStyle.surface : "transparent"))
-                                    Behavior on color { ColorAnimation { duration: 90 } }
-                                    BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.on ? BarStyle.onAccent : BarStyle.text }
-                                    HoverHandler { id: chipHov }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, chip.v) }
+                                    tone: row.wrap ? "outlined" : "plain"
+                                    toggled: on
+                                    width: chipText.implicitWidth + 24; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, chip.v)
+                                    BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.ink; font.weight: chip.on ? Font.DemiBold : Font.Medium }
                                 }
                             }
                             Row {
@@ -708,18 +694,16 @@ Scope {
                                 visible: row.modelData.t === "step"
                                 anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
                                 spacing: 6
-                                Rectangle {
-                                    width: 30; height: 30; radius: 15; color: minusHov.hovered ? BarStyle.plateHover : "transparent"
+                                BarButton {
+                                    tone: "outlined"; width: 32; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, Math.max(row.modelData.min, Number(row.value) - row.modelData.by))
                                     BarIcon { anchors.centerIn: parent; name: "remove"; size: 18; color: BarStyle.text }
-                                    HoverHandler { id: minusHov }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, Math.max(row.modelData.min, Number(row.value) - row.modelData.by)) }
                                 }
                                 BarText { width: 52; horizontalAlignment: Text.AlignHCenter; anchors.verticalCenter: parent.verticalCenter; text: String(row.value); font.weight: Font.DemiBold }
-                                Rectangle {
-                                    width: 30; height: 30; radius: 15; color: plusHov.hovered ? BarStyle.plateHover : "transparent"
+                                BarButton {
+                                    tone: "outlined"; width: 32; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, Math.min(row.modelData.max, Number(row.value) + row.modelData.by))
                                     BarIcon { anchors.centerIn: parent; name: "add"; size: 18; color: BarStyle.text }
-                                    HoverHandler { id: plusHov }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, Math.min(row.modelData.max, Number(row.value) + row.modelData.by)) }
                                 }
                             }
                         }
