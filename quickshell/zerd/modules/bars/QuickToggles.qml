@@ -12,29 +12,21 @@ Grid {
 
     function details(kind: string): void { BarState.sidebar = ""; GlobalStates.barPopup = { kind: kind, x: 1700 } }
 
-    component Tile: Rectangle {
+    component Tile: BarButton {
         id: tile
         property string icon
         property string title
         property string sub
         property bool on: false
-        signal tapped()
-        signal secondary()
-        width: (root.width - 8) / 2; height: 62; radius: 20
-        color: on ? BarStyle.accent : BarStyle.plateHover
-        scale: ma.pressed ? 0.97 : 1
-        Behavior on color { ColorAnimation { duration: 110 } }
-        Behavior on scale { NumberAnimation { duration: 80; easing.type: Easing.OutCubic } }
-        BarIcon { x: 16; anchors.verticalCenter: parent.verticalCenter; name: tile.icon; fill: 1; size: 20; color: tile.on ? BarStyle.onAccent : BarStyle.subtext }
+        toggled: on
+        width: (root.width - 8) / 2; height: 62
+        radius: tile.pressed ? BarStyle.radiusSmall : BarStyle.radiusMedium
+        Behavior on radius { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
+        BarIcon { x: 16; anchors.verticalCenter: parent.verticalCenter; name: tile.icon; fill: tile.on ? 1 : 0; size: 22; color: tile.on ? BarStyle.accent : tile.inkSoft }
         Column {
-            x: 48; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 56
-            BarText { text: tile.title; width: parent.width; elide: Text.ElideRight; font.weight: Font.DemiBold; font.pixelSize: 12; color: tile.on ? BarStyle.onAccent : BarStyle.text }
-            BarText { text: tile.sub; width: parent.width; elide: Text.ElideRight; font.pixelSize: 11; color: tile.on ? BarStyle.onAccent : BarStyle.subtext }
-        }
-        MouseArea {
-            id: ma; anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: mouse => mouse.button === Qt.RightButton ? tile.secondary() : tile.tapped()
+            x: 50; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 58
+            BarText { text: tile.title; width: parent.width; elide: Text.ElideRight; font.weight: Font.DemiBold; font.pixelSize: 13; color: tile.ink }
+            BarText { text: tile.sub; width: parent.width; elide: Text.ElideRight; font.pixelSize: 11; color: tile.inkSoft }
         }
     }
 
