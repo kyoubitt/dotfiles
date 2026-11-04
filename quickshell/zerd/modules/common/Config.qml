@@ -319,6 +319,8 @@ Singleton {
                     property list<string> layoutRight: ["tools", "keyboard", "status", "tray", "end"]
                     property list<string> layoutHidden: ["focus"]
                     // Single items inside the Info and Status blocks.
+                    // pills (a capsule per group), strip (one full-width bar), floating (one rounded bar, inset)
+                    property string look: "pills"
                     property bool showCpu: true
                     property bool showMemory: true
                     property bool showGpu: true

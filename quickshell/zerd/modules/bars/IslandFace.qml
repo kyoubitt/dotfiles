@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Widgets
 import qs
 import qs.services
 
@@ -8,6 +9,9 @@ BarPill {
     id: root
 
     readonly property var player: NowPlaying.player
+    // a soft accent edge while music plays
+    border.color: NowPlaying.isPlaying ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.45) : BarStyle.border
+    Behavior on border.color { ColorAnimation { duration: 300 } }
     property int maxTextWidth: 220
 
     // Red dot while something records, shares the screen or uses the mic.
@@ -69,6 +73,16 @@ BarPill {
         id: mediaPart
         visible: root.player !== null && !root.vertical
         spacing: 8
+        // the cover of what plays
+        Item {
+            id: artPart
+            visible: coverImg.status === Image.Ready
+            width: 24; height: 24
+            ClippingRectangle {
+                anchors.fill: parent; radius: 8; color: BarStyle.plateHover
+                Image { id: coverImg; anchors.fill: parent; source: NowPlaying.player?.trackArtUrl ?? ""; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize: Qt.size(48, 48) }
+            }
+        }
         // Play / pause is its own target; the rest opens the player.
         Item {
             width: 24; height: 24

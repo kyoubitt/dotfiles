@@ -60,7 +60,10 @@ Scope {
 
             readonly property var options: Config.options?.bars?.top ?? ({})
             readonly property int barHeight: options.height ?? 34
-            readonly property int margin: options.margin ?? 8
+            // pills: a capsule per group. strip: one full-width bar. floating: one rounded bar, inset from the edges.
+            readonly property string look: options.look ?? "pills"
+            readonly property int margin: look === "strip" ? 0 : (options.margin ?? 8)
+            readonly property int sidePad: look === "strip" ? 14 : (look === "floating" ? margin + 14 : margin)
             // `autoHide` is the user's switch (always slide away). `smartHide` only does it in the odd layout where a
             // fullscreen window and an ordinary one share the workspace, so the bar would sit across the fullscreen one.
             readonly property bool userAutoHide: options.autoHide ?? false
@@ -180,9 +183,21 @@ Scope {
                 Behavior on y { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                 Behavior on opacity { NumberAnimation { duration: 110 } }
 
+                // the one plate behind everything in the strip and floating looks
+                Rectangle {
+                    visible: win.look !== "pills"
+                    x: win.look === "strip" ? 0 : win.margin
+                    y: win.look === "strip" ? 0 : win.margin
+                    width: parent.width - 2 * x; height: win.barHeight
+                    radius: win.look === "strip" ? 0 : height / 2
+                    color: BarStyle.plate
+                    border.width: win.look === "floating" ? 1 : 0
+                    border.color: BarStyle.border
+                    Rectangle { visible: win.look === "strip"; anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 1; color: BarStyle.border }
+                }
                 Row {
                     id: left
-                    x: win.margin
+                    x: win.sidePad
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
@@ -198,7 +213,7 @@ Scope {
                 }
                 Row {
                     id: right
-                    x: parent.width - width - win.margin
+                    x: parent.width - width - win.sidePad
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }

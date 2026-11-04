@@ -61,7 +61,8 @@ Scope {
         { name: "Bar", icon: "toolbar", rows: [
             { t: "toggle", label: "Hide the bar until the pointer is at the top", hint: "Rest the pointer on the top edge to bring it back", path: "bars.top.autoHide", def: false },
             { t: "toggle", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true },
-            { t: "choice", label: "Workspaces", path: "bars.top.workspaceStyle", opts: ["pills", "numbers"], def: "pills" },
+            { t: "choice", label: "Bar style", hint: "Pills: a capsule per group. Strip: one full-width bar. Floating: one rounded bar", path: "bars.top.look", opts: [{ v: "pills", l: "Pills" }, { v: "strip", l: "Strip" }, { v: "floating", l: "Floating" }], def: "pills" },
+            { t: "choice", label: "Workspaces", hint: "Icons show the apps open on each workspace", path: "bars.top.workspaceStyle", opts: ["pills", "numbers", "icons"], def: "pills" },
             { t: "step", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
             { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 },
             { t: "actions", label: "Layout", hint: "Drag the blocks where you want them, hide what you don't use. Window titles can show private chats, so that block starts hidden", acts: [

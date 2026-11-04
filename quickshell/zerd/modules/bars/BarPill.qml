@@ -28,10 +28,10 @@ Rectangle {
     implicitHeight: root.vertical ? even(layout.implicitHeight + 2 * BarStyle.padding) : root.thickness
     radius: Math.min(width, height) / 2
     antialiasing: true
-    color: root.interactive && (root.hovered || hover.pressed) ? BarStyle.plateHover : BarStyle.plate
+    color: root.interactive && (root.hovered || hover.pressed) ? BarStyle.plateHover : (BarStyle.flatPills && !root.vertical ? "transparent" : BarStyle.plate)
     scale: root.interactive && hover.pressed ? 0.97 : 1
     Behavior on scale { NumberAnimation { duration: 80; easing.type: Easing.OutCubic } }
-    border.width: 1
+    border.width: BarStyle.flatPills && !root.vertical ? 0 : 1
     border.color: BarStyle.border
     Behavior on color { ColorAnimation { duration: 100 } }
 

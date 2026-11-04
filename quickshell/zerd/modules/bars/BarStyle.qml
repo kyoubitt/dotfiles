@@ -20,6 +20,8 @@ Singleton {
 
     readonly property int fontSize: 13
     readonly property int iconSize: 18
+    // The strip and floating bar styles draw one plate behind everything, so the capsules themselves go flat.
+    readonly property bool flatPills: (Config.options?.bars?.top?.look ?? "pills") !== "pills"
     readonly property int gap: 6
     readonly property int padding: 10
 
