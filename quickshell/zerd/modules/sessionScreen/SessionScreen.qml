@@ -15,53 +15,46 @@ import qs.modules.bars
 Scope {
     id: root
 
-    // A tonal tile with the icon, the name and the key that does it. Hover and the keyboard focus lift it and fill it
+    // A big rounded tile with the icon, the name and the key that does it. Hover or the keyboard selection fills it
     // with the accent; the destructive ones (reboot, shut down) fill with the warning colour instead.
-    component SessionButton: ColumnLayout {
-        id: sessionButton
+    component SessionButton: Item {
+        id: sb
         required property string icon
         required property string label
         property string hint: ""
         property bool danger: false
+        property bool selected: false
         signal activated()
-        readonly property color tone: sessionButton.danger ? BarStyle.danger : BarStyle.accent
+        implicitWidth: 120
+        implicitHeight: 150
+        readonly property color tone: sb.danger ? BarStyle.danger : BarStyle.accent
+        readonly property bool lit: btn.hovered || sb.selected
 
-        spacing: 12
-
-        Rectangle {
-            id: tile
-            Layout.alignment: Qt.AlignHCenter
-            implicitWidth: 96
-            implicitHeight: 96
-            radius: 48
-            readonly property bool lit: tileHover.hovered || tileTap.pressed
-            color: lit ? Qt.rgba(sessionButton.tone.r, sessionButton.tone.g, sessionButton.tone.b, 0.92) : Qt.rgba(0, 0, 0, 0.32)
-            border.width: 1
-            border.color: lit ? "transparent" : Qt.rgba(1, 1, 1, 0.14)
-            scale: tileTap.pressed ? 0.94 : (lit ? 1.05 : 1)
-            Behavior on color { ColorAnimation { duration: 110 } }
-            Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
-
-            Text {
-                anchors.centerIn: parent
-                text: sessionButton.icon
-                font.family: Appearance.font.family.iconMaterial
-                font.pixelSize: 38
-                color: tile.lit ? BarStyle.onAccent : "#ffffff"
-                Behavior on color { ColorAnimation { duration: 110 } }
-            }
-            HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { id: tileTap; onTapped: sessionButton.activated() }
+        BarButton {
+            id: btn
+            width: 112; height: 112
+            anchors.horizontalCenter: parent.horizontalCenter
+            radius: lit ? 40 : 32
+            Behavior on radius { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutCubic } }
+            tone: sb.lit ? "filled" : "tonal"
+            accentColor: sb.tone
+            onAccentColor: sb.danger ? BarStyle.onAccent : BarStyle.onAccent
+            onTapped: sb.activated()
+            BarIcon { anchors.centerIn: parent; name: sb.icon; size: 44; color: btn.ink }
         }
-
-        Text {
-            Layout.alignment: Qt.AlignHCenter
-            text: sessionButton.label
+        BarText {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 124
+            text: sb.label
             font.pixelSize: 14
-            font.weight: Font.Medium
-            color: "#ffffff"
-            opacity: tile.lit ? 1 : 0.7
-            Behavior on opacity { NumberAnimation { duration: 110 } }
+            color: sb.lit ? BarStyle.text : BarStyle.subtext
+        }
+        Rectangle {
+            visible: sb.hint.length > 0
+            x: btn.x + btn.width - 28; y: 6
+            width: 22; height: 22; radius: 8
+            color: Qt.rgba(0, 0, 0, 0.35)
+            BarText { anchors.centerIn: parent; text: sb.hint; font.pixelSize: 11; color: "#ffffff"; opacity: 0.8 }
         }
     }
 
@@ -110,15 +103,23 @@ Scope {
                 anchors.verticalCenterOffset: riseOffset
 
                 focus: true
+                property int sel: -1
+                readonly property var actions: [
+                    { icon: "logout", label: "Log out", hint: "E", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                    { icon: "lock", label: "Lock", hint: "L", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                    { icon: "bedtime", label: "Sleep", hint: "S", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                    { icon: "restart_alt", label: "Restart", hint: "R", danger: true, cmd: ["systemctl", "reboot"] },
+                    { icon: "power_settings_new", label: "Shut down", hint: "U", danger: true, cmd: ["systemctl", "poweroff"] }
+                ]
+                function run(a): void { GlobalStates.sessionOpen = false; Quickshell.execDetached(a.cmd) }
                 Keys.onEscapePressed: GlobalStates.sessionOpen = false
+                Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
+                Keys.onRightPressed: sel = (sel + 1) % actions.length
+                Keys.onReturnPressed: if (sel >= 0) run(actions[sel])
+                Keys.onEnterPressed: if (sel >= 0) run(actions[sel])
                 Keys.onPressed: event => {
-                    const k = event.key
-                    const go = (cmd) => { GlobalStates.sessionOpen = false; Quickshell.execDetached(cmd); event.accepted = true }
-                    if (k === Qt.Key_L) go(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
-                    else if (k === Qt.Key_S) go(["sh", "-c", "sleep 1; systemctl suspend"])
-                    else if (k === Qt.Key_R) go(["systemctl", "reboot"])
-                    else if (k === Qt.Key_U) go(["systemctl", "poweroff"])
-                    else if (k === Qt.Key_E) go(["niri", "msg", "action", "quit", "--skip-confirmation"])
+                    const hit = actions.find(a => event.key === Qt["Key_" + a.hint])
+                    if (hit) { run(hit); event.accepted = true }
                 }
 
                 Component.onCompleted: {
@@ -136,73 +137,36 @@ Scope {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 6
 
-                    Text {
+                    BarText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm AP")
-                        font.family: Appearance.font.family.monospace
-                        font.pixelSize: 72
-                        font.bold: true
-                        color: Appearance.colors.colOnLayer0
+                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
+                        font.pixelSize: 88
+                        font.weight: Font.DemiBold
+                        color: "#ffffff"
                     }
-                    Text {
+                    BarText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
-                        font.family: Appearance.font.family.monospace
+                        text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
                         font.pixelSize: 18
-                        color: Appearance.colors.colOnLayer0
-                        opacity: 0.7
+                        color: BarStyle.accent
                     }
                 }
 
                 RowLayout {
+                    id: actionRow
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 28
-
-                    SessionButton {
-                        icon: "logout"
-                        label: "Log out"
-                        hint: "E"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["niri", "msg", "action", "quit", "--skip-confirmation"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "lock"
-                        label: "Lock"
-                        hint: "L"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "bedtime"
-                        label: "Sleep"
-                        hint: "S"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["sh", "-c", "sleep 1; systemctl suspend"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "restart_alt"
-                        label: "Reboot"
-                        hint: "R"
-                        danger: true
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "reboot"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "power_settings_new"
-                        label: "Shut down"
-                        hint: "U"
-                        danger: true
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "poweroff"])
+                    spacing: 18
+                    Repeater {
+                        model: content.actions
+                        delegate: SessionButton {
+                            required property var modelData
+                            required property int index
+                            icon: modelData.icon
+                            label: modelData.label
+                            hint: modelData.hint
+                            danger: modelData.danger === true
+                            selected: content.sel === index
+                            onActivated: content.run(modelData)
                         }
                     }
                 }
@@ -284,7 +248,7 @@ Scope {
                                 spacing: 1
                                 MarqueeText {
                                     Layout.fillWidth: true
-                                    font.family: Appearance.font.family.monospace
+                                    font.family: Appearance.font.family.expressive
                                     font.pixelSize: 15
                                     font.bold: true
                                     color: Appearance.colors.colOnLayer3
@@ -292,7 +256,7 @@ Scope {
                                 }
                                 MarqueeText {
                                     Layout.fillWidth: true
-                                    font.family: Appearance.font.family.monospace
+                                    font.family: Appearance.font.family.expressive
                                     font.pixelSize: 12
                                     color: Appearance.colors.colOnLayer3
                                     opacity: 0.65
