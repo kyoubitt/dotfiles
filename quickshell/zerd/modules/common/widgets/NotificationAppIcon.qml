@@ -12,7 +12,7 @@ MaterialShape { // App icon
     property var appIcon: ""
     property var summary: ""
     property var urgency: NotificationUrgency.Normal
-    property bool isUrgent: urgency === NotificationUrgency.Critical
+    property bool isUrgent: urgency === NotificationUrgency.Critical || String(urgency).toLowerCase() === "critical"
     property var image: ""
     property real materialIconScale: 0.57
     property real appIconScale: 0.8
@@ -55,7 +55,7 @@ MaterialShape { // App icon
         anchors.fill: parent
         sourceComponent: MaterialSymbol {
             text: {
-                return (root.urgency == NotificationUrgency.Critical
+                return (root.isUrgent
                     && root.guessedMaterialSymbol === root.defaultMaterialSymbol)
                     ? "priority_high" : root.guessedMaterialSymbol
             }
