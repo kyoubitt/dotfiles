@@ -186,13 +186,19 @@ Scope {
                             required property var modelData
                             required property int index
                             width: parent.width; height: 42; radius: 21
-                            color: root.page === index ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.2) : (hov.hovered ? BarStyle.plateHover : "transparent")
-                            Behavior on color { ColorAnimation { duration: 90 } }
+                            color: root.page === index ? BarStyle.accentContainer : (hov.hovered ? BarStyle.plateHover : "transparent")
+                            Behavior on color { ColorAnimation { duration: BarStyle.motionFast } }
+                            Rectangle {
+                                x: 0; anchors.verticalCenter: parent.verticalCenter
+                                width: 4; height: root.page === item.index ? 20 : 0; radius: 2
+                                color: BarStyle.accent
+                                Behavior on height { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
+                            }
                             Row {
                                 anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
                                 spacing: 10
-                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: item.modelData.icon; size: 20; color: root.page === item.index ? BarStyle.accent : BarStyle.subtext }
-                                BarText { anchors.verticalCenter: parent.verticalCenter; text: item.modelData.name; font.weight: root.page === item.index ? Font.DemiBold : Font.Medium; color: root.page === item.index ? BarStyle.accent : BarStyle.text }
+                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: item.modelData.icon; size: 20; color: root.page === item.index ? BarStyle.onAccentContainer : BarStyle.subtext }
+                                BarText { anchors.verticalCenter: parent.verticalCenter; text: item.modelData.name; font.weight: root.page === item.index ? Font.DemiBold : Font.Medium; color: root.page === item.index ? BarStyle.onAccentContainer : BarStyle.text }
                             }
                             HoverHandler { id: hov }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.page = item.index }
@@ -218,7 +224,15 @@ Scope {
                     }
                     Item {
                         width: rows.width; height: 44
+                        Rectangle {
+                            id: badge
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 44; height: 44; radius: 16
+                            color: BarStyle.accentContainer
+                            BarIcon { anchors.centerIn: parent; name: root.query.length > 0 ? "search" : root.pages[root.page].icon; size: 24; fill: 1; color: BarStyle.onAccentContainer }
+                        }
                         Column {
+                            x: badge.width + 14
                             anchors.verticalCenter: parent.verticalCenter
                             BarText { text: root.query.length > 0 ? "Search" : root.pages[root.page].name; font.pixelSize: 24; font.weight: Font.DemiBold }
                             BarText { text: root.query.length > 0 ? "Every page" : (root.blurbs[root.pages[root.page].name] ?? ""); font.pixelSize: 12; color: BarStyle.subtext }
@@ -241,7 +255,13 @@ Scope {
                     }
                     Item {
                       width: rows.width; height: cardCol.implicitHeight
-                      Rectangle { anchors.fill: parent; radius: 24; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border }
+                      Rectangle {
+                          anchors.fill: parent; radius: 24; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
+                          gradient: Gradient {
+                              GradientStop { position: 0.0; color: Qt.tint(BarStyle.plate, Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.07)) }
+                              GradientStop { position: 0.35; color: BarStyle.plate }
+                          }
+                      }
                       Column {
                         id: cardCol
                         width: parent.width
