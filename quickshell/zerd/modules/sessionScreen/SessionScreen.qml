@@ -15,46 +15,95 @@ import qs.modules.bars
 Scope {
     id: root
 
-    // A big rounded tile with the icon, the name and the key that does it. Hover or the keyboard selection fills it
-    // with the accent; the destructive ones (reboot, shut down) fill with the warning colour instead.
+    // Hold-to-confirm capsule after ilyamiro's power actions (serpantinum, AGPL-3.0) and the liquid fill shader of the
+    // Material You theme by Darkkal44 (MIT): press and hold, a wave fills the capsule, and when it is full the action runs.
+    // Letting go drains it again. The heavier the action, the longer the hold.
     component SessionButton: Item {
         id: sb
         required property string icon
         required property string label
         property string hint: ""
         property bool danger: false
+        property real weight: 1
         property bool selected: false
+        property real fillLevel: 0
+        property bool done: false
         signal activated()
-        implicitWidth: 120
-        implicitHeight: 150
+        implicitWidth: 144
+        implicitHeight: 196
         readonly property color tone: sb.danger ? BarStyle.danger : BarStyle.accent
-        readonly property bool lit: btn.hovered || sb.selected
+        readonly property bool lit: ma.containsMouse || sb.selected || fillLevel > 0.001
 
-        BarButton {
-            id: btn
-            width: 112; height: 112
-            anchors.horizontalCenter: parent.horizontalCenter
-            radius: lit ? 40 : 32
-            Behavior on radius { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutCubic } }
-            tone: sb.lit ? "filled" : "tonal"
-            accentColor: sb.tone
-            onAccentColor: sb.danger ? BarStyle.onAccent : BarStyle.onAccent
-            onTapped: sb.activated()
-            BarIcon { anchors.centerIn: parent; name: sb.icon; size: 44; color: btn.ink }
-        }
-        BarText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: 124
-            text: sb.label
-            font.pixelSize: 14
-            color: sb.lit ? BarStyle.text : BarStyle.subtext
+        function press(): void { if (done) return; drain.stop(); fill.start() }
+        function release(): void { if (done) return; fill.stop(); drain.start() }
+
+        NumberAnimation { id: fill; target: sb; property: "fillLevel"; to: 1; duration: 520 * sb.weight * (1 - sb.fillLevel); easing.type: Easing.InSine
+            onFinished: { sb.done = true; flash.restart(); sb.activated() } }
+        NumberAnimation { id: drain; target: sb; property: "fillLevel"; to: 0; duration: 1200 * sb.fillLevel; easing.type: Easing.OutQuad }
+
+        Rectangle {
+            id: capsule
+            anchors.fill: parent
+            radius: BarStyle.radiusXL + 10
+            color: ma.containsMouse || sb.selected ? BarStyle.cardHigh : BarStyle.card
+            border.width: sb.selected ? 2 : 0
+            border.color: sb.tone
+            clip: true
+            scale: ma.pressed ? 0.97 : (sb.lit ? 1.03 : 1)
+            Behavior on color { ColorAnimation { duration: BarStyle.motionFast } }
+            Behavior on scale { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
+
+            ShaderEffect {
+                id: wave
+                anchors.fill: parent
+                visible: sb.fillLevel > 0.001
+                property real radius: capsule.radius
+                property real fillLevel: sb.fillLevel
+                property real waveAmp: sb.fillLevel < 0.99 ? Math.min(12, capsule.height * sb.fillLevel, capsule.height * (1 - sb.fillLevel)) * Math.sin(sb.fillLevel * Math.PI) : 0
+                property vector2d itemSize: Qt.vector2d(width, height)
+                property real phase: 0
+                property real vertical: 1
+                property color color1: Qt.darker(sb.tone, 1.1)
+                property color color2: sb.tone
+                property vector4d params: Qt.vector4d(1, 0, 0, 0)
+                fragmentShader: Qt.resolvedUrl("fluid_wave.frag.qsb")
+                NumberAnimation on phase { running: sb.fillLevel > 0 && sb.fillLevel < 1; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 800 }
+            }
+            Rectangle { anchors.fill: parent; radius: capsule.radius; color: "#ffffff"; opacity: 0
+                NumberAnimation on opacity { id: flash; running: false; from: 0.6; to: 0; duration: 500; easing.type: Easing.OutExpo } }
+
+            // icon and name; a second copy, clipped to the filled part, turns dark on the wave
+            Item {
+                anchors.fill: parent
+                BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: sb.lit ? BarStyle.text : BarStyle.subtext }
+                BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: sb.lit ? BarStyle.text : BarStyle.subtext }
+                BarText { x: 0; y: 156; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.fillLevel > 0.001 ? "keep holding" : "hold"; font.pixelSize: 11; color: BarStyle.subtext; opacity: 0.7 }
+            }
+            Item {
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                height: parent.height * sb.fillLevel
+                clip: true
+                Item {
+                    x: 0; y: -(capsule.height - parent.height); width: capsule.width; height: capsule.height
+                    BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: BarStyle.onAccent }
+                    BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: BarStyle.onAccent }
+                }
+            }
         }
         Rectangle {
             visible: sb.hint.length > 0
-            x: btn.x + btn.width - 28; y: 6
-            width: 22; height: 22; radius: 8
-            color: Qt.rgba(0, 0, 0, 0.35)
+            x: parent.width - 34; y: 12; width: 22; height: 22; radius: 8
+            color: Qt.rgba(0, 0, 0, 0.3)
             BarText { anchors.centerIn: parent; text: sb.hint; font.pixelSize: 11; color: "#ffffff"; opacity: 0.8 }
+        }
+        MouseArea {
+            id: ma
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onPressed: sb.press()
+            onReleased: sb.release()
+            onCanceled: sb.release()
         }
     }
 
@@ -105,21 +154,30 @@ Scope {
                 focus: true
                 property int sel: -1
                 readonly property var actions: [
-                    { icon: "logout", label: "Log out", hint: "E", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
-                    { icon: "lock", label: "Lock", hint: "L", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
-                    { icon: "bedtime", label: "Sleep", hint: "S", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
-                    { icon: "restart_alt", label: "Restart", hint: "R", danger: true, cmd: ["systemctl", "reboot"] },
-                    { icon: "power_settings_new", label: "Shut down", hint: "U", danger: true, cmd: ["systemctl", "poweroff"] }
+                    { icon: "logout", label: "Log out", hint: "E", weight: 1.3, cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                    { icon: "lock", label: "Lock", hint: "L", weight: 0.8, cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 1, cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 2, danger: true, cmd: ["systemctl", "reboot"] },
+                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 2.8, danger: true, cmd: ["systemctl", "poweroff"] }
                 ]
                 function run(a): void { GlobalStates.sessionOpen = false; Quickshell.execDetached(a.cmd) }
+                function capAt(i: int): var { return caps.itemAt(i) }
                 Keys.onEscapePressed: GlobalStates.sessionOpen = false
                 Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
                 Keys.onRightPressed: sel = (sel + 1) % actions.length
-                Keys.onReturnPressed: if (sel >= 0) run(actions[sel])
-                Keys.onEnterPressed: if (sel >= 0) run(actions[sel])
+                // keys do what the mouse does: hold to fill, let go to drain
+                Keys.onReturnPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                Keys.onEnterPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                Keys.onReleased: event => {
+                    if (event.isAutoRepeat) return
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (sel >= 0) capAt(sel)?.release(); return }
+                    const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                    if (i >= 0) capAt(i)?.release()
+                }
                 Keys.onPressed: event => {
-                    const hit = actions.find(a => event.key === Qt["Key_" + a.hint])
-                    if (hit) { run(hit); event.accepted = true }
+                    if (event.isAutoRepeat) return
+                    const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                    if (i >= 0) { sel = i; capAt(i)?.press(); event.accepted = true }
                 }
 
                 Component.onCompleted: {
@@ -157,6 +215,7 @@ Scope {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 18
                     Repeater {
+                        id: caps
                         model: content.actions
                         delegate: SessionButton {
                             required property var modelData
@@ -165,6 +224,7 @@ Scope {
                             label: modelData.label
                             hint: modelData.hint
                             danger: modelData.danger === true
+                            weight: modelData.weight ?? 1
                             selected: content.sel === index
                             onActivated: content.run(modelData)
                         }
