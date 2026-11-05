@@ -268,7 +268,7 @@ Singleton {
             property JsonObject bars: JsonObject {
                 // Notification banners: "rice" is the shell's own, "waffle" the old Waffle ones. `rules` are "app|silent" or "app|mute".
                 property JsonObject notifications: JsonObject {
-                    property string engine: "rice"
+                    property string engine: "inir"
                     property string position: "top"
                     property int width: 380
                     property list<string> rules: ["Spotify|mute"]

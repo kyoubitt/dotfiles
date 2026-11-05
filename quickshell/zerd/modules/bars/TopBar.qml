@@ -8,6 +8,7 @@ import Quickshell.Wayland
 import qs
 import qs.modules.common
 import qs.services
+import qs.modules.notificationPopup as INiRNotif
 
 // Floating top bar in three groups: workspaces and the focused window on the
 // left, the clock/media island in the middle, the status capsule, tray and
@@ -31,7 +32,8 @@ Scope {
     SettingsWindow {}
     WidgetBoard {}
     BarEditor {}
-    LazyLoader { active: (Config.options?.bars?.notifications?.engine ?? "rice") === "rice"; component: NotifPopups {} }
+    LazyLoader { active: (Config.options?.bars?.notifications?.engine ?? "inir") === "inir"; component: INiRNotif.NotificationPopup {} }
+    NotifRuleSweep {}
 
     property string debug: ""
 

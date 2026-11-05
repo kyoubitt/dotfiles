@@ -210,6 +210,18 @@ Singleton {
     }
 
     // Public API - use cached values
+    // App names whose group has at least one notification matching the query, in the order of appNameList.
+    function appNamesMatching(query): var {
+        const needle = String(query ?? "").trim().toLowerCase()
+        if (needle.length === 0) return root.appNameList
+        const groups = root.groupsByAppName
+        return root.appNameList.filter(appName => {
+            if (appName.toLowerCase().includes(needle)) return true
+            const notifications = groups[appName]?.notifications ?? []
+            return notifications.some(notif => (notif.summary ?? "").toLowerCase().includes(needle) || (notif.body ?? "").toLowerCase().includes(needle))
+        })
+    }
+
     property var groupsByAppName: _cachedGroupsByAppName
     property var popupGroupsByAppName: _cachedPopupGroupsByAppName
     property var appNameList: _cachedAppNameList

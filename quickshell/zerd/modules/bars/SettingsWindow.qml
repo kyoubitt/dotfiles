@@ -114,7 +114,7 @@ Scope {
             { t: "toggle", label: "Dock icons magnify under the pointer", path: "iris.dock.magnification", def: true }
         ] },
         { name: "Notifications", icon: "notifications", rows: [
-            { t: "choice", label: "Banners", path: "bars.notifications.engine", opts: ["rice", "waffle"], def: "rice" },
+            { t: "choice", label: "Banners", path: "bars.notifications.engine", opts: ["inir", "waffle"], def: "inir" },
             { t: "choice", label: "Position", path: "bars.notifications.position", opts: ["top", "bottom"], def: "top" },
             { t: "step", label: "Width", path: "bars.notifications.width", min: 300, max: 520, by: 20, def: 380 }
         ] },
