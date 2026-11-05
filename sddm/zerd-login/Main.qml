@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Controls
+import QtQuick.VirtualKeyboard
 
 // The login screen, built from the same glass blocks as the lock screen: a big clock, one block with your picture,
 // name and the password pill, a block for the session and one for sleep / restart / shut down.
@@ -68,7 +69,7 @@ Rectangle {
 
     // a glass block, the same everywhere
     component Glass: Rectangle {
-        color: Qt.rgba(0, 0, 0, 0.4)
+        color: Qt.rgba(1, 1, 1, 0.1)
         border.width: 1
         border.color: Qt.rgba(1, 1, 1, 0.14)
         antialiasing: true
@@ -80,7 +81,8 @@ Rectangle {
         signal clicked()
         width: 56; height: 56; radius: hov.containsMouse ? 20 : 28
         Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-        color: hov.containsMouse ? root.accent : Qt.rgba(1, 1, 1, 0.08)
+        color: hov.containsMouse ? root.accent : Qt.rgba(1, 1, 1, 0.1)
+        border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
         Behavior on color { ColorAnimation { duration: 160 } }
         scale: hov.pressed ? 0.93 : 1
         Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
@@ -99,7 +101,7 @@ Rectangle {
             id: clockText
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatTime(new Date(), config.HourFormat)
-            font.family: root.fam; font.pixelSize: 132; font.weight: Font.Medium
+            font.family: root.fam; font.pixelSize: 140; font.weight: Font.Light
             renderType: Text.QtRendering
             color: "#ffffff"
         }
@@ -156,7 +158,7 @@ Rectangle {
             }
             Rectangle {
                 anchors.fill: parent; radius: 29
-                color: Qt.rgba(1, 1, 1, 0.07)
+                color: Qt.rgba(1, 1, 1, 0.12)
                 border.width: 2
                 border.color: root.failed ? config.WarningColor : (pw.activeFocus ? root.accent : Qt.rgba(1, 1, 1, 0.12))
                 Behavior on border.color { ColorAnimation { duration: 160 } }
@@ -197,33 +199,80 @@ Rectangle {
         }
     }
 
-    // ---- session block (left) and power block (right)
-    Glass {
-        id: sessionBlock
-        visible: sessionModel.count > 1
+    // ---- bottom left: session picker and the on-screen keyboard
+    Row {
+        id: leftRow
         anchors { left: parent.left; bottom: parent.bottom; margins: 36 }
-        height: 80; width: sessRow.width + 40; radius: 28
-        Row {
-            id: sessRow
-            anchors.centerIn: parent
-            spacing: 12
-            Round { icon: "desktop_windows"; tip: "Session"; onClicked: root.sessionIndex = (root.sessionIndex + 1) % sessionModel.count }
-            Text { anchors.verticalCenter: parent.verticalCenter; text: root.sessionName; font.family: root.fam; font.pixelSize: 16; renderType: Text.QtRendering; color: "#ffffff" }
+        spacing: 12
+        Rectangle {
+            id: sessionPill
+            height: 56; width: sessLabel.width + 100; radius: 28
+            color: sessMouse.containsMouse || sessionPopup.visible ? root.accent : Qt.rgba(1, 1, 1, 0.1)
+            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
+            Behavior on color { ColorAnimation { duration: 160 } }
+            Text { x: 18; anchors.verticalCenter: parent.verticalCenter; text: "desktop_windows"; font.family: root.icons; font.pixelSize: 24
+                color: sessMouse.containsMouse || sessionPopup.visible ? root.onAccent : "#ffffff" }
+            Text { id: sessLabel; x: 52; anchors.verticalCenter: parent.verticalCenter; text: root.sessionName
+                font.family: root.fam; font.pixelSize: 16; font.weight: Font.Medium; renderType: Text.QtRendering
+                color: sessMouse.containsMouse || sessionPopup.visible ? root.onAccent : "#ffffff" }
+            Text { anchors.right: parent.right; anchors.rightMargin: 14; anchors.verticalCenter: parent.verticalCenter
+                text: sessionPopup.visible ? "expand_more" : "expand_less"; font.family: root.icons; font.pixelSize: 20
+                color: sessMouse.containsMouse || sessionPopup.visible ? root.onAccent : Qt.rgba(1, 1, 1, 0.7) }
+            MouseArea { id: sessMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: sessionPopup.visible = !sessionPopup.visible }
+        }
+        Round { icon: "keyboard"; tip: "On-screen keyboard"; onClicked: { vk.activated = !vk.activated; if (vk.activated) { pw.forceActiveFocus(); Qt.inputMethod.show() } } }
+    }
+    // every session, newest-chosen first in the list; the current one is ticked
+    Rectangle {
+        id: sessionPopup
+        visible: false
+        x: leftRow.x; width: 280
+        height: Math.min(sessionList.count, 8) * 52 + 16
+        y: leftRow.y - height - 10
+        radius: 26
+        color: Qt.rgba(0.12, 0.2, 0.19, 0.94)
+        border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
+        ListView {
+            id: sessionList
+            anchors.fill: parent; anchors.margins: 8
+            clip: true; spacing: 0
+            model: sessionModel
+            delegate: Rectangle {
+                id: srow
+                width: sessionList.width; height: 52; radius: 20
+                readonly property bool current: index === root.sessionIndex
+                color: srowMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : (current ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.28) : "transparent")
+                Text { x: 18; anchors.verticalCenter: parent.verticalCenter; text: model.name; width: parent.width - 60; elide: Text.ElideRight
+                    font.family: root.fam; font.pixelSize: 16; renderType: Text.QtRendering; color: "#ffffff" }
+                Text { visible: srow.current; anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
+                    text: "check"; font.family: root.icons; font.pixelSize: 22; color: root.accent }
+                MouseArea { id: srowMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                    onClicked: { root.sessionIndex = index; sessionPopup.visible = false; pw.forceActiveFocus() } }
+            }
         }
     }
-    Glass {
-        id: powerBlock
+
+    // ---- bottom right: power, as round buttons straight on the wallpaper
+    Row {
+        id: pRow
         visible: sddm.canSuspend || sddm.canReboot || sddm.canPowerOff
         anchors { right: parent.right; bottom: parent.bottom; margins: 36 }
-        height: 80; width: pRow.width + 24; radius: 28
-        Row {
-            id: pRow
-            anchors.centerIn: parent
-            spacing: 10
-            Round { icon: "bedtime"; tip: "Sleep"; visible: sddm.canSuspend; onClicked: sddm.suspend() }
-            Round { icon: "restart_alt"; tip: "Restart"; visible: sddm.canReboot; onClicked: sddm.reboot() }
-            Round { icon: "power_settings_new"; tip: "Shut down"; visible: sddm.canPowerOff; onClicked: sddm.powerOff() }
-        }
+        spacing: 12
+        Round { icon: "bedtime"; tip: "Sleep"; visible: sddm.canSuspend; onClicked: sddm.suspend() }
+        Round { icon: "restart_alt"; tip: "Restart"; visible: sddm.canReboot; onClicked: sddm.reboot() }
+        Round { icon: "power_settings_new"; tip: "Shut down"; visible: sddm.canPowerOff; onClicked: sddm.powerOff() }
+    }
+
+    // ---- on-screen keyboard
+    InputPanel {
+        id: vk
+        property bool activated: false
+        z: 20
+        width: Math.min(root.width - 200, 1000)
+        x: (root.width - width) / 2
+        y: activated && Qt.inputMethod.visible ? root.height - height - 120 : root.height
+        visible: activated && Qt.inputMethod.visible
+        Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
     }
 
     Component.onCompleted: pw.forceActiveFocus()
