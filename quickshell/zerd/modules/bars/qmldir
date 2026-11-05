@@ -87,5 +87,4 @@ WallpaperPicker 1.0 WallpaperPicker.qml
 SettingsWindow 1.0 SettingsWindow.qml
 singleton Profiles 1.0 Profiles.qml
 singleton NiriBinds 1.0 NiriBinds.qml
-AppMenu 1.0 AppMenu.qml
 NotifRuleSweep 1.0 NotifRuleSweep.qml

@@ -14,6 +14,7 @@ import qs.modules.iris.dock as IrisDockModule
 import qs.modules.waffle.background as WaffleBackgroundModule
 import qs.modules.waffle.sideDock as WaffleSideDockModule
 import qs.modules.waffle.startMenu
+import qs.modules.launcher as LauncherModule
 import qs.modules.polkit
 import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
 import qs.modules.sessionScreen
@@ -84,7 +85,7 @@ ShellRoot {
     // Start menu (application launcher) - handles IPC target "search"
     LazyLoader {
         active: Config.ready && (Config.options?.enabledPanels ?? []).includes("wStartMenu")
-        component: WaffleStartMenu {}
+        component: LauncherModule.LauncherHost {}
     }
 
     // Polkit authentication dialog

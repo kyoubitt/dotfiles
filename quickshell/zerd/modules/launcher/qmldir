@@ -1,0 +1,14 @@
+module qs.modules.launcher
+singleton ThemeBackend 1.0 ThemeBackend.qml
+singleton LauncherController 1.0 LauncherController.qml
+singleton Caching 1.0 Caching.qml
+GlassFill 1.0 GlassFill.qml
+GlassLens 1.0 GlassLens.qml
+GlassFillets 1.0 GlassFillets.qml
+WallpaperBlur 1.0 WallpaperBlur.qml
+Input 1.0 Input.qml
+EmojiSearch 1.0 EmojiSearch.qml
+Launcher 1.0 Launcher.qml
+LauncherHost 1.0 LauncherHost.qml
+TabSwitch 1.0 TabSwitch.qml
+singleton I18n 1.0 I18n.qml
