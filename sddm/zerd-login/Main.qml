@@ -94,9 +94,13 @@ Rectangle {
 
     // ---- clock
     Column {
+        id: stack
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -24
+        spacing: 0
+      Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.1
-        spacing: 2
+        spacing: 0
         Text {
             id: clockText
             anchors.horizontalCenter: parent.horizontalCenter
@@ -113,20 +117,20 @@ Rectangle {
             color: root.accent
         }
         Timer { interval: 1000; running: true; repeat: true; onTriggered: clockText.text = Qt.formatTime(new Date(), config.HourFormat) }
-    }
+      }
+      Item { width: 1; height: 72 }
 
     // ---- login block
-    Item {
+      Item {
         id: card
-        width: 440; height: 316
+        width: 440; height: 232
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.44
 
         Item {
             id: avatar
             width: 104; height: 104
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 28
+            y: 0
                         Rectangle { id: fallback; x: 6; y: 6; width: 92; height: 92; radius: 46; color: root.accent
                 Text { anchors.centerIn: parent; text: root.realName.length > 0 ? root.realName.charAt(0).toUpperCase() : "?"
                     font.family: root.fam; font.pixelSize: 40; font.weight: Font.Medium; color: root.onAccent } }
@@ -136,7 +140,7 @@ Rectangle {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 148
+            y: 114
             text: root.realName
             font.family: root.fam; font.pixelSize: 24; font.weight: Font.Medium
             renderType: Text.QtRendering
@@ -146,7 +150,7 @@ Rectangle {
         Item {
             id: fieldWrap
             width: 376; height: 58
-            x: 32; y: 222
+            x: 32; y: 174
             SequentialAnimation {
                 id: shake
                 NumberAnimation { target: fieldWrap; property: "x"; to: 20; duration: 50 }
@@ -195,6 +199,7 @@ Rectangle {
                 MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.login() }
             }
         }
+    }
     }
 
     // ---- bottom left: session picker and the on-screen keyboard
