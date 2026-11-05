@@ -6,7 +6,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 dest=/usr/share/sddm/themes/zerd-login
 sudo rm -rf "$dest"
 sudo mkdir -p "$dest"
-sudo cp "$here"/Main.qml "$here"/metadata.desktop "$here"/theme.conf "$dest"/
+sudo cp -r "$here"/Main.qml "$here"/metadata.desktop "$here"/theme.conf "$here"/shaders "$dest"/
 # theme.conf belongs to you so scripts/theme-sync.sh can recolour it on every wallpaper change
 sudo chown "$USER:$USER" "$dest/theme.conf"
 sudo mkdir -p /etc/sddm.conf.d

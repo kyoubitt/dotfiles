@@ -1,10 +1,10 @@
 [SddmGreeterTheme]
 Name=zerd-login
-Description=Login screen that matches the zerd shell
+Description=Login screen for the zerd shell (Material You theme by Darkkal44, via ilyamiro/serpantinum)
 Type=sddm-theme
 Version=1.0
-ConfigFile=theme.conf
 MainScript=Main.qml
+ConfigFile=theme.conf
 Theme-Id=zerd-login
 Theme-API=2.0
 QtVersion=6
