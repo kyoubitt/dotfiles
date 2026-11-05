@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.common
 import qs.services
 
 // The buttons under a notification, the same in the banner and the centre: its own actions as tonal buttons and,
@@ -22,7 +23,7 @@ Flow {
             tone: "tonal"
             width: actText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
             onTapped: Notifications.attemptInvokeAction(root.notificationId, act.modelData.identifier)
-            BarText { id: actText; anchors.centerIn: parent; text: act.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: act.ink }
+            BarText { font.family: Appearance.font.family.monospace; id: actText; anchors.centerIn: parent; text: act.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: act.ink }
         }
     }
     BarButton {
@@ -31,6 +32,6 @@ Flow {
         tone: "outlined"
         width: muteText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
         onTapped: NotifRules.setMode(root.appName, "silent")
-        BarText { id: muteText; anchors.centerIn: parent; text: "Mute " + root.appName; font.pixelSize: 11; color: mute.inkSoft; width: Math.min(implicitWidth, 120); elide: Text.ElideRight }
+        BarText { font.family: Appearance.font.family.monospace; id: muteText; anchors.centerIn: parent; text: "Mute " + root.appName; font.pixelSize: 11; color: mute.inkSoft; width: Math.min(implicitWidth, 120); elide: Text.ElideRight }
     }
 }

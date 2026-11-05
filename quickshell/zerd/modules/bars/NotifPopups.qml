@@ -179,12 +179,12 @@ Scope {
                             width: parent.width - 42 - 12
                             spacing: 2
                             // who sent it, and how long ago
-                            BarText {
+                            BarText { font.family: Appearance.font.family.monospace;
                                 width: parent.width; elide: Text.ElideRight
                                 text: card.modelData.appName + ((root.counts[card.modelData.appName] ?? 1) > 1 ? " · " + root.counts[card.modelData.appName] + " new" : "") + "  ·  " + card.age
                                 font.pixelSize: 11; font.weight: Font.DemiBold; color: BarStyle.subtext
                             }
-                            BarText { width: parent.width; elide: Text.ElideRight; text: card.modelData.summary.length > 0 ? card.modelData.summary : card.modelData.appName; font.pixelSize: 14; font.weight: Font.DemiBold }
+                            BarText { font.family: Appearance.font.family.monospace; width: parent.width; elide: Text.ElideRight; text: card.modelData.summary.length > 0 ? card.modelData.summary : card.modelData.appName; font.pixelSize: 14; font.weight: Font.DemiBold }
                             Text {
                                 visible: card.modelData.body.length > 0
                                 width: parent.width
@@ -195,7 +195,7 @@ Scope {
                                 elide: Text.ElideRight
                                 color: BarStyle.subtext
                                 font.pixelSize: 13
-                                font.family: Appearance.font.family.expressive
+                                font.family: Appearance.font.family.monospace
                                 renderType: Text.QtRendering
                             }
                             NotifActions {

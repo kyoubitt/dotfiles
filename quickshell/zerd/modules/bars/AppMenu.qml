@@ -302,21 +302,22 @@ Item {
             readonly property bool pinned: !isAction && root.isPinned(modelData.entry)
             width: grid.cellWidth - 8; height: grid.cellHeight - 8
             radius: BarStyle.radiusLarge
+            tone: "plain"
             toggled: root.current === index
             onTapped: root.launch(modelData)
             onSecondary: { if (!isAction) IrisDockOrder.togglePin(root.keyOf(modelData.entry)) }
             onHoveredChanged: if (hovered) root.current = index
             Image {
                 visible: !tile.isAction
-                x: Math.round((tile.width - width) / 2); y: 10
-                width: 52; height: 52
+                x: Math.round((tile.width - width) / 2); y: 8
+                width: 56; height: 56
                 source: tile.isAction ? "" : AppSearch.getIconSource(tile.modelData.entry.icon || tile.modelData.entry.name, "application-x-executable")
                 sourceSize: Qt.size(104, 104)
                 smooth: true; mipmap: true; asynchronous: true
             }
             BarIcon { visible: tile.isAction; x: Math.round((tile.width - 32) / 2); y: 20; name: tile.isAction ? tile.modelData.action.icon : ""; size: 32; color: BarStyle.accent }
             BarText {
-                x: 6; y: 68; width: tile.width - 12
+                x: 6; y: 70; width: tile.width - 12
                 text: tile.isAction ? tile.modelData.action.title : (tile.modelData.entry.name ?? "")
                 color: tile.ink; font.pixelSize: 12
                 horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
@@ -343,6 +344,7 @@ Item {
             readonly property bool pinned: !isAction && root.isPinned(modelData.entry)
             width: list.width; height: 56
             radius: BarStyle.radiusMedium
+            tone: "plain"
             toggled: root.current === index
             onTapped: root.launch(modelData)
             onSecondary: { if (!isAction) IrisDockOrder.togglePin(root.keyOf(modelData.entry)) }

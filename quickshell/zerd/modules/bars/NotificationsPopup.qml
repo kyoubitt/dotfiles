@@ -24,12 +24,12 @@ Column {
         Row {
             spacing: 8
             anchors.verticalCenter: parent.verticalCenter
-            BarText { visible: !root.compact; anchors.verticalCenter: parent.verticalCenter; text: "Notifications"; font.weight: Font.DemiBold; font.pixelSize: 15 }
+            BarText { font.family: Appearance.font.family.monospace; visible: !root.compact; anchors.verticalCenter: parent.verticalCenter; text: "Notifications"; font.weight: Font.DemiBold; font.pixelSize: 15 }
             Rectangle {
                 visible: root.items.length > 0
                 anchors.verticalCenter: parent.verticalCenter
                 width: countText.implicitWidth + 12; height: 18; radius: 9; color: BarStyle.accent
-                BarText { id: countText; anchors.centerIn: parent; text: root.items.length; font.pixelSize: 11; color: BarStyle.onAccent; font.weight: Font.DemiBold }
+                BarText { font.family: Appearance.font.family.monospace; id: countText; anchors.centerIn: parent; text: root.items.length; font.pixelSize: 11; color: BarStyle.onAccent; font.weight: Font.DemiBold }
             }
         }
         Row {
@@ -48,7 +48,7 @@ Column {
                 tone: "tonal"
                 width: clearText.implicitWidth + 24; height: 34; radius: 17
                 onTapped: Notifications.discardAllNotifications()
-                BarText { id: clearText; anchors.centerIn: parent; text: "Clear all"; font.pixelSize: 12; font.weight: Font.Medium }
+                BarText { font.family: Appearance.font.family.monospace; id: clearText; anchors.centerIn: parent; text: "Clear all"; font.pixelSize: 12; font.weight: Font.Medium }
             }
         }
     }
@@ -59,7 +59,7 @@ Column {
         spacing: 6
         topPadding: 18; bottomPadding: 18
         BarIcon { anchors.horizontalCenter: parent.horizontalCenter; name: Notifications.silent ? "notifications_off" : "notifications_none"; size: 34; color: BarStyle.subtext }
-        BarText { anchors.horizontalCenter: parent.horizontalCenter; text: Notifications.silent ? "Do not disturb is on" : "You're all caught up"; color: BarStyle.subtext }
+        BarText { font.family: Appearance.font.family.monospace; anchors.horizontalCenter: parent.horizontalCenter; text: Notifications.silent ? "Do not disturb is on" : "You're all caught up"; color: BarStyle.subtext }
     }
 
     // One card per app, newest first: the two latest notifications while closed, up to eight when open.
@@ -123,13 +123,13 @@ Column {
                         }
                         Column {
                             x: 46; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 46 - 70
-                            BarText { text: group.modelData.app; width: parent.width; elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.DemiBold }
-                            BarText { text: group.items.length > 1 ? group.items.length + " notifications" : "1 notification"; font.pixelSize: 11; color: BarStyle.subtext }
+                            BarText { font.family: Appearance.font.family.monospace; text: group.modelData.app; width: parent.width; elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.DemiBold }
+                            BarText { font.family: Appearance.font.family.monospace; text: group.items.length > 1 ? group.items.length + " notifications" : "1 notification"; font.pixelSize: 11; color: BarStyle.subtext }
                         }
                         Row {
                             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                             spacing: 6
-                            BarText { anchors.verticalCenter: parent.verticalCenter; text: { void root.tick; return root.ageOf(group.modelData.time) } font.pixelSize: 11; color: BarStyle.subtext }
+                            BarText { font.family: Appearance.font.family.monospace; anchors.verticalCenter: parent.verticalCenter; text: { void root.tick; return root.ageOf(group.modelData.time) } font.pixelSize: 11; color: BarStyle.subtext }
                             BarIcon { anchors.verticalCenter: parent.verticalCenter; name: group.expanded ? "expand_less" : "expand_more"; size: 20; color: BarStyle.subtext }
                         }
                     }
@@ -149,13 +149,13 @@ Column {
                                 Column {
                                     id: rowCol
                                     x: 4; y: 4; width: parent.width - 8 - 26; spacing: 2
-                                    BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.summary.length > 0 ? row.modelData.summary : row.modelData.appName; font.pixelSize: 13; font.weight: Font.DemiBold }
+                                    BarText { font.family: Appearance.font.family.monospace; width: parent.width; elide: Text.ElideRight; text: row.modelData.summary.length > 0 ? row.modelData.summary : row.modelData.appName; font.pixelSize: 13; font.weight: Font.DemiBold }
                                     Text {
                                         visible: row.modelData.body.length > 0
                                         width: parent.width
                                         text: row.modelData.body; textFormat: Text.PlainText
                                         wrapMode: Text.Wrap; maximumLineCount: group.expanded ? 6 : 1; elide: Text.ElideRight
-                                        color: BarStyle.subtext; font.pixelSize: 12; font.family: Appearance.font.family.expressive
+                                        color: BarStyle.subtext; font.pixelSize: 12; font.family: Appearance.font.family.monospace
                                         renderType: Text.QtRendering
                                     }
                                     NotifActions {

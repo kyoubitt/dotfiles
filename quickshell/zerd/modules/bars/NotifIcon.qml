@@ -26,23 +26,31 @@ Item {
 
     width: size; height: size
 
-    ClippingRectangle {
+    // iNiR's shape: a round tile (a soft burst when urgent) in the accent container colour, the app's own icon or
+    // a symbol guessed from the title on it; a picture that came with the notification fills a circle instead.
+    MaterialShape {
+        visible: !root.hasImage
         anchors.fill: parent
-        radius: Math.round(root.size * 0.3)
-        color: root.hasImage ? BarStyle.plateHover
-            : root.critical ? Qt.tint(BarStyle.plateHover, Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.3))
-            : Qt.tint(BarStyle.plateHover, Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.2))
-        border.width: 1
-        border.color: BarStyle.edge
-        IconImage { visible: root.hasImage; anchors.fill: parent; source: root.hasImage ? root.image : ""; mipmap: true }
-        SmartAppIcon { visible: !root.hasImage && !root.useSymbol; anchors.centerIn: parent; icon: root.iconName; iconSize: Math.round(root.size * 0.66) }
-        BarIcon {
-            visible: root.useSymbol
-            anchors.centerIn: parent
-            name: root.critical && root.symbol === "chat" ? "priority_high" : root.symbol
-            size: Math.round(root.size * 0.52); fill: 1
-            color: root.critical ? BarStyle.danger : BarStyle.accent
-        }
+        implicitSize: root.size
+        shape: root.critical ? MaterialShape.Shape.SoftBurst : MaterialShape.Shape.Circle
+        color: root.critical
+            ? Qt.tint(BarStyle.plateHover, Qt.rgba(BarStyle.danger.r, BarStyle.danger.g, BarStyle.danger.b, 0.45))
+            : BarStyle.accentContainer
+    }
+    ClippingRectangle {
+        visible: root.hasImage
+        anchors.fill: parent
+        radius: width / 2
+        color: BarStyle.plateHover
+        IconImage { anchors.fill: parent; source: root.hasImage ? root.image : ""; mipmap: true }
+    }
+    SmartAppIcon { visible: !root.hasImage && !root.useSymbol; anchors.centerIn: parent; icon: root.iconName; iconSize: Math.round(root.size * 0.62) }
+    BarIcon {
+        visible: root.useSymbol
+        anchors.centerIn: parent
+        name: root.critical && root.symbol === "chat" ? "priority_high" : root.symbol
+        size: Math.round(root.size * 0.54); fill: 1
+        color: root.critical ? BarStyle.danger : BarStyle.onAccentContainer
     }
     // with a picture, the app icon is a small badge on its corner
     Rectangle {
