@@ -96,7 +96,7 @@ Rectangle {
     Column {
         id: stack
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: -24
+        anchors.verticalCenterOffset: -70
         spacing: 0
       Column {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -170,9 +170,10 @@ Rectangle {
                 x: 26; width: parent.width - 26 - 68; height: parent.height
                 verticalAlignment: TextInput.AlignVCenter
                 echoMode: TextInput.Password; passwordCharacter: "●"
-                color: "#ffffff"; font.family: root.fam; font.pixelSize: 18
+                color: "transparent"; selectionColor: root.accent; font.family: root.fam; font.pixelSize: 18
                 renderType: Text.QtRendering
                 focus: true; enabled: !root.busy
+                cursorDelegate: Item {}
                 onAccepted: root.login()
                 onTextChanged: root.failed = false
                 Text {
@@ -181,6 +182,48 @@ Rectangle {
                     text: root.failed ? "Wrong password" : "Password"
                     font: pw.font
                     color: root.failed ? config.WarningColor : Qt.rgba(1, 1, 1, 0.55)
+                }
+                // one shape per typed character, springing in and settling from the accent to white
+                Flickable {
+                    id: dots
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width; height: 28
+                    visible: pw.text.length > 0
+                    interactive: false; clip: true
+                    contentWidth: dotRow.implicitWidth
+                    contentX: Math.max(contentWidth - width, 0)
+                    Behavior on contentX { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                    Row {
+                        id: dotRow
+                        anchors.left: parent.left; anchors.leftMargin: 2; anchors.verticalCenter: parent.verticalCenter
+                        spacing: 10
+                        Repeater {
+                            model: pw.text.length
+                            delegate: Item {
+                                id: ch
+                                required property int index
+                                width: 14; height: 14
+                                readonly property int kind: index % 5
+                                Rectangle {
+                                    id: blob
+                                    anchors.centerIn: parent
+                                    width: 0; height: 0; opacity: 0
+                                    color: root.accent
+                                    radius: ch.kind === 1 ? 3 : width / 2
+                                    rotation: ch.kind === 1 ? 45 : 0
+                                    property real full: ch.kind === 2 ? 18 : 15
+                                    Component.onCompleted: appear.start()
+                                    ParallelAnimation {
+                                        id: appear
+                                        NumberAnimation { target: blob; property: "opacity"; to: 1; duration: 50 }
+                                        NumberAnimation { target: blob; property: "width"; to: blob.full; duration: 340; easing.type: Easing.OutBack; easing.overshoot: 2.2 }
+                                        NumberAnimation { target: blob; property: "height"; to: ch.kind === 2 ? 9 : blob.full; duration: 340; easing.type: Easing.OutBack; easing.overshoot: 2.2 }
+                                        ColorAnimation { target: blob; property: "color"; from: root.accent; to: "#ffffff"; duration: 1000; easing.type: Easing.OutCubic }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Rectangle {
@@ -200,12 +243,15 @@ Rectangle {
             }
         }
     }
-    }
-
-    // ---- bottom left: session picker and the on-screen keyboard
+      Item { width: 1; height: 28 }
+      Item {
+        id: switchRow
+        width: 440; height: 56
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 5
     Row {
         id: leftRow
-        anchors { left: parent.left; bottom: parent.bottom; margins: 36 }
+        anchors.horizontalCenter: parent.horizontalCenter
         spacing: 12
         Rectangle {
             id: sessionPill
@@ -225,13 +271,12 @@ Rectangle {
         }
         Round { icon: "keyboard"; tip: "On-screen keyboard"; onClicked: { vk.activated = !vk.activated; if (vk.activated) { pw.forceActiveFocus(); Qt.inputMethod.show() } } }
     }
-    // every session, newest-chosen first in the list; the current one is ticked
     Rectangle {
         id: sessionPopup
         visible: false
-        x: leftRow.x; width: 280
+        x: Math.round((parent.width - width) / 2); width: 280
         height: Math.min(sessionList.count, 8) * 52 + 16
-        y: leftRow.y - height - 10
+        y: leftRow.height + 10
         radius: 26
         color: Qt.rgba(0.12, 0.2, 0.19, 0.94)
         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
@@ -253,6 +298,9 @@ Rectangle {
                     onClicked: { root.sessionIndex = index; sessionPopup.visible = false; pw.forceActiveFocus() } }
             }
         }
+    }
+
+      }
     }
 
     // ---- bottom right: power, as round buttons straight on the wallpaper
