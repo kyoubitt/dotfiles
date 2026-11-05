@@ -68,6 +68,7 @@ BarSwitch 1.0 BarSwitch.qml
 BarHoverFill 1.0 BarHoverFill.qml
 BatteryWave 1.0 BatteryWave.qml
 NotifIcon 1.0 NotifIcon.qml
+NotifActions 1.0 NotifActions.qml
 NotifPopups 1.0 NotifPopups.qml
 NotifRulesSection 1.0 NotifRulesSection.qml
 RightSections 1.0 RightSections.qml

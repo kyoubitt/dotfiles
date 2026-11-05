@@ -198,31 +198,14 @@ Scope {
                                 font.family: Appearance.font.family.expressive
                                 renderType: Text.QtRendering
                             }
-                            Flow {
+                            NotifActions {
                                 visible: card.buttons.length > 0 || hover.hovered
-                                topPadding: 8
                                 width: parent.width
-                                spacing: 6
-                                Repeater {
-                                    model: card.buttons
-                                    delegate: BarButton {
-                                        id: actBtn
-                                        required property var modelData
-                                        tone: "tonal"
-                                        width: actionText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
-                                        onTapped: Notifications.attemptInvokeAction(card.modelData.notificationId, actBtn.modelData.identifier)
-                                        BarText { id: actionText; anchors.centerIn: parent; text: actBtn.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: actBtn.ink }
-                                    }
-                                }
-                                // quiet this app from here
-                                BarButton {
-                                    id: muteBtn
-                                    visible: hover.hovered
-                                    tone: "outlined"
-                                    width: muteText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
-                                    onTapped: NotifRules.setMode(card.modelData.appName, "silent")
-                                    BarText { id: muteText; anchors.centerIn: parent; text: "Mute " + card.modelData.appName; font.pixelSize: 11; color: muteBtn.inkSoft; width: Math.min(implicitWidth, 120); elide: Text.ElideRight }
-                                }
+                                topPadding: 8
+                                notificationId: card.modelData.notificationId
+                                appName: card.modelData.appName
+                                buttons: card.buttons
+                                showMute: hover.hovered
                             }
                         }
                     }

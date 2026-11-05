@@ -158,19 +158,12 @@ Column {
                                         color: BarStyle.subtext; font.pixelSize: 12; font.family: Appearance.font.family.expressive
                                         renderType: Text.QtRendering
                                     }
-                                    Flow {
+                                    NotifActions {
                                         visible: group.expanded && row.buttons.length > 0
-                                        topPadding: 6; width: parent.width; spacing: 6
-                                        Repeater {
-                                            model: row.buttons
-                                            delegate: BarButton {
-                                                id: actBtn
-                                                required property var modelData
-                                                tone: "tonal"; width: actText.implicitWidth + 30; height: 34; radius: BarStyle.radiusSmall
-                                                onTapped: Notifications.attemptInvokeAction(row.modelData.notificationId, actBtn.modelData.identifier)
-                                                BarText { id: actText; anchors.centerIn: parent; text: actBtn.modelData.text; font.pixelSize: 12; font.weight: Font.Medium }
-                                            }
-                                        }
+                                        width: parent.width
+                                        notificationId: row.modelData.notificationId
+                                        appName: row.modelData.appName
+                                        buttons: row.buttons
                                     }
                                 }
                                 // dismiss this one
