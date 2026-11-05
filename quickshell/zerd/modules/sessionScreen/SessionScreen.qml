@@ -38,8 +38,14 @@ Scope {
         readonly property color tone: sb.danger ? BarStyle.danger : BarStyle.accent
         readonly property bool lit: ma.containsMouse || sb.selected || level > 0.001
 
-        function press(): void { if (done) return; drain.stop(); fillLevel = Math.max(fillLevel, jar); fill.start() }
-        function release(): void { if (done) return; fill.stop(); drain.start() }
+        function press(): void { if (done) return; pressedAt = Date.now(); drain.stop(); fillLevel = Math.max(fillLevel, jar); fill.start() }
+        property real pressedAt: 0
+        function release(): void {
+            if (done) return
+            fill.stop()
+            if (Date.now() - pressedAt < 320) { fillLevel = 1; done = true; flash.restart(); sb.activated(); return }   // a plain click
+            drain.start()
+        }
 
         NumberAnimation { id: fill; target: sb; property: "fillLevel"; to: 1; duration: 520 * sb.weight * (1 - sb.fillLevel); easing.type: Easing.InSine
             onFinished: { sb.done = true; flash.restart(); sb.activated() } }
@@ -81,7 +87,6 @@ Scope {
                 anchors.fill: parent
                 BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: sb.lit ? BarStyle.text : BarStyle.subtext }
                 BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: sb.lit ? BarStyle.text : BarStyle.subtext }
-                BarText { x: 0; y: 156; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.fillLevel > 0.001 ? "keep holding" : "hold"; font.pixelSize: 11; color: BarStyle.subtext; opacity: 0.7 }
             }
             Item {
                 anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
@@ -93,12 +98,6 @@ Scope {
                     BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: BarStyle.onAccent }
                 }
             }
-        }
-        Rectangle {
-            visible: sb.hint.length > 0
-            x: parent.width - 34; y: 12; width: 22; height: 22; radius: 8
-            color: Qt.rgba(0, 0, 0, 0.3)
-            BarText { anchors.centerIn: parent; text: sb.hint; font.pixelSize: 11; color: "#ffffff"; opacity: 0.8 }
         }
         MouseArea {
             id: ma
@@ -226,7 +225,7 @@ Scope {
                             required property int index
                             icon: modelData.icon
                             label: modelData.label
-                            hint: modelData.hint
+                            hint: ""
                             danger: modelData.danger === true
                             weight: modelData.weight ?? 1
                             selected: content.sel === index
@@ -235,179 +234,51 @@ Scope {
                     }
                 }
 
-                // Now playing - modeled on the gtklock media card: bigger
-                // art, stacked title/artist, wavy seekbar, real controls -
-                // last in the content group so it moves/centers as one unit
-                // with the clock and buttons.
-                Item {
+                // What is playing: a wide card, the cover, the words, a smooth bar and three liquid round buttons.
+                Rectangle {
                     id: nowPlayingCard
                     visible: NowPlaying.player !== null
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 8
-                    implicitWidth: 300
-                    implicitHeight: nowPlayingCol.implicitHeight + 28
+                    Layout.topMargin: 12
+                    implicitWidth: 640
+                    implicitHeight: 148
+                    radius: BarStyle.radiusXL + 6
+                    color: BarStyle.card
+                    antialiasing: true
 
-                    // Sibling of the content, not a wrapping parent - a
-                    // parent's opacity multiplies into every child, which
-                    // is what made the album art look washed out/hazy
-                    // rather than just the background being translucent.
-                    StyledRectangularShadow {
-                        target: nowPlayingCardBg
+                    Item {
+                        id: coverBox
+                        x: 20; y: 20; width: 108; height: 108
+                        Rectangle { anchors.fill: parent; radius: 30; color: BarStyle.cardHigh
+                            BarIcon { anchors.centerIn: parent; name: "music_note"; size: 38; color: BarStyle.accent } }
+                        Image { id: coverImg; anchors.fill: parent; source: NowPlaying.player?.trackArtUrl ?? ""; sourceSize: Qt.size(216, 216); fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: false }
+                        Rectangle { id: coverMask; anchors.fill: parent; radius: 30; visible: false; layer.enabled: true }
+                        MultiEffect { anchors.fill: parent; source: coverImg; visible: coverImg.status === Image.Ready; maskEnabled: true; maskSource: coverMask }
                     }
-
-                    GlassBackground {
-                        id: nowPlayingCardBg
-                        anchors.fill: parent
-                        radius: Appearance.rounding.large
-                        fallbackColor: Appearance.colors.colLayer3
-                        screenX: nowPlayingCardBg.mapToItem(null, 0, 0).x
-                        screenY: nowPlayingCardBg.mapToItem(null, 0, 0).y
+                    Column {
+                        x: 148; y: 24; width: parent.width - 148 - 24
+                        spacing: 2
+                        BarText { width: parent.width; elide: Text.ElideRight; text: NowPlaying.activeTrack?.title ?? ""; font.pixelSize: 20; font.weight: Font.DemiBold }
+                        BarText { width: parent.width; elide: Text.ElideRight; text: NowPlaying.activeTrack?.artist ?? ""; font.pixelSize: 14; color: BarStyle.subtext }
                     }
-
-                    ColumnLayout {
-                        id: nowPlayingCol
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            top: parent.top
-                            margins: 16
-                        }
-                        spacing: 10
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter
-                                width: 56
-                                height: 56
-                                radius: 12
-                                antialiasing: true
-                                color: Appearance.colors.colLayer3
-                                clip: true
-
-                                Image {
-                                    id: nowPlayingArt
-                                    anchors.fill: parent
-                                    source: NowPlaying.player?.trackArtUrl ?? ""
-                                    fillMode: Image.PreserveAspectCrop
-                                    sourceSize.width: width
-                                    sourceSize.height: height
-                                    asynchronous: true
-                                    visible: status === Image.Ready
-                                }
-                                Text {
-                                    anchors.centerIn: parent
-                                    visible: nowPlayingArt.status !== Image.Ready
-                                    text: "music_note"
-                                    font.family: Appearance.font.family.iconMaterial
-                                    font.pixelSize: 22
-                                    color: Appearance.colors.colPrimary
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 1
-                                MarqueeText {
-                                    Layout.fillWidth: true
-                                    font.family: Appearance.font.family.expressive
-                                    font.pixelSize: 15
-                                    font.bold: true
-                                    color: Appearance.colors.colOnLayer3
-                                    text: NowPlaying.activeTrack?.title ?? ""
-                                }
-                                MarqueeText {
-                                    Layout.fillWidth: true
-                                    font.family: Appearance.font.family.expressive
-                                    font.pixelSize: 12
-                                    color: Appearance.colors.colOnLayer3
-                                    opacity: 0.65
-                                    text: NowPlaying.activeTrack?.artist ?? ""
-                                }
-                            }
-                        }
-
-                        WavySeekbar {
-                            Layout.fillWidth: true
-                            progress: (NowPlaying.player && NowPlaying.player.length > 0)
-                                ? Math.max(0, Math.min(1, NowPlaying.player.position / NowPlaying.player.length)) : 0
-                            accentColor: Appearance.colors.colPrimary
-                            dimColor: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.25)
-                            amplitude: 4
-                            animate: NowPlaying.isPlaying
-                            onSeekRequested: fraction => {
-                                if (!NowPlaying.player || NowPlaying.player.length <= 0) return
-                                NowPlaying.player.position = fraction * NowPlaying.player.length
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            spacing: 24
-
-                            Text {
-                                text: "skip_previous"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 20
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.previous() }
-                            }
-                            Text {
-                                text: NowPlaying.isPlaying ? "pause" : "play_arrow"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 24
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.togglePlaying() }
-                            }
-                            Text {
-                                text: "skip_next"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 20
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.next() }
-                            }
-                        }
-
-                        // Small equalizer, driven by the same cava data the
-                        // media widget uses. Mirrored from the center (bass
-                        // in the middle, treble at the edges) instead of a
-                        // raw left-to-right sweep - reads as more musical
-                        // and symmetric than one side just being louder.
-                        RowLayout {
-                            id: eqRow
-                            readonly property int barCount: 20
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: 4
-                            spacing: 4
-
-                            Repeater {
-                                model: eqRow.barCount
-                                delegate: Rectangle {
-                                    id: eqBar
-                                    required property int index
-                                    readonly property int mirroredIndex: eqBar.index <= eqRow.barCount / 2
-                                        ? eqBar.index
-                                        : eqRow.barCount - eqBar.index
-                                    readonly property real level: panelWindow.visualizerPoints.length > 0
-                                        ? Math.max(0, Math.min(1, (panelWindow.visualizerPoints[Math.min(eqBar.mirroredIndex, panelWindow.visualizerPoints.length - 1)] ?? 0) / 1000))
-                                        : 0
-                                    Layout.alignment: Qt.AlignBottom
-                                    implicitWidth: 3
-                                    implicitHeight: 4 + level * 22
-                                    radius: width / 2
-                                    antialiasing: true
-                                    color: Appearance.colors.colPrimary
-                                    opacity: 0.45 + level * 0.55
-
-                                    Behavior on implicitHeight { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
-                                    Behavior on opacity { NumberAnimation { duration: 100 } }
-                                }
-                            }
-                        }
+                    // the bar: a thin pill that fills with the accent; a click or drag seeks
+                    Item {
+                        id: prog
+                        x: 148; y: 78; width: parent.width - 148 - 24; height: 14
+                        readonly property real frac: (NowPlaying.player && NowPlaying.player.length > 0) ? Math.max(0, Math.min(1, NowPlaying.player.position / NowPlaying.player.length)) : 0
+                        Timer { interval: 1000; repeat: true; running: NowPlaying.isPlaying; onTriggered: NowPlaying.player?.positionChanged() }
+                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 6; radius: 3; color: BarStyle.cardHigh }
+                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * prog.frac; height: 6; radius: 3; color: BarStyle.accent
+                            Behavior on width { NumberAnimation { duration: 900 } } }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                            onClicked: mouse => { if (NowPlaying.player && NowPlaying.player.length > 0) NowPlaying.player.position = NowPlaying.player.length * (mouse.x / width) } }
+                    }
+                    Row {
+                        x: 148; y: 98
+                        spacing: 12
+                        LiquidRound { icon: "skip_previous"; onActivated: NowPlaying.previous() }
+                        LiquidRound { icon: NowPlaying.isPlaying ? "pause" : "play_arrow"; big: true; onActivated: NowPlaying.togglePlaying() }
+                        LiquidRound { icon: "skip_next"; onActivated: NowPlaying.next() }
                     }
                 }
             }
