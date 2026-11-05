@@ -18,13 +18,13 @@ Item {
 
     ClippingRectangle {
         anchors.fill: parent; radius: 30; color: BarStyle.plate
-        Image { anchors.fill: parent; source: root.art; sourceSize: Qt.size(16, 16); fillMode: Image.PreserveAspectCrop; smooth: true; cache: false; opacity: 0.55 }
+        Image { anchors.fill: parent; source: CoverCache.src(root.art); sourceSize: Qt.size(16, 16); fillMode: Image.PreserveAspectCrop; smooth: true; cache: true; opacity: 0.55 }
         Rectangle { anchors.fill: parent; gradient: Gradient { GradientStop { position: 0; color: "#22000000" } GradientStop { position: 1; color: "#aa000000" } } }
     }
     ClippingRectangle {
         x: 28; y: 28; width: 194; height: 194; radius: root.round ? 97 : 20; color: root.art.length === 0 ? Qt.rgba(MusicStore.accent.r, MusicStore.accent.g, MusicStore.accent.b, 0.3) : BarStyle.plate
         BarIcon { visible: root.art.length === 0 && root.icon.length > 0; anchors.centerIn: parent; name: root.icon; fill: 1; size: 84; color: MusicStore.accent }
-        Image { anchors.fill: parent; source: root.art; sourceSize: Qt.size(400, 400); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+        Image { anchors.fill: parent; source: CoverCache.src(root.art); sourceSize: Qt.size(400, 400); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
     }
     Column {
         id: headCol

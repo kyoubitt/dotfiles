@@ -34,3 +34,4 @@ LyricsSide 1.0 LyricsSide.qml
 TrackTable 1.0 parts/TrackTable.qml
 EText 1.0 parts/EText.qml
 Spectrum 1.0 parts/Spectrum.qml
+singleton CoverCache 1.0 CoverCache.qml

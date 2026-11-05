@@ -13,7 +13,7 @@ Item {
     Component.onCompleted: { shownA = current; onA = false }
 
     // the colour of the cover: the average of its saturated pixels, lifted so it works as a button colour
-    Image { id: probe; source: root.current; sourceSize: Qt.size(24, 24); visible: false; cache: false; asynchronous: true; onStatusChanged: if (status === Image.Ready) sampler.requestPaint() }
+    Image { id: probe; source: CoverCache.src(root.current); sourceSize: Qt.size(24, 24); visible: false; cache: true; asynchronous: true; onStatusChanged: if (status === Image.Ready) sampler.requestPaint() }
     Canvas {
         id: sampler
         width: 24; height: 24; visible: false
@@ -47,7 +47,7 @@ Item {
         anchors.fill: parent
         opacity: on ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
-        Image { id: img; anchors.centerIn: parent; width: parent.width * 1.4; height: width; source: lay.src; sourceSize: Qt.size(160, 160); fillMode: Image.PreserveAspectCrop; visible: false; cache: false; smooth: true }
+        Image { id: img; anchors.centerIn: parent; width: parent.width * 1.4; height: width; source: CoverCache.src(lay.src); sourceSize: Qt.size(160, 160); fillMode: Image.PreserveAspectCrop; visible: false; cache: true; smooth: true }
         MultiEffect { anchors.fill: img; source: img; blurEnabled: true; blur: 1.0; blurMax: 64; saturation: 0.9; brightness: 0.02; autoPaddingEnabled: false }
     }
     Layer { src: root.shownA; on: root.onA }

@@ -156,7 +156,7 @@ Item {
                 ClippingRectangle {
                     x: MusicStore.libShown ? 8 : (parent.width - 54) / 2; anchors.verticalCenter: parent.verticalCenter; width: 54; height: 54
                     radius: it.modelData.kind === "artist" ? 27 : 10; color: BarStyle.plate
-                    Image { anchors.fill: parent; source: MusicStore.artOf(it.item, false); sourceSize: Qt.size(120, 120); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false }
+                    Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(it.item, false)); sourceSize: Qt.size(120, 120); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true }
                     Rectangle { visible: it.playing; anchors.fill: parent; color: "#66000000"
                         BarIcon { anchors.centerIn: parent; name: Playback.isPlaying ? "graphic_eq" : "pause"; size: 24; color: MusicStore.accent } }
                 }

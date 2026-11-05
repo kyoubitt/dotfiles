@@ -52,7 +52,7 @@ Item {
             rotation: 8 * Math.sin(root.clock * Math.PI / 15)
             Item {
                 anchors.fill: parent; layer.enabled: true; layer.smooth: true
-                Image { id: bg; anchors.fill: parent; source: root.artUrl; sourceSize: Qt.size(128, 128); fillMode: Image.PreserveAspectCrop; visible: false; cache: false }
+                Image { id: bg; anchors.fill: parent; source: CoverCache.src(root.artUrl); sourceSize: Qt.size(128, 128); fillMode: Image.PreserveAspectCrop; visible: false; cache: true }
                 MultiEffect { anchors.fill: parent; source: bg; blurEnabled: true; blur: 1.0; blurMax: 32; saturation: 0.5; brightness: -0.12; autoPaddingEnabled: false }
             }
         }
@@ -123,7 +123,7 @@ Item {
             opacity: 1
             SequentialAnimation { id: bigPop; NumberAnimation { target: big; property: "opacity"; to: 0.3; duration: 90 } NumberAnimation { target: big; property: "opacity"; to: 1; duration: 260; easing.type: Easing.OutCubic } }
             Connections { target: MusicStore; function onTrackKeyChanged() { bigPop.restart() } }
-            Image { anchors.fill: parent; source: root.artUrl; sourceSize: Qt.size(720, 720); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+            Image { anchors.fill: parent; source: CoverCache.src(root.artUrl); sourceSize: Qt.size(720, 720); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
         }
         // a glow behind the cover that breathes with the bass
         Rectangle {
@@ -199,7 +199,7 @@ Item {
                 width: ListView.view.width; height: 58
                 Rectangle { anchors.fill: parent; radius: 16; color: qiHov.hovered ? "#26ffffff" : "transparent" }
                 ClippingRectangle { x: 8; anchors.verticalCenter: parent.verticalCenter; width: 42; height: 42; radius: 10; color: "#33ffffff"
-                    Image { anchors.fill: parent; source: MusicStore.artOf(qi.modelData, false); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false } }
+                    Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(qi.modelData, false)); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true } }
                 Column { x: 62; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 74
                     EText { width: parent.width; elide: Text.ElideRight; text: qi.modelData.name; color: "#ffffff"; font.weight: Font.Medium }
                     EText { width: parent.width; elide: Text.ElideRight; text: MusicStore.artistsOf(qi.modelData); color: "#ffffff"; opacity: 0.65; font.pixelSize: 12 } }

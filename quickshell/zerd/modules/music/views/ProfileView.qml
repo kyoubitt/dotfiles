@@ -22,7 +22,7 @@ Flickable {
             spacing: 26
             ClippingRectangle {
                 width: 170; height: 170; radius: 85; color: MusicStore.accent
-                Image { anchors.fill: parent; source: (MusicStore.me?.images ?? [])[0]?.url ?? ""; sourceSize: Qt.size(340, 340); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false; visible: status === Image.Ready }
+                Image { anchors.fill: parent; source: CoverCache.src((MusicStore.me?.images ?? [])[0]?.url ?? ""); sourceSize: Qt.size(340, 340); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true; visible: status === Image.Ready }
                 EText { anchors.centerIn: parent; visible: !(MusicStore.me?.images ?? []).length; text: (MusicStore.name || "?").charAt(0).toUpperCase(); font.pixelSize: 64; font.weight: Font.Bold; color: MusicStore.onAccent }
             }
             Column {

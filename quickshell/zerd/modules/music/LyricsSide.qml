@@ -25,7 +25,7 @@ Rectangle {
         x: 16; y: 16; width: parent.width - 32; height: 84
         ClippingRectangle {
             width: 80; height: 80; radius: 18; color: BarStyle.plate
-            Image { anchors.fill: parent; source: Playback.player?.trackArtUrl ?? ""; sourceSize: Qt.size(120, 120); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false }
+            Image { anchors.fill: parent; source: CoverCache.src(Playback.player?.trackArtUrl ?? ""); sourceSize: Qt.size(120, 120); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true }
         }
         Column {
             x: 94; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 94; spacing: 3

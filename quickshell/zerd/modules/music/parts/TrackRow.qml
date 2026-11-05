@@ -35,7 +35,7 @@ Item {
         BarIcon { visible: root.number >= 0 && hov.hovered && !root.current; anchors.centerIn: parent; name: "play_arrow"; fill: 1; size: 22; color: BarStyle.text }
         ClippingRectangle {
             visible: root.number < 0; anchors.verticalCenter: parent.verticalCenter; width: 42; height: 42; radius: 10; color: BarStyle.plate
-            Image { anchors.fill: parent; source: MusicStore.artOf(root.track, false); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+            Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(root.track, false)); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
         }
     }
     Column {

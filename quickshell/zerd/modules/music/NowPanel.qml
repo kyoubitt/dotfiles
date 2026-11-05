@@ -54,7 +54,7 @@ Rectangle {
             }
             ClippingRectangle {
                 width: parent.width; height: width; radius: 18; color: BarStyle.plate
-                Image { anchors.fill: parent; source: root.p?.trackArtUrl ?? ""; sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+                Image { anchors.fill: parent; source: CoverCache.src(root.p?.trackArtUrl ?? ""); sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
                 TapHandler { onTapped: MusicStore.immersive = true }
             }
             Row {
@@ -143,7 +143,7 @@ Rectangle {
                         width: parent.width; height: 56
                         Rectangle { anchors.fill: parent; radius: 14; color: qh.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent" }
                         ClippingRectangle { x: 6; anchors.verticalCenter: parent.verticalCenter; width: 42; height: 42; radius: 8; color: BarStyle.plate
-                            Image { anchors.fill: parent; source: MusicStore.artOf(qi.modelData, false); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false } }
+                            Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(qi.modelData, false)); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true } }
                         Column { x: 58; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 70
                             EText { width: parent.width; elide: Text.ElideRight; text: qi.modelData.name; font.weight: Font.DemiBold }
                             EText { width: parent.width; elide: Text.ElideRight; text: MusicStore.artistsOf(qi.modelData); font.pixelSize: 12; color: BarStyle.subtext } }
@@ -156,7 +156,7 @@ Rectangle {
             ClippingRectangle {
                 visible: root.artist !== null
                 width: parent.width; height: 240; radius: 20; color: BarStyle.plate
-                Image { anchors.fill: parent; source: MusicStore.artOf(root.artist, true); sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false }
+                Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(root.artist, true)); sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true }
                 Rectangle { anchors.fill: parent; gradient: Gradient { GradientStop { position: 0.3; color: "#00000000" } GradientStop { position: 1; color: "#dd000000" } } }
                 EText { x: 16; y: 14; text: "About the artist"; font.weight: Font.Bold; color: "#ffffff" }
                 Column { x: 16; anchors.bottom: parent.bottom; anchors.bottomMargin: 16; width: parent.width - 32; spacing: 3

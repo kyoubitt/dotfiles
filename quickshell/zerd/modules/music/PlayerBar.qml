@@ -61,7 +61,7 @@ Item {
                 SequentialAnimation { id: pop; NumberAnimation { target: art; property: "scale"; to: 0.82; duration: 70 } NumberAnimation { target: art; property: "scale"; to: 1; duration: 320; easing.type: Easing.OutBack } }
                 Connections { target: MusicStore; function onTrackKeyChanged() { pop.restart() } }
                 anchors.verticalCenter: parent.verticalCenter; width: 68; height: 68; radius: 14; color: BarStyle.plate
-                Image { anchors.fill: parent; source: root.p?.trackArtUrl ?? ""; sourceSize: Qt.size(150, 150); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+                Image { anchors.fill: parent; source: CoverCache.src(root.p?.trackArtUrl ?? ""); sourceSize: Qt.size(150, 150); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
                 TapHandler { onTapped: MusicStore.nowOpen = !MusicStore.nowOpen }
             }
             Column {

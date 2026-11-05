@@ -13,7 +13,9 @@ Singleton {
     readonly property bool orbitHas: root.orbit !== null && (root.orbit.trackTitle ?? "") !== ""
     readonly property var mpris: MprisController.activePlayer
     // Orbit wins unless the Spotify app (or another player) is the one making sound and Orbit is silent.
-    readonly property bool useOrbit: root.orbitHas && (root.orbit.isPlaying || !(root.mpris && MprisController.isPlaying))
+    // Orbit speaks for the shell only while it is actually playing, or when there is no other player at all: a song it
+    // merely remembers never hides what another player (the Spotify app, a browser) is doing
+    readonly property bool useOrbit: root.orbitHas && (root.orbit.isPlaying || !root.mpris)
     readonly property var player: root.useOrbit ? root.orbit : root.mpris
     readonly property bool isPlaying: root.useOrbit ? root.orbit.isPlaying : MprisController.isPlaying
 

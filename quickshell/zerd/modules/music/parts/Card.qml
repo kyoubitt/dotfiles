@@ -23,7 +23,7 @@ Item {
         color: BarStyle.plate
         scale: tap.pressed ? 0.96 : (root.hot ? 1.04 : 1)
         Behavior on scale { SpringAnimation { spring: 7; damping: 0.45 } }
-        Image { anchors.fill: parent; scale: root.hot ? 1.07 : 1; Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } } source: MusicStore.artOf(root.item, false); sourceSize: Qt.size(root.artSize * 2, root.artSize * 2); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: false }
+        Image { anchors.fill: parent; scale: root.hot ? 1.07 : 1; Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } } source: CoverCache.src(MusicStore.artOf(root.item, false)); sourceSize: Qt.size(root.artSize * 2, root.artSize * 2); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
     }
     // play
     Item {

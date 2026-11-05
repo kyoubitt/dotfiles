@@ -53,7 +53,7 @@ Item {
         Behavior on scale { SpringAnimation { spring: 6; damping: 0.45 } }
         ClippingRectangle {
             anchors.fill: parent; radius: 22; color: MusicStore.accent
-            Image { anchors.fill: parent; source: (MusicStore.me?.images ?? [])[0]?.url ?? ""; sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: false; visible: status === Image.Ready }
+            Image { anchors.fill: parent; source: CoverCache.src((MusicStore.me?.images ?? [])[0]?.url ?? ""); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true; visible: status === Image.Ready }
             EText { anchors.centerIn: parent; visible: !(MusicStore.me?.images ?? []).length; text: (MusicStore.name || "?").charAt(0).toUpperCase(); font.weight: Font.Bold; color: MusicStore.onAccent }
         }
         HoverHandler { id: avHov }
