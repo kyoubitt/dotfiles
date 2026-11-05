@@ -299,7 +299,6 @@ MouseArea { // Notification group area
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 5
                         StyledText {
-        font.family: Appearance.font.family.monospace
                             id: appName
                             font.weight: false ? Font.DemiBold : Font.Normal
                             font.letterSpacing: false && topRow.showAppName ? 0.4 : 0
@@ -317,7 +316,7 @@ MouseArea { // Notification group area
                         }
                         StyledText {
                             id: timeText
-                            font.family: false ? Appearance.font.family.monospace : Appearance.font.family.monospace
+                            font.family: false ? Appearance.font.family.numbers : Appearance.font.family.main
                             Layout.rightMargin: 10
                             horizontalAlignment: Text.AlignLeft
                             text: NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)

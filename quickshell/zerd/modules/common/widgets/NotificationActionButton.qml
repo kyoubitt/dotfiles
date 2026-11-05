@@ -67,7 +67,6 @@ RippleButton {
         : Appearance.colors.colLayer4Active
 
     contentItem: StyledText {
-        font.family: Appearance.font.family.monospace
         horizontalAlignment: Text.AlignHCenter
         text: buttonText
         font.weight: false ? Font.Medium : Font.Normal

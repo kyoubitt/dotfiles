@@ -198,7 +198,7 @@ Singleton {
             groups[appName].notifications.push(notif)
             groups[appName].time = root.latestTimeForApp[appName] || notif.time
             // Check critical urgency
-            if (notif.urgency === "Critical") {
+            if (String(notif.urgency).toLowerCase() === "critical") {
                 groups[appName].hasCritical = true
             }
         }

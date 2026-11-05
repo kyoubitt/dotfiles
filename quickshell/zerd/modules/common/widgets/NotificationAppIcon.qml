@@ -1,5 +1,5 @@
 import qs.modules.common
-import qs.services
+import qs.modules.bars
 import qs.modules.common.functions
 import Qt5Compat.GraphicalEffects
 import QtQuick
@@ -12,7 +12,7 @@ MaterialShape { // App icon
     property var appIcon: ""
     property var summary: ""
     property var urgency: NotificationUrgency.Normal
-    property bool isUrgent: urgency === NotificationUrgency.Critical || String(urgency).toLowerCase() === "critical"
+    property bool isUrgent: urgency === NotificationUrgency.Critical
     property var image: ""
     property real materialIconScale: 0.57
     property real appIconScale: 0.8
@@ -39,12 +39,11 @@ MaterialShape { // App icon
         MaterialShape.Shape.VerySunny,
         MaterialShape.Shape.SoftBurst,
     ]
-    readonly property bool loadsSymbol: preferMaterialSymbol || (effectiveAppIcon == "" && !hasVisualImage)
-    shape: isUrgent ? MaterialShape.Shape.SoftBurst : MaterialShape.Shape.Circle
+    shape: isUrgent ? urgentShapes[Math.floor(Math.random() * urgentShapes.length)] : MaterialShape.Shape.Circle
 
     color: false
         ? (isUrgent ? Appearance.zzz.secondary : Appearance.zzz.paperAlt)
-        : isUrgent ? Appearance.colors.colError : (loadsSymbol ? WallustTheme.accent : Qt.rgba(1, 1, 1, 0.1))
+        : isUrgent ? Appearance.colors.colErrorContainer : BarStyle.accentContainer
     Loader {
         id: materialSymbolLoader
         // Icon-theme hints such as notify-send's `-i camera-photo` are not
@@ -55,14 +54,14 @@ MaterialShape { // App icon
         anchors.fill: parent
         sourceComponent: MaterialSymbol {
             text: {
-                return (root.isUrgent
+                return (root.urgency == NotificationUrgency.Critical
                     && root.guessedMaterialSymbol === root.defaultMaterialSymbol)
                     ? "priority_high" : root.guessedMaterialSymbol
             }
             anchors.fill: parent
             color: false
                 ? (isUrgent ? Appearance.zzz.onSecondary : Appearance.zzz.ink)
-                : isUrgent ? Appearance.colors.colOnError : WallustTheme.textOnAccent
+                : isUrgent ? Appearance.colors.colOnErrorContainer : BarStyle.onAccentContainer
             iconSize: root.materialIconSize
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

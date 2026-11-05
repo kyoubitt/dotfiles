@@ -82,7 +82,6 @@ Item {
             }
 
             StyledText {
-        font.family: Appearance.font.family.monospace
                 Layout.alignment: Qt.AlignHCenter
                 text: Notifications.silent ? Translation.tr("Muted") : Translation.tr("All caught up")
                 font.pixelSize: Appearance.font.pixelSize.normal

@@ -210,7 +210,7 @@ Item { // Notification item area
                     Layout.fillWidth: summaryTextMetrics.width >= contentColumn.width * root.summaryElideRatio
                     visible: !root.onlyNotification
                     font.family: false && root.expanded
-                        ? Appearance.font.family.monospace : Appearance.font.family.monospace
+                        ? Appearance.font.family.title : Appearance.font.family.main
                     font.pixelSize: false && root.expanded
                         ? Appearance.font.pixelSize.normal : root.fontSize
                     font.weight: false ? (root.expanded ? Appearance.editorial.titleWeight : Font.DemiBold) : Font.Normal
@@ -224,7 +224,6 @@ Item { // Notification item area
                     text: root.notificationSummaryText
                 }
                 StyledText {
-        font.family: Appearance.font.family.monospace
                     opacity: !root.expanded ? 1 : 0
                     visible: opacity > 0
                     Layout.fillWidth: true
@@ -252,8 +251,7 @@ Item { // Notification item area
                 opacity: root.expanded ? 1 : 0
                 visible: opacity > 0
 
-                StyledText {
-        font.family: Appearance.font.family.monospace // Notification body (expanded)
+                StyledText { // Notification body (expanded)
                     id: notificationBodyText
                     Behavior on opacity {
                         enabled: Appearance.animationsEnabled

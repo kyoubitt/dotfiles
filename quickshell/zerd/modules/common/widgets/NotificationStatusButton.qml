@@ -57,7 +57,6 @@ GroupButton {
                 color: button.colText
             }
             StyledText {
-        font.family: Appearance.font.family.monospace
                 visible: buttonText !== ""
                 text: buttonText
                 font.pixelSize: Appearance.font.pixelSize.small
