@@ -10,7 +10,7 @@ Flickable {
     contentHeight: col.implicitHeight + 70
     clip: true
     boundsBehavior: Flickable.StopAtBounds
-    Timer { id: deb; interval: 260; onTriggered: { const q = MusicStore.query.trim(); if (q.length > 1) MusicApi.search(q, r => root.results = r); else root.results = null } }
+    Timer { id: deb; interval: 260; onTriggered: { const q = MusicStore.query.trim(); if (q.length > 1) MusicApi.search(q, r => { if (MusicStore.query.trim() === q) root.results = r }); else root.results = null } }
     Connections { target: MusicStore; function onQueryChanged() { deb.restart() } }
     Component.onCompleted: deb.restart()
 
