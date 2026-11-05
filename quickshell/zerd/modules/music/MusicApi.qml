@@ -167,7 +167,7 @@ Singleton {
                     MusicStore.tell("Spotify is limiting requests, back in " + (secs >= 3600 ? Math.round(secs / 360) / 10 + " h" : Math.ceil(secs / 60) + " min"))
                 }
                 if (x.status === 401 && !root._retrying) { root._retrying = true; root.expiresAt = 0; root.call(method, path, body, done); root._retrying = false; return }
-                if (cacheable && x.status === 200 && j) { const d = { t: Date.now(), j: j }; root._memo[path] = d; root.diskWrite(key, j); root.staleServed = false }
+                if (cacheable && x.status === 200 && j) { const d = { t: Date.now(), j: j }; root._memo[path] = d; root.trimMemo(); root.diskWrite(key, j); root.staleServed = false }
                 else if (cacheable && x.status !== 200 && saved) { root.staleServed = true; if (done) done(200, saved.j); return }
                 else if (cacheable && x.status !== 200) { root.embedTracks(path, e => { if (e) { root.staleServed = true; root.diskWrite(key, e); if (done) done(200, e) } else if (done) done(x.status, j) }); return }
                 if (done) done(x.status, j)
@@ -177,6 +177,13 @@ Singleton {
     }
     property bool _retrying: false
     property var _memo: ({})
+    // The answers kept in memory are capped, oldest first, so browsing for hours does not pile them up.
+    function trimMemo(): void {
+        const ks = Object.keys(root._memo)
+        if (ks.length <= 60) return
+        ks.sort((x, y) => (root._memo[x]?.t ?? 0) - (root._memo[y]?.t ?? 0))
+        for (const k of ks.slice(0, ks.length - 60)) delete root._memo[k]
+    }
     function forget(): void { root._memo = ({}) }
 
     function search(q: string, done: var): void {
