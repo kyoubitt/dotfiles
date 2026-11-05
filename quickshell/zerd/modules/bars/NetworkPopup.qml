@@ -116,21 +116,12 @@ Column {
     Timer { interval: 1000; repeat: true; running: true; onTriggered: traffic.running = true }
     Timer { interval: 6000; repeat: true; running: !root.iwd; onTriggered: { probe.running = true; saver.running = true } }
 
-    component Switch: Rectangle {
-        id: sw
+    // the shared Material 3 switch, with the on / tapped names this popup uses
+    component Switch: BarSwitch {
         property bool on: false
         signal tapped()
-        width: 40; height: 22; radius: 11
-        color: on ? BarStyle.accent : BarStyle.plateHover
-        border.width: 1; border.color: BarStyle.border
-        Behavior on color { ColorAnimation { duration: 110 } }
-        Rectangle {
-            width: 16; height: 16; radius: 8; y: 3
-            x: sw.on ? sw.width - width - 3 : 3
-            color: sw.on ? BarStyle.onAccent : BarStyle.subtext
-            Behavior on x { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
-        }
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: sw.tapped() }
+        checked: on
+        onToggled: tapped()
     }
     component Tab: Rectangle {
         id: tab
@@ -204,7 +195,7 @@ Column {
         signal tapped()
         signal secondary()
         width: 320; height: 40
-        Rectangle { anchors.fill: parent; radius: 12; color: ma.containsMouse ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 100 } } }
+        BarHoverFill { anchors.fill: parent; hovered: ma.containsMouse; pressed: ma.pressed }
         BarIcon { x: 10; anchors.verticalCenter: parent.verticalCenter; name: entry.icon; size: 18; color: entry.active ? BarStyle.accent : BarStyle.subtext }
         Column {
             x: 40; anchors.verticalCenter: parent.verticalCenter; width: 190

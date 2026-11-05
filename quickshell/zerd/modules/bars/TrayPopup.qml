@@ -32,7 +32,7 @@ Column {
             required property var modelData
             readonly property bool hidden: root.hiddenIds.includes(modelData.id)
             width: root.width; height: 38
-            Rectangle { anchors.fill: parent; radius: 12; color: area.containsMouse ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 100 } } }
+            BarHoverFill { anchors.fill: parent; hovered: area.containsMouse; pressed: area.pressed }
             IconImage { id: glyph; x: 10; anchors.verticalCenter: parent.verticalCenter; width: 20; height: 20; source: row.modelData.icon; mipmap: true; visible: status !== Image.Error && source.toString().length > 0 }
             BarIcon { x: 10; anchors.verticalCenter: parent.verticalCenter; name: "apps"; size: 20; color: BarStyle.subtext; visible: !glyph.visible }
             Column {

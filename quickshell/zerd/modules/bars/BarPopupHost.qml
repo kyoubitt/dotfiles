@@ -109,7 +109,7 @@ Scope {
                 signal clicked()
                 implicitWidth: 220
                 implicitHeight: 34
-                Rectangle { anchors.fill: parent; radius: 12; color: tgArea.containsMouse ? BarStyle.plateHover : "transparent" }
+                BarHoverFill { anchors.fill: parent; hovered: tgArea.containsMouse; pressed: tgArea.pressed }
                 Row {
                     anchors.verticalCenter: parent.verticalCenter
                     x: 8; spacing: 10
