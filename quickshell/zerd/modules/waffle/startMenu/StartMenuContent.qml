@@ -10,6 +10,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.startMenu
+import qs.modules.bars
 
 WBarAttachedPanelContent {
     id: root
@@ -78,7 +79,7 @@ WBarAttachedPanelContent {
 
     contentItem: WPane {
         color: SMColors.bg
-        radius: 28
+        radius: BarStyle.radiusXL
         contentItem: WPanelPageColumn {
             RowLayout {
                 Layout.fillWidth: true
@@ -98,48 +99,25 @@ WBarAttachedPanelContent {
 
                 Rectangle {
                     id: viewToggle
-                    implicitWidth: row.implicitWidth + 16
-                    implicitHeight: row.implicitHeight + 16
-                    radius: 24
+                    implicitWidth: 2 * 40 + 4 + 16
+                    implicitHeight: 56
+                    radius: height / 2
                     antialiasing: true
-                    color: root.tileIdle
+                    color: BarStyle.card
 
-                    RowLayout {
-                        id: row
+                    Row {
                         anchors.centerIn: parent
                         spacing: 4
-
-                        WBorderlessButton {
-                            implicitWidth: 34
-                            implicitHeight: 34
-                            radius: 12
-                            checked: root.appViewMode === "grid"
-                            colBackground: checked ? SMColors.accent : "transparent"
-                            colBackgroundHover: checked ? ColorUtils.lighten(SMColors.accent, 0.1) : root.tileHover
-                            onClicked: root.appViewMode = "grid"
-                            contentItem: Text {
-                                anchors.centerIn: parent
-                                text: "grid_view"
-                                font.family: "Material Symbols Rounded"
-                                font.pixelSize: 18
-                                color: root.appViewMode === "grid" ? SMColors.bg : SMColors.fg
-                            }
-                        }
-
-                        WBorderlessButton {
-                            implicitWidth: 34
-                            implicitHeight: 34
-                            radius: 12
-                            checked: root.appViewMode === "list"
-                            colBackground: checked ? SMColors.accent : "transparent"
-                            colBackgroundHover: checked ? ColorUtils.lighten(SMColors.accent, 0.1) : root.tileHover
-                            onClicked: root.appViewMode = "list"
-                            contentItem: Text {
-                                anchors.centerIn: parent
-                                text: "list"
-                                font.family: "Material Symbols Rounded"
-                                font.pixelSize: 18
-                                color: root.appViewMode === "list" ? SMColors.bg : SMColors.fg
+                        Repeater {
+                            model: [{ mode: "grid", icon: "grid_view" }, { mode: "list", icon: "list" }]
+                            delegate: BarButton {
+                                id: vb
+                                required property var modelData
+                                width: 40; height: 40
+                                radius: 20
+                                tone: root.appViewMode === modelData.mode ? "filled" : "plain"
+                                onTapped: root.appViewMode = modelData.mode
+                                BarIcon { anchors.centerIn: parent; name: vb.modelData.icon; size: 20; color: vb.ink }
                             }
                         }
                     }

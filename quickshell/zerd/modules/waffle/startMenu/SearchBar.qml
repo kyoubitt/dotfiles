@@ -9,6 +9,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.startMenu
+import qs.modules.bars
 
 FooterRectangle {
     id: root
@@ -42,7 +43,7 @@ FooterRectangle {
         implicitHeight: content.implicitHeight + 24
         radius: height / 2
         antialiasing: true
-        color: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.09)
+        color: BarStyle.card
         border.width: 2
         border.color: searchInput.activeFocus ? SMColors.accent : "transparent"
         Behavior on border.color { ColorAnimation { duration: 120 } }
@@ -54,12 +55,11 @@ FooterRectangle {
             anchors.rightMargin: 16
             spacing: 11
 
-            Text {
+            BarIcon {
                 Layout.alignment: Qt.AlignVCenter
-                text: "search"
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 20
-                color: SMColors.fg
+                name: "search"
+                size: 22
+                color: BarStyle.subtext
             }
 
             WTextInput {

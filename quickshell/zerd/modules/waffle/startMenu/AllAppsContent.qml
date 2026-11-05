@@ -10,6 +10,7 @@ import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.startMenu
 import qs.modules.iris.dock
+import qs.modules.bars
 
 WPanelPageColumn {
     id: root
@@ -111,19 +112,17 @@ WPanelPageColumn {
                 Layout.fillWidth: true
                 visible: root.filterText.length === 0 && root.pinnedApps.length > 0
                 spacing: 6
-                Text { text: "Recent"; color: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.6); font.pixelSize: 12; font.weight: Font.Medium; leftPadding: 4 }
+                BarText { text: "Recent"; color: BarStyle.subtext; font.pixelSize: 12; leftPadding: 6 }
                 Row {
                     spacing: 8
                     Repeater {
                         model: root.pinnedApps
-                        delegate: Rectangle {
+                        delegate: BarButton {
                             id: pin
                             required property var modelData
-                            width: 64; height: 64; radius: 20
-                            color: pinHover.hovered ? root.tileHover : root.tileIdle
-                            Behavior on color { ColorAnimation { duration: 90 } }
-                            scale: pinHover.hovered ? 1.04 : 1
-                            Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+                            width: 64; height: 64
+                            radius: BarStyle.radiusLarge
+                            onTapped: { root.launch(pin.modelData); GlobalStates.searchOpen = false }
                             Image {
                                 anchors.centerIn: parent
                                 width: 40; height: 40
@@ -131,12 +130,10 @@ WPanelPageColumn {
                                 sourceSize: Qt.size(96, 96)
                                 smooth: true; mipmap: true; asynchronous: true
                             }
-                            HoverHandler { id: pinHover }
-                            TapHandler { onTapped: { root.launch(pin.modelData); GlobalStates.searchOpen = false } }
                         }
                     }
                 }
-                Text { text: "All apps"; color: ColorUtils.mix(SMColors.fg, SMColors.bg, 0.6); font.pixelSize: 12; font.weight: Font.Medium; leftPadding: 4; topPadding: 6 }
+                Text { text: "All apps"; color: BarStyle.subtext; font.pixelSize: 12; leftPadding: 6; topPadding: 6 }
             }
 
             GridView {
@@ -155,48 +152,40 @@ WPanelPageColumn {
 
                 model: root.filteredApps
 
-                delegate: WBorderlessButton {
+                delegate: BarButton {
                     id: gridItem
                     required property var modelData
                     required property int index
                     width: gridView.cellWidth - 12
                     height: gridView.cellHeight - 12
-                    radius: 20
-                    checked: gridView.currentIndex === index
-                    colBackground: checked ? root.tileSelected : root.tileIdle
-                    colBackgroundHover: checked ? root.tileSelected : root.tileHover
-
-                    onClicked: {
+                    radius: BarStyle.radiusLarge
+                    toggled: gridView.currentIndex === index
+                    onTapped: {
                         root.launch(gridItem.modelData)
                         GlobalStates.searchOpen = false
                     }
                     onHoveredChanged: { if (hovered) gridView.currentIndex = index }
 
-                    contentItem: ColumnLayout {
-                        spacing: 6
-                        Item { Layout.preferredHeight: 2 }
-                        Image {
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 56; Layout.preferredHeight: 56
-                            source: AppSearch.getIconSource(gridItem.modelData.icon || gridItem.modelData.name, "application-x-executable")
-                            sourceSize: Qt.size(112, 112)
-                            smooth: true; mipmap: true
-                            asynchronous: true
-                        }
-                        WText {
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: gridView.cellWidth - 20
-                            text: gridItem.modelData.name || ""
-                            color: SMColors.fg
-                            font.pixelSize: 13
-                            font.weight: Font.Medium
-                            horizontalAlignment: Text.AlignHCenter
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                            wrapMode: Text.NoWrap
-                        }
+                    Image {
+                        x: Math.round((gridItem.width - width) / 2)
+                        y: 12
+                        width: 56; height: 56
+                        source: AppSearch.getIconSource(gridItem.modelData.icon || gridItem.modelData.name, "application-x-executable")
+                        sourceSize: Qt.size(112, 112)
+                        smooth: true; mipmap: true
+                        asynchronous: true
                     }
-                    WToolTip { text: gridItem.modelData.name || "" }
+                    BarText {
+                        x: 8
+                        y: 76
+                        width: gridItem.width - 16
+                        text: gridItem.modelData.name || ""
+                        color: gridItem.ink
+                        font.pixelSize: 13
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                        maximumLineCount: 1
+                    }
                 }
 
                 Text {
@@ -219,44 +208,37 @@ WPanelPageColumn {
 
                 model: root.filteredApps
 
-                delegate: WBorderlessButton {
+                delegate: BarButton {
                     id: listItem
                     required property var modelData
                     required property int index
                     width: listView.width
-                    implicitHeight: 60
-                    radius: 20
-                    checked: listView.currentIndex === index
-                    colBackground: checked ? root.tileSelected : root.tileIdle
-                    colBackgroundHover: checked ? root.tileSelected : root.tileHover
-
-                    onClicked: {
+                    height: 60
+                    radius: BarStyle.radiusMedium
+                    toggled: listView.currentIndex === index
+                    onTapped: {
                         root.launch(listItem.modelData)
                         GlobalStates.searchOpen = false
                     }
                     onHoveredChanged: { if (hovered) listView.currentIndex = index }
 
-                    contentItem: RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 14
-                        anchors.rightMargin: 14
-                        spacing: 14
-                        Image {
-                            Layout.alignment: Qt.AlignVCenter
-                            source: AppSearch.getIconSource(listItem.modelData.icon || listItem.modelData.name, "application-x-executable")
-                            sourceSize: Qt.size(88, 88)
-                            width: 44; height: 44
-                            smooth: true; mipmap: true
-                            asynchronous: true
-                        }
-                        WText {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignVCenter
-                            text: listItem.modelData.name || ""
-                            color: SMColors.fg
-                            font.pixelSize: 14
-                            elide: Text.ElideRight
-                        }
+                    Image {
+                        x: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: AppSearch.getIconSource(listItem.modelData.icon || listItem.modelData.name, "application-x-executable")
+                        sourceSize: Qt.size(88, 88)
+                        width: 44; height: 44
+                        smooth: true; mipmap: true
+                        asynchronous: true
+                    }
+                    BarText {
+                        x: 72
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: listItem.width - 72 - 16
+                        text: listItem.modelData.name || ""
+                        color: listItem.ink
+                        font.pixelSize: 14
+                        elide: Text.ElideRight
                     }
                 }
 
