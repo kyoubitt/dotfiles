@@ -6,6 +6,7 @@ import qs.services
 import qs
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.bars
 
 Scope {
     id: root
@@ -65,11 +66,9 @@ Scope {
                 }
             }
 
-            StartMenuContent {
+            AppMenu {
                 id: content
                 anchors.centerIn: parent
-                width: Math.max(panelWindow.minW, implicitWidth)
-                height: Math.max(panelWindow.minH, implicitHeight)
                 focus: true
                 onClosed: {
                     GlobalStates.searchOpen = false
