@@ -33,8 +33,10 @@ PanelWindow {
         right: true
     }
 
+    // one place to size the whole launcher; whole pixels keep the text sharp
+    readonly property real uiScale: 1.15
     function s(val) {
-        return (typeof Scaler !== "undefined" && Scaler.s) ? Scaler.s(val) : val;
+        return Math.round(val * launcherWindow.uiScale);
     }
 
     function closeLauncher() {
@@ -119,13 +121,13 @@ PanelWindow {
     SequentialAnimation {
         id: itemsIntroSequence
         running: false
-        PauseAnimation { duration: 60 }
+        PauseAnimation { duration: 0 }
         NumberAnimation {
             target: launcherWindow
             property: "introItems"
             from: 0.0
             to: 1.0
-            duration: 520
+            duration: 260
             easing.type: Easing.Linear
         }
     }
@@ -205,7 +207,7 @@ PanelWindow {
     property var defaultLauncherSettings: ({
         "position": "center",
         "width": 680,
-        "itemCount": 6,
+        "itemCount": 8,
         "terminalCommand": "ghostty -e",
         "smartRanking": true,
         "searchProvider": "google"
@@ -510,10 +512,9 @@ PanelWindow {
         if (isVisible) {
             tabSwitch.currentIndex = launcherWindow.currentTabIndex;
             restartItemsIntro();
-            if (!launcherWindow.appsLoaded) {
-                launcherWindow.loadApps();
-                launcherWindow.appsLoaded = true;
-            }
+            // the entry list is read again on every open: it is quick, and the window now outlives start-up
+            launcherWindow.loadApps();
+            launcherWindow.appsLoaded = true;
             if (searchInput.text !== "") {
                 searchInput.clear();
                 filterDebounceTimer.stop();
@@ -1191,9 +1192,9 @@ PanelWindow {
         property real animProgress: launcherWindow.isVisible ? 1.0 : 0.0
         Behavior on animProgress {
             NumberAnimation {
-                duration: launcherWindow.isVisible ? (launcherWindow.isCentered ? 420 : 340) : (launcherWindow.isCentered ? 200 : 150)
+                duration: launcherWindow.isVisible ? 240 : 140
                 easing.type: launcherWindow.isVisible ? Easing.OutBack : Easing.InQuad
-                easing.overshoot: launcherWindow.isVisible ? 1.28 : 1.0
+                easing.overshoot: launcherWindow.isVisible ? 0.9 : 1.0
             }
         }
 

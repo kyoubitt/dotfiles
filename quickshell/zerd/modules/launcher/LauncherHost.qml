@@ -6,10 +6,8 @@ import qs
 // Keeps the launcher window around only while the menu is open, and answers the `search` IPC.
 Scope {
     id: root
-    LazyLoader {
-        active: GlobalStates.searchOpen
-        Launcher {}
-    }
+    // built once and kept: opening only shows it, nothing is created or loaded on the way
+    Launcher {}
     IpcHandler {
         target: "search"
         function toggle(): void { GlobalStates.searchOpen = !GlobalStates.searchOpen }

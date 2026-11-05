@@ -12,7 +12,7 @@ Item {
     property int weight: Font.Normal
     property real letterSpacing: 0
     property color color: IrisStyle.text
-    property int renderType: Text.QtRendering
+    property int renderType: Text.NativeRendering
     property bool countDown: false
 
     readonly property real inkPad: Math.ceil(root.pixelSize * 0.14)

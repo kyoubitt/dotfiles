@@ -50,7 +50,7 @@ Item {
         font.family: Appearance.font.family.expressive
         font.pixelSize: Math.max(14, root.fontPixelSize)
         font.letterSpacing: root.charSpacing * 0.1
-        renderType: Text.QtRendering
+        renderType: Text.NativeRendering
         clip: true
         Keys.forwardTo: [root]
         onTextEdited: root.textEdited(text)

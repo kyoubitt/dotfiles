@@ -130,7 +130,7 @@ Item {
                     text: root.message.length > 100 ? root.message.substring(0, 100) + "..." : root.message
                     font.family: "Inter"
                     font.pixelSize: 12
-                    renderType: Text.QtRendering
+                    renderType: Text.NativeRendering
                     color: ColorUtils.applyAlpha(SMColors.fg, 0.7)
                     wrapMode: Text.WordWrap
                     Layout.maximumWidth: 350

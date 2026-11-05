@@ -111,7 +111,7 @@ Item {
                 color: (root.synced && ln.cur) ? "#8cffffff" : "#ffffff"
                 font.pixelSize: root.synced ? root.size : root.size * 0.75
                 font.weight: Font.Bold
-                renderType: Text.QtRendering
+                renderType: Text.NativeRendering
                 opacity: !root.synced ? 0.9 : (ln.cur ? 1 : Math.max(0.16, 0.34 - ln.dist * 0.02))
                 scale: !root.synced ? 1 : (ln.cur ? 1.06 : Math.max(0.88, 0.94 - ln.dist * 0.01))
                 transformOrigin: Item.Left

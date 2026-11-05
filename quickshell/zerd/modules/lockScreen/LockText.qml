@@ -8,9 +8,9 @@ import qs.modules.waffle.startMenu
 // number of pixels so layouts never place text on a half pixel.
 Text {
     color: SMColors.fg
-    renderType: Text.QtRendering
+    renderType: Text.NativeRendering
     font.family: Appearance.font.family.expressive
-    font.hintingPreference: Font.PreferNoHinting
+    font.hintingPreference: Font.PreferDefaultHinting
     font.kerning: true
     font.preferShaping: true
     lineHeightMode: Text.FixedHeight

@@ -41,7 +41,7 @@ Row {
         font.features: ({ "tnum": 1 })
         font.letterSpacing: Math.round(-root.pixelSize * 0.02)
         color: root.color
-        renderType: Text.QtRendering
+        renderType: Text.NativeRendering
     }
 
     component Minor: Text {
@@ -53,7 +53,7 @@ Row {
         font.weight: IrisStyle.weight(Font.DemiBold)
         font.features: ({ "tnum": 1 })
         color: IrisStyle.secondaryOf(root.color)
-        renderType: Text.QtRendering
+        renderType: Text.NativeRendering
     }
 
     component Count: IrisNumber {

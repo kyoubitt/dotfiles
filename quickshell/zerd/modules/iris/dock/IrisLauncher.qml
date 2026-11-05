@@ -175,7 +175,7 @@ Scope {
                         color: IrisStyle.text
                         selectionColor: IrisStyle.accent
                         font.pixelSize: 13
-                        renderType: Text.QtRendering
+                        renderType: Text.NativeRendering
                         font.hintingPreference: Font.PreferNoHinting
                         clip: true
                         focus: true
