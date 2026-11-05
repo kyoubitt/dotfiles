@@ -17,7 +17,7 @@ Item {
     Timer { id: closeTimer; interval: 130; onTriggered: root.closed() }
 
     implicitWidth: 720
-    implicitHeight: 620
+    implicitHeight: 660
     width: implicitWidth
     height: implicitHeight
 
@@ -58,11 +58,12 @@ Item {
     readonly property var recentApps: {
         const all = DesktopEntries.applications.values
         const out = []
+        for (const e of all) if (!e.noDisplay && root.isPinned(e) && !out.includes(e)) out.push(e)
         for (const id of root.recentIds) {
             const e = all.find(a => String(a.id) === String(id))
             if (e && !e.noDisplay && !out.includes(e)) out.push(e)
         }
-        return out.slice(0, 6)
+        return out.slice(0, 8)
     }
     property string debounced: ""
     Timer { id: deb; interval: 70; onTriggered: root.debounced = root.query.trim() }
@@ -101,6 +102,7 @@ Item {
             })
         }
         for (const e of apps) out.push({ entry: e })
+        if (q.length > 1 && !root.isSum) out.push({ action: { title: "Search the web for \"" + root.debounced + "\"", icon: "travel_explore", keys: [], run: () => Quickshell.execDetached(["xdg-open", "https://duckduckgo.com/?q=" + encodeURIComponent(root.debounced)]) } })
         return out
     }
 
@@ -251,7 +253,7 @@ Item {
         width: parent.width - 32
         height: visible ? 110 : 0
         visible: root.debounced.length === 0 && root.category === "all" && root.recentApps.length > 0
-        BarText { x: 6; text: "Recent"; color: BarStyle.subtext; font.pixelSize: 12 }
+        BarText { x: 6; text: "Pinned and recent"; color: BarStyle.subtext; font.pixelSize: 12 }
         Row {
             y: 22
             spacing: 10
@@ -269,6 +271,7 @@ Item {
                         sourceSize: Qt.size(96, 96)
                         smooth: true; mipmap: true; asynchronous: true
                     }
+                    BarIcon { visible: root.isPinned(rc.modelData); x: rc.width - 20; y: 5; name: "keep"; fill: 1; size: 13; color: BarStyle.accent }
                 }
             }
         }
@@ -286,7 +289,7 @@ Item {
         id: grid
         visible: root.viewMode === "grid"
         x: 10; y: root.listTop
-        width: parent.width - 20; height: parent.height - y - 12
+        width: parent.width - 20; height: parent.height - y - 44
         clip: true
         cellWidth: Math.floor(width / 5); cellHeight: 112
         currentIndex: root.current
@@ -329,7 +332,7 @@ Item {
         id: list
         visible: root.viewMode === "list"
         x: 10; y: root.listTop
-        width: parent.width - 20; height: parent.height - y - 12
+        width: parent.width - 20; height: parent.height - y - 44
         clip: true; spacing: 4
         currentIndex: root.current
         highlightFollowsCurrentItem: false
@@ -364,6 +367,21 @@ Item {
                 color: row.ink; font.pixelSize: 14; elide: Text.ElideRight
             }
             BarIcon { visible: row.pinned; anchors.right: parent.right; anchors.rightMargin: 18; anchors.verticalCenter: parent.verticalCenter; name: "keep"; fill: 1; size: 16; color: BarStyle.accent }
+        }
+    }
+    // the keys, quietly along the bottom
+    Row {
+        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 14 }
+        spacing: 18
+        Repeater {
+            model: [["↑↓←→", "move"], ["Enter", "open"], ["Right-click", "pin"], ["Esc", "close"]]
+            delegate: Row {
+                required property var modelData
+                spacing: 6
+                Rectangle { height: 20; width: k.width + 12; radius: 7; color: BarStyle.card
+                    BarText { id: k; anchors.centerIn: parent; text: parent.parent.modelData[0]; font.pixelSize: 11; color: BarStyle.subtext } }
+                BarText { anchors.verticalCenter: parent.verticalCenter; text: parent.modelData[1]; font.pixelSize: 11; color: BarStyle.subtext }
+            }
         }
     }
     BarText {

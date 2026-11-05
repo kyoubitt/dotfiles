@@ -137,12 +137,6 @@ Item {
 
         Item { Layout.preferredHeight: 22 }
 
-        LockBlocks {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: implicitWidth
-            Layout.preferredHeight: implicitHeight
-        }
-
         LockVisualizer {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: implicitWidth
