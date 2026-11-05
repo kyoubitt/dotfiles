@@ -108,13 +108,6 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 350 } }
     }
 
-    // ---------------- power, top center ----------------
-    LockPowerControl {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 36
-    }
-
     // ---------------- clock view ----------------
     ColumnLayout {
         id: clockView
@@ -144,9 +137,10 @@ Item {
 
         Item { Layout.preferredHeight: 22 }
 
-        LockMediaCard {
+        LockBlocks {
             Layout.alignment: Qt.AlignHCenter
-            visible: NowPlaying.player !== null
+            Layout.preferredWidth: implicitWidth
+            Layout.preferredHeight: implicitHeight
         }
 
         LockVisualizer {
