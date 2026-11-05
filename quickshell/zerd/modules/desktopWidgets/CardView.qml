@@ -46,6 +46,9 @@ Loader {
             id: host
             screenRef: view.screenRef
             width: 380; height: 226
+            irisMaterial: "clear"
+            legibleAlways: false
+            irisOutline: "never"
             LyricsCard { widget: host; anchors.fill: parent }
         }
     }

@@ -15,6 +15,8 @@ IrisWidgetFace {
     readonly property var lines: LyricsStore.lines
     property real pos: 0
     property int cur: 0
+    property real frac: 0
+    Behavior on frac { NumberAnimation { duration: 220 } }
     readonly property bool ready: LyricsStore.state === "ok" && lines.length > 0
 
     onTitleChanged: if (title.length > 0) LyricsStore.request(title, artist, p?.length ?? 0)
@@ -27,28 +29,17 @@ IrisWidgetFace {
             let i = 0
             for (let k = 0; k < l.length; k++) { if (l[k].t >= 0 && l[k].t <= root.pos + 0.25) i = k; else if (l[k].t > root.pos) break }
             if (i !== root.cur) root.cur = i
+            const t0 = l[i]?.t ?? 0, t1 = l[i + 1]?.t ?? (t0 + 4)
+            root.frac = t1 > t0 ? Math.max(0, Math.min(1, (root.pos - t0) / (t1 - t0))) : 0
         }
     }
     onLinesChanged: cur = 0
 
     function lineAt(i: int): string { return i >= 0 && i < lines.length ? lines[i].s : "" }
 
-    // header
-    Row {
-        id: head
-        anchors { left: parent.left; top: parent.top }
-        spacing: 8
-        BarIcon { name: "lyrics"; size: 16; color: BarStyle.accent; anchors.verticalCenter: parent.verticalCenter }
-        BarText {
-            width: root.width - root.padding * 2 - 24
-            text: root.title.length > 0 ? root.title + (root.artist ? "  ·  " + root.artist : "") : "Lyrics"
-            color: BarStyle.subtext; font.pixelSize: 12; elide: Text.ElideRight
-        }
-    }
-
     Item {
         id: stage
-        anchors { left: parent.left; right: parent.right; top: head.bottom; bottom: parent.bottom; topMargin: 8 }
+        anchors.fill: parent
         clip: true
         opacity: root.ready ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
@@ -61,18 +52,41 @@ IrisWidgetFace {
             Behavior on y { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
             Repeater {
                 model: 5
-                delegate: BarText {
+                delegate: Item {
+                    id: ln
                     required property int index
                     readonly property int off: index - 2
+                    readonly property string line: root.lineAt(root.cur + off)
                     width: col.width
-                    text: root.lineAt(root.cur + off)
-                    horizontalAlignment: Text.AlignLeft
-                    elide: Text.ElideRight
-                    color: off === 0 ? BarStyle.text : BarStyle.subtext
+                    height: base.height
                     opacity: off === 0 ? 1 : Math.max(0.15, 0.55 - Math.abs(off) * 0.2)
-                    font.pixelSize: off === 0 ? 22 : 14
-                    font.weight: off === 0 ? Font.DemiBold : Font.Medium
                     Behavior on opacity { NumberAnimation { duration: 250 } }
+                    BarText {
+                        id: base
+                        width: parent.width
+                        text: ln.line
+                        elide: Text.ElideRight
+                        color: ln.off === 0 ? Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(1, 1, 1, 0.75)
+                        style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.55)
+                        font.pixelSize: ln.off === 0 ? 22 : 14
+                        font.weight: ln.off === 0 ? Font.DemiBold : Font.Medium
+                    }
+                    // the line fills with the accent as it is sung
+                    Item {
+                        visible: ln.off === 0
+                        width: Math.min(parent.width, base.implicitWidth) * root.frac
+                        height: parent.height
+                        clip: true
+                        BarText {
+                            width: ln.width
+                            text: ln.line
+                            elide: Text.ElideRight
+                            color: BarStyle.accent
+                            style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.55)
+                            font.pixelSize: 22
+                            font.weight: Font.DemiBold
+                        }
+                    }
                 }
             }
         }
