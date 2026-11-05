@@ -15,7 +15,7 @@ Item {
 
     Process {
         running: true
-        command: ["sh", "-c", "uptime -p | sed 's/^up //'"]
+        command: ["sh", "-c", "uptime -p | sed -e 's/^up //' -e 's/ years\?/y/;s/ weeks\?/w/;s/ days\?/d/;s/ hours\?/h/;s/ minutes\?/m/'"]
         stdout: StdioCollector { onStreamFinished: root.uptime = text.trim() }
     }
 
@@ -24,8 +24,9 @@ Item {
         LockAvatar { size: 44 }
         Column {
             anchors.verticalCenter: parent.verticalCenter
-            BarText { text: Config.options?.account?.name || SystemInfo.displayName; font.pixelSize: 15; font.weight: Font.DemiBold }
-            BarText { text: root.uptime.length > 0 ? "up " + root.uptime : ""; color: BarStyle.subtext; font.pixelSize: 12 }
+            width: Math.max(40, root.width - 44 - 12 - 3 * 36 - 12 - 12)
+            BarText { width: parent.width; elide: Text.ElideRight; text: Config.options?.account?.name || SystemInfo.displayName; font.pixelSize: 15; font.weight: Font.DemiBold }
+            BarText { width: parent.width; elide: Text.ElideRight; text: root.uptime.length > 0 ? "up " + root.uptime : ""; color: BarStyle.subtext; font.pixelSize: 12 }
         }
     }
     Column {
