@@ -27,14 +27,18 @@ Scope {
         property real weight: 1
         property bool selected: false
         property real fillLevel: 0
+        // like liquid in a jar: resting the pointer on a capsule fills it part way, holding fills the rest
+        property real jar: ma.containsMouse && !done ? 0.4 : 0
+        Behavior on jar { NumberAnimation { duration: 1100; easing.type: Easing.OutCubic } }
+        readonly property real level: Math.max(fillLevel, jar)
         property bool done: false
         signal activated()
         implicitWidth: 144
         implicitHeight: 196
         readonly property color tone: sb.danger ? BarStyle.danger : BarStyle.accent
-        readonly property bool lit: ma.containsMouse || sb.selected || fillLevel > 0.001
+        readonly property bool lit: ma.containsMouse || sb.selected || level > 0.001
 
-        function press(): void { if (done) return; drain.stop(); fill.start() }
+        function press(): void { if (done) return; drain.stop(); fillLevel = Math.max(fillLevel, jar); fill.start() }
         function release(): void { if (done) return; fill.stop(); drain.start() }
 
         NumberAnimation { id: fill; target: sb; property: "fillLevel"; to: 1; duration: 520 * sb.weight * (1 - sb.fillLevel); easing.type: Easing.InSine
@@ -56,10 +60,10 @@ Scope {
             ShaderEffect {
                 id: wave
                 anchors.fill: parent
-                visible: sb.fillLevel > 0.001
+                visible: sb.level > 0.001
                 property real radius: capsule.radius
-                property real fillLevel: sb.fillLevel
-                property real waveAmp: sb.fillLevel < 0.99 ? Math.min(12, capsule.height * sb.fillLevel, capsule.height * (1 - sb.fillLevel)) * Math.sin(sb.fillLevel * Math.PI) : 0
+                property real fillLevel: sb.level
+                property real waveAmp: sb.level < 0.99 ? Math.min(14, capsule.height * sb.level, capsule.height * (1 - sb.level)) * Math.sin(sb.level * Math.PI) : 0
                 property vector2d itemSize: Qt.vector2d(width, height)
                 property real phase: 0
                 property real vertical: 1
@@ -67,7 +71,7 @@ Scope {
                 property color color2: sb.tone
                 property vector4d params: Qt.vector4d(1, 0, 0, 0)
                 fragmentShader: Qt.resolvedUrl("fluid_wave.frag.qsb")
-                NumberAnimation on phase { running: sb.fillLevel > 0 && sb.fillLevel < 1; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 800 }
+                NumberAnimation on phase { running: sb.level > 0 && sb.level < 1; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 800 }
             }
             Rectangle { anchors.fill: parent; radius: capsule.radius; color: "#ffffff"; opacity: 0
                 NumberAnimation on opacity { id: flash; running: false; from: 0.6; to: 0; duration: 500; easing.type: Easing.OutExpo } }
@@ -81,7 +85,7 @@ Scope {
             }
             Item {
                 anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-                height: parent.height * sb.fillLevel
+                height: parent.height * sb.level
                 clip: true
                 Item {
                     x: 0; y: -(capsule.height - parent.height); width: capsule.width; height: capsule.height

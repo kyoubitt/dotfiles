@@ -625,10 +625,11 @@ Rectangle {
             width: dateText.implicitWidth + 32 * s
             height: 32 * s
             radius: root.radius
-            color: root.cSurface
+            color: "transparent"
 
             Text {
                 id: dateText
+                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                 anchors.centerIn: parent
                 text: Qt.formatDate(root.now, "dddd, MMM d")
                 font.family: root.sansFont
@@ -775,8 +776,11 @@ Rectangle {
                 Rectangle {
                     anchors.fill: parent
                     radius: root.radius
-                    color: root.cField
+                    color: "transparent"
+                    border.width: 0
                     Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                    // no box: a thin line under the text instead
+                    Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 2 * s; radius: height / 2; color: root.cText; opacity: 0.55 }
                 }
 
                 Item {
@@ -787,14 +791,14 @@ Rectangle {
                     height: pw.btnSize
                     property real busyRotation: 0
                     property alias canvas: lockCanvas
-                    readonly property color iconColor: pw.hasError ? root.cRed : (pw.isBusy ? root.cBusy : root.cMid)
+                    readonly property color iconColor: pw.hasError ? root.cRed : (pw.isBusy ? root.cBusy : "#ffffff")
                     onIconColorChanged: lockCanvas.requestPaint()
                     onBusyRotationChanged: lockCanvas.requestPaint()
 
                     Rectangle {
                         anchors.fill: parent
                         radius: pw.btnRadius
-                        color: lockMa.containsMouse ? Qt.lighter(root.cFieldBox, 1.06) : root.cFieldBox
+                        color: lockMa.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                         Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
                     }
 
@@ -1188,7 +1192,7 @@ Rectangle {
                 width: userRow.implicitWidth + 36 * s
                 height: 36 * s
                 radius: root.radius
-                color: userMa.pressed ? root.cFieldBox : (userMa.containsMouse ? root.cField : root.cSurface)
+                color: userMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (userMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
                 scale: userMa.pressed ? 0.96 : 1.0
                 Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
@@ -1200,16 +1204,17 @@ Rectangle {
                     Ico {
                         anchors.verticalCenter: parent.verticalCenter
                         name: "user"
-                        tint: root.cMid
+                        tint: "#ffffff"
                         size: 16 * s
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.userName()
+                        style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
                         font.pixelSize: 14 * s
                         font.weight: Font.Medium
-                        color: root.cText
+                        color: "#ffffff"
                     }
                 }
 
@@ -1232,7 +1237,7 @@ Rectangle {
                 width: sessionRow.implicitWidth + 36 * s
                 height: 36 * s
                 radius: root.radius
-                color: sessionMa.pressed ? root.cFieldBox : (sessionMa.containsMouse ? root.cField : root.cSurface)
+                color: sessionMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (sessionMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
                 scale: sessionMa.pressed ? 0.96 : 1.0
                 Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
@@ -1244,16 +1249,17 @@ Rectangle {
                     Ico {
                         anchors.verticalCenter: parent.verticalCenter
                         name: "session"
-                        tint: root.cMid
+                        tint: "#ffffff"
                         size: 16 * s
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.sessionName()
+                        style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
                         font.pixelSize: 14 * s
                         font.weight: Font.Medium
-                        color: root.cText
+                        color: "#ffffff"
                     }
                 }
 
@@ -1348,7 +1354,7 @@ Rectangle {
             width: 36 * s
             height: 36 * s
             radius: root.radius
-            color: themeMa.containsMouse ? root.cField : root.cSurface
+            color: themeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
             scale: themeMa.pressed ? 0.94 : 1.0
             Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
@@ -1356,7 +1362,7 @@ Rectangle {
             Ico {
                 anchors.centerIn: parent
                 name: root.isDark ? "sun" : "moon"
-                tint: root.cMid
+                tint: "#ffffff"
                 size: 16 * s
             }
 
@@ -1376,7 +1382,7 @@ Rectangle {
             width: 36 * s
             height: 36 * s
             radius: root.radius
-            color: root.powerMenuOpen ? root.cFieldBox : (toggleMa.containsMouse ? root.cField : root.cSurface)
+            color: root.powerMenuOpen ? Qt.rgba(1, 1, 1, 0.18) : (toggleMa.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent")
             scale: toggleMa.pressed ? 0.94 : 1.0
             Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
