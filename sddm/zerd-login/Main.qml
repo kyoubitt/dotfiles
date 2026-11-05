@@ -116,10 +116,9 @@ Rectangle {
     }
 
     // ---- login block
-    Glass {
+    Item {
         id: card
         width: 440; height: 316
-        radius: 36
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.44
 
@@ -128,8 +127,7 @@ Rectangle {
             width: 104; height: 104
             anchors.horizontalCenter: parent.horizontalCenter
             y: 28
-            Rectangle { anchors.fill: parent; radius: width / 2; color: "transparent"; border.width: 3; border.color: root.accent }
-            Rectangle { id: fallback; x: 6; y: 6; width: 92; height: 92; radius: 46; color: root.accent
+                        Rectangle { id: fallback; x: 6; y: 6; width: 92; height: 92; radius: 46; color: root.accent
                 Text { anchors.centerIn: parent; text: root.realName.length > 0 ? root.realName.charAt(0).toUpperCase() : "?"
                     font.family: root.fam; font.pixelSize: 40; font.weight: Font.Medium; color: root.onAccent } }
             Image { id: pic; x: 6; y: 6; width: 92; height: 92; source: root.picture; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: false; sourceSize: Qt.size(184, 184) }
@@ -159,8 +157,8 @@ Rectangle {
             Rectangle {
                 anchors.fill: parent; radius: 29
                 color: Qt.rgba(1, 1, 1, 0.12)
-                border.width: 2
-                border.color: root.failed ? config.WarningColor : (pw.activeFocus ? root.accent : Qt.rgba(1, 1, 1, 0.12))
+                border.width: root.failed ? 2 : 0
+                border.color: config.WarningColor
                 Behavior on border.color { ColorAnimation { duration: 160 } }
             }
             TextInput {
