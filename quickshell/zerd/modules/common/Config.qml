@@ -507,6 +507,12 @@ Singleton {
                     property int my: 0
                     property string text: ""
                 }
+                property JsonObject lyrics: JsonObject {
+                    property bool enable: false
+                    property string anchor: "centerLeft"
+                    property int mx: 760
+                    property int my: 0
+                }
                 property JsonObject timer: JsonObject {
                     property bool enable: false
                     property string anchor: "centerRight"

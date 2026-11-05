@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.iris.host
 import qs.modules.iris.widgets
 import qs.modules.iris.style
+import qs.modules.desktopWidgets
 import qs.modules.background.widgets.clock
 import qs.modules.background.widgets.shape
 import qs.modules.background.widgets.visualizer
@@ -36,8 +37,18 @@ Loader {
         stackedClock: c_stackedClock,
         visualizer: c_visualizer,
         shape: c_shape,
-        notes: c_notes
+        notes: c_notes,
+        lyrics: c_lyrics
     })[name] ?? null
+    Component {
+        id: c_lyrics
+        IrisWidgetHost {
+            id: host
+            screenRef: view.screenRef
+            width: 380; height: 226
+            LyricsCard { widget: host; anchors.fill: parent }
+        }
+    }
     Component {
         id: c_media
                 IrisWidgetHost {

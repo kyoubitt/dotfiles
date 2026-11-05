@@ -3,3 +3,4 @@ singleton DesktopWidgets 1.0 DesktopWidgets.qml
 WidgetLayer 1.0 WidgetLayer.qml
 WindCard 1.0 WindCard.qml
 CardView 1.0 CardView.qml
+LyricsCard 1.0 LyricsCard.qml

@@ -12,7 +12,7 @@ import qs.services
 Singleton {
     id: root
 
-    readonly property var names: ["media", "clock", "weather", "wind", "rings", "greeting", "calendar", "agenda", "controls", "date", "day", "battery", "uptime", "worldClock", "todo", "notes", "timer", "cookieClock", "pixelClock", "stackedClock", "shape", "visualizer"]
+    readonly property var names: ["media", "clock", "weather", "wind", "rings", "greeting", "calendar", "agenda", "controls", "date", "day", "battery", "uptime", "worldClock", "todo", "notes", "lyrics", "timer", "cookieClock", "pixelClock", "stackedClock", "shape", "visualizer"]
     // Hides every card at once without touching the individual switches.
     property bool hidden: false
 

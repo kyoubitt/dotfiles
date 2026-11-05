@@ -18,6 +18,7 @@ Singleton {
         { name: "greeting", cat: "Fun", title: "Greeting", icon: "waving_hand", w: 380, h: 176 },
         { name: "calendar", cat: "Info", title: "Calendar", icon: "calendar_month", w: 360, h: 232 },
         { name: "agenda", cat: "Info", title: "Agenda", icon: "event_note", w: 380, h: 232 },
+        { name: "lyrics", cat: "Media", title: "Lyrics", icon: "lyrics", w: 380, h: 226 },
         { name: "controls", cat: "Media", title: "Controls", icon: "tune", w: 380, h: 226 },
         { name: "date", cat: "Clocks", title: "Date", icon: "today", w: 176, h: 176 },
         { name: "day", cat: "Clocks", title: "Day", icon: "calendar_today", w: 176, h: 176 },
@@ -53,6 +54,7 @@ Singleton {
         worldClock: { anchor: "centerRight", mx: 480, my: 0 },
         todo: { anchor: "centerLeft", mx: 80, my: 0 },
         notes: { anchor: "centerLeft", mx: 420, my: 0 },
+        lyrics: { anchor: "centerLeft", mx: 760, my: 0 },
         timer: { anchor: "centerRight", mx: 80, my: 0 }
     })
     // Size step of a card: 0.8, 1 or 1.25.
