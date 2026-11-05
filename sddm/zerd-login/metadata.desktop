@@ -1,0 +1,10 @@
+[SddmGreeterTheme]
+Name=zerd-login
+Description=Login screen that matches the zerd shell
+Type=sddm-theme
+Version=1.0
+ConfigFile=theme.conf
+MainScript=Main.qml
+Theme-Id=zerd-login
+Theme-API=2.0
+QtVersion=6

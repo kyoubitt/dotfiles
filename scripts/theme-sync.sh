@@ -611,17 +611,18 @@ update_niri_config() {
 
 update_sddm_theme() {
   local -r wallpaper_path="$1"
-  local -r sddm_conf="/usr/share/sddm/themes/sddm-astronaut-theme/Themes/wallust.conf"
+  local sddm_conf="/usr/share/sddm/themes/sddm-astronaut-theme/Themes/wallust.conf"
   local -r sddm_bg_cache="/var/cache/sddm-wallust/background.jpg"
   local -r wallust_colors_file="$HOME/.cache/wallust/colors.json"
 
-  if [[ ! -f "$sddm_conf" ]]; then
-    log_warn "SDDM wallust theme not found, skipping SDDM sync"
-    return
-  fi
-
-  if [[ ! -w "$sddm_conf" ]]; then
-    log_warn "SDDM theme config not writable, skipping SDDM sync"
+  # the astronaut theme's wallust config and the zerd-login theme's config take the same colours
+  local sddm_confs=()
+  local candidate
+  for candidate in "$sddm_conf" "/usr/share/sddm/themes/zerd-login/theme.conf"; do
+    [[ -f "$candidate" && -w "$candidate" ]] && sddm_confs+=("$candidate")
+  done
+  if [[ ${#sddm_confs[@]} -eq 0 ]]; then
+    log_warn "No writable SDDM theme config found, skipping SDDM sync"
     return
   fi
 
@@ -651,6 +652,7 @@ update_sddm_theme() {
   # Write through the existing file handle instead, which only needs the
   # file to be writable.
   local sddm_conf_tmp
+  for sddm_conf in "${sddm_confs[@]}"; do
   sddm_conf_tmp=$(mktemp)
 
   sed \
@@ -688,6 +690,7 @@ update_sddm_theme() {
 
   cat "$sddm_conf_tmp" > "$sddm_conf"
   rm -f "$sddm_conf_tmp"
+  done
 
   log_success "SDDM theme synced with current wallpaper/colors"
 }
