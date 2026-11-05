@@ -120,19 +120,31 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         Behavior on slide { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
 
-        LockText {
+        // Caelestia's clock: the hours in the accent, the minutes in the text colour, side by side
+        Row {
             Layout.alignment: Qt.AlignHCenter
-            text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
-            font.pixelSize: 124
-            font.weight: Font.Medium
-            font.letterSpacing: -1
+            spacing: 8
+            LockText {
+                text: Qt.locale().toString(DateTime.clock.date, "hh")
+                color: SMColors.accent
+                font.pixelSize: 150
+                font.weight: Font.DemiBold
+                font.letterSpacing: -2
+            }
+            LockText {
+                text: Qt.locale().toString(DateTime.clock.date, "mm")
+                color: SMColors.fg
+                font.pixelSize: 150
+                font.weight: Font.DemiBold
+                font.letterSpacing: -2
+            }
         }
         LockText {
             Layout.alignment: Qt.AlignHCenter
-            text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
-            opacity: 0.75
+            text: Qt.locale().toString(DateTime.clock.date, "dddd • d MMM").toUpperCase()
             font.pixelSize: 20
-            font.letterSpacing: 1
+            font.weight: Font.DemiBold
+            font.letterSpacing: 3
         }
 
         Item { Layout.preferredHeight: 22 }
