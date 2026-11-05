@@ -12,11 +12,11 @@ BarButton {
     tone: filled ? "filled" : "outlined"
     accentColor: MusicStore.accent
     onAccentColor: MusicStore.onAccent
-    width: big ? 56 : label.implicitWidth + (icon.length > 0 ? 58 : 36); height: big ? 56 : 40
+    width: big ? 48 : label.implicitWidth + (icon.length > 0 ? 62 : 40); height: 48
     radius: height / 2
     Row {
         anchors.centerIn: parent; spacing: 8
-        BarIcon { visible: root.icon.length > 0; anchors.verticalCenter: parent.verticalCenter; name: root.icon; fill: 1; size: root.big ? 30 : 20; color: root.ink }
+        BarIcon { visible: root.icon.length > 0; anchors.verticalCenter: parent.verticalCenter; name: root.icon; fill: 1; size: root.big ? 28 : 22; color: root.ink }
         EText { id: label; visible: !root.big; anchors.verticalCenter: parent.verticalCenter; text: root.text; font.weight: Font.DemiBold; color: root.ink }
     }
 }

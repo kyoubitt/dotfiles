@@ -39,7 +39,12 @@ Item {
     
     // Error handling state
     property bool _imageError: false
-    onResolvedSourceChanged: root._imageError = false
+    property int _tries: 0
+    onResolvedSourceChanged: { root._imageError = false; root._tries = 0 }
+    // A failed load is tried again a few times: a file read that fails once (busy disk, theme being rewritten) must not
+    // leave the app with the fallback icon for good.
+    Timer { id: retry; interval: 1500; onTriggered: root._imageError = false }
+    on_ImageErrorChanged: { if (root._imageError && root._tries < 4) { root._tries++; retry.restart() } }
 
     Loader {
         anchors.fill: parent

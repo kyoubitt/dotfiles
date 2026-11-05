@@ -83,6 +83,8 @@ Rectangle {
                         readonly property real bump: bRoot.currentFill > 0.001 && bRoot.currentFill < 0.999 ? Math.exp(-Math.pow((bRoot.currentFill - norm) * 9, 2)) : 0.0
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             id: ct
                             anchors.centerIn: parent
                             text: slot.modelData === " " ? "\u00A0" : slot.modelData
@@ -628,12 +630,16 @@ Rectangle {
             color: "transparent"
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: dateText
                 style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 2.5 * s
                 anchors.centerIn: parent
                 text: Qt.formatDate(root.now, "dddd, MMM d")
                 font.family: root.sansFont
-                font.pixelSize: 13 * s
+                font.pixelSize: 15 * s
                 font.weight: Font.Medium
                 color: root.cText
             }
@@ -756,7 +762,7 @@ Rectangle {
             TextMetrics {
                 id: charMetrics
                 font.family: root.sansFont
-                font.pixelSize: pw.fontSize
+                font.pixelSize: pw.fontSize + 2 * s
                 text: "0"
             }
 
@@ -1023,9 +1029,11 @@ Rectangle {
                     onWidthChanged: pw.updateScroll()
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         text: pw.hasError ? "Wrong password" : "Enter password"
                         font.family: root.sansFont
-                        font.pixelSize: pw.fontSize
+                        font.pixelSize: pw.fontSize + 2 * s
                         color: pw.hasError ? root.cRed : root.cMid
                         opacity: pw.hasError ? 1.0 : ((innerInput.text.length === 0 && !pw.hasFocus && charModel.count === 0) ? 0.55 : 0.0)
                         x: (fieldArea.width - implicitWidth) / 2
@@ -1114,11 +1122,13 @@ Rectangle {
                             }
 
                             Text {
+
+                                renderType: Text.NativeRendering
                                 anchors.centerIn: parent
                                 text: charSlot.glyph
                                 color: root.cText
                                 font.family: root.sansFont
-                                font.pixelSize: pw.fontSize
+                                font.pixelSize: pw.fontSize + 2 * s
                                 opacity: pw.revealProgress
                                 scale: 0.88 + 0.12 * pw.revealProgress
                                 rotation: (1.0 - pw.revealProgress) * 12
@@ -1157,7 +1167,7 @@ Rectangle {
                         selectByMouse: true
                         horizontalAlignment: TextInput.AlignHCenter
                         font.family: root.sansFont
-                        font.pixelSize: pw.fontSize
+                        font.pixelSize: pw.fontSize + 2 * s
                         enabled: !pw.isBusy
                         inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                         onCursorPositionChanged: pw.updateScroll()
@@ -1208,11 +1218,12 @@ Rectangle {
                         size: 16 * s
                     }
                     Text {
+                        renderType: Text.NativeRendering
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.userName()
                         style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
-                        font.pixelSize: 14 * s
+                        font.pixelSize: 17 * s
                         font.weight: Font.Medium
                         color: "#ffffff"
                     }
@@ -1253,11 +1264,12 @@ Rectangle {
                         size: 16 * s
                     }
                     Text {
+                        renderType: Text.NativeRendering
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.sessionName()
                         style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
-                        font.pixelSize: 14 * s
+                        font.pixelSize: 17 * s
                         font.weight: Font.Medium
                         color: "#ffffff"
                     }
