@@ -168,8 +168,14 @@ Scope {
                 id: nav
                 x: 0; y: 0; width: 210; height: win.height
                 color: Qt.darker(BarStyle.surface, 1.25)
+                Flickable {
+                  anchors.fill: parent
+                  contentHeight: navCol.implicitHeight + 36
+                  clip: true
+                  boundsBehavior: Flickable.StopAtBounds
                 Column {
-                    x: 12; y: 18; width: parent.width - 24; spacing: 4
+                    id: navCol
+                    x: 12; y: 18; width: nav.width - 24; spacing: 4
                     Row {
                         x: 8; spacing: 10; bottomPadding: 12
                         LockAvatar { size: 40 }
@@ -204,6 +210,7 @@ Scope {
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.page = item.index }
                         }
                     }
+                }
                 }
             }
 
@@ -278,7 +285,7 @@ Scope {
                             readonly property bool stack: modelData.t === "actions" && (modelData.hint?.length ?? 0) > 46
                             readonly property bool block: row.wrap || row.stack || ["list", "profiles", "binds", "cards", "swatches", "overview"].includes(modelData.t)
                             readonly property var value: Config.getNestedValue(modelData.path, modelData.def)
-                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : row.wrap ? labelCol.height + wrapRow.height + 42 : row.stack ? labelCol.height + 30 + 44 : (row.modelData.hint || row.modelData.where ? 64 : 54)
+                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : row.wrap ? labelCol.height + wrapRow.height + 42 : row.stack ? labelCol.height + 30 + 44 : Math.max(row.modelData.hint || row.modelData.where ? 64 : 54, labelCol.height + 28)
                             Rectangle { visible: row.index < rowRep.count - 1; anchors.bottom: parent.bottom; x: 18; width: parent.width - 36; height: 1; color: BarStyle.border; opacity: 0.7 }
                             Column {
                                 id: labelCol
@@ -287,7 +294,7 @@ Scope {
                                 width: row.block ? parent.width - 36 : (row.modelData.t === "choice" ? Math.max(120, parent.width - chipsRow.width - 64) : parent.width - 260)
                                 spacing: 2
                                 BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.label }
-                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; wrapMode: row.block ? Text.WordWrap : Text.NoWrap; maximumLineCount: row.block ? 2 : 1; font.pixelSize: 12; color: BarStyle.subtext
+                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; wrapMode: Text.WordWrap; maximumLineCount: 2; font.pixelSize: 12; color: BarStyle.subtext
                                     text: (row.modelData.where ? row.modelData.where + (row.modelData.hint ? "  ·  " : "") : "") + (row.modelData.hint ?? "") }
                             }
                             // the person: picture, name, and buttons to change them
