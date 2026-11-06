@@ -50,7 +50,7 @@ Scope {
 
     function begin(mode: string): void {
         if (root.open || root.busy) { if (root.open) root.setMode(mode); return }
-        if (NiriService.inOverview || GlobalStates.screenLocked) return
+        if (GlobalStates.screenLocked) return
         BarState.closeAll()
         // The launcher holds the keyboard exclusively; with it open the overlay never sees Space.
         GlobalStates.irisLauncherOpen = false
