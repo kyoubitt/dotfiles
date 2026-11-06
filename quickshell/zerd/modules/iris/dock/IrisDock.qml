@@ -1485,18 +1485,20 @@ Item {
                             font.weight: IrisStyle.weight(Font.DemiBold)
                         }
                         IrisText {
+                            visible: (menu.windows?.length ?? 0) !== 1     // one window needs no count
                             text: (menu.windows?.length ?? 0) === 0 ? Translation.tr("Not running")
-                                : (menu.windows.length === 1 ? Translation.tr("1 window") : Translation.tr("%1 windows").arg(menu.windows.length))
+                                : Translation.tr("%1 windows").arg(menu.windows.length)
                             color: IrisStyle.muted
                             font.pixelSize: IrisStyle.typeMeta
                         }
                     }
                     Repeater {
-                        model: menu.windows
+                        // the list of windows only when there is something to choose between
+                        model: (menu.windows?.length ?? 0) > 1 ? menu.windows : []
                         MenuRow {
                             required property var modelData
                             glyph: modelData.activated ? "radio_button_checked" : "select_window"
-                            label: String(modelData.title ?? "")
+                            label: String(modelData.title ?? "").replace(/^[^A-Za-z0-9\[(]+\s*/, "")
                             onClicked: {
                                 if (CompositorService.isNiri && modelData.niriWindowId !== undefined) NiriService.focusWindow(modelData.niriWindowId)
                                 else modelData.activate()
@@ -1504,7 +1506,7 @@ Item {
                             }
                         }
                     }
-                    Rectangle { Layout.fillWidth: true; Layout.leftMargin: 10 * root.d; Layout.rightMargin: 10 * root.d; Layout.topMargin: 4 * root.d; Layout.bottomMargin: 4 * root.d; implicitHeight: 1; color: IrisStyle.hairlineStrong }
+                    Rectangle { visible: (menu.windows?.length ?? 0) > 1; Layout.fillWidth: true; Layout.leftMargin: 10 * root.d; Layout.rightMargin: 10 * root.d; Layout.topMargin: 4 * root.d; Layout.bottomMargin: 4 * root.d; implicitHeight: 1; color: IrisStyle.hairlineStrong }
                     MenuRow {
                         visible: (menu.app?.toplevels?.length ?? 0) > 1
                         glyph: "view_carousel"
