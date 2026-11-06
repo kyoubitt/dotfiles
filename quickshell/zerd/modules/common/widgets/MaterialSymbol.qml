@@ -50,7 +50,8 @@ Item {
             weight: (root.useNerd && root.hasNerdGlyph) ? Font.Normal : (Font.Normal + (Font.DemiBold - Font.Normal) * root.truncatedFill)
             variableAxes: (root.useNerd && root.hasNerdGlyph) ? ({}) : ({ 
                 "FILL": root.truncatedFill,
-                "opsz": root.iconSize,
+                "wght": root.iconSize <= 18 ? 600 : (root.iconSize <= 24 ? 500 : 400),
+                "opsz": Math.max(20, Math.min(48, root.iconSize)),
             })
         }
     }

@@ -23,6 +23,7 @@ Item {
         font.family: Appearance.font.family.iconMaterial
         font.pixelSize: Math.round(root.size)
         font.hintingPreference: Font.PreferNoHinting
-        font.variableAxes: ({ "FILL": root.fill, "opsz": Math.round(root.size) })
+        // sturdier strokes for small sizes: thin 400-weight lines are what read as grainy at 14 to 18 px
+        font.variableAxes: ({ "FILL": root.fill, "wght": root.size <= 18 ? 600 : (root.size <= 24 ? 500 : 400), "opsz": Math.max(20, Math.min(48, Math.round(root.size))) })
     }
 }

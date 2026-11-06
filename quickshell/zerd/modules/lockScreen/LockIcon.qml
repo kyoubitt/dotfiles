@@ -26,6 +26,6 @@ Item {
         font.family: Appearance.font.family.iconMaterial
         font.pixelSize: Math.round(root.iconSize)
         font.hintingPreference: Font.PreferNoHinting
-        font.variableAxes: ({ "FILL": root.fill, "opsz": Math.round(root.iconSize) })
+        font.variableAxes: ({ "FILL": root.fill, "wght": root.iconSize <= 18 ? 600 : (root.iconSize <= 24 ? 500 : 400), "opsz": Math.max(20, Math.min(48, Math.round(root.iconSize))) })
     }
 }

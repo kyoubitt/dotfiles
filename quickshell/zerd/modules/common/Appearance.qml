@@ -275,7 +275,7 @@ Singleton {
             property string iconNerd: "JetBrains Mono NF"
             property string monospace: Config.options?.appearance?.typography?.monospaceFont ?? "JetBrainsMono Nerd Font"
             property string reading: "Readex Pro"
-            property string expressive: "Space Grotesk"
+            property string expressive: "Inter"
         }
         property QtObject variableAxes: QtObject {
             // Roboto Flex is customized to feel geometric, unserious yet not overly kiddy
