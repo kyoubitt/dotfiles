@@ -364,16 +364,38 @@ Scope {
                         anchors { right: parent.right; bottom: parent.top; bottomMargin: 6 }
                         spacing: 4
                         Repeater {
-                            model: [{ l: "S", v: 0.8 }, { l: "M", v: 1 }, { l: "L", v: 1.25 }]
+                            model: [{ l: "S", v: 0.8 }, { l: "M", v: 1 }, { l: "L", v: 1.25 }, { l: "XL", v: 1.5 }]
                             delegate: Rectangle {
                                 id: sz
                                 required property var modelData
                                 readonly property bool on: Math.abs(WidgetRegistry.scaleOf(frame.modelData.name) - modelData.v) < 0.01
-                                width: 28; height: 24; radius: 12
+                                width: sz.modelData.l.length > 1 ? 36 : 30; height: 28; radius: 14
                                 color: on ? BarStyle.accent : BarStyle.surface
                                 border.width: 1; border.color: on ? BarStyle.accent : BarStyle.border
                                 BarText { anchors.centerIn: parent; text: sz.modelData.l; font.pixelSize: 11; font.weight: Font.DemiBold; color: sz.on ? BarStyle.onAccent : BarStyle.text }
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.setCardScale(frame.modelData.name, sz.modelData.v) }
+                            }
+                        }
+                    }
+                    // free resize: drag the corner, the card scales with it (0.6 to 1.8, in 5 % steps)
+                    Rectangle {
+                        id: grip
+                        visible: frame.selected
+                        anchors { right: parent.right; bottom: parent.bottom; margins: -6 }
+                        width: 22; height: 22; radius: 11
+                        color: BarStyle.accent; border.width: 2; border.color: BarStyle.surface
+                        BarIcon { anchors.centerIn: parent; name: "open_in_full"; size: 12; color: BarStyle.onAccent }
+                        property real startScale: 1
+                        property real startW: 1
+                        MouseArea {
+                            anchors.fill: parent; anchors.margins: -6
+                            cursorShape: Qt.SizeFDiagCursor
+                            onPressed: mouse => { root.pushUndo(); grip.startScale = WidgetRegistry.scaleOf(frame.modelData.name); grip.startW = Math.max(1, frame.width); win.selected = frame.modelData.name }
+                            onPositionChanged: mouse => {
+                                if (!pressed) return
+                                const dx = mapToItem(frame, mouse.x, mouse.y).x - frame.width
+                                const k = Math.max(0.6, Math.min(1.8, grip.startScale * (grip.startW + dx) / grip.startW))
+                                WidgetRegistry.setScale(frame.modelData.name, Math.round(k * 20) / 20)
                             }
                         }
                     }
