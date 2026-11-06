@@ -104,9 +104,12 @@ Scope {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            preventStealing: true
+            acceptedButtons: Qt.LeftButton
             onPressed: sb.press()
             onReleased: sb.release()
-            onCanceled: sb.release()
+            // a cancel while the pointer is still on the capsule is not you letting go: keep the hold going
+            onCanceled: { console.log("[power] press cancelled on " + sb.label); if (!ma.containsMouse) sb.release() }
         }
     }
 
