@@ -22,49 +22,49 @@ Scope {
         id: sb
         required property string icon
         required property string label
-        property string hint: ""
+        property color tone: BarStyle.accent
         property bool danger: false
         property real weight: 1
         property bool selected: false
-        property real fillLevel: 0
-        // like liquid in a jar: resting the pointer on a capsule fills it part way, holding fills the rest
-        property real jar: ma.containsMouse && !done ? 0.4 : 0
-        Behavior on jar { NumberAnimation { duration: 1100; easing.type: Easing.OutCubic } }
-        readonly property real level: Math.max(fillLevel, jar)
-        property bool done: false
+        property real level: 0                 // how full the jar is, 0..1
+        property bool fired: false
+        property bool holding: false
+        property real pressedAt: 0
+        readonly property bool resting: ma.containsMouse || sb.selected
         signal activated()
         implicitWidth: 144
         implicitHeight: 196
-        readonly property color tone: sb.danger ? BarStyle.danger : BarStyle.accent
-        readonly property bool lit: ma.containsMouse || sb.selected || level > 0.001
+        readonly property bool lit: resting || level > 0.001
 
-        function press(): void { if (done) return; pressedAt = Date.now(); drain.stop(); fillLevel = Math.max(fillLevel, jar); fill.start() }
-        property real pressedAt: 0
-        function release(): void {
-            if (done) return
-            fill.stop()
-            if (Date.now() - pressedAt < 320) { fillLevel = 1; done = true; flash.restart(); sb.activated(); return }   // a plain click
-            drain.start()
+        // one animation drives the liquid: to half when you rest on it, to the top when you hold or click
+        function go(to: real, ms: int, ease: int): void {
+            lv.stop(); lv.from = sb.level; lv.to = to; lv.duration = Math.max(1, ms); lv.easing.type = ease; lv.start()
         }
-
-        NumberAnimation { id: fill; target: sb; property: "fillLevel"; to: 1; duration: 520 * sb.weight * (1 - sb.fillLevel); easing.type: Easing.InSine
-            onFinished: { sb.done = true; flash.restart(); sb.activated() } }
-        NumberAnimation { id: drain; target: sb; property: "fillLevel"; to: 0; duration: 1200 * sb.fillLevel; easing.type: Easing.OutQuad }
+        function rest(): void { if (!fired) go(resting ? 0.5 : 0, 600, Easing.OutCubic) }
+        onRestingChanged: if (!holding) rest()
+        function press(): void { if (fired) return; holding = true; pressedAt = Date.now(); go(1, 1000 * weight * (1 - level) + 120, Easing.InSine) }
+        function release(): void {
+            if (fired || !holding) return
+            holding = false
+            if (Date.now() - pressedAt < 260) go(1, 170, Easing.OutCubic)   // a plain click fills it at once
+            else rest()
+        }
+        NumberAnimation { id: lv; target: sb; property: "level"
+            onFinished: { if (sb.level >= 0.999 && !sb.fired) { sb.fired = true; flash.restart(); sb.activated() } } }
 
         Rectangle {
             id: capsule
             anchors.fill: parent
             radius: BarStyle.radiusXL + 10
-            color: ma.containsMouse || sb.selected ? BarStyle.cardHigh : BarStyle.card
-            border.width: sb.selected ? 2 : 0
-            border.color: sb.tone
+            color: "transparent"
+            border.width: 1.5
+            border.color: Qt.rgba(1, 1, 1, sb.lit ? 0.4 : 0.16)
+            Behavior on border.color { ColorAnimation { duration: BarStyle.motionFast } }
             clip: true
             scale: ma.pressed ? 0.97 : (sb.lit ? 1.03 : 1)
-            Behavior on color { ColorAnimation { duration: BarStyle.motionFast } }
             Behavior on scale { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
 
             ShaderEffect {
-                id: wave
                 anchors.fill: parent
                 visible: sb.level > 0.001
                 property real radius: capsule.radius
@@ -82,12 +82,12 @@ Scope {
             Rectangle { anchors.fill: parent; radius: capsule.radius; color: "#ffffff"; opacity: 0
                 NumberAnimation on opacity { id: flash; running: false; from: 0.6; to: 0; duration: 500; easing.type: Easing.OutExpo } }
 
-            // icon and name; a second copy, clipped to the filled part, turns dark on the wave
             Item {
                 anchors.fill: parent
-                BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: sb.lit ? BarStyle.text : BarStyle.subtext }
-                BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: sb.lit ? BarStyle.text : BarStyle.subtext }
+                BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: "#ffffff"; opacity: sb.lit ? 1 : 0.8 }
+                BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: "#ffffff"; opacity: sb.lit ? 1 : 0.8 }
             }
+            // the same icon and name in the dark colour, only where the liquid is
             Item {
                 anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
                 height: parent.height * sb.level
@@ -124,19 +124,6 @@ Scope {
 
             anchors { top: true; bottom: true; left: true; right: true }
 
-            property list<real> visualizerPoints: []
-            Process {
-                id: cavaProc
-                running: NowPlaying.isPlaying
-                onRunningChanged: { if (!running) panelWindow.visualizerPoints = [] }
-                command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/media_widget_config.txt`]
-                stdout: SplitParser {
-                    onRead: data => {
-                        panelWindow.visualizerPoints = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p))
-                    }
-                }
-            }
-
             // Real frosted-glass backdrop: the actual wallpaper, blurred live,
             // rather than a flat dimmed rectangle - static power-menu tools
             // can't do this without a pre-baked screenshot.
@@ -157,13 +144,14 @@ Scope {
                 focus: true
                 property int sel: -1
                 readonly property var actions: [
-                    { icon: "logout", label: "Log out", hint: "E", weight: 1.3, cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
-                    { icon: "lock", label: "Lock", hint: "L", weight: 0.8, cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
-                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 1, cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
-                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 2, danger: true, cmd: ["systemctl", "reboot"] },
-                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 2.8, danger: true, cmd: ["systemctl", "poweroff"] }
+                    { icon: "logout", label: "Log out", hint: "E", weight: 1.3, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                    { icon: "lock", label: "Lock", hint: "L", weight: 0.8, tone: "accent", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 1, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 2, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
+                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 2.8, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
                 ]
-                function run(a): void { GlobalStates.sessionOpen = false; Quickshell.execDetached(a.cmd) }
+                // the command goes out first: closing the window destroys this item, and a command sent after that was lost
+                function run(a): void { Quickshell.execDetached(a.cmd.slice()); GlobalStates.sessionOpen = false }
                 function capAt(i: int): var { return caps.itemAt(i) }
                 Keys.onEscapePressed: GlobalStates.sessionOpen = false
                 Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
@@ -225,8 +213,7 @@ Scope {
                             required property int index
                             icon: modelData.icon
                             label: modelData.label
-                            hint: ""
-                            danger: modelData.danger === true
+                            tone: modelData.tone === "accent" ? BarStyle.accent : modelData.tone
                             weight: modelData.weight ?? 1
                             selected: content.sel === index
                             onActivated: content.run(modelData)
@@ -234,53 +221,6 @@ Scope {
                     }
                 }
 
-                // What is playing: a wide card, the cover, the words, a smooth bar and three liquid round buttons.
-                Rectangle {
-                    id: nowPlayingCard
-                    visible: NowPlaying.player !== null
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 12
-                    implicitWidth: 640
-                    implicitHeight: 148
-                    radius: BarStyle.radiusXL + 6
-                    color: BarStyle.card
-                    antialiasing: true
-
-                    Item {
-                        id: coverBox
-                        x: 20; y: 20; width: 108; height: 108
-                        Rectangle { anchors.fill: parent; radius: 30; color: BarStyle.cardHigh
-                            BarIcon { anchors.centerIn: parent; name: "music_note"; size: 38; color: BarStyle.accent } }
-                        Image { id: coverImg; anchors.fill: parent; source: NowPlaying.player?.trackArtUrl ?? ""; sourceSize: Qt.size(216, 216); fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: false }
-                        Rectangle { id: coverMask; anchors.fill: parent; radius: 30; visible: false; layer.enabled: true }
-                        MultiEffect { anchors.fill: parent; source: coverImg; visible: coverImg.status === Image.Ready; maskEnabled: true; maskSource: coverMask }
-                    }
-                    Column {
-                        x: 148; y: 24; width: parent.width - 148 - 24
-                        spacing: 2
-                        BarText { width: parent.width; elide: Text.ElideRight; text: NowPlaying.activeTrack?.title ?? ""; font.pixelSize: 20; font.weight: Font.DemiBold }
-                        BarText { width: parent.width; elide: Text.ElideRight; text: NowPlaying.activeTrack?.artist ?? ""; font.pixelSize: 14; color: BarStyle.subtext }
-                    }
-                    // the bar: a thin pill that fills with the accent; a click or drag seeks
-                    Item {
-                        id: prog
-                        x: 148; y: 78; width: parent.width - 148 - 24; height: 14
-                        readonly property real frac: (NowPlaying.player && NowPlaying.player.length > 0) ? Math.max(0, Math.min(1, NowPlaying.player.position / NowPlaying.player.length)) : 0
-                        Timer { interval: 1000; repeat: true; running: NowPlaying.isPlaying; onTriggered: NowPlaying.player?.positionChanged() }
-                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 6; radius: 3; color: BarStyle.cardHigh }
-                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * prog.frac; height: 6; radius: 3; color: BarStyle.accent
-                            Behavior on width { NumberAnimation { duration: 900 } } }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: mouse => { if (NowPlaying.player && NowPlaying.player.length > 0) NowPlaying.player.position = NowPlaying.player.length * (mouse.x / width) } }
-                    }
-                    Row {
-                        x: 148; y: 98
-                        spacing: 12
-                        LiquidRound { icon: "skip_previous"; onActivated: NowPlaying.previous() }
-                        LiquidRound { icon: NowPlaying.isPlaying ? "pause" : "play_arrow"; big: true; onActivated: NowPlaying.togglePlaying() }
-                        LiquidRound { icon: "skip_next"; onActivated: NowPlaying.next() }
-                    }
-                }
             }
         }
     }

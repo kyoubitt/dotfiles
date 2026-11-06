@@ -34,7 +34,7 @@ PanelWindow {
     }
 
     // one place to size the whole launcher; whole pixels keep the text sharp
-    readonly property real uiScale: 1.15
+    readonly property real uiScale: 1.0
     function s(val) {
         return Math.round(val * launcherWindow.uiScale);
     }
@@ -206,8 +206,8 @@ PanelWindow {
 
     property var defaultLauncherSettings: ({
         "position": "center",
-        "width": 680,
-        "itemCount": 8,
+        "width": 720,
+        "itemCount": 7,
         "terminalCommand": "ghostty -e",
         "smartRanking": true,
         "searchProvider": "google"
