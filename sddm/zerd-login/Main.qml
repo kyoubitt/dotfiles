@@ -394,9 +394,9 @@ Rectangle {
     Item {
         id: avatar
         z: 5
-        width: 92 * s; height: width
+        width: 72 * s; height: width
         x: Math.round((root.width - width) / 2)
-        y: Math.round(root.height * 0.6 - height / 2)
+        y: Math.round(root.height * 0.555 - height / 2)
         visible: avatarImg.status === Image.Ready
         opacity: root.ui1
         Rectangle { anchors.fill: parent; radius: width / 2; color: "transparent"; border.width: 3 * s; border.color: root.cDark }
@@ -537,7 +537,7 @@ Rectangle {
             Item {
                 id: digits
                 anchors.centerIn: parent
-                readonly property real fitSize: 230 * s
+                readonly property real fitSize: 130 * s
                 readonly property var inkRects: {
                     var rects = [];
                     for (var i = 0; i < 10; i++) rects.push(ref.tightBoundingRect(String(i)));
@@ -1102,13 +1102,18 @@ Rectangle {
                                 anchors.centerIn: parent
                                 width: pw.dotSize
                                 height: width
-                                radius: Math.round(width * 0.24)
+                                // the lock screen's little shapes, in turn: circle, soft square, diamond, flower-ish squircle
+                                readonly property int kind: charSlot.index % 4
+                                radius: Math.round(width * [0.5, 0.24, 0.16, 0.38][kind])
                                 color: root.cText
                                 antialiasing: true
+                                property real baseRot: kind === 2 ? 45 : (kind === 3 ? 22 : 0)
+                                property color tint: root.cDark
+                                ColorAnimation on color { id: tintIn; from: charShape.tint; to: root.cText; duration: 420; easing.type: Easing.OutCubic }
                                 property real dotPop: 1.0
                                 opacity: 1.0 - pw.revealProgress
                                 scale: (1.0 - pw.revealProgress) * dotPop
-                                rotation: pw.revealProgress * -12
+                                rotation: baseRot + pw.revealProgress * -12
                                 visible: opacity > 0.01
                                 Component.onCompleted: {
                                     dotPop = 0.82;
@@ -1223,7 +1228,7 @@ Rectangle {
                         text: root.userName()
                         style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
-                        font.pixelSize: 17 * s
+                        font.pixelSize: 14 * s
                         font.weight: Font.Medium
                         color: "#ffffff"
                     }
@@ -1269,7 +1274,7 @@ Rectangle {
                         text: root.sessionName()
                         style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5)
                         font.family: root.sansFont
-                        font.pixelSize: 17 * s
+                        font.pixelSize: 14 * s
                         font.weight: Font.Medium
                         color: "#ffffff"
                     }
