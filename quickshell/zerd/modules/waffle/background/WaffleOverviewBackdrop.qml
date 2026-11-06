@@ -19,9 +19,9 @@ Variants {
         // Intentionally not the shared waffles.background.backdrop settings -
         // that dim (80%) is tuned for opaque modal/dialog scrims, not for a
         // wallpaper that should still read through the overview.
-        readonly property real overviewDim: 0.3
-        readonly property real overviewBlur: 0.35
-        readonly property real overviewBlurMax: 56
+        readonly property real overviewDim: 0.28
+        readonly property real overviewBlur: 1.0
+        readonly property real overviewBlurMax: 64
         readonly property var wBackdrop: Config.options.waffles?.background?.backdrop ?? {}
         readonly property string wallpaperUrl: {
             const path = Config.options.background.wallpaperPath;
