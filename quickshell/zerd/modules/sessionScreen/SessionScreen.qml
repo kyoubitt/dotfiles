@@ -15,53 +15,91 @@ import qs.modules.bars
 Scope {
     id: root
 
-    // A tonal tile with the icon, the name and the key that does it. Hover and the keyboard focus lift it and fill it
-    // with the accent; the destructive ones (reboot, shut down) fill with the warning colour instead.
-    component SessionButton: ColumnLayout {
-        id: sessionButton
+    // Hold-to-confirm capsule after ilyamiro's power actions (serpantinum, AGPL-3.0) and the liquid fill shader of the
+    // Material You theme by Darkkal44 (MIT): press and hold, a wave fills the capsule, and when it is full the action runs.
+    // Letting go drains it again. The heavier the action, the longer the hold.
+    component SessionButton: Item {
+        id: sb
         required property string icon
         required property string label
-        property string hint: ""
-        property bool danger: false
+        property color tone: BarStyle.accent
+        property real weight: 1
+        property bool selected: false
+        property real leave: 0                  // 0..1, how far the menu has gone when another capsule fired
+        property bool chosen: false             // this is the capsule that fired
+        readonly property real level: hold.level
+        readonly property bool lit: hold.resting || hold.level > 0.001
         signal activated()
-        readonly property color tone: sessionButton.danger ? BarStyle.danger : BarStyle.accent
-
-        spacing: 12
+        signal tapped()
+        function press(): void { hold.keyDown() }
+        function release(): void { hold.keyUp() }
+        implicitWidth: 144
+        implicitHeight: 196
 
         Rectangle {
-            id: tile
-            Layout.alignment: Qt.AlignHCenter
-            implicitWidth: 96
-            implicitHeight: 96
-            radius: 48
-            readonly property bool lit: tileHover.hovered || tileTap.pressed
-            color: lit ? Qt.rgba(sessionButton.tone.r, sessionButton.tone.g, sessionButton.tone.b, 0.92) : Qt.rgba(0, 0, 0, 0.32)
-            border.width: 1
-            border.color: lit ? "transparent" : Qt.rgba(1, 1, 1, 0.14)
-            scale: tileTap.pressed ? 0.94 : (lit ? 1.05 : 1)
-            Behavior on color { ColorAnimation { duration: 110 } }
-            Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
+            id: capsule
+            anchors.fill: parent
+            radius: BarStyle.radiusXL + 10
+            color: "transparent"
+            border.width: 1.5
+            border.color: Qt.rgba(1, 1, 1, sb.lit ? 0.4 : 0.16)
+            Behavior on border.color { ColorAnimation { duration: BarStyle.motionFast } }
+            clip: true
+            property real bob: 0
+            transform: Translate { y: capsule.bob }
+            scale: (hold.holding ? 0.97 : (sb.lit ? 1.03 : 1)) + (sb.chosen ? 0.07 * sb.leave : 0)
+            Behavior on scale { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
 
-            Text {
-                anchors.centerIn: parent
-                text: sessionButton.icon
-                font.family: Appearance.font.family.iconMaterial
-                font.pixelSize: 38
-                color: tile.lit ? BarStyle.onAccent : "#ffffff"
-                Behavior on color { ColorAnimation { duration: 110 } }
+            ShaderEffect {
+                anchors.fill: parent
+                visible: sb.level > 0.001
+                property real radius: capsule.radius
+                property real fillLevel: sb.level
+                property real waveAmp: sb.level < 0.99 ? Math.min(14, capsule.height * sb.level, capsule.height * (1 - sb.level)) * Math.sin(sb.level * Math.PI) : 0
+                property vector2d itemSize: Qt.vector2d(width, height)
+                property real phase: 0
+                property real vertical: 1
+                property color color1: Qt.darker(sb.tone, 1.1)
+                property color color2: sb.tone
+                property vector4d params: Qt.vector4d(1, 0, 0, 0)
+                fragmentShader: Qt.resolvedUrl("fluid_wave.frag.qsb")
+                NumberAnimation on phase { running: sb.level > 0 && sb.level < 1; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 800 }
             }
-            HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { id: tileTap; onTapped: sessionButton.activated() }
+            Rectangle { anchors.fill: parent; radius: capsule.radius; color: "#ffffff"; opacity: 0
+                NumberAnimation on opacity { id: flash; running: false; from: 0.6; to: 0; duration: 500; easing.type: Easing.OutExpo } }
+
+            Item {
+                anchors.fill: parent
+                BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: "#ffffff"; opacity: sb.lit ? 1 : 0.8 }
+                BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: "#ffffff"; opacity: sb.lit ? 1 : 0.8 }
+            }
+            // the same icon and name in the dark colour, only where the liquid is
+            Item {
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                height: parent.height * sb.level
+                clip: true
+                Item {
+                    x: 0; y: -(capsule.height - parent.height); width: capsule.width; height: capsule.height
+                    BarIcon { x: Math.round((parent.width - width) / 2); y: 52; name: sb.icon; size: 50; color: BarStyle.onAccent }
+                    BarText { x: 0; y: 128; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: sb.label; font.pixelSize: 15; color: BarStyle.onAccent }
+                }
+            }
         }
 
-        Text {
-            Layout.alignment: Qt.AlignHCenter
-            text: sessionButton.label
-            font.pixelSize: 14
-            font.weight: Font.Medium
-            color: "#ffffff"
-            opacity: tile.lit ? 1 : 0.7
-            Behavior on opacity { NumberAnimation { duration: 110 } }
+        // a quick tap only nudges the capsule: it does nothing until it is held
+        SequentialAnimation {
+            id: nudge
+            NumberAnimation { target: capsule; property: "bob"; to: -9; duration: 110; easing.type: Easing.OutQuad }
+            NumberAnimation { target: capsule; property: "bob"; to: 0; duration: 380; easing.type: Easing.OutBounce }
+        }
+
+        HoldLogic {
+            id: hold
+            anchors.fill: parent
+            weight: sb.weight
+            selected: sb.selected
+            onActivated: { flash.restart(); sb.activated() }
+            onTapped: { nudge.restart(); sb.tapped() }
         }
     }
 
@@ -79,308 +117,148 @@ Scope {
 
             anchors { top: true; bottom: true; left: true; right: true }
 
-            property list<real> visualizerPoints: []
-            Process {
-                id: cavaProc
-                running: NowPlaying.isPlaying
-                onRunningChanged: { if (!running) panelWindow.visualizerPoints = [] }
-                command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/media_widget_config.txt`]
-                stdout: SplitParser {
-                    onRead: data => {
-                        panelWindow.visualizerPoints = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p))
-                    }
-                }
-            }
-
-            // Real frosted-glass backdrop: the actual wallpaper, blurred live,
-            // rather than a flat dimmed rectangle - static power-menu tools
-            // can't do this without a pre-baked screenshot.
-            LockBackdrop {
+            // The whole menu fades in on open and, for everything except Lock, fades out before the command runs.
+            Item {
+                id: stage
                 anchors.fill: parent
-            }
+                opacity: Math.min(content.enter * 3, 1) * (content.fadeBackdrop ? 1 - content.leave : 1)
 
-            // Entrance: fade + rise, so it feels like something actually
-            // happened rather than just popping into existence.
-            ColumnLayout {
-                id: content
-                anchors.centerIn: parent
-                spacing: 32
-                opacity: 0
-                property real riseOffset: 24
-                anchors.verticalCenterOffset: riseOffset
-
-                focus: true
-                Keys.onEscapePressed: GlobalStates.sessionOpen = false
-                Keys.onPressed: event => {
-                    const k = event.key
-                    const go = (cmd) => { GlobalStates.sessionOpen = false; Quickshell.execDetached(cmd); event.accepted = true }
-                    if (k === Qt.Key_L) go(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
-                    else if (k === Qt.Key_S) go(["systemctl", "suspend"])
-                    else if (k === Qt.Key_R) go(["systemctl", "reboot"])
-                    else if (k === Qt.Key_U) go(["systemctl", "poweroff"])
-                    else if (k === Qt.Key_E) go(["niri", "msg", "action", "quit", "--skip-confirmation"])
-                }
-
-                Component.onCompleted: {
-                    entranceAnim.start()
-                    content.forceActiveFocus()
-                }
-
-                ParallelAnimation {
-                    id: entranceAnim
-                    NumberAnimation { target: content; property: "opacity"; from: 0; to: 1; duration: 280; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: content; property: "riseOffset"; from: 24; to: 0; duration: 320; easing.type: Easing.OutQuad }
+                // Real frosted-glass backdrop: the actual wallpaper, blurred live.
+                LockBackdrop {
+                    anchors.fill: parent
                 }
 
                 ColumnLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 6
+                    id: content
+                    anchors.centerIn: parent
+                    spacing: 32
 
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm AP")
-                        font.family: Appearance.font.family.monospace
-                        font.pixelSize: 72
-                        font.bold: true
-                        color: Appearance.colors.colOnLayer0
-                    }
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
-                        font.family: Appearance.font.family.monospace
-                        font.pixelSize: 18
-                        color: Appearance.colors.colOnLayer0
-                        opacity: 0.7
-                    }
-                }
+                    focus: true
+                    property int sel: -1
+                    property real enter: 0                // 0..1 while opening
+                    property real leave: 0                // 0..1 once a capsule has fired
+                    property bool fadeBackdrop: true      // false for Lock: the lock screen shows the same blurred wallpaper
+                    property int chosen: -1
+                    readonly property var actions: [
+                        { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                        { icon: "lock", label: "Lock", hint: "L", weight: 0.6, tone: "accent", lock: true, cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                        { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                        { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
+                        { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
+                    ]
+                    property string hintText: "Hold a button to confirm"
 
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 28
-
-                    SessionButton {
-                        icon: "logout"
-                        label: "Log out"
-                        hint: "E"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["niri", "msg", "action", "quit", "--skip-confirmation"])
+                    // The capsule fired: the others fade away, then the command goes out. Lock keeps the blurred
+                    // backdrop up until the lock screen is really on screen, so the desktop never flashes between them.
+                    function run(i: int): void {
+                        if (chosen >= 0) return
+                        chosen = i
+                        const a = actions[i]
+                        fadeBackdrop = !a.lock
+                        leaveAnim.start()
+                        if (a.lock) {
+                            Quickshell.execDetached(a.cmd.slice())
+                            lockWait.start()
                         }
                     }
-                    SessionButton {
-                        icon: "lock"
-                        label: "Lock"
-                        hint: "L"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"])
-                        }
+                    function finish(): void {
+                        const a = actions[chosen]
+                        if (!a.lock) Quickshell.execDetached(a.cmd.slice())
+                        GlobalStates.sessionOpen = false
                     }
-                    SessionButton {
-                        icon: "bedtime"
-                        label: "Sleep"
-                        hint: "S"
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "suspend"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "restart_alt"
-                        label: "Reboot"
-                        hint: "R"
-                        danger: true
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "reboot"])
-                        }
-                    }
-                    SessionButton {
-                        icon: "power_settings_new"
-                        label: "Shut down"
-                        hint: "U"
-                        danger: true
-                        onActivated: {
-                            GlobalStates.sessionOpen = false
-                            Quickshell.execDetached(["systemctl", "poweroff"])
-                        }
-                    }
-                }
-
-                // Now playing - modeled on the gtklock media card: bigger
-                // art, stacked title/artist, wavy seekbar, real controls -
-                // last in the content group so it moves/centers as one unit
-                // with the clock and buttons.
-                Item {
-                    id: nowPlayingCard
-                    visible: NowPlaying.player !== null
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 8
-                    implicitWidth: 300
-                    implicitHeight: nowPlayingCol.implicitHeight + 28
-
-                    // Sibling of the content, not a wrapping parent - a
-                    // parent's opacity multiplies into every child, which
-                    // is what made the album art look washed out/hazy
-                    // rather than just the background being translucent.
-                    StyledRectangularShadow {
-                        target: nowPlayingCardBg
+                    NumberAnimation on enter { id: enterAnim; from: 0; to: 1; duration: 720; easing.type: Easing.OutCubic; running: true }
+                    NumberAnimation { id: leaveAnim; target: content; property: "leave"; from: 0; to: 1; duration: 340; easing.type: Easing.InOutCubic
+                        onFinished: if (!content.actions[content.chosen].lock) content.finish() }
+                    // Lock: close once the lock screen covers us, or after a moment if it never does
+                    Timer { id: lockWait; interval: 1500; onTriggered: content.finish() }
+                    Connections {
+                        target: GlobalStates
+                        enabled: content.chosen >= 0 && content.actions[content.chosen].lock === true
+                        function onScreenLockedChanged() { if (GlobalStates.screenLocked) { lockWait.stop(); content.finish() } }
                     }
 
-                    GlassBackground {
-                        id: nowPlayingCardBg
-                        anchors.fill: parent
-                        radius: Appearance.rounding.large
-                        fallbackColor: Appearance.colors.colLayer3
-                        screenX: nowPlayingCardBg.mapToItem(null, 0, 0).x
-                        screenY: nowPlayingCardBg.mapToItem(null, 0, 0).y
+                    function capAt(i: int): var { return caps.itemAt(i) }
+                    Keys.onEscapePressed: GlobalStates.sessionOpen = false
+                    Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
+                    Keys.onRightPressed: sel = (sel + 1) % actions.length
+                    // keys do what the mouse does: hold to fill, let go to drain
+                    Keys.onReturnPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                    Keys.onEnterPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                    Keys.onReleased: event => {
+                        if (event.isAutoRepeat) return
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (sel >= 0) capAt(sel)?.release(); return }
+                        const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                        if (i >= 0) capAt(i)?.release()
                     }
+                    Keys.onPressed: event => {
+                        if (event.isAutoRepeat) return
+                        const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                        if (i >= 0) { sel = i; capAt(i)?.press(); event.accepted = true }
+                    }
+
+                    Component.onCompleted: content.forceActiveFocus()
 
                     ColumnLayout {
-                        id: nowPlayingCol
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            top: parent.top
-                            margins: 16
-                        }
-                        spacing: 10
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 6
+                        opacity: content.fadeBackdrop ? 1 - content.leave : 1
+                        transform: Translate { y: (1 - Math.min(1, content.enter * 1.6)) * -18 }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter
-                                width: 56
-                                height: 56
-                                radius: 12
-                                antialiasing: true
-                                color: Appearance.colors.colLayer3
-                                clip: true
-
-                                Image {
-                                    id: nowPlayingArt
-                                    anchors.fill: parent
-                                    source: NowPlaying.player?.trackArtUrl ?? ""
-                                    fillMode: Image.PreserveAspectCrop
-                                    sourceSize.width: width
-                                    sourceSize.height: height
-                                    asynchronous: true
-                                    visible: status === Image.Ready
-                                }
-                                Text {
-                                    anchors.centerIn: parent
-                                    visible: nowPlayingArt.status !== Image.Ready
-                                    text: "music_note"
-                                    font.family: Appearance.font.family.iconMaterial
-                                    font.pixelSize: 22
-                                    color: Appearance.colors.colPrimary
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 1
-                                MarqueeText {
-                                    Layout.fillWidth: true
-                                    font.family: Appearance.font.family.monospace
-                                    font.pixelSize: 15
-                                    font.bold: true
-                                    color: Appearance.colors.colOnLayer3
-                                    text: NowPlaying.activeTrack?.title ?? ""
-                                }
-                                MarqueeText {
-                                    Layout.fillWidth: true
-                                    font.family: Appearance.font.family.monospace
-                                    font.pixelSize: 12
-                                    color: Appearance.colors.colOnLayer3
-                                    opacity: 0.65
-                                    text: NowPlaying.activeTrack?.artist ?? ""
-                                }
-                            }
-                        }
-
-                        WavySeekbar {
-                            Layout.fillWidth: true
-                            progress: (NowPlaying.player && NowPlaying.player.length > 0)
-                                ? Math.max(0, Math.min(1, NowPlaying.player.position / NowPlaying.player.length)) : 0
-                            accentColor: Appearance.colors.colPrimary
-                            dimColor: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.25)
-                            amplitude: 4
-                            animate: NowPlaying.isPlaying
-                            onSeekRequested: fraction => {
-                                if (!NowPlaying.player || NowPlaying.player.length <= 0) return
-                                NowPlaying.player.position = fraction * NowPlaying.player.length
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
+                        BarText {
                             Layout.alignment: Qt.AlignHCenter
-                            spacing: 24
-
-                            Text {
-                                text: "skip_previous"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 20
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.previous() }
-                            }
-                            Text {
-                                text: NowPlaying.isPlaying ? "pause" : "play_arrow"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 24
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.togglePlaying() }
-                            }
-                            Text {
-                                text: "skip_next"
-                                font.family: Appearance.font.family.iconMaterial
-                                font.pixelSize: 20
-                                color: Appearance.colors.colOnLayer3
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: NowPlaying.next() }
-                            }
+                            text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
+                            font.pixelSize: 88
+                            font.weight: Font.DemiBold
+                            color: "#ffffff"
                         }
-
-                        // Small equalizer, driven by the same cava data the
-                        // media widget uses. Mirrored from the center (bass
-                        // in the middle, treble at the edges) instead of a
-                        // raw left-to-right sweep - reads as more musical
-                        // and symmetric than one side just being louder.
-                        RowLayout {
-                            id: eqRow
-                            readonly property int barCount: 20
-                            Layout.fillWidth: true
+                        BarText {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: 4
-                            spacing: 4
+                            text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
+                            font.pixelSize: 18
+                            color: BarStyle.accent
+                        }
+                    }
 
-                            Repeater {
-                                model: eqRow.barCount
-                                delegate: Rectangle {
-                                    id: eqBar
-                                    required property int index
-                                    readonly property int mirroredIndex: eqBar.index <= eqRow.barCount / 2
-                                        ? eqBar.index
-                                        : eqRow.barCount - eqBar.index
-                                    readonly property real level: panelWindow.visualizerPoints.length > 0
-                                        ? Math.max(0, Math.min(1, (panelWindow.visualizerPoints[Math.min(eqBar.mirroredIndex, panelWindow.visualizerPoints.length - 1)] ?? 0) / 1000))
-                                        : 0
-                                    Layout.alignment: Qt.AlignBottom
-                                    implicitWidth: 3
-                                    implicitHeight: 4 + level * 22
-                                    radius: width / 2
-                                    antialiasing: true
-                                    color: Appearance.colors.colPrimary
-                                    opacity: 0.45 + level * 0.55
-
-                                    Behavior on implicitHeight { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
-                                    Behavior on opacity { NumberAnimation { duration: 100 } }
+                    RowLayout {
+                        id: actionRow
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 18
+                        Repeater {
+                            id: caps
+                            model: content.actions
+                            delegate: SessionButton {
+                                id: cap
+                                required property var modelData
+                                required property int index
+                                // each capsule rises a beat after the one before it
+                                readonly property real appear: {
+                                    const t = Math.max(0, Math.min(1, (content.enter - index * 0.07) / 0.55))
+                                    return 1 - Math.pow(1 - t, 3)
                                 }
+                                icon: modelData.icon
+                                label: modelData.label
+                                tone: modelData.tone === "accent" ? BarStyle.accent : modelData.tone
+                                weight: modelData.weight ?? 1
+                                selected: content.sel === index
+                                chosen: content.chosen === index
+                                leave: content.leave
+                                opacity: appear * (chosen ? 1 - (content.fadeBackdrop ? 0 : content.leave) : 1 - content.leave)
+                                transform: Translate { y: (1 - cap.appear) * 40 + (cap.chosen ? 0 : cap.leave * 10) }
+                                onActivated: content.run(index)
+                                onTapped: { content.hintText = "Keep holding to " + modelData.label.toLowerCase(); hintReset.restart() }
                             }
                         }
                     }
+
+                    BarText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: content.hintText
+                        font.pixelSize: 14
+                        color: content.hintText.indexOf("Keep") === 0 ? BarStyle.accent : "#ffffff"
+                        opacity: (content.hintText.indexOf("Keep") === 0 ? 1 : 0.5) * Math.min(1, content.enter * 1.4) * (1 - content.leave)
+                        Behavior on color { ColorAnimation { duration: 160 } }
+                    }
+                    Timer { id: hintReset; interval: 1800; onTriggered: content.hintText = "Hold a button to confirm" }
                 }
             }
         }

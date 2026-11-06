@@ -61,11 +61,13 @@ Scope {
         { name: "Bar", icon: "toolbar", rows: [
             { t: "toggle", label: "Hide the bar until the pointer is at the top", hint: "Rest the pointer on the top edge to bring it back", path: "bars.top.autoHide", def: false },
             { t: "toggle", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true },
-            { t: "toggle", label: "Show the focused window's title", hint: "Off keeps private chat titles out of the bar", path: "bars.top.showFocus", def: false },
-            { t: "toggle", label: "Show the tools capsule", path: "bars.top.showTools", def: true },
-            { t: "choice", label: "Workspaces", path: "bars.top.workspaceStyle", opts: ["pills", "numbers"], def: "pills" },
+            { t: "choice", label: "Bar style", hint: "Pills: a capsule per group. Strip: one full-width bar. Floating: one rounded bar", path: "bars.top.look", opts: [{ v: "pills", l: "Pills" }, { v: "strip", l: "Strip" }, { v: "floating", l: "Floating" }], def: "pills" },
+            { t: "choice", label: "Workspaces", hint: "Icons show the apps open on each workspace", path: "bars.top.workspaceStyle", opts: ["pills", "numbers", "icons"], def: "pills" },
             { t: "step", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
-            { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 }
+            { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 },
+            { t: "actions", label: "Layout", hint: "Drag the blocks where you want them, hide what you don't use. Window titles can show private chats, so that block starts hidden", acts: [
+                { text: "Edit bar layout", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "open"] },
+                { text: "Reset to default", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "reset"] } ] },
         ] },
         { name: "Dock", icon: "dock_to_bottom", rows: [
             { t: "toggle", label: "Hide the dock until the pointer is at the edge", hint: "Rest the pointer on the screen edge to show it", path: "iris.dock.autoHide", def: true },
@@ -73,7 +75,6 @@ Scope {
             { t: "choice", label: "Style", hint: "Tiles: every icon on its own dark square in a flat plate. Classic: the floating pill", path: "iris.dock.style", opts: ["tiles", "classic"], def: "tiles" },
             { t: "toggle", label: "Spectrum", hint: "Moves with the music while a song plays", path: "iris.dock.cava.enable", def: true },
             { t: "choice", label: "Spectrum style", hint: "Wave: a soft hill along the bottom of the screen. Inside: bars in the dock plate", path: "iris.dock.cava.style", opts: ["wave", "inside"], def: "wave" },
-            { t: "choice", label: "Edge", path: "iris.dock.edge", opts: ["bottom", "left", "right", "top"], def: "bottom" },
             { t: "step", label: "Icon size", path: "iris.dock.iconSize", min: 28, max: 64, by: 2, def: 40 },
             { t: "toggle", label: "Magnify icons under the pointer", path: "iris.dock.magnification", def: true },
             { t: "toggle", label: "Badges", path: "iris.dock.badges", def: true },
@@ -113,7 +114,7 @@ Scope {
             { t: "toggle", label: "Dock icons magnify under the pointer", path: "iris.dock.magnification", def: true }
         ] },
         { name: "Notifications", icon: "notifications", rows: [
-            { t: "choice", label: "Banners", path: "bars.notifications.engine", opts: ["rice", "waffle"], def: "rice" },
+            { t: "choice", label: "Banners", path: "bars.notifications.engine", opts: ["inir", "waffle"], def: "inir" },
             { t: "choice", label: "Position", path: "bars.notifications.position", opts: ["top", "bottom"], def: "top" },
             { t: "step", label: "Width", path: "bars.notifications.width", min: 300, max: 520, by: 20, def: 380 }
         ] },
@@ -167,8 +168,14 @@ Scope {
                 id: nav
                 x: 0; y: 0; width: 210; height: win.height
                 color: Qt.darker(BarStyle.surface, 1.25)
+                Flickable {
+                  anchors.fill: parent
+                  contentHeight: navCol.implicitHeight + 36
+                  clip: true
+                  boundsBehavior: Flickable.StopAtBounds
                 Column {
-                    x: 12; y: 18; width: parent.width - 24; spacing: 4
+                    id: navCol
+                    x: 12; y: 18; width: nav.width - 24; spacing: 4
                     Row {
                         x: 8; spacing: 10; bottomPadding: 12
                         LockAvatar { size: 40 }
@@ -185,18 +192,25 @@ Scope {
                             required property var modelData
                             required property int index
                             width: parent.width; height: 42; radius: 21
-                            color: root.page === index ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.2) : (hov.hovered ? BarStyle.plateHover : "transparent")
-                            Behavior on color { ColorAnimation { duration: 90 } }
+                            color: root.page === index ? BarStyle.accentContainer : (hov.hovered ? BarStyle.plateHover : "transparent")
+                            Behavior on color { ColorAnimation { duration: BarStyle.motionFast } }
+                            Rectangle {
+                                x: 0; anchors.verticalCenter: parent.verticalCenter
+                                width: 4; height: root.page === item.index ? 20 : 0; radius: 2
+                                color: BarStyle.accent
+                                Behavior on height { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
+                            }
                             Row {
                                 anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
                                 spacing: 10
-                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: item.modelData.icon; size: 20; color: root.page === item.index ? BarStyle.accent : BarStyle.subtext }
-                                BarText { anchors.verticalCenter: parent.verticalCenter; text: item.modelData.name; font.weight: root.page === item.index ? Font.DemiBold : Font.Medium; color: root.page === item.index ? BarStyle.accent : BarStyle.text }
+                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: item.modelData.icon; size: 20; color: root.page === item.index ? BarStyle.onAccentContainer : BarStyle.subtext }
+                                BarText { anchors.verticalCenter: parent.verticalCenter; text: item.modelData.name; font.weight: root.page === item.index ? Font.DemiBold : Font.Medium; color: root.page === item.index ? BarStyle.onAccentContainer : BarStyle.text }
                             }
                             HoverHandler { id: hov }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.page = item.index }
                         }
                     }
+                }
                 }
             }
 
@@ -217,7 +231,15 @@ Scope {
                     }
                     Item {
                         width: rows.width; height: 44
+                        Rectangle {
+                            id: badge
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 44; height: 44; radius: 16
+                            color: BarStyle.accentContainer
+                            BarIcon { anchors.centerIn: parent; name: root.query.length > 0 ? "search" : root.pages[root.page].icon; size: 24; fill: 1; color: BarStyle.onAccentContainer }
+                        }
                         Column {
+                            x: badge.width + 14
                             anchors.verticalCenter: parent.verticalCenter
                             BarText { text: root.query.length > 0 ? "Search" : root.pages[root.page].name; font.pixelSize: 24; font.weight: Font.DemiBold }
                             BarText { text: root.query.length > 0 ? "Every page" : (root.blurbs[root.pages[root.page].name] ?? ""); font.pixelSize: 12; color: BarStyle.subtext }
@@ -240,7 +262,13 @@ Scope {
                     }
                     Item {
                       width: rows.width; height: cardCol.implicitHeight
-                      Rectangle { anchors.fill: parent; radius: 24; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border }
+                      Rectangle {
+                          anchors.fill: parent; radius: 24; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
+                          gradient: Gradient {
+                              GradientStop { position: 0.0; color: Qt.tint(BarStyle.plate, Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.07)) }
+                              GradientStop { position: 0.35; color: BarStyle.plate }
+                          }
+                      }
                       Column {
                         id: cardCol
                         width: parent.width
@@ -251,17 +279,22 @@ Scope {
                             id: row
                             required property var modelData
                             required property int index
-                            readonly property bool block: ["list", "profiles", "binds", "cards", "swatches", "overview"].includes(modelData.t)
+                            // long lists of choices (the date formats) wrap under the label instead of running off the card
+                            readonly property bool wrap: modelData.t === "choice" && (modelData.opts?.length ?? 0) > 5
+                            // buttons with a long hint sit under the text, never under the words
+                            readonly property bool stack: modelData.t === "actions" && (modelData.hint?.length ?? 0) > 46
+                            readonly property bool block: row.wrap || row.stack || ["list", "profiles", "binds", "cards", "swatches", "overview"].includes(modelData.t)
                             readonly property var value: Config.getNestedValue(modelData.path, modelData.def)
-                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : (row.modelData.hint || row.modelData.where ? 64 : 54)
+                            width: cardCol.width; height: row.modelData.t === "overview" ? overviewCol.implicitHeight + 28 : row.modelData.t === "preview" ? 96 : row.modelData.t === "list" ? hiddenCol.implicitHeight + 76 : row.modelData.t === "binds" ? bindsCol.implicitHeight + 74 : row.modelData.t === "cards" ? cardsFlow.implicitHeight + 78 : row.modelData.t === "swatches" ? 112 : row.modelData.t === "user" ? 118 : row.modelData.t === "profiles" ? profCol.implicitHeight + 76 : row.wrap ? labelCol.height + wrapRow.height + 42 : row.stack ? labelCol.height + 30 + 44 : Math.max(row.modelData.hint || row.modelData.where ? 64 : 54, labelCol.height + 28)
                             Rectangle { visible: row.index < rowRep.count - 1; anchors.bottom: parent.bottom; x: 18; width: parent.width - 36; height: 1; color: BarStyle.border; opacity: 0.7 }
                             Column {
+                                id: labelCol
                                 x: 18; y: row.block ? 14 : Math.round((parent.height - height) / 2)
                                 visible: row.modelData.t !== "user"
                                 width: row.block ? parent.width - 36 : (row.modelData.t === "choice" ? Math.max(120, parent.width - chipsRow.width - 64) : parent.width - 260)
                                 spacing: 2
                                 BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.label }
-                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; font.pixelSize: 12; color: BarStyle.subtext
+                                BarText { visible: text.length > 0; width: parent.width; elide: Text.ElideRight; wrapMode: Text.WordWrap; maximumLineCount: 2; font.pixelSize: 12; color: BarStyle.subtext
                                     text: (row.modelData.where ? row.modelData.where + (row.modelData.hint ? "  ·  " : "") : "") + (row.modelData.hint ?? "") }
                             }
                             // the person: picture, name, and buttons to change them
@@ -363,18 +396,18 @@ Scope {
                             // buttons that run something
                             Row {
                                 visible: row.modelData.t === "actions"
-                                anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
+                                x: row.stack ? 18 : row.width - width - 14
+                                y: row.stack ? labelCol.y + labelCol.height + 12 : Math.round((row.height - height) / 2)
                                 spacing: 6
                                 Repeater {
                                     model: row.modelData.acts ?? []
-                                    delegate: Rectangle {
+                                    delegate: BarButton {
                                         id: ab
                                         required property var modelData
-                                        width: abText.implicitWidth + 28; height: 30; radius: 15
-                                        color: abHov.hovered ? BarStyle.plateHover : BarStyle.accent
-                                        BarText { id: abText; anchors.centerIn: parent; text: ab.modelData.text; font.pixelSize: 12; color: BarStyle.onAccent }
-                                        HoverHandler { id: abHov }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(ab.modelData.cmd) }
+                                        tone: "filled"
+                                        width: abText.implicitWidth + 30; height: 34; radius: 17
+                                        onTapped: Quickshell.execDetached(ab.modelData.cmd)
+                                        BarText { id: abText; anchors.centerIn: parent; text: ab.modelData.text; font.pixelSize: 12; font.weight: Font.Medium; color: ab.ink }
                                     }
                                 }
                             }
@@ -399,7 +432,7 @@ Scope {
                                 visible: row.modelData.t === "overview"
                                 x: 14; y: 14; width: parent.width - 28; spacing: 14
                                 Rectangle {
-                                    width: parent.width; height: 128; radius: 22
+                                    width: parent.width; height: 128; radius: BarStyle.radiusLarge
                                     gradient: Gradient {
                                         orientation: Gradient.Horizontal
                                         GradientStop { position: 0; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.28) }
@@ -416,7 +449,7 @@ Scope {
                                     // the wallpaper in use
                                     Rectangle {
                                         anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
-                                        width: 170; height: 96; radius: 14; color: BarStyle.surface; clip: true
+                                        width: 170; height: 96; radius: BarStyle.radiusMedium; color: BarStyle.surface; clip: true
                                         Image { anchors.fill: parent; source: WallpaperState.thumbUrl(WallpaperState.current); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 340 }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "open"]) }
                                         Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 26; color: "#99000000"
@@ -463,7 +496,7 @@ Scope {
                                             id: pc
                                             required property var modelData
                                             required property int index
-                                            width: Math.floor((overviewCol.width - 20) / 3); height: 84; radius: 20
+                                            width: Math.floor((overviewCol.width - 20) / 3); height: 84; radius: BarStyle.radiusMedium
                                             color: pcHov.hovered ? BarStyle.plateHover : "transparent"
                                             border.width: 1; border.color: BarStyle.border
                                             Behavior on color { ColorAnimation { duration: 90 } }
@@ -641,68 +674,63 @@ Scope {
                             }
 
                             // switch (Material 3: outlined track when off, the knob grows and shows a tick when on)
-                            Rectangle {
+                            BarSwitch {
                                 visible: row.modelData.t === "toggle"
                                 anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
-                                width: 52; height: 32; radius: 16
-                                color: row.value ? BarStyle.accent : BarStyle.surface
-                                border.width: row.value ? 0 : 2; border.color: BarStyle.subtext
-                                Behavior on color { ColorAnimation { duration: 110 } }
-                                Rectangle {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: row.value ? 24 : 16; height: width; radius: width / 2
-                                    x: row.value ? parent.width - width - 4 : 8
-                                    color: row.value ? BarStyle.onAccent : BarStyle.subtext
-                                    Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                                    Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                                    BarIcon { anchors.centerIn: parent; visible: row.value; name: "check"; size: 16; color: BarStyle.accent }
-                                }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, !row.value) }
+                                checked: !!row.value
+                                onToggled: Config.setNestedValue(row.modelData.path, !row.value)
                             }
                             // choice chips
                             Rectangle {
-                                visible: row.modelData.t === "choice"
+                                visible: row.modelData.t === "choice" && !row.wrap
                                 anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
                                 width: chipsRow.width + 8; height: 38; radius: 19; color: BarStyle.surface
                             }
+                            // choice chips: one row for a few choices, wrapped under the label for many
+                            Component {
+                                id: chipC
+                                BarButton {
+                                    id: chip
+                                    required property var modelData
+                                    readonly property var v: typeof modelData === "object" ? modelData.v : modelData
+                                    readonly property bool on: row.value === v
+                                    tone: row.wrap ? "outlined" : "plain"
+                                    toggled: on
+                                    width: chipText.implicitWidth + 24; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, chip.v)
+                                    BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.ink; font.weight: chip.on ? Font.DemiBold : Font.Medium }
+                                }
+                            }
                             Row {
                                 id: chipsRow
-                                visible: row.modelData.t === "choice"
+                                visible: row.modelData.t === "choice" && !row.wrap
                                 anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
                                 spacing: 2
-                                Repeater {
-                                    model: row.modelData.opts ?? []
-                                    delegate: Rectangle {
-                                        id: chip
-                                        required property var modelData
-                                        readonly property var v: typeof modelData === "object" ? modelData.v : modelData
-                                        readonly property bool on: row.value === v
-                                        width: chipText.implicitWidth + 22; height: 30; radius: 15
-                                        color: on ? BarStyle.accent : (chipHov.hovered ? BarStyle.plateHover : "transparent")
-                                        Behavior on color { ColorAnimation { duration: 90 } }
-                                        BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.on ? BarStyle.onAccent : BarStyle.text }
-                                        HoverHandler { id: chipHov }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, chip.v) }
-                                    }
-                                }
+                                Repeater { model: row.wrap ? [] : (row.modelData.opts ?? []); delegate: chipC }
+                            }
+                            Flow {
+                                id: wrapRow
+                                visible: row.wrap
+                                x: 18; y: labelCol.y + labelCol.height + 12
+                                width: row.width - 36
+                                spacing: 6
+                                Repeater { model: row.wrap ? (row.modelData.opts ?? []) : []; delegate: chipC }
                             }
                             // stepper
                             Row {
                                 visible: row.modelData.t === "step"
                                 anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
                                 spacing: 6
-                                Rectangle {
-                                    width: 30; height: 30; radius: 15; color: minusHov.hovered ? BarStyle.plateHover : "transparent"
+                                BarButton {
+                                    tone: "outlined"; width: 32; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, Math.max(row.modelData.min, Number(row.value) - row.modelData.by))
                                     BarIcon { anchors.centerIn: parent; name: "remove"; size: 18; color: BarStyle.text }
-                                    HoverHandler { id: minusHov }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, Math.max(row.modelData.min, Number(row.value) - row.modelData.by)) }
                                 }
                                 BarText { width: 52; horizontalAlignment: Text.AlignHCenter; anchors.verticalCenter: parent.verticalCenter; text: String(row.value); font.weight: Font.DemiBold }
-                                Rectangle {
-                                    width: 30; height: 30; radius: 15; color: plusHov.hovered ? BarStyle.plateHover : "transparent"
+                                BarButton {
+                                    tone: "outlined"; width: 32; height: 32; radius: 16
+                                    onTapped: Config.setNestedValue(row.modelData.path, Math.min(row.modelData.max, Number(row.value) + row.modelData.by))
                                     BarIcon { anchors.centerIn: parent; name: "add"; size: 18; color: BarStyle.text }
-                                    HoverHandler { id: plusHov }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Config.setNestedValue(row.modelData.path, Math.min(row.modelData.max, Number(row.value) + row.modelData.by)) }
                                 }
                             }
                         }
