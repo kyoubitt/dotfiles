@@ -76,6 +76,19 @@ Scope {
         if (!t) return
         t.layoutLeft = l.left; t.layoutMiddle = l.middle; t.layoutRight = l.right; t.layoutHidden = l.hidden
     }
+    // one click: take a block off the bar (into Hidden) or put it back in its usual box
+    function isHidden(id: string): bool { return root.layout.hidden.includes(id) }
+    function toggleBlock(id: string): void {
+        root.pushUndo()
+        const l = { left: root.layout.left.filter(x => x !== id), middle: root.layout.middle.filter(x => x !== id), right: root.layout.right.filter(x => x !== id), hidden: root.layout.hidden.filter(x => x !== id) }
+        if (!root.isHidden(id)) l.hidden.push(id)
+        else {
+            let to = "right"
+            for (const k of ["left", "middle", "right"]) if (root.defaults[k].includes(id)) to = k
+            l[to].push(id)
+        }
+        root.setLayout(l)
+    }
     function setSwitch(k: string, on: bool): void { if (Config.options?.bars?.top) Config.options.bars.top[k] = on }
 
     // ---- history
@@ -338,6 +351,7 @@ Scope {
                                 required property string modelData
                                 height: 38; radius: 19; width: hcRow.implicitWidth + 30
                                 color: BarStyle.surface; border.width: 1; border.color: BarStyle.edge
+                                TapHandler { onTapped: root.toggleBlock(hc.modelData) }
                                 Row {
                                     id: hcRow
                                     anchors.centerIn: parent; spacing: 8
@@ -376,11 +390,28 @@ Scope {
 
                 // switches for the small things inside a block
                 Rectangle {
-                    x: win.cx; y: win.optY; width: win.cw; height: 118; radius: BarStyle.radiusLarge + 2
+                    x: win.cx; y: win.optY; width: win.cw; height: 200; radius: BarStyle.radiusLarge + 2
                     color: Qt.rgba(1, 1, 1, 0.06); border.width: 1; border.color: BarStyle.edge
-                    BarText { x: 20; y: 14; text: "Inside the blocks"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
+                    BarText { x: 20; y: 14; text: "On the bar (click to hide or show)"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
+                    Flow {
+                        x: 14; y: 38; width: parent.width - 28; spacing: 8
+                        Repeater {
+                            model: Object.keys(root.info)
+                            delegate: BarButton {
+                                id: bb
+                                required property string modelData
+                                readonly property bool off: root.isHidden(modelData)
+                                height: 34; radius: 17; width: bbText.implicitWidth + 54
+                                tone: "outlined"; toggled: !off
+                                BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: bb.off ? "visibility_off" : "visibility"; size: 16; color: bb.ink }
+                                BarText { id: bbText; x: 34; anchors.verticalCenter: parent.verticalCenter; text: root.info[bb.modelData].t; font.pixelSize: 13; color: bb.ink }
+                                onTapped: root.toggleBlock(bb.modelData)
+                            }
+                        }
+                    }
+                    BarText { x: 20; y: 92; text: "Inside the blocks"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
                     Column {
-                        x: 14; y: 40; spacing: 10
+                        x: 14; y: 114; spacing: 10
                         Repeater {
                             model: ["System and weather", "Status icons"]
                             delegate: Row {
