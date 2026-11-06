@@ -58,7 +58,8 @@ Scope {
     readonly property var switches: [
         { k: "showCpu", t: "CPU", g: "System and weather" }, { k: "showMemory", t: "Memory", g: "System and weather" },
         { k: "showGpu", t: "GPU", g: "System and weather" }, { k: "showWeather", t: "Weather", g: "System and weather" },
-        { k: "showBluetooth", t: "Bluetooth", g: "Status icons" }, { k: "showBattery", t: "Battery", g: "Status icons" }
+        { k: "showVolume", t: "Volume", g: "Status icons" }, { k: "showNetwork", t: "Network", g: "Status icons" },
+        { k: "showBluetooth", t: "Bluetooth", g: "Status icons" }, { k: "showBattery", t: "Battery", g: "Status icons" }, { k: "showBell", t: "Notifications", g: "Status icons" }
     ]
 
     readonly property var top: Config.options?.bars?.top ?? ({})
@@ -389,17 +390,15 @@ Scope {
                                 BarText { width: 150; height: 32; verticalAlignment: Text.AlignVCenter; leftPadding: 6; text: swRow.modelData; font.pixelSize: 12; color: Qt.rgba(1, 1, 1, 0.8) }
                                 Repeater {
                                     model: root.switches.filter(d => d.g === swRow.modelData)
-                                    delegate: Rectangle {
+                                    delegate: BarButton {
                                         id: sw
                                         required property var modelData
                                         readonly property bool on: root.top[modelData.k] ?? true
-                                        height: 32; radius: 16; width: swText.implicitWidth + 50
-                                        color: on ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.24) : "transparent"
-                                        border.width: 1; border.color: on ? BarStyle.accent : Qt.rgba(1, 1, 1, 0.18)
-                                        Behavior on color { ColorAnimation { duration: 100 } }
-                                        BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: sw.on ? "check" : "close"; size: 14; color: sw.on ? BarStyle.accent : BarStyle.subtext }
-                                        BarText { id: swText; x: 32; anchors.verticalCenter: parent.verticalCenter; text: sw.modelData.t; font.pixelSize: 12 }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { root.pushUndo(); root.setSwitch(sw.modelData.k, !sw.on) } }
+                                        height: 34; radius: 17; width: swText.implicitWidth + 54
+                                        tone: "outlined"; toggled: on
+                                        BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: sw.on ? "check" : "close"; size: 16; color: sw.ink }
+                                        BarText { id: swText; x: 34; anchors.verticalCenter: parent.verticalCenter; text: sw.modelData.t; font.pixelSize: 13; color: sw.ink }
+                                        onTapped: { root.pushUndo(); root.setSwitch(sw.modelData.k, !sw.on) }
                                     }
                                 }
                             }
@@ -424,28 +423,25 @@ Scope {
                                 { t: "Reset to default", i: "restart_alt", a: "reset", off: false },
                                 { t: "Done", i: "", a: "done", off: false }
                             ]
-                            delegate: Rectangle {
+                            delegate: BarButton {
                                 id: btn
                                 required property var modelData
                                 readonly property bool primary: modelData.a === "done"
-                                height: 38; width: btnRow.implicitWidth + 26; radius: 19
+                                height: 40; width: btnRow.implicitWidth + 30; radius: 20
+                                tone: primary ? "filled" : "outlined"
                                 opacity: modelData.off ? 0.4 : 1
-                                color: primary ? BarStyle.accent : (bm.pressed ? BarStyle.border : "transparent")
-                                border.width: primary ? 0 : 1; border.color: BarStyle.border
+                                enabled: !modelData.off
                                 Row {
                                     id: btnRow
                                     anchors.centerIn: parent; spacing: 6
-                                    BarIcon { visible: btn.modelData.i.length > 0; anchors.verticalCenter: parent.verticalCenter; name: btn.modelData.i; size: 16 }
-                                    BarText { anchors.verticalCenter: parent.verticalCenter; text: btn.modelData.t; font.pixelSize: 12; font.weight: btn.primary ? Font.DemiBold : Font.Medium; color: btn.primary ? BarStyle.onAccent : BarStyle.text }
+                                    BarIcon { visible: btn.modelData.i.length > 0; anchors.verticalCenter: parent.verticalCenter; name: btn.modelData.i; size: 18; color: btn.ink }
+                                    BarText { anchors.verticalCenter: parent.verticalCenter; text: btn.modelData.t; font.pixelSize: 13; font.weight: btn.primary ? Font.DemiBold : Font.Medium; color: btn.ink }
                                 }
-                                MouseArea {
-                                    id: bm; anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (btn.modelData.a === "undo") root.undo()
-                                        else if (btn.modelData.a === "redo") root.redo()
-                                        else if (btn.modelData.a === "reset") root.resetAll()
-                                        else root.open = false
-                                    }
+                                onTapped: {
+                                    if (modelData.a === "undo") root.undo()
+                                    else if (modelData.a === "redo") root.redo()
+                                    else if (modelData.a === "reset") root.resetAll()
+                                    else root.open = false
                                 }
                             }
                         }

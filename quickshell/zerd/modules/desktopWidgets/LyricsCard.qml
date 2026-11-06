@@ -75,26 +75,38 @@ IrisWidgetFace {
                         id: base
                         width: parent.width
                         text: ln.line
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
                         elide: Text.ElideRight
-                        color: ln.off === 0 ? Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(1, 1, 1, 0.75)
+                        // not yet sung: a quieter white; the sung part is solid white over it
+                        color: Qt.rgba(1, 1, 1, ln.off === 0 ? 0.5 : 0.78)
                         style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.55)
                         font.pixelSize: ln.off === 0 ? 22 : 14
                         font.weight: ln.off === 0 ? Font.DemiBold : Font.Medium
                     }
-                    // the line fills with the accent as it is sung
-                    Item {
-                        visible: ln.off === 0
-                        width: Math.min(parent.width, base.implicitWidth) * root.frac
-                        height: parent.height
-                        clip: true
-                        BarText {
-                            width: ln.width
-                            text: ln.line
-                            elide: Text.ElideRight
-                            color: BarStyle.accent
-                            style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.55)
-                            font.pixelSize: 22
-                            font.weight: Font.DemiBold
+                    // the sung part, line by line: the first row fills first, then the second
+                    Repeater {
+                        model: ln.off === 0 ? Math.max(1, base.lineCount) : 0
+                        delegate: Item {
+                            id: row
+                            required property int index
+                            readonly property real rowH: base.height / Math.max(1, base.lineCount)
+                            readonly property real part: Math.max(0, Math.min(1, root.frac * base.lineCount - index))
+                            x: 0; y: index * rowH
+                            width: Math.round(base.width * part); height: rowH
+                            clip: true
+                            BarText {
+                                y: -row.y
+                                width: base.width
+                                text: ln.line
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                                color: "#ffffff"
+                                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.55)
+                                font.pixelSize: 22
+                                font.weight: Font.DemiBold
+                            }
                         }
                     }
                 }

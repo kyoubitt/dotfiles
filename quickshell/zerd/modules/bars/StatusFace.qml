@@ -76,6 +76,7 @@ BarPill {
         onScrolled: event => event.angleDelta.y > 0 ? Brightness.increaseBrightness() : Brightness.decreaseBrightness()
     }
     Part {
+        visible: Config.options?.bars?.top?.showVolume ?? true
         popup: "volume"
         tip: (Audio.sink?.audio?.muted ?? false) ? "Muted" : "Volume " + Math.round(Audio.value * 100) + "%"
         icon: (Audio.sink?.audio?.muted ?? false) || Audio.value <= 0 ? "volume_off" : "volume_up"
@@ -84,6 +85,7 @@ BarPill {
     }
     Divider {}
     Part {
+        visible: Config.options?.bars?.top?.showNetwork ?? true
         popup: "network"
         tip: NetLink.iwd ? (NetLink.ethUp ? "Ethernet" : NetLink.connected ? NetLink.ssid : "Not connected") : (Network.networkName.length > 0 ? Network.networkName : "Network")
         icon: NetLink.iwd ? NetLink.icon : Network.materialSymbol
@@ -101,6 +103,7 @@ BarPill {
     Part { visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true); popup: "battery"; tip: "Battery " + Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " charging" : ""); icon: Battery.isCharging ? "battery_charging_full" : "battery_full"; label: Math.round(Battery.percentage * 100) + "%"; tint: Battery.isCritical ? BarStyle.danger : BarStyle.text }
     Divider {}
     Part {
+        visible: Config.options?.bars?.top?.showBell ?? true
         popup: "notifications"
         tip: Notifications.count > 0 ? Notifications.count + " notifications" : "Notifications"
         icon: Notifications.silent ? "notifications_off" : "notifications"
