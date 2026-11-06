@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import qs.modules.common
 import qs.modules.dock2
+import qs.modules.bars
 
 // One full-screen, click-through layer per output that carries the floating
 // dock. Only the dock's own rectangle takes input; while a menu is open the
@@ -21,6 +22,8 @@ Scope {
         required property var modelData
 
         screen: modelData
+        // the editors cover the whole screen, so the dock steps aside while one is open
+        visible: !BarState.editingBar && !BarState.board
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         exclusiveZone: 0

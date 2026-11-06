@@ -147,11 +147,11 @@ Scope {
                 focus: true
                 property int sel: -1
                 readonly property var actions: [
-                    { icon: "logout", label: "Log out", hint: "E", weight: 1.3, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
-                    { icon: "lock", label: "Lock", hint: "L", weight: 0.8, tone: "accent", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
-                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 1, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
-                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 2, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
-                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 2.8, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
+                    { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                    { icon: "lock", label: "Lock", hint: "L", weight: 0.6, tone: "accent", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
+                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
                 ]
                 // the command goes out first: closing the window destroys this item, and a command sent after that was lost
                 function run(a): void { Quickshell.execDetached(a.cmd.slice()); GlobalStates.sessionOpen = false }
