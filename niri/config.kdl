@@ -48,7 +48,7 @@ gestures {
 
 overview {
     zoom 0.65
-    backdrop-color "#000000b3"
+    backdrop-color "#0b0b10"
     workspace-shadow {
         softness 40
         spread 8
@@ -57,10 +57,8 @@ overview {
     }
 }
 
-layer-rule {
-    match namespace="^awww-daemon$"
-    place-within-backdrop true
-}
+// The wallpaper daemon used to draw the sharp wallpaper behind the overview; the shell now draws a blurred one there
+// (quickshell:wOverviewBackdrop below), so the daemon stays out of the backdrop.
 
 binds {
     // Shortcuts Panel

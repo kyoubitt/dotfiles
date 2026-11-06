@@ -31,7 +31,7 @@ Variants {
 
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.layer: WlrLayer.Background
         WlrLayershell.namespace: "quickshell:wOverviewBackdrop"
         anchors { top: true; bottom: true; left: true; right: true }
 

@@ -23,34 +23,18 @@ Scope {
         required property string icon
         required property string label
         property color tone: BarStyle.accent
-        property bool danger: false
         property real weight: 1
         property bool selected: false
-        property real level: 0                 // how full the jar is, 0..1
-        property bool fired: false
-        property bool holding: false
-        property real pressedAt: 0
-        readonly property bool resting: ma.containsMouse || sb.selected
+        property real leave: 0                  // 0..1, how far the menu has gone when another capsule fired
+        property bool chosen: false             // this is the capsule that fired
+        readonly property real level: hold.level
+        readonly property bool lit: hold.resting || hold.level > 0.001
         signal activated()
+        signal tapped()
+        function press(): void { hold.keyDown() }
+        function release(): void { hold.keyUp() }
         implicitWidth: 144
         implicitHeight: 196
-        readonly property bool lit: resting || level > 0.001
-
-        // one animation drives the liquid: to half when you rest on it, to the top when you hold or click
-        function go(to: real, ms: int, ease: int): void {
-            lv.stop(); lv.from = sb.level; lv.to = to; lv.duration = Math.max(1, ms); lv.easing.type = ease; lv.start()
-        }
-        function rest(): void { if (!fired) go(resting ? 0.5 : 0, 600, Easing.OutCubic) }
-        onRestingChanged: if (!holding) rest()
-        function press(): void { if (fired) return; holding = true; pressedAt = Date.now(); go(1, 1000 * weight * (1 - level) + 120, Easing.InSine) }
-        function release(): void {
-            if (fired || !holding) return
-            holding = false
-            if (Date.now() - pressedAt < 260) go(1, 170, Easing.OutCubic)   // a plain click fills it at once
-            else rest()
-        }
-        NumberAnimation { id: lv; target: sb; property: "level"
-            onFinished: { if (sb.level >= 0.999 && !sb.fired) { sb.fired = true; flash.restart(); sb.activated() } } }
 
         Rectangle {
             id: capsule
@@ -61,7 +45,9 @@ Scope {
             border.color: Qt.rgba(1, 1, 1, sb.lit ? 0.4 : 0.16)
             Behavior on border.color { ColorAnimation { duration: BarStyle.motionFast } }
             clip: true
-            scale: ma.pressed ? 0.97 : (sb.lit ? 1.03 : 1)
+            property real bob: 0
+            transform: Translate { y: capsule.bob }
+            scale: (hold.holding ? 0.97 : (sb.lit ? 1.03 : 1)) + (sb.chosen ? 0.07 * sb.leave : 0)
             Behavior on scale { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutBack } }
 
             ShaderEffect {
@@ -99,17 +85,21 @@ Scope {
                 }
             }
         }
-        MouseArea {
-            id: ma
+
+        // a quick tap only nudges the capsule: it does nothing until it is held
+        SequentialAnimation {
+            id: nudge
+            NumberAnimation { target: capsule; property: "bob"; to: -9; duration: 110; easing.type: Easing.OutQuad }
+            NumberAnimation { target: capsule; property: "bob"; to: 0; duration: 380; easing.type: Easing.OutBounce }
+        }
+
+        HoldLogic {
+            id: hold
             anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            preventStealing: true
-            acceptedButtons: Qt.LeftButton
-            onPressed: sb.press()
-            onReleased: sb.release()
-            // a cancel while the pointer is still on the capsule is not you letting go: keep the hold going
-            onCanceled: { console.log("[power] press cancelled on " + sb.label); if (!ma.containsMouse) sb.release() }
+            weight: sb.weight
+            selected: sb.selected
+            onActivated: { flash.restart(); sb.activated() }
+            onTapped: { nudge.restart(); sb.tapped() }
         }
     }
 
@@ -127,103 +117,149 @@ Scope {
 
             anchors { top: true; bottom: true; left: true; right: true }
 
-            // Real frosted-glass backdrop: the actual wallpaper, blurred live,
-            // rather than a flat dimmed rectangle - static power-menu tools
-            // can't do this without a pre-baked screenshot.
-            LockBackdrop {
+            // The whole menu fades in on open and, for everything except Lock, fades out before the command runs.
+            Item {
+                id: stage
                 anchors.fill: parent
-            }
+                opacity: Math.min(content.enter * 3, 1) * (content.fadeBackdrop ? 1 - content.leave : 1)
 
-            // Entrance: fade + rise, so it feels like something actually
-            // happened rather than just popping into existence.
-            ColumnLayout {
-                id: content
-                anchors.centerIn: parent
-                spacing: 32
-                opacity: 0
-                property real riseOffset: 24
-                anchors.verticalCenterOffset: riseOffset
-
-                focus: true
-                property int sel: -1
-                readonly property var actions: [
-                    { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
-                    { icon: "lock", label: "Lock", hint: "L", weight: 0.6, tone: "accent", cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
-                    { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
-                    { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
-                    { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
-                ]
-                // the command goes out first: closing the window destroys this item, and a command sent after that was lost
-                function run(a): void { Quickshell.execDetached(a.cmd.slice()); GlobalStates.sessionOpen = false }
-                function capAt(i: int): var { return caps.itemAt(i) }
-                Keys.onEscapePressed: GlobalStates.sessionOpen = false
-                Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
-                Keys.onRightPressed: sel = (sel + 1) % actions.length
-                // keys do what the mouse does: hold to fill, let go to drain
-                Keys.onReturnPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
-                Keys.onEnterPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
-                Keys.onReleased: event => {
-                    if (event.isAutoRepeat) return
-                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (sel >= 0) capAt(sel)?.release(); return }
-                    const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
-                    if (i >= 0) capAt(i)?.release()
-                }
-                Keys.onPressed: event => {
-                    if (event.isAutoRepeat) return
-                    const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
-                    if (i >= 0) { sel = i; capAt(i)?.press(); event.accepted = true }
-                }
-
-                Component.onCompleted: {
-                    entranceAnim.start()
-                    content.forceActiveFocus()
-                }
-
-                ParallelAnimation {
-                    id: entranceAnim
-                    NumberAnimation { target: content; property: "opacity"; from: 0; to: 1; duration: 280; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: content; property: "riseOffset"; from: 24; to: 0; duration: 320; easing.type: Easing.OutQuad }
+                // Real frosted-glass backdrop: the actual wallpaper, blurred live.
+                LockBackdrop {
+                    anchors.fill: parent
                 }
 
                 ColumnLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 6
+                    id: content
+                    anchors.centerIn: parent
+                    spacing: 32
 
-                    BarText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
-                        font.pixelSize: 88
-                        font.weight: Font.DemiBold
-                        color: "#ffffff"
-                    }
-                    BarText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
-                        font.pixelSize: 18
-                        color: BarStyle.accent
-                    }
-                }
+                    focus: true
+                    property int sel: -1
+                    property real enter: 0                // 0..1 while opening
+                    property real leave: 0                // 0..1 once a capsule has fired
+                    property bool fadeBackdrop: true      // false for Lock: the lock screen shows the same blurred wallpaper
+                    property int chosen: -1
+                    readonly property var actions: [
+                        { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                        { icon: "lock", label: "Lock", hint: "L", weight: 0.6, tone: "accent", lock: true, cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
+                        { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                        { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
+                        { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
+                    ]
+                    property string hintText: "Hold a button to confirm"
 
-                RowLayout {
-                    id: actionRow
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 18
-                    Repeater {
-                        id: caps
-                        model: content.actions
-                        delegate: SessionButton {
-                            required property var modelData
-                            required property int index
-                            icon: modelData.icon
-                            label: modelData.label
-                            tone: modelData.tone === "accent" ? BarStyle.accent : modelData.tone
-                            weight: modelData.weight ?? 1
-                            selected: content.sel === index
-                            onActivated: content.run(modelData)
+                    // The capsule fired: the others fade away, then the command goes out. Lock keeps the blurred
+                    // backdrop up until the lock screen is really on screen, so the desktop never flashes between them.
+                    function run(i: int): void {
+                        if (chosen >= 0) return
+                        chosen = i
+                        const a = actions[i]
+                        fadeBackdrop = !a.lock
+                        leaveAnim.start()
+                        if (a.lock) {
+                            Quickshell.execDetached(a.cmd.slice())
+                            lockWait.start()
                         }
                     }
-                }
+                    function finish(): void {
+                        const a = actions[chosen]
+                        if (!a.lock) Quickshell.execDetached(a.cmd.slice())
+                        GlobalStates.sessionOpen = false
+                    }
+                    NumberAnimation on enter { id: enterAnim; from: 0; to: 1; duration: 720; easing.type: Easing.OutCubic; running: true }
+                    NumberAnimation { id: leaveAnim; target: content; property: "leave"; from: 0; to: 1; duration: 340; easing.type: Easing.InOutCubic
+                        onFinished: if (!content.actions[content.chosen].lock) content.finish() }
+                    // Lock: close once the lock screen covers us, or after a moment if it never does
+                    Timer { id: lockWait; interval: 1500; onTriggered: content.finish() }
+                    Connections {
+                        target: GlobalStates
+                        enabled: content.chosen >= 0 && content.actions[content.chosen].lock === true
+                        function onScreenLockedChanged() { if (GlobalStates.screenLocked) { lockWait.stop(); content.finish() } }
+                    }
 
+                    function capAt(i: int): var { return caps.itemAt(i) }
+                    Keys.onEscapePressed: GlobalStates.sessionOpen = false
+                    Keys.onLeftPressed: sel = sel <= 0 ? actions.length - 1 : sel - 1
+                    Keys.onRightPressed: sel = (sel + 1) % actions.length
+                    // keys do what the mouse does: hold to fill, let go to drain
+                    Keys.onReturnPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                    Keys.onEnterPressed: event => { if (!event.isAutoRepeat && sel >= 0) capAt(sel)?.press() }
+                    Keys.onReleased: event => {
+                        if (event.isAutoRepeat) return
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (sel >= 0) capAt(sel)?.release(); return }
+                        const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                        if (i >= 0) capAt(i)?.release()
+                    }
+                    Keys.onPressed: event => {
+                        if (event.isAutoRepeat) return
+                        const i = actions.findIndex(a => event.key === Qt["Key_" + a.hint])
+                        if (i >= 0) { sel = i; capAt(i)?.press(); event.accepted = true }
+                    }
+
+                    Component.onCompleted: content.forceActiveFocus()
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 6
+                        opacity: content.fadeBackdrop ? 1 - content.leave : 1
+                        transform: Translate { y: (1 - Math.min(1, content.enter * 1.6)) * -18 }
+
+                        BarText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
+                            font.pixelSize: 88
+                            font.weight: Font.DemiBold
+                            color: "#ffffff"
+                        }
+                        BarText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
+                            font.pixelSize: 18
+                            color: BarStyle.accent
+                        }
+                    }
+
+                    RowLayout {
+                        id: actionRow
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 18
+                        Repeater {
+                            id: caps
+                            model: content.actions
+                            delegate: SessionButton {
+                                id: cap
+                                required property var modelData
+                                required property int index
+                                // each capsule rises a beat after the one before it
+                                readonly property real appear: {
+                                    const t = Math.max(0, Math.min(1, (content.enter - index * 0.07) / 0.55))
+                                    return 1 - Math.pow(1 - t, 3)
+                                }
+                                icon: modelData.icon
+                                label: modelData.label
+                                tone: modelData.tone === "accent" ? BarStyle.accent : modelData.tone
+                                weight: modelData.weight ?? 1
+                                selected: content.sel === index
+                                chosen: content.chosen === index
+                                leave: content.leave
+                                opacity: appear * (chosen ? 1 - (content.fadeBackdrop ? 0 : content.leave) : 1 - content.leave)
+                                transform: Translate { y: (1 - cap.appear) * 40 + (cap.chosen ? 0 : cap.leave * 10) }
+                                onActivated: content.run(index)
+                                onTapped: { content.hintText = "Keep holding to " + modelData.label.toLowerCase(); hintReset.restart() }
+                            }
+                        }
+                    }
+
+                    BarText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: content.hintText
+                        font.pixelSize: 14
+                        color: content.hintText.indexOf("Keep") === 0 ? BarStyle.accent : "#ffffff"
+                        opacity: (content.hintText.indexOf("Keep") === 0 ? 1 : 0.5) * Math.min(1, content.enter * 1.4) * (1 - content.leave)
+                        Behavior on color { ColorAnimation { duration: 160 } }
+                    }
+                    Timer { id: hintReset; interval: 1800; onTriggered: content.hintText = "Hold a button to confirm" }
+                }
             }
         }
     }
