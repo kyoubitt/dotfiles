@@ -42,15 +42,6 @@ Item {
         function cs(v) { return Math.round(v) }
     }
 
-    // TEMP DEBUG: where each block, its pill and its face sit in the window
-    Timer {
-        interval: 4000; running: root.visible; repeat: false
-        onTriggered: {
-            const b = root.mapToItem(null, 0, 0), m = mod.mapToItem(null, 0, 0), f = mod.faceItem ? mod.faceItem.mapToItem(null, 0, 0) : null
-            console.log("BARDBG", root.blockId, "block y", b.y, "h", root.height, "| pill y", m.y, "h", mod.height, "| face y", f ? f.y : "-", "h", mod.faceItem ? mod.faceItem.height : "-", "grouped", root.grouped)
-        }
-    }
-
     BarModule {
         id: mod
         moduleId: root.blockId
