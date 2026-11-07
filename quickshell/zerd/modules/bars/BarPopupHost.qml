@@ -84,6 +84,7 @@ Scope {
             Connections {
                 target: root
                 function onPopupChanged() {
+                    console.log("POPUPDBG changed", root.popup?.kind ?? "closed", root.spec ? String(root.spec.src).split("/").pop() : "no-spec") /* TEMP DEBUG */
                     if (root.popup && !root.wasOpen) Ilya.Sounds.popupOpened()
                     else if (!root.popup && root.wasOpen) Ilya.Sounds.popupClosed()
                     root.wasOpen = !!root.popup
