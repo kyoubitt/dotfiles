@@ -8,6 +8,7 @@ import Quickshell.Bluetooth
 import qs
 import qs.services
 import qs.modules.common
+import "ilya" as Ilya
 
 // One popup at a time under the top bar (GlobalStates.barPopup): calendar,
 // media, volume, brightness, network, battery and system details. Click
@@ -16,6 +17,7 @@ Scope {
     id: root
 
     readonly property var popup: GlobalStates.barPopup
+    property bool wasOpen: false
 
     readonly property bool overview: NiriService.inOverview
     onOverviewChanged: if (overview) GlobalStates.barPopup = null
@@ -82,6 +84,9 @@ Scope {
             Connections {
                 target: root
                 function onPopupChanged() {
+                    if (root.popup && !root.wasOpen) Ilya.Sounds.popupOpened()
+                    else if (!root.popup && root.wasOpen) Ilya.Sounds.popupClosed()
+                    root.wasOpen = !!root.popup
                     if (root.popup && root.spec) {
                         if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }
                         pl.active = true
