@@ -112,6 +112,7 @@ Scope {
                 { t: "choice", art: "spectrum", icon: "graphic_eq", label: "Spectrum style", hint: "Wave: a soft hill along the bottom of the screen. Inside: bars in the dock plate", path: "iris.dock.cava.style", opts: ["wave", "inside"], def: "wave" } ] } ] },
         { name: "Panels", nav: "Shell", icon: "side_navigation", blurb: "The quick panel and the sections panel", groups: [
             { title: "Edge panels", rows: [
+                { t: "toggle", icon: "blur_on", label: "Liquid glass", hint: "Frosted, translucent popups and bar plates", path: "bars.liquidGlass", def: false },
                 { t: "toggle", icon: "side_navigation", label: "Open a panel from the screen edge", hint: "The pointer has to move onto the edge and rest there", path: "bars.sidebars.edgeHover", def: true },
                 { t: "choice", art: "edges", icon: "swap_horiz", label: "Edges", path: "bars.sidebars.edgeSide", opts: ["left", "right", "both"], def: "both" },
                 { t: "toggle", icon: "do_not_disturb_on", label: "Focus timer turns Do not disturb on", path: "bars.sidebars.focusDnd", def: true } ] } ] },
@@ -275,23 +276,23 @@ Scope {
                         let y = 0, last = null
                         for (let i = 0; i < root.pages.length; i++) {
                             const n = root.pages[i].nav
-                            if (n !== last) { last = n; if (n !== "") { y += out.length > 0 ? 8 : 0; out.push({ heading: n, y: y }); y += 28 } }
-                            out.push({ page: i, y: y }); y += 35
+                            if (n !== last) { last = n; if (n !== "") { y += out.length > 0 ? 16 : 0; out.push({ heading: n, y: y }); y += 24 } }
+                            out.push({ page: i, y: y }); y += 38
                         }
                         return out
                     }
                     readonly property var pageY: { const m = []; for (const e of entries) if (e.page !== undefined) m[e.page] = e.y; return m }
                     Flickable {
                         x: 0; y: 118; width: nav.width; height: nav.height - 118
-                        contentHeight: navBody.height + 2
+                        contentHeight: navBody.height + 12
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         Item {
                             id: navBody
                             x: 12; width: nav.width - 24
-                            height: nav.entries[nav.entries.length - 1].y + 34
+                            height: nav.entries[nav.entries.length - 1].y + 36
                             Rectangle {
-                                y: nav.pageY[root.page] ?? 0; width: parent.width; height: 34; radius: 17
+                                y: nav.pageY[root.page] ?? 0; width: parent.width; height: 36; radius: 18
                                 color: BarStyle.accentContainer
                                 Behavior on y { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.BezierSpline; easing.bezierCurve: BarStyle.easeExpressive } }
                             }
@@ -302,20 +303,21 @@ Scope {
                                     required property var modelData
                                     readonly property bool isPage: modelData.page !== undefined
                                     readonly property bool on: isPage && root.page === modelData.page
-                                    y: modelData.y; width: navBody.width; height: isPage ? 34 : 24
+                                    y: modelData.y; width: navBody.width; height: isPage ? 36 : 24
                                     BarText {
                                         visible: !ent.isPage
-                                        x: 14; y: 3; text: String(ent.modelData.heading ?? "").toUpperCase()
-                                        font.pixelSize: 13; font.weight: Font.DemiBold; font.letterSpacing: 0.9; color: BarStyle.text; opacity: 0.72
+                                        x: 14; y: 6; text: String(ent.modelData.heading ?? "").toUpperCase()
+                                        font.pixelSize: 11; font.weight: Font.DemiBold; font.letterSpacing: 0.8; color: BarStyle.subtext
                                     }
                                     Row {
                                         visible: ent.isPage
                                         x: 14; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                                        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: ent.isPage ? root.pages[ent.modelData.page].icon : ""; size: 20; fill: ent.on ? 1 : 0; color: ent.on ? BarStyle.onAccentContainer : BarStyle.subtext }
-                                        BarText { anchors.verticalCenter: parent.verticalCenter; text: ent.isPage ? root.pages[ent.modelData.page].name : ""; font.weight: ent.on ? Font.DemiBold : Font.Medium; color: ent.on ? BarStyle.onAccentContainer : BarStyle.text }
+                                        Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                                            BarIcon { anchors.centerIn: parent; name: ent.isPage ? root.pages[ent.modelData.page].icon : ""; size: 18; fill: ent.on ? 1 : 0; color: ent.on ? BarStyle.onAccentContainer : BarStyle.subtext } }
+                                        BarText { anchors.verticalCenter: parent.verticalCenter; text: ent.isPage ? root.pages[ent.modelData.page].name : ""; font.pixelSize: 14; font.weight: ent.on ? Font.DemiBold : Font.Medium; color: ent.on ? BarStyle.onAccentContainer : BarStyle.text }
                                     }
                                     HoverHandler { id: navHover; enabled: ent.isPage; cursorShape: Qt.PointingHandCursor }
-                                    Rectangle { visible: ent.isPage && !ent.on && navHover.hovered; anchors.fill: parent; radius: 17; color: BarStyle.plateHover; z: -1 }
+                                    Rectangle { visible: ent.isPage && !ent.on && navHover.hovered; anchors.fill: parent; radius: 18; color: BarStyle.plateHover; z: -1 }
                                     TapHandler { enabled: ent.isPage; onTapped: { searchIn.text = ""; root.page = ent.modelData.page; view.forceActiveFocus() } }
                                 }
                             }
