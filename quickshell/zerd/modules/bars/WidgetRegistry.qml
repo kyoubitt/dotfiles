@@ -66,6 +66,9 @@ Singleton {
         }
         return 1
     }
+    // Cards that grow by real size, not by magnifying (their text keeps its size and they show more instead).
+    readonly property var sized: ["lyrics"]
+    function visualScale(name: string): real { return sized.indexOf(name) >= 0 ? 1 : scaleOf(name) }
     function setScale(name: string, v: real): void {
         const t = Config.options?.desktopWidgets
         if (!t) return

@@ -24,7 +24,7 @@ Item {
         required property string name
         readonly property var cfg: Config.options?.desktopWidgets?.[name] ?? ({})
         readonly property string anchorName: cfg.anchor ?? "topLeft"
-        readonly property real cs: WidgetRegistry.scaleOf(name)
+        readonly property real cs: WidgetRegistry.visualScale(name)
         scale: cs
         transformOrigin: Item.TopLeft
 

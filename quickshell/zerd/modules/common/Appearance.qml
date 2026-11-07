@@ -253,7 +253,7 @@ Singleton {
     rounding: QtObject {
         property int unsharpen: 2
         property int unsharpenmore: 6
-        property int verysmall: 8
+        property int verysmall: 10
         property int small: 12
         property int normal: 17
         property int large: 23
@@ -297,7 +297,7 @@ Singleton {
             })
         }
         property QtObject pixelSize: QtObject {
-            property int smallest: Math.round(10 * root.fontSizeScale)
+            property int smallest: Math.round(11 * root.fontSizeScale)
             property int smaller: Math.round(12 * root.fontSizeScale)
             property int smallie: Math.round(13 * root.fontSizeScale)
             property int small: Math.round(15 * root.fontSizeScale)

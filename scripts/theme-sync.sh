@@ -644,6 +644,16 @@ update_sddm_theme() {
   color4=$(jq -r '.colors.color4' "$wallust_colors_file")
   color6=$(jq -r '.colors.color6' "$wallust_colors_file")
   color7=$(jq -r '.colors.color7' "$wallust_colors_file")
+  # the shell's own surface and text colours (the Material palette it generates), so the login screen matches the bar and lock screen
+  local -r m3_file="$HOME/.local/state/quickshell/user/generated/colors.json"
+  if [[ -f "$m3_file" ]]; then
+    local m3
+    m3=$(jq -r '.surface' "$m3_file"); [[ "$m3" =~ ^#[0-9A-Fa-f]{6}$ ]] && background="$m3"
+    m3=$(jq -r '.surface_container_high' "$m3_file"); [[ "$m3" =~ ^#[0-9A-Fa-f]{6}$ ]] && color0="$m3"
+    m3=$(jq -r '.on_surface' "$m3_file"); [[ "$m3" =~ ^#[0-9A-Fa-f]{6}$ ]] && { foreground="$m3"; color6="$m3"; }
+    m3=$(jq -r '.on_surface_variant' "$m3_file"); [[ "$m3" =~ ^#[0-9A-Fa-f]{6}$ ]] && color7="$m3"
+    m3=$(jq -r '.error' "$m3_file"); [[ "$m3" =~ ^#[0-9A-Fa-f]{6}$ ]] && color3="$m3"
+  fi
   # the shell's accent (a colour picked in Settings wins over the wallpaper's), so the login screen matches the lock screen
   local accent_pick
   accent_pick=$(jq -r '.colours.accent // ""' "$HOME/.config/zerda-shell/config.json" 2> /dev/null)

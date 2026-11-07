@@ -6,6 +6,7 @@ import qs.modules.iris.host
 import qs.modules.iris.widgets
 import qs.modules.iris.style
 import qs.modules.desktopWidgets
+import qs.modules.bars
 import qs.modules.background.widgets.clock
 import qs.modules.background.widgets.shape
 import qs.modules.background.widgets.visualizer
@@ -45,7 +46,8 @@ Loader {
         IrisWidgetHost {
             id: host
             screenRef: view.screenRef
-            width: 380; height: 226
+            readonly property real grow: WidgetRegistry.scaleOf("lyrics")
+            width: Math.round(380 * grow); height: Math.round(226 * grow)
             irisMaterial: "clear"
             legibleAlways: false
             irisOutline: "never"

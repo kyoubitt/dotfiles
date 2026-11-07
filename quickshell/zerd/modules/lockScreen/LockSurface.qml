@@ -149,20 +149,30 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         Behavior on slide { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
 
-        // Caelestia's clock: the hours in the accent, the minutes in the text colour, side by side
+        // Caelestia's clock, side by side, but every digit solid in the text colour with a soft shadow so it reads on any wallpaper
         Row {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 8
+            spacing: 4
             LockText {
                 text: Qt.locale().toString(DateTime.clock.date, "hh")
-                color: SMColors.accent
+                color: "#ffffff"
+                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.45)
                 font.pixelSize: 150
                 font.weight: Font.DemiBold
                 font.letterSpacing: -2
             }
             LockText {
+                text: ":"
+                color: "#ffffff"
+                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.45)
+                font.pixelSize: 150
+                font.weight: Font.DemiBold
+                topPadding: -6
+            }
+            LockText {
                 text: Qt.locale().toString(DateTime.clock.date, "mm")
-                color: SMColors.fg
+                color: "#ffffff"
+                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.45)
                 font.pixelSize: 150
                 font.weight: Font.DemiBold
                 font.letterSpacing: -2
@@ -171,6 +181,8 @@ Item {
         LockText {
             Layout.alignment: Qt.AlignHCenter
             text: Qt.locale().toString(DateTime.clock.date, "dddd • d MMM").toUpperCase()
+            color: "#ffffff"
+            style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.45)
             font.pixelSize: 20
             font.weight: Font.DemiBold
             font.letterSpacing: 3

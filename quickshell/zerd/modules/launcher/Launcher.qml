@@ -1230,12 +1230,12 @@ PanelWindow {
             if (launcherWindow.isCentered) {
                 let baseH = launcherWindow.collapsedCenterHeight;
                 let targetH = Math.max(baseH, launcherWindow.animatedLauncherHeight);
-                return baseH + (targetH - baseH) * animProgress;
+                return Math.round(baseH + (targetH - baseH) * animProgress);
             }
             if (!launcherWindow.isSideAttached) {
-                return launcherWindow.animatedLauncherHeight * animProgress;
+                return Math.round(launcherWindow.animatedLauncherHeight * animProgress);
             }
-            return launcherWindow.animatedLauncherHeight;
+            return Math.round(launcherWindow.animatedLauncherHeight);
         }
 
         opacity: launcherWindow.isCentered
@@ -1897,8 +1897,8 @@ PanelWindow {
                                             renderType: Text.NativeRendering
                                             font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
-                                            font.pixelSize: launcherWindow.s(12)
-                                            font.weight: delegateRoot.isSelected ? Font.Bold : Font.Medium
+                                            font.pixelSize: launcherWindow.s(13)
+                                            font.weight: delegateRoot.isSelected ? Font.Bold : Font.DemiBold
                                             color: delegateRoot.isSelected ? (ThemeBackend.liquidGlass ? ThemeBackend.text : ThemeBackend.crust) : ThemeBackend.text
                                             horizontalAlignment: I18n.textAlignment
                                             elide: Text.ElideRight
@@ -1915,11 +1915,11 @@ PanelWindow {
                                             renderType: Text.NativeRendering
                                             font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
-                                            font.pixelSize: launcherWindow.s(10)
-                                            font.weight: Font.Normal
+                                            font.pixelSize: launcherWindow.s(11)
+                                            font.weight: Font.Medium
                                             color: delegateRoot.isSelected ? (ThemeBackend.liquidGlass ? ThemeBackend.text : ThemeBackend.crust) : ThemeBackend.subtext0
                                             horizontalAlignment: I18n.textAlignment
-                                            opacity: delegateRoot.isSelected ? 0.9 : 0.85
+                                            opacity: delegateRoot.isSelected ? 0.95 : 0.9
                                             elide: Text.ElideRight
                                             verticalAlignment: Text.AlignVCenter
 
@@ -2114,7 +2114,7 @@ PanelWindow {
                                         renderType: Text.NativeRendering
                                         font.hintingPreference: Font.PreferFullHinting
                                         font.family: ThemeBackend.fontFamily
-                                        font.pixelSize: launcherWindow.s(9)
+                                        font.pixelSize: launcherWindow.s(11)
                                         font.weight: emojiDelegateRoot.isSelected ? Font.Bold : Font.Normal
                                         color: emojiDelegateRoot.isSelected ? ((emojiGlass.active || emojiDelegateRoot.lensHandled) ? ThemeBackend.text : ThemeBackend.crust) : ThemeBackend.subtext0
                                         elide: Text.ElideRight
