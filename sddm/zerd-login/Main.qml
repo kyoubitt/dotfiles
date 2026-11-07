@@ -511,12 +511,6 @@ Rectangle {
                         styleColor: Qt.rgba(0, 0, 0, 0.45)
                         color: root.cText
                         verticalAlignment: Text.AlignVCenter
-                        SequentialAnimation on opacity {
-                            running: modelData.colon
-                            loops: Animation.Infinite
-                            NumberAnimation { to: 0.35; duration: 900; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: 1; duration: 900; easing.type: Easing.InOutSine }
-                        }
                     }
                 }
             }

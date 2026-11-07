@@ -168,12 +168,6 @@ Item {
                 font.pixelSize: 150
                 font.weight: Font.DemiBold
                 topPadding: -6
-                SequentialAnimation on opacity {
-                    running: clockView.visible
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.35; duration: 900; easing.type: Easing.InOutSine }
-                    NumberAnimation { to: 1; duration: 900; easing.type: Easing.InOutSine }
-                }
             }
             LockText {
                 text: Qt.locale().toString(DateTime.clock.date, "mm")
