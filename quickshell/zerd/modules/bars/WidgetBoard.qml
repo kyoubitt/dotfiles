@@ -220,7 +220,7 @@ Scope {
             // Dark enough that the windows behind never compete with the cards being arranged.
             Rectangle {
                 anchors.fill: parent
-                color: Qt.rgba(0.02, 0.01, 0.015, 0.88)
+                color: Qt.rgba(0.02, 0.01, 0.015, 0.40)
                 opacity: BarState.board ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 120 } }
                 enabled: false
@@ -322,7 +322,7 @@ Scope {
                         name: frame.modelData.name
                         screenRef: win.screen
                         enabled: false
-                        readonly property real cs: WidgetRegistry.scaleOf(frame.modelData.name)
+                        readonly property real cs: WidgetRegistry.visualScale(frame.modelData.name)
                         scale: cs
                         transformOrigin: Item.TopLeft
                         onCsChanged: WidgetRegistry.report(frame.modelData.name, live.width * cs, live.height * cs)

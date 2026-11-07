@@ -74,25 +74,6 @@ Item {
             readonly property bool wide: root.maxTextWidth >= 60
 
             BarCell {
-                tip: root.player?.trackAlbum ? root.player.trackAlbum : "Player"
-                padding: 2
-                onTapped: mediaPlate.openPopup("media")
-                onMiddle: NowPlaying.togglePlaying()
-                ClippingRectangle {
-                    width: 24; height: 24; radius: 8
-                    color: BarStyle.cardHigh
-                    Image {
-                        anchors.fill: parent
-                        source: NowPlaying.activeTrack?.artUrl ?? ""
-                        sourceSize: Qt.size(48, 48)
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        visible: status === Image.Ready
-                    }
-                    BarIcon { anchors.centerIn: parent; name: "music_note"; size: 16; color: BarStyle.subtext; visible: (NowPlaying.activeTrack?.artUrl ?? "") === "" }
-                }
-            }
-            BarCell {
                 visible: mediaPlate.wide
                 tip: (root.player?.trackTitle ?? "") + ((root.player?.trackArtist ?? "") ? "  ·  " + root.player.trackArtist : "")
                 padding: 6

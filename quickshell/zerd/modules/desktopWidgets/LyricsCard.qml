@@ -16,6 +16,7 @@ IrisWidgetFace {
     property real pos: 0
     property int cur: 0
     property real frac: 0
+    readonly property int reach: Math.max(2, Math.min(5, Math.round(height / 80)))      // lines shown each side: a bigger card shows more lines, not bigger letters
     property real base: 0               // the player's last answer, in seconds
     property real stamp: 0              // when that answer arrived
     readonly property bool ready: LyricsStore.state === "ok" && lines.length > 0
@@ -72,7 +73,7 @@ IrisWidgetFace {
                     Behavior on k { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
                     width: col.width
                     height: base.height * k
-                    opacity: Math.abs(off) > 2 ? 0 : (sel ? 1 : Math.max(0.15, 0.55 - Math.abs(off) * 0.2))
+                    opacity: Math.abs(off) > root.reach ? 0 : (sel ? 1 : Math.max(0.15, 0.55 - Math.abs(off) * 0.12))
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                     Item {
                         width: col.width; height: base.height
