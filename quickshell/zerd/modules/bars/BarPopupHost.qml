@@ -25,6 +25,12 @@ Scope {
         target: "barpopup"
         function open(kind: string): void { BarState.sidebar = ""; GlobalStates.barPopup = { kind: kind, x: 960 } }
         function close(): void { GlobalStates.barPopup = null }
+
+    // The copied popups: file, size, and which screen corner they sit in (his WindowRegistry layout).
+    readonly property var copied: ({
+        volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 }
+    })
+    readonly property var spec: copied[popup?.kind ?? ""] ?? null
     }
     function close(): void { GlobalStates.barPopup = null }
 
@@ -46,8 +52,41 @@ Scope {
             MouseArea { id: backdrop; y: 50; width: parent.width; height: parent.height - 50; onClicked: root.close() }
             Item { focus: true; Keys.onEscapePressed: root.close() }
 
+            Shortcut { sequence: "Escape"; enabled: root.popup !== null; onActivated: root.close() }
+
+            // A popup copied from serpantinum: created when asked for, plays its own enter and leave.
+            Item {
+                id: stage
+                visible: pl.active
+                width: root.spec?.w ?? 0
+                height: root.spec?.h ?? 0
+                x: root.spec?.at === "left" ? (root.spec?.m ?? 0) : root.spec?.at === "center" ? Math.round((win.width - width) / 2) : win.width - width - (root.spec?.m ?? 0)
+                y: 52
+                MouseArea { anchors.fill: parent }
+                Loader {
+                    id: pl
+                    anchors.fill: parent
+                    active: false
+                    onLoaded: item.visible = true
+                }
+            }
+            Connections {
+                target: root
+                function onPopupChanged() {
+                    if (root.popup && root.spec) {
+                        if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }
+                        pl.active = true
+                        if (pl.item) pl.item.visible = true
+                    } else if (pl.active) {
+                        if (pl.item && pl.item.startExit) pl.item.startExit(() => { if (!root.popup || !root.spec) pl.active = false })
+                        else pl.active = false
+                    }
+                }
+            }
+
             Rectangle {
                 id: card
+                visible: root.spec === null
                 readonly property int pad: 14
                 width: Math.max(220, body.implicitWidth + 2 * pad)
                 height: body.implicitHeight + 2 * pad

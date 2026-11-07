@@ -11,3 +11,6 @@ GlassFill 1.0 display/GlassFill.qml
 AxisFlow 1.0 layout/AxisFlow.qml
 GlassFillets 1.0 display/GlassFillets.qml
 GlassLens 1.0 display/GlassLens.qml
+Draggable 1.0 behavior/Draggable.qml
+LiquidFill 1.0 display/LiquidFill.qml
+Switch 1.0 inputs/Switch.qml
