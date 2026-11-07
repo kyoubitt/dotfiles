@@ -298,7 +298,9 @@ Singleton {
                 property JsonObject sidebars: JsonObject {
                     property bool edgeHover: true
                     property string edgeSide: "both"
-                    property list<string> expanded: ["today", "calendar", "timer", "clipboard", "tasks", "widgets"]
+                    property list<string> expanded: ["calendar"]
+                    // set once after the sections were collapsed by default (the saved list from before is dropped one time)
+                    property bool collapsedV2: false
                     // Right panel: section order and the ones switched off (names as in RightSections).
                     property list<string> rightOrder: []
                     property list<string> leftOrder: []

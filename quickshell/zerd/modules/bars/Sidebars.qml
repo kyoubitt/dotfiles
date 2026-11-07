@@ -127,10 +127,15 @@ Scope {
             property bool swapping: false
             // the panel shows its sections, or the translator as a tab of its own; closing resets it
             property string tab: "main"
+            Component.onCompleted: {
+                const sb = Config.options?.bars?.sidebars
+                if (sb && !sb.collapsedV2) { sb.expanded = ["calendar"]; sb.collapsedV2 = true }
+            }
+            property string query: ""
             readonly property bool onRight: displaySide === "right"
             // How far the panel has grown out of its screen edge (iNiR's morph): 0 = a thin band on the edge, 1 = open.
             property real progress: 0
-            onOnChanged: { progress = on ? 1 : 0; if (!on) tab = "main" }
+            onOnChanged: { progress = on ? 1 : 0; if (!on) { tab = "main"; query = "" } }
             Behavior on progress { NumberAnimation { id: slide; duration: win.on ? 150 : 100; easing.type: win.on ? Easing.OutCubic : Easing.InCubic } }
             Binding { target: BarState; property: "panelEnter"; value: win.progress }
             onWantedChanged: {
@@ -222,40 +227,88 @@ Scope {
                     PanelButton { icon: "close"; size: 36; tip: "Close"; onTapped: BarState.closeAll() }
                 }
 
-                // tabs under the header: the panel, and the translator as its own page
+                // Edit widgets: a slim button under the header
                 BarButton {
                     id: editBtn
                     visible: win.onRight
                     x: 20; y: 62
                     tone: "tonal"
-                    width: parent.width - 40; height: 40; radius: 20
+                    width: parent.width - 40; height: 36; radius: 18
                     onTapped: BarState.openBoard()
                     Row {
                         anchors.centerIn: parent; spacing: 8
-                        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "widgets"; size: 18; fill: 1; color: BarStyle.accent }
-                        BarText { anchors.verticalCenter: parent.verticalCenter; text: "Edit widgets"; font.weight: Font.DemiBold; color: editBtn.ink }
+                        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "widgets"; size: 16; fill: 1; color: BarStyle.accent }
+                        BarText { anchors.verticalCenter: parent.verticalCenter; text: "Edit widgets"; font.pixelSize: 13; font.weight: Font.DemiBold; color: editBtn.ink }
                     }
                 }
-                Row {
+                // Sections / Translate as one segmented control with a sliding highlight
+                Rectangle {
                     id: tabs
                     visible: win.onRight
-                    x: 20; y: 110
-                    spacing: 6
+                    x: 20; y: 106
+                    width: parent.width - 40; height: 36; radius: 18
+                    color: BarStyle.card
+                    border.width: 1; border.color: BarStyle.edge
+                    readonly property var items: [{ k: "main", t: "Sections", i: "widgets" }, { k: "translate", t: "Translate", i: "translate" }]
+                    Rectangle {
+                        y: 3; height: parent.height - 6; radius: height / 2
+                        width: (parent.width - 6) / 2
+                        x: 3 + (win.tab === "translate" ? width : 0)
+                        color: BarStyle.accentContainer
+                        Behavior on x { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.OutCubic } }
+                    }
                     Repeater {
-                        model: win.onRight ? [{ k: "main", t: "Sections", i: "widgets" }, { k: "translate", t: "Translate", i: "translate" }] : []
-                        delegate: BarButton {
+                        model: tabs.items
+                        delegate: Item {
                             id: tb
                             required property var modelData
-                            tone: "tonal"; toggled: win.tab === modelData.k
-                            height: 32; radius: 16; width: tbRow.implicitWidth + 28
-                            onTapped: win.tab = modelData.k
+                            required property int index
+                            x: 3 + index * (tabs.width - 6) / 2; y: 3
+                            width: (tabs.width - 6) / 2; height: tabs.height - 6
+                            readonly property bool on: win.tab === modelData.k
                             Row {
-                                id: tbRow
                                 anchors.centerIn: parent; spacing: 6
-                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: tb.modelData.i; size: 16; fill: tb.toggled ? 1 : 0; color: tb.ink }
-                                BarText { anchors.verticalCenter: parent.verticalCenter; text: tb.modelData.t; font.pixelSize: 12; font.weight: Font.DemiBold; color: tb.ink }
+                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: tb.modelData.i; size: 16; fill: tb.on ? 1 : 0; color: tb.on ? BarStyle.onAccentContainer : BarStyle.subtext }
+                                BarText { anchors.verticalCenter: parent.verticalCenter; text: tb.modelData.t; font.pixelSize: 13; font.weight: Font.DemiBold; color: tb.on ? BarStyle.onAccentContainer : BarStyle.subtext }
                             }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: win.tab = tb.modelData.k }
                         }
+                    }
+                }
+                // search: filters the sections below; Enter opens the first match, "translate" jumps to the translator
+                Rectangle {
+                    id: searchBox
+                    visible: win.onRight && win.tab === "main"
+                    x: 20; y: 150
+                    width: parent.width - 40; height: 38; radius: 19
+                    color: BarStyle.card
+                    border.width: 1; border.color: searchInput.activeFocus ? BarStyle.accent : BarStyle.edge
+                    Behavior on border.color { ColorAnimation { duration: BarStyle.motionFast } }
+                    BarIcon { x: 14; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 18; color: BarStyle.subtext }
+                    TextInput {
+                        id: searchInput
+                        x: 42; width: parent.width - 42 - 40; height: parent.height
+                        verticalAlignment: TextInput.AlignVCenter
+                        color: BarStyle.text; selectionColor: BarStyle.accent; selectedTextColor: BarStyle.onAccent
+                        font.family: Appearance.font.family.expressive; font.pixelSize: 13
+                        renderType: Text.NativeRendering
+                        clip: true
+                        text: win.query
+                        onTextChanged: win.query = text
+                        Keys.onEscapePressed: { text = ""; focus = false }
+                        onAccepted: {
+                            const q = text.trim().toLowerCase()
+                            if (q.length > 0 && "translate translator language".includes(q)) { win.tab = "translate"; return }
+                            const f = rightSections.firstMatch
+                            if (f !== "" && !Config.options.bars.sidebars.expanded.includes(f)) Config.options.bars.sidebars.expanded = Config.options.bars.sidebars.expanded.concat([f])
+                        }
+                        BarText { visible: searchInput.text.length === 0; anchors.verticalCenter: parent.verticalCenter; text: "Search sections and tools"; font.pixelSize: 13; color: BarStyle.subtext; opacity: 0.8 }
+                    }
+                    BarIcon {
+                        visible: searchInput.text.length > 0
+                        anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                        name: "close"; size: 16; color: BarStyle.subtext
+                        MouseArea { anchors.fill: parent; anchors.margins: -8; cursorShape: Qt.PointingHandCursor; onClicked: searchInput.text = "" }
                     }
                 }
 
@@ -272,7 +325,7 @@ Scope {
                     visible: win.tab === "main"
                     anchors.fill: parent
                     anchors.margins: 20
-                    anchors.topMargin: win.onRight ? 156 : 76
+                    anchors.topMargin: win.onRight ? 200 : 76
                     anchors.bottomMargin: 8
                     contentHeight: column.implicitHeight + 24
                     clip: true
@@ -352,8 +405,10 @@ Scope {
 
                         // ---- Right: sections
                         RightSections {
+                            id: rightSections
                             visible: win.onRight
                             width: parent.width
+                            query: win.query
                         }
                     }
                 }

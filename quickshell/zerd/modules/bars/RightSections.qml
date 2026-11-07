@@ -11,6 +11,24 @@ Column {
 
     spacing: 10
 
+    // the search text of the panel: sections whose name or keywords do not match are left out
+    property string query: ""
+    readonly property var keywords: ({
+        calendar: "calendar date month day agenda today",
+        notifications: "notifications alerts messages clear mute",
+        weather: "weather forecast temperature rain wind",
+        timer: "timer stopwatch focus pomodoro countdown",
+        calculator: "calculator math numbers",
+        converter: "converter units length mass temperature speed data volume",
+        notes: "notes scratch memo text"
+    })
+    function matches(name: string): bool {
+        const q = root.query.trim().toLowerCase()
+        if (q.length === 0) return true
+        return (name + " " + (root.keywords[name] ?? "")).toLowerCase().includes(q)
+    }
+    readonly property var firstMatch: root.order.filter(n => !root.hidden.includes(n) && root.matches(n))[0] ?? ""
+
     readonly property var defaults: ["calendar", "notifications", "weather", "timer", "calculator", "converter", "notes"]
     readonly property var stored: Config.options?.bars?.sidebars?.rightOrder ?? []
     readonly property var order: root.stored.filter(n => root.defaults.includes(n)).concat(root.defaults.filter(n => !root.stored.includes(n)))
@@ -88,7 +106,7 @@ Column {
         width: parent.width
         names: root.defaults
         order: root.order
-        hidden: root.hidden
+        hidden: root.hidden.concat(root.defaults.filter(n => !root.matches(n)))
         comps: root.comps
         onMoved: list => Config.options.bars.sidebars.rightOrder = list
     }
