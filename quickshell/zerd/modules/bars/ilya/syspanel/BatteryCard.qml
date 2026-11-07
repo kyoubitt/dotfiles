@@ -139,7 +139,7 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: PowerProfiles.profile = index === 0 ? PowerProfile.PowerSaver : (index === 1 ? PowerProfile.Balanced : PowerProfile.Performance)
+                        onClicked: { Sounds.playSfx("reusables/switch/sfx.wav", 0.6); PowerProfiles.profile = index === 0 ? PowerProfile.PowerSaver : (index === 1 ? PowerProfile.Balanced : PowerProfile.Performance) }
                     }
                 }
             }

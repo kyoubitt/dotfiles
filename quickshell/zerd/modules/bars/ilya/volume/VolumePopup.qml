@@ -118,7 +118,7 @@ Item {
     readonly property string activeName: {
         if (!activeNode) return I18n.t("volumepopup.no_device");
         if (activeTab === "apps") return Audio.getNodeAppName(activeNode);
-        return Audio.getNodeName(activeNode);
+        return Audio.friendlyName(activeNode);
     }
 
     readonly property string activeDesc: {
@@ -217,8 +217,8 @@ Item {
                     transform: Translate { y: window.s(25) * (1.0 - introHeader) }
 
                     Item {
-                        Layout.preferredWidth: window.s(110)
-                        Layout.preferredHeight: window.s(110)
+                        Layout.preferredWidth: window.s(140)
+                        Layout.preferredHeight: window.s(140)
 
                         Rectangle {
                             anchors.centerIn: parent
@@ -525,7 +525,11 @@ Item {
                         readonly property string tab: window.activeTab
                         readonly property string outputName: window.activeOutputName
                         readonly property string inputName: window.activeInputName
-                        anchors.fill: parent
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        // outputs: the devices take what they need and the apps sit right under them; the other tabs fill the area
+                        height: window.activeTab === "outputs" && Audio.apps.length > 0 ? Math.min(contentHeight, Math.max(window.s(100), parent.height * 0.5)) : parent.height
                         spacing: window.s(10)
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
@@ -559,7 +563,7 @@ Item {
                             readonly property bool isActiveNode: !!ListView.view && (ListView.view.tab === "outputs" ? (!!node && node.name === ListView.view.outputName) : (ListView.view.tab === "inputs" ? (!!node && node.name === ListView.view.inputName) : false))
                             readonly property int nodeVol: node && node.audio ? Math.round(node.audio.volume * 100) : 0
                             readonly property bool nodeMute: node && node.audio ? node.audio.muted : false
-                            readonly property string nodeDesc: !!ListView.view && ListView.view.tab === "apps" ? Audio.getNodeAppName(node) : Audio.getNodeName(node)
+                            readonly property string nodeDesc: !!ListView.view && ListView.view.tab === "apps" ? Audio.getNodeAppName(node) : Audio.friendlyName(node)
                             readonly property string nodeNameStr: Audio.getNodeSubDesc(node)
 
                             property bool isLoaded: false
@@ -725,6 +729,102 @@ Item {
                                         color: ThemeBackend.subtext0
                                         text: delegateRoot.nodeVol + "%"
                                         horizontalAlignment: Text.AlignRight
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // per-app volume right under the output devices
+                    Item {
+                        id: appsBlock
+                        visible: window.activeTab === "outputs" && Audio.apps.length > 0
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: contentList.bottom
+                        anchors.topMargin: window.s(12)
+                        anchors.bottom: parent.bottom
+
+                        Text {
+                            id: appsTitle
+                            renderType: Text.NativeRendering
+                            text: "Apps"
+                            font.family: ThemeBackend.fontFamily
+                            font.pixelSize: 13
+                            font.weight: Font.DemiBold
+                            color: ThemeBackend.subtext0
+                        }
+
+                        ListView {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: appsTitle.bottom
+                            anchors.topMargin: window.s(8)
+                            anchors.bottom: parent.bottom
+                            clip: true
+                            spacing: window.s(6)
+                            boundsBehavior: Flickable.StopAtBounds
+                            model: Audio.apps
+
+                            delegate: Rectangle {
+                                id: appRow
+                                required property var modelData
+                                width: ListView.view.width
+                                height: window.s(40)
+                                radius: window.s(12)
+                                color: ThemeBackend.surface0
+                                readonly property int vol: modelData && modelData.audio ? Math.round(modelData.audio.volume * 100) : 0
+                                readonly property bool muted: modelData && modelData.audio ? modelData.audio.muted : false
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: window.s(12)
+                                    anchors.rightMargin: window.s(12)
+                                    spacing: window.s(10)
+                                    Text {
+                                        renderType: Text.NativeRendering
+                                        Layout.preferredWidth: window.s(96)
+                                        elide: Text.ElideRight
+                                        text: Audio.getNodeAppName(appRow.modelData)
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        color: appRow.muted ? ThemeBackend.subtext0 : ThemeBackend.text
+                                    }
+                                    Draggable {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: window.s(16)
+                                        Layout.alignment: Qt.AlignVCenter
+                                        from: 0.0
+                                        to: 100.0
+                                        value: appRow.vol
+                                        backgroundColor: ThemeBackend.surface1
+                                        accentColor: appRow.muted ? ThemeBackend.surface2 : window.tabColor
+                                        gradColor1: appRow.muted ? ThemeBackend.surface2 : window.tabColor
+                                        gradColor2: appRow.muted ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.05)
+                                        gradColor3: appRow.muted ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.10)
+                                        cornerRadius: window.s(5)
+                                        handleSize: window.s(18)
+                                        handleColor: appRow.muted ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.15)
+                                        handleHoverColor: Qt.lighter(window.tabColor, 1.5)
+                                        handleDragColor: Qt.lighter(window.tabColor, 1.45)
+                                        handleBorderColor: Qt.rgba(0, 0, 0, 0.2)
+                                        onMoved: val => {
+                                            const pct = Math.max(0, Math.min(100, Math.round(val)));
+                                            if (pct > 0 && appRow.muted) Audio.toggleMute(appRow.modelData);
+                                            Audio.setVolume(appRow.modelData, pct);
+                                        }
+                                    }
+                                    Text {
+                                        renderType: Text.NativeRendering
+                                        Layout.preferredWidth: window.s(34)
+                                        horizontalAlignment: Text.AlignRight
+                                        text: appRow.vol + "%"
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: 12
+                                        font.weight: Font.DemiBold
+                                        font.features: { "tnum": 1 }
+                                        color: ThemeBackend.subtext0
                                     }
                                 }
                             }

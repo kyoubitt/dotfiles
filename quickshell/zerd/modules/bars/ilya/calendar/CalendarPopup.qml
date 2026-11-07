@@ -130,7 +130,7 @@ Item {
             font.pixelSize: 18
             color: ThemeBackend.text
         }
-        MouseArea { id: am; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: arrow.tapped() }
+        MouseArea { id: am; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { Sounds.playSfx("reusables/iconbutton/click.wav", 0.6); arrow.tapped() } }
     }
 
     component Pill: Rectangle {
@@ -149,7 +149,7 @@ Item {
             font.weight: Font.DemiBold
             color: ThemeBackend.crust
         }
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: pill.tapped() }
+        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { Sounds.playSfx("reusables/clickbutton/click.wav", 0.6); pill.tapped() } }
     }
 
     Rectangle {
@@ -262,7 +262,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: root.pickDate(cell.modelData.date)
+                                    onClicked: { Sounds.playSfx("reusables/clickbutton/click2.wav", 0.5); root.pickDate(cell.modelData.date) }
                                 }
                             }
                         }

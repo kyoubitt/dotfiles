@@ -174,6 +174,21 @@ Singleton {
         return node.properties?.["device.description"] || node.description || node.name || "Unknown Device";
     }
 
+    // 'Raptor Lake High Definition Audio Controller Headphones' becomes 'Headphones'; the technical id stays as the small line
+    function friendlyName(node) {
+        let d = getNodeName(node);
+        if (!node || node.isStream) return d;
+        const ci = d.toLowerCase().lastIndexOf("controller ");
+        if (ci !== -1) d = d.slice(ci + "controller ".length);
+        const l = d.toLowerCase();
+        if (/head(phone|set)/.test(l)) return /headset/.test(l) ? "Headset" : "Headphones";
+        if (/speaker/.test(l)) return "Speakers";
+        if (/microphone|\bmic\b/.test(l)) return /headset/.test(l) ? "Headset microphone" : "Microphone";
+        if (/hdmi|displayport/.test(l)) return "HDMI / DisplayPort";
+        d = d.replace(/\s*\((analog|digital)[^)]*\)\s*$/i, "").replace(/\s+(analog|digital)\s+(stereo|mono|output|input)$/i, "");
+        return d.length > 0 ? d : getNodeName(node);
+    }
+
     function getNodeSubDesc(node) {
         if (!node) return "";
         if (node.isStream) {
