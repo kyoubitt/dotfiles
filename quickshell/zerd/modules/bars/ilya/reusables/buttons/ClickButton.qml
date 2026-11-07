@@ -111,6 +111,8 @@ Item {
             spacing: 8
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: iconLabel
                 visible: root.buttonIcon !== ""
                 text: root.buttonIcon
@@ -127,6 +129,8 @@ Item {
                 spacing: 0
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: mainLabel
                     visible: root.buttonText !== ""
                     text: root.buttonText
@@ -140,6 +144,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: subLabel
                     visible: root.subText !== ""
                     text: root.subText

@@ -313,7 +313,7 @@ BarFaceBase {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.wifiStyle === "text" && !root.isPreview
-        onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network wifi"])
+        onClicked: Popups.toggle("wifi", root)
     }
 
     AxisFlow {
@@ -333,6 +333,8 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
                 text: root.effectiveIcon
@@ -346,6 +348,8 @@ BarFaceBase {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             visible: root.showName
             text: root.isVertical ? (root.effectiveName.length > 6 ? (root.effectiveName.substring(0, 5) + "…") : root.effectiveName) : root.effectiveName
             font.family: ThemeBackend.fontFamily
@@ -390,7 +394,7 @@ BarFaceBase {
             transform: Translate { y: wifiPill.initAnimTrigger ? 0 : s(15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network wifi"])
+            onClicked: if (!root.isPreview) Popups.toggle("wifi", root)
         }
     }
 
@@ -408,7 +412,7 @@ BarFaceBase {
             textFontSize: s(root.isCompact ? 9 : 10)
             accentColor: root.isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: root.isActive ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network wifi"])
+            onClicked: if (!root.isPreview) Popups.toggle("wifi", root)
         }
     }
 }

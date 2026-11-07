@@ -1,6 +1,6 @@
 pragma Singleton
 import QtQuick
-import "../../"
+import "."
 
 HoverMenuController {
     id: controller

@@ -57,6 +57,8 @@ Item {
             spacing: root.marqueeSpacing
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: mainText
                 text: root.text
                 color: root.color
@@ -65,6 +67,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: cloneText
                 text: root.text
                 color: root.color

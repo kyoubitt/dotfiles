@@ -66,6 +66,8 @@ Item {
             spacing: -2
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: timeText
                 anchors.left: parent.left
                 text: widget ? widget.timeStr : (typeof DateTime !== "undefined" ? DateTime.time : "12:00")
@@ -76,6 +78,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: dateText
                 visible: widget ? widget.showDate : true
                 anchors.left: parent.left
@@ -96,6 +100,8 @@ Item {
             spacing: widget ? widget.s(1) : 1
 
             Text {
+
+                renderType: Text.NativeRendering
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: parsedTime.hours
                 font.family: ThemeBackend.fontFamily
@@ -105,6 +111,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 visible: parsedTime.hasMinutes
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: parsedTime.minutes
@@ -115,6 +123,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 visible: parsedTime.hasSeconds
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: parsedTime.seconds
@@ -125,6 +135,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 visible: parsedTime.ampm !== ""
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: parsedTime.ampm
@@ -150,6 +162,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 visible: widget ? widget.showDate : true
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: widget ? widget.dayStr : (typeof DateTime !== "undefined" ? DateTime.day : "18")
@@ -160,6 +174,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 visible: widget ? widget.showDate : true
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: widget ? widget.monthStr : (typeof DateTime !== "undefined" ? DateTime.monthShort : "Sep")

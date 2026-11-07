@@ -190,7 +190,7 @@ BarFaceBase {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.batStyle === "text" && !root.isPreview
-        onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle system"])
+        onClicked: Popups.toggle("system", root)
     }
 
     AxisFlow {
@@ -210,6 +210,8 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
                 text: root.batIcon
@@ -223,6 +225,8 @@ BarFaceBase {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             visible: !root.isDesktop && root.effectiveShowPercent
             text: root.batPercent
             font.family: ThemeBackend.fontFamily
@@ -261,7 +265,7 @@ BarFaceBase {
                 textFontSize: s(root.isCompact ? 11 : 12)
                 accentColor: Qt.lighter(ThemeBackend.surface0, root.isCompact && !root.lockLook ? 1.18 : 1.28)
                 textColor: root.lockLook ? root.lockBatColor : root.batDynamicColor
-                onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle system"])
+                onClicked: if (!root.isPreview) Popups.toggle("system", root)
             }
         }
     }
@@ -298,6 +302,8 @@ BarFaceBase {
                 property color accentColor: batMouseArea.pressed ? Qt.darker(baseAccentColor, 1.15) : (batMouseArea.containsMouse ? Qt.lighter(baseAccentColor, 1.08) : baseAccentColor)
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: dummyPercentMetrics
                     visible: false
                     text: root.batPercent ? root.batPercent : "100%"
@@ -307,6 +313,8 @@ BarFaceBase {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: dummyIconMetrics
                     visible: false
                     text: (!root.isDesktop && root.batStyle === "minimal" && root.isCharging) ? "󱐋" : (root.batIcon ? root.batIcon : "󰁹")
@@ -374,6 +382,8 @@ BarFaceBase {
                     spacing: root.isDesktop ? 0 : s(root.isCompact ? 5 : 6)
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         id: batIconText
                         visible: root.effectiveShowIcon
                         text: (!root.isDesktop && root.batStyle === "minimal" && root.isCharging) ? "󱐋" : root.batIcon
@@ -384,6 +394,8 @@ BarFaceBase {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         id: batPercentText
                         visible: !root.isDesktop && root.effectiveShowPercent
                         text: root.batPercent
@@ -410,6 +422,8 @@ BarFaceBase {
                         spacing: contentRow.spacing
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             visible: batIconText.visible
                             text: batIconText.text
                             font.family: batIconText.font.family
@@ -419,6 +433,8 @@ BarFaceBase {
                         }
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             visible: batPercentText.visible
                             text: batPercentText.text
                             font.family: batPercentText.font.family
@@ -436,7 +452,7 @@ BarFaceBase {
                     hoverEnabled: true
                     enabled: !root.isPreview
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle system"])
+                    onClicked: Popups.toggle("system", root)
                 }
             }
 
@@ -565,6 +581,8 @@ BarFaceBase {
                     height: sideBatIconText.implicitHeight
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         id: sideBatIconText
                         anchors.centerIn: parent
                         text: (!root.isDesktop && root.batStyle === "minimal" && root.isCharging) ? "󱐋" : root.batIcon
@@ -584,6 +602,8 @@ BarFaceBase {
                     visible: !root.isDesktop && root.effectiveShowIcon && batBtn.fillRatio > 0
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         x: sideContentBox.x
                         y: sideContentBox.y - batBtn.fillY
                         text: sideBatIconText.text
@@ -599,7 +619,7 @@ BarFaceBase {
                     hoverEnabled: true
                     enabled: !root.isPreview
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle system"])
+                    onClicked: Popups.toggle("system", root)
                 }
             }
         }

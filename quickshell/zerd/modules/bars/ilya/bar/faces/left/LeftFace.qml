@@ -179,6 +179,8 @@ Item {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             anchors.centerIn: parent
             anchors.verticalCenterOffset: menuBtn.glyphYOffset
             visible: root.iconOnly
@@ -226,8 +228,8 @@ Item {
                 activeColor: itemId === "caffeine" ? Qt.tint(ThemeBackend.peach, "#5c3016") : ThemeBackend.peach
                 onClicked: {
                     if (root.isPreview) return;
-                    if (itemId === "settings") Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle settings"]);
-                    else if (itemId === "launcher") Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle launcher"]);
+                    if (itemId === "settings") Popups.toggle("settings", root);
+                    else if (itemId === "launcher") Popups.toggle("launcher", root);
                     else if (itemId === "nightlight") root.toggleNightLight();
                     else if (itemId === "caffeine") root.setCaffeine(!root.caffeineActive);
                     else if (itemId === "shuffle") root.shuffleWallpaper(menuItem);

@@ -137,6 +137,8 @@ Item {
                 height: implicitHeight
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: hourText
                     x: 0
                     anchors.verticalCenter: parsedTime.hasSeconds ? parent.verticalCenter : undefined
@@ -151,6 +153,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: minuteText
                     visible: !parsedTime.hasSeconds && parsedTime.hasMinutes
                     x: hourText.width + (widget ? widget.s(1) : 1)
@@ -165,6 +169,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: ampmText
                     visible: !parsedTime.hasSeconds && parsedTime.ampm !== ""
                     x: parsedTime.hasMinutes
@@ -191,6 +197,7 @@ Item {
                     Row {
                         spacing: widget ? widget.s(2) : 2
                         Text {
+                            renderType: Text.NativeRendering
                             text: parsedTime.minutes
                             font.family: materialFaceRoot.clockFont
                             font.pixelSize: widget ? widget.s(widget.isCompact ? 11 : 12) : 12
@@ -201,6 +208,8 @@ Item {
                         }
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             visible: parsedTime.ampm !== ""
                             text: parsedTime.ampm
                             font.family: materialFaceRoot.clockFont
@@ -214,6 +223,8 @@ Item {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         x: widget ? widget.s(2) : 2
                         text: parsedTime.seconds
                         font.family: materialFaceRoot.clockFont
@@ -243,6 +254,8 @@ Item {
                 spacing: widget ? widget.s(widget.isCompact ? 2 : 3) : 3
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: dayText
                     anchors.verticalCenter: parent.verticalCenter
                     text: parsedDate.day
@@ -260,6 +273,8 @@ Item {
                     spacing: 0
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         visible: parsedDate.weekday !== ""
                         text: parsedDate.weekday
                         font.family: materialFaceRoot.clockFont
@@ -271,6 +286,8 @@ Item {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         visible: parsedDate.month !== ""
                         text: parsedDate.month
                         font.family: materialFaceRoot.clockFont
@@ -319,6 +336,8 @@ Item {
                 height: implicitHeight
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: sideHourText
                     x: 0
                     anchors.verticalCenter: parsedTime.hasSeconds ? parent.verticalCenter : undefined
@@ -338,6 +357,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: sideMinuteText
                     visible: !parsedTime.hasSeconds && parsedTime.hasMinutes
                     x: widget ? widget.s(widget.isCompact ? 4 : 5) : 5
@@ -352,6 +373,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: sideAmpmText
                     visible: !parsedTime.hasSeconds && parsedTime.ampm !== ""
                     x: parsedTime.hasMinutes
@@ -376,6 +399,8 @@ Item {
                     spacing: widget ? widget.s(widget.isCompact ? 0 : 0.5) : 0.5
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         text: parsedTime.minutes
                         font.family: materialFaceRoot.clockFont
                         font.pixelSize: widget ? widget.s(widget.isCompact ? 9 : 10) : 10
@@ -386,6 +411,8 @@ Item {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         x: widget ? widget.s(widget.isCompact ? 1 : 1.5) : 1.5
                         text: parsedTime.seconds
                         font.family: materialFaceRoot.clockFont
@@ -397,6 +424,8 @@ Item {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         visible: parsedTime.ampm !== ""
                         x: widget ? widget.s(widget.isCompact ? 1 : 1.5) : 1.5
                         text: parsedTime.ampm
@@ -426,6 +455,8 @@ Item {
                 spacing: 0
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widget ? widget.dayStr : (typeof DateTime !== "undefined" ? DateTime.day : "18")
                     font.family: materialFaceRoot.clockFont
@@ -436,6 +467,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widget ? widget.monthStr : (typeof DateTime !== "undefined" ? DateTime.monthShort : "Sep")
                     font.family: materialFaceRoot.clockFont

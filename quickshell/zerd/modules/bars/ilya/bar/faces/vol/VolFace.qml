@@ -116,7 +116,7 @@ BarFaceBase {
             if (mouse.button === Qt.RightButton) {
                 if (Audio.defaultSink) Audio.toggleMute(Audio.defaultSink)
             } else {
-                Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle volume"])
+                Popups.toggle("volume", root)
             }
         }
 
@@ -159,6 +159,8 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
                 text: root.volIcon
@@ -172,6 +174,8 @@ BarFaceBase {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             visible: root.showPercent
             text: root.volPercent
             font.family: ThemeBackend.fontFamily
@@ -218,7 +222,7 @@ BarFaceBase {
             transform: Translate { y: volPill.initAnimTrigger ? 0 : s(15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle volume"])
+            onClicked: if (!root.isPreview) Popups.toggle("volume", root)
             onRightClicked: if (!root.isPreview && Audio.defaultSink) Audio.toggleMute(Audio.defaultSink)
 
             property real wheelAccumulator: 0
@@ -256,7 +260,7 @@ BarFaceBase {
             iconFontSize: s(root.isCompact ? 14 : 15)
             accentColor: root.isSoundActive ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.12) : ThemeBackend.surface1)
             textColor: root.isSoundActive ? ThemeBackend.base : (root.isCompact ? ThemeBackend.text : ThemeBackend.subtext0)
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle volume"])
+            onClicked: if (!root.isPreview) Popups.toggle("volume", root)
         }
     }
 }

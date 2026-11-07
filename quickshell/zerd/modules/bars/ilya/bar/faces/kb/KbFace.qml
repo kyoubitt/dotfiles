@@ -146,6 +146,8 @@ BarFaceBase {
             height: width
 
             Text {
+
+                renderType: Text.NativeRendering
                 anchors.centerIn: parent
                 text: "󰌌"
                 font.family: ThemeBackend.iconFont
@@ -158,6 +160,8 @@ BarFaceBase {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             text: root.kbLayout
             font.family: ThemeBackend.fontFamily
             font.pixelSize: s(root.isCompact ? 11 : 12)

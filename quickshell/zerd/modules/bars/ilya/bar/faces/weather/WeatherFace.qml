@@ -44,7 +44,7 @@ Item {
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             if (Caching.serpantinumDir) {
-                Quickshell.execDetached(["bash", Caching.serpantinumDir + "/scripts/qs_manager.sh", "toggle", "calendar"]);
+                Popups.toggle("calendar", root);
             }
         }
     }
@@ -71,6 +71,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 text: root.weatherIcon
                 font.family: ThemeBackend.iconFont
                 font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 16 : 18) : (root.isCompact ? 16 : 18)) : (barWindow ? barWindow.cs(root.isCompact ? 18 : 20) : (root.isCompact ? 18 : 20))
@@ -79,6 +81,8 @@ Item {
             }
 
             Text {
+
+                renderType: Text.NativeRendering
                 text: root.weatherTemp
                 font.family: ThemeBackend.fontFamily
                 font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)) : (barWindow ? barWindow.cs(root.isCompact ? 14 : 15) : (root.isCompact ? 14 : 15))

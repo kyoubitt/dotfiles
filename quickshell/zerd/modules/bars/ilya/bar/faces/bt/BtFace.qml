@@ -219,7 +219,7 @@ BarFaceBase {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.btStyle === "text" && !root.isPreview
-        onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network bt"])
+        onClicked: Popups.toggle("bt", root)
     }
 
     AxisFlow {
@@ -239,6 +239,8 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
+
+                renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
                 text: root.btIcon
@@ -252,6 +254,8 @@ BarFaceBase {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             visible: root.showName
             text: root.isVertical ? (root.btDevice.length > 6 ? (root.btDevice.substring(0, 5) + "…") : root.btDevice) : root.btDevice
             font.family: ThemeBackend.fontFamily
@@ -297,7 +301,7 @@ BarFaceBase {
             transform: Translate { y: btPill.initAnimTrigger ? 0 : s(15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network bt"])
+            onClicked: if (!root.isPreview) Popups.toggle("bt", root)
         }
     }
 
@@ -315,7 +319,7 @@ BarFaceBase {
             textFontSize: s(root.isCompact ? 9 : 10)
             accentColor: root.isBtOn ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: root.isBtOn ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle network bt"])
+            onClicked: if (!root.isPreview) Popups.toggle("bt", root)
         }
     }
 }

@@ -86,6 +86,8 @@ Item {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: root.iconOffsetX
             anchors.verticalCenterOffset: root.iconOffsetY

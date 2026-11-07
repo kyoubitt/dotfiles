@@ -183,7 +183,7 @@ Item {
                         height: mediaLayoutContainer.height
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle music"])
+                        onClicked: Popups.toggle("music", root)
 
                         Row {
                             id: infoLayout
@@ -213,6 +213,8 @@ Item {
                                 }
 
                                 Text {
+
+                                    renderType: Text.NativeRendering
                                     anchors.centerIn: parent
                                     text: "󰎈"
                                     font.family: ThemeBackend.iconFont
@@ -277,6 +279,8 @@ Item {
                                 }
 
                                 Text {
+
+                                    renderType: Text.NativeRendering
                                     text: root.infoMode === "author"
                                         ? (root.isPreview ? I18n.t("guide.bar.media.preview.author", "Song author") : (isMediaActive && player ? (player.trackArtist || "") : ""))
                                         : (root.isPreview ? "01:24 / 03:42" : (isMediaActive && player ? (root.formatTime(MprisController.livePosition) + " / " + root.formatTime(player.length)) : ""))
@@ -397,6 +401,8 @@ Item {
                     }
 
                     Text {
+
+                        renderType: Text.NativeRendering
                         anchors.centerIn: parent
                         text: "󰎈"
                         font.family: ThemeBackend.fontFamily
@@ -447,7 +453,7 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (Caching.serpantinumDir) {
-                                Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle music"]);
+                                Popups.toggle("music", root);
                             }
                         }
                     }

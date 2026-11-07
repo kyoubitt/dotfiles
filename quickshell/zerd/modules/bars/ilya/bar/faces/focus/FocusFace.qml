@@ -58,7 +58,7 @@ Item {
             textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
             onClicked: {
                 if (Caching.serpantinumDir) {
-                    Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle applauncher"])
+                    Popups.toggle("applauncher", root)
                 }
             }
         }
@@ -82,6 +82,8 @@ Item {
                 rotation: root.isVertical ? 90 : 0
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: titleTextMain
                     text: root.displayText
                     font.family: root.isVertical ? Qt.application.font.family : ThemeBackend.fontFamily
@@ -122,7 +124,7 @@ Item {
         z: -1
         onClicked: {
             if (Caching.serpantinumDir) {
-                Quickshell.execDetached(["bash", "-c", Caching.serpantinumDir + "/scripts/qs_manager.sh toggle applauncher"])
+                Popups.toggle("applauncher", root)
             }
         }
     }

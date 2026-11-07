@@ -161,6 +161,8 @@ Item {
         }
 
         Text {
+
+            renderType: Text.NativeRendering
             anchors.centerIn: parent
             text: circleRoot.showText ? circleRoot.textVal : circleRoot.icon
             font.pixelSize: Math.round(circleRoot.showText

@@ -104,6 +104,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: recText
                     text: root.recTimeFormatted
                     font.family: ThemeBackend.fontFamily
@@ -133,6 +135,8 @@ Item {
                         spacing: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 3 : 4) : (root.isCompact ? 3 : 4)) : (barWindow ? barWindow.cs(root.isCompact ? 5 : 6) : (root.isCompact ? 5 : 6))
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             text: timerItem.modelData.icon
                             font.family: ThemeBackend.iconFont
                             font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 10 : 11) : (root.isCompact ? 10 : 11)) : (barWindow ? barWindow.cs(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12))
@@ -141,6 +145,8 @@ Item {
                         }
 
                         Text {
+
+                            renderType: Text.NativeRendering
                             text: timerItem.modelData.time
                             font.family: ThemeBackend.fontFamily
                             font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)) : (barWindow ? barWindow.cs(root.isCompact ? 13 : 14) : (root.isCompact ? 13 : 14))

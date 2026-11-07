@@ -352,6 +352,8 @@ Item {
                 }
 
                 Text {
+
+                    renderType: Text.NativeRendering
                     id: monthLabel
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widget ? widget.monthStr : (typeof DateTime !== "undefined" ? DateTime.monthShort : "Sep")
