@@ -22,8 +22,6 @@ Singleton {
     // a usable backdrop for the text on top of it.
     property color bgBase: alpha("#1A1412", 0.62)
     property color bgCard: alpha("#1E1614", 0.68)
-    // the palette's own background and foreground, un-faded, for the bar and its popups
-    property color rawBackground: "#1A1412"
     property color textPrimary: "#E0C097"
     property color textSecondary: "#A08A75"
     property color wallAccent: "#D4A373"
@@ -57,7 +55,6 @@ Singleton {
                 root.bgBase = alpha(special.background, 0.62)
                 root.bgCard = alpha(special.background, 0.68)
             }
-            if (special.background) root.rawBackground = special.background
             if (special.foreground) root.textPrimary = special.foreground
             if (colors.color8) root.textSecondary = colors.color8
             if (colors.color4) root.wallAccent = colors.color4

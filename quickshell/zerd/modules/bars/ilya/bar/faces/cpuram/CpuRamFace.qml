@@ -26,7 +26,6 @@ BarFaceBase {
             anchors.verticalCenter: parent.verticalCenter
             text: parent.symbol
             font.family: ThemeBackend.symbolFont
-            font.variableAxes: ({ "wght": 600, "opsz": 20 })
             font.pixelSize: 18
             color: ThemeBackend.subtext0
         }

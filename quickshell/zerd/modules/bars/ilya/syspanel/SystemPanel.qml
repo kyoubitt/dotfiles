@@ -38,9 +38,9 @@ Item {
     readonly property real boxRadius: Math.min(ThemeBackend.borderRadius, root.s(20))
     readonly property real cardRadius: Math.min(ThemeBackend.borderRadius, root.s(14))
 
-    readonly property color briColor: ThemeBackend.blue
-    readonly property color volColor: ThemeBackend.blue
-    readonly property color profileColor: ThemeBackend.blue
+    readonly property color briColor: Qt.lighter(ThemeBackend.mauve, 1.1)
+    readonly property color volColor: Qt.lighter(ThemeBackend.sapphire, 1.5)
+    readonly property color profileColor: Qt.lighter(ThemeBackend.blue, 1.55)
     readonly property int batCapacity: UPower.displayDevice.ready ? Math.round(UPower.displayDevice.percentage * 100) : 0
 
     readonly property bool isCharging: UPower.displayDevice.ready && (UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
@@ -123,8 +123,6 @@ Item {
     }
 
     property real animCapacity: 0
-    // the panel is as tall as what is in it; the host reads this
-    readonly property real contentHeight: mainCol.implicitHeight + root.s(16)
     Behavior on animCapacity {
         enabled: root.visible
         NumberAnimation { duration: 1200; easing.type: Easing.OutQuint }
@@ -410,7 +408,11 @@ Item {
         id: sidebarPanel
         anchors.fill: parent
         color: ThemeBackend.card
-        radius: ThemeBackend.borderRadius
+        radius: Math.min(ThemeBackend.borderRadius, root.s(28))
+        topLeftRadius: root.isLeftAnchored ? 0 : radius
+        bottomLeftRadius: root.isLeftAnchored ? 0 : radius
+        topRightRadius: root.isLeftAnchored ? radius : 0
+        bottomRightRadius: root.isLeftAnchored ? radius : 0
         clip: true
         opacity: root.introContent
 
@@ -428,7 +430,6 @@ Item {
             anchors.fill: parent
 
             ColumnLayout {
-                id: mainCol
                 anchors.fill: parent
                 anchors.margins: root.s(8)
                 spacing: root.s(5)
@@ -545,9 +546,7 @@ Item {
                 NotificationBox {
                     id: notifsBox
                     Layout.fillWidth: true
-                    Layout.fillHeight: false
-                    Layout.preferredHeight: root.s(210)
-                    Layout.maximumHeight: root.s(210)
+                    Layout.fillHeight: true
                     Layout.minimumHeight: root.s(68)
                     cornerRadius: root.boxRadius
                     cardRadius: root.cardRadius

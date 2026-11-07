@@ -32,7 +32,6 @@ BarFaceBase {
             anchors.centerIn: parent
             text: root.silent ? "notifications_off" : "notifications"
             font.family: "Material Symbols Rounded"
-            font.variableAxes: ({ "wght": 600, "opsz": 20 })
             font.pixelSize: 18
             color: root.silent ? ThemeBackend.blue : ThemeBackend.text
         }

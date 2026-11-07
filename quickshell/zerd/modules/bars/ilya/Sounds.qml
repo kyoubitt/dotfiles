@@ -52,7 +52,6 @@ Item {
     }
 
     function play(filePath, volume, duration, overrideSfxBlock) {
-        console.log("SFXDBG", String(filePath).split("/sounds/").pop(), "muted", root.isMuted, "vol", root.masterVolume) /* TEMP DEBUG */
         if ((root.isMuted || root.masterVolume <= 0.0) && overrideSfxBlock !== true) return;
         if (!filePath || filePath.trim() === "") return;
         if (overrideSfxBlock !== true && !root._allowed(filePath)) return;

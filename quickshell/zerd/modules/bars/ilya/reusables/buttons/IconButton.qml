@@ -93,7 +93,6 @@ Item {
             anchors.verticalCenterOffset: root.iconOffsetY
             text: ThemeBackend.symOf(root.buttonIcon) || root.buttonIcon
             font.family: ThemeBackend.symOf(root.buttonIcon) !== "" ? ThemeBackend.symbolFont : root.iconFont
-            font.variableAxes: ({ "wght": 600, "opsz": 20 })
             font.pixelSize: ThemeBackend.symOf(root.buttonIcon) !== "" ? 18 : root.iconFontSize
             color: root.displayTextColor
             horizontalAlignment: Text.AlignHCenter

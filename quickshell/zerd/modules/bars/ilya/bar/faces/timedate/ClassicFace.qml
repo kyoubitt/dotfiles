@@ -105,7 +105,6 @@ Item {
                     lineHeightMode: Text.FixedHeight
                     lineHeight: 17
                     font.weight: Font.Bold
-                    font.features: { "tnum": 1 }
                     color: ThemeBackend.text
                 }
 
