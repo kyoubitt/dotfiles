@@ -25,7 +25,36 @@ Item {
     readonly property color accent: SMColors.accent
 
     // Lets LockScreen's watchdog know this surface actually came up.
-    Component.onCompleted: root.lock.surfaceShown = true
+    Component.onCompleted: { root.lock.surfaceShown = true; appearAnim.start() }
+
+    // 0..1 when the surface comes up: the wallpaper, clock and avatar fade and rise in instead of popping.
+    property real appear: 0
+    NumberAnimation { id: appearAnim; target: root; property: "appear"; from: 0; to: 1; duration: 700; easing.type: Easing.OutCubic }
+
+    // What the password check is doing, as the shapes and the avatar ring show it.
+    readonly property string authState: root.lock.unlocking ? "success"
+        : root.lock.verifying ? "verifying"
+        : root.lock.failed ? "fail" : "typing"
+    // The length of the password handed to PAM: the field is cleared on submit, the shapes stay while it is checked
+    // and for the burst or fall that follows.
+    property int sentLength: 0
+    readonly property int shownLength: root.authState === "typing" ? passwordInput.text.length : root.sentLength
+    Timer {
+        id: failClear
+        interval: 950
+        onTriggered: root.sentLength = 0
+    }
+    onAuthStateChanged: {
+        if (authState === "fail") failClear.restart()
+        else { failClear.stop(); if (authState === "typing") sentLength = 0 }
+    }
+    // 0..1 over the short success fade (LockScreen waits 260 ms before the lock drops)
+    property real unlockT: 0
+    NumberAnimation { id: unlockAnim; target: root; property: "unlockT"; from: 0; to: 1; duration: 250; easing.type: Easing.Linear }
+    Connections {
+        target: root.lock
+        function onUnlockingChanged() { if (root.lock.unlocking) unlockAnim.restart(); else { unlockAnim.stop(); root.unlockT = 0 } }
+    }
 
     // Caps lock, read from the keyboard LED (only while the login view is up).
     property bool capsLock: false
@@ -87,7 +116,6 @@ Item {
         target: root.lock
         function onLockedChanged() { if (root.lock.locked) root.showClock() }
         function onRefocusRequested() { passwordInput.forceActiveFocus() }
-        function onVerifyingChanged() { if (!root.lock.verifying) spinner.rotation = 0 }
     }
 
     // 0..1 while the login view comes in; drives a staggered entrance
@@ -98,6 +126,7 @@ Item {
 
     LockBackdrop {
         anchors.fill: parent
+        opacity: root.appear
     }
 
     // Extra smoke over the wallpaper while logging in.
@@ -113,9 +142,9 @@ Item {
         id: clockView
         property real slide: root.loginView ? -18 : 0
         x: Math.round((root.width - width) / 2)
-        y: Math.round((root.height - height) / 2 - 10 + slide)
+        y: Math.round((root.height - height) / 2 - 10 + slide + (1 - root.appear) * 28)
         spacing: 6
-        opacity: root.loginView ? 0 : 1
+        opacity: (root.loginView ? 0 : 1) * root.appear
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         Behavior on slide { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
@@ -187,15 +216,18 @@ Item {
         x: Math.round((root.width - width) / 2)
         y: Math.round((root.height - height) / 2 + slide)
         spacing: 14
-        opacity: root.loginView && !root.lock.unlocking ? 1 : 0
+        // while unlocking the parts fade one after another (the pill and name first, the avatar last), so the
+        // column itself only fades out at the very end
+        opacity: root.loginView ? 1 - Math.max(0, Math.min(1, (root.unlockT - 0.75) / 0.25)) : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: root.lock.unlocking ? 220 : 350; easing.type: Easing.OutCubic } }
+        Behavior on opacity { enabled: !root.lock.unlocking; NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
         Behavior on slide { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
         LockAvatar {
             Layout.alignment: Qt.AlignHCenter
             size: 104
-            opacity: root.stage(0)
+            state: root.authState
+            opacity: root.stage(0) * (1 - Math.max(0, Math.min(1, (root.unlockT - 0.55) / 0.35)))
             transform: Translate { y: (1 - root.stage(0)) * 14 }
         }
         LockText {
@@ -204,7 +236,7 @@ Item {
             font.pixelSize: 22
             font.weight: Font.Medium
             font.letterSpacing: 0.5
-            opacity: root.stage(0.4)
+            opacity: root.stage(0.4) * (1 - Math.max(0, Math.min(1, root.unlockT * 3)))
             transform: Translate { y: (1 - root.stage(0.4)) * 14 }
         }
 
@@ -221,8 +253,9 @@ Item {
                 Translate { x: fieldWrap.shakeOffset },
                 Translate { y: (1 - root.stage(0.8)) * 14 }
             ]
-            opacity: root.stage(0.8) * (root.lock.verifying ? 0.8 : 1)
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            opacity: root.stage(0.8)
+            // the pill, lock glyph and button fade early on success; the shapes burst on their own
+            property real chrome: 1 - Math.max(0, Math.min(1, root.unlockT * 3))
 
             Connections {
                 target: root.lock
@@ -239,10 +272,11 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 radius: height / 2
+                opacity: fieldWrap.chrome
                 color: ColorUtils.applyAlpha("#000000", 0.5)
                 border.width: passwordInput.activeFocus ? 2 : 1
                 border.color: root.lock.failed ? Appearance.colors.colError
-                            : root.lock.verifying ? ColorUtils.applyAlpha(root.accent, 0.5)
+                            : root.lock.verifying || root.lock.unlocking ? ColorUtils.applyAlpha(root.accent, 0.5)
                             : ColorUtils.applyAlpha(root.accent, passwordInput.activeFocus ? 0.8 : 0.4)
                 Behavior on border.color { ColorAnimation { duration: 150 } }
             }
@@ -256,7 +290,7 @@ Item {
                 fill: 1
                 iconSize: 18
                 color: root.lock.failed ? Appearance.colors.colError : root.fg
-                opacity: root.lock.failed || root.capsLock ? 1 : 0.65
+                opacity: (root.lock.failed || root.capsLock ? 1 : 0.65) * fieldWrap.chrome
             }
 
             TextInput {
@@ -273,6 +307,8 @@ Item {
                 renderType: Text.NativeRendering
                 clip: true
                 focus: true
+                // typing is paused while PAM checks; the field keeps focus so keys are swallowed, not lost to the clock view
+                readOnly: root.lock.verifying || root.lock.unlocking
 
                 Component.onCompleted: forceActiveFocus()
 
@@ -290,26 +326,36 @@ Item {
                     if (!root.loginView) { root.showLogin(); return }
                     if (root.lock.pseudoLock) { root.lock.submitPassword(text); return }
                     if (text.length > 0) {
+                        const n = text.length
                         root.lock.submitPassword(text)
-                        text = ""
+                        // only once PAM has taken it: otherwise the text stays so Enter can be pressed again
+                        if (root.lock.verifying) {
+                            root.sentLength = n
+                            fieldWrap.showPassword = false
+                            text = ""
+                        }
                     }
                 }
 
                 LockText {
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: passwordInput.text.length === 0
+                    visible: opacity > 0
                     text: "enter password"
-                    opacity: 0.55
+                    opacity: root.shownLength === 0 ? 0.55 : 0
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
                     font.pixelSize: 16
                 }
+            }
 
-                PasswordChars {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width
-                    height: 28
-                    visible: !fieldWrap.showPassword && passwordInput.text.length > 0
-                    length: passwordInput.text.length
-                }
+            // outside the TextInput (which clips): tall, so the shapes can fall past the pill
+            PasswordChars {
+                x: 52
+                y: (fieldWrap.height - height) / 2
+                width: fieldWrap.width - 52 - 96
+                height: 180
+                state: root.authState
+                visible: !fieldWrap.showPassword && root.shownLength > 0
+                length: root.shownLength
             }
 
             LockIcon {
@@ -338,23 +384,16 @@ Item {
                 height: 36
                 radius: width / 2
                 color: root.accent
-                opacity: passwordInput.text.length > 0 || root.lock.pseudoLock || root.lock.verifying ? 1 : 0.45
+                opacity: (root.lock.verifying ? 0.45 : (passwordInput.text.length > 0 || root.lock.pseudoLock ? 1 : 0.45)) * fieldWrap.chrome
                 Behavior on opacity { NumberAnimation { duration: 150 } }
 
-                // Arrow, swapped for a spinner while PAM is checking.
+                // Arrow; a check once the password is accepted. The ring and the shapes show the checking.
                 LockIcon {
                     id: spinner
                     anchors.centerIn: parent
-                    text: root.lock.verifying ? "progress_activity" : "arrow_forward"
+                    text: root.lock.unlocking ? "check" : "arrow_forward"
                     iconSize: 20
                     color: SMColors.bg
-                    NumberAnimation on rotation {
-                        running: root.lock.verifying
-                        from: 0
-                        to: 360
-                        duration: 900
-                        loops: Animation.Infinite
-                    }
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -364,19 +403,40 @@ Item {
             }
         }
 
-        // One line of feedback under the field.
-        LockText {
+        // One line of feedback under the field: each message fades in on its own ("wrong password" rises a little).
+        Item {
             Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 340
             Layout.preferredHeight: 18
-            text: root.lock.failed
-                ? (root.lock.failCount >= 3 ? `wrong password · ${root.lock.failCount} attempts` : "wrong password")
-                : root.lock.verifying ? (root.slowCheck ? "still checking…" : "checking…")
-                : root.capsLock ? "caps lock is on" : "esc to go back"
-            color: root.lock.failed ? Appearance.colors.colError : root.fg
-            opacity: root.lock.failed || root.lock.verifying || root.capsLock ? 0.9 : 0.45
-            font.pixelSize: 13
-            font.weight: Font.Medium
-            font.letterSpacing: 0.3
+            opacity: 1 - Math.max(0, Math.min(1, root.unlockT * 3))
+
+            LockText {
+                anchors.centerIn: parent
+                text: root.capsLock ? "caps lock is on" : "esc to go back"
+                opacity: root.lock.failed || root.lock.verifying ? 0 : (root.capsLock ? 0.9 : 0.45)
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                font.pixelSize: 13
+                font.letterSpacing: 0.3
+            }
+            LockText {
+                anchors.centerIn: parent
+                text: root.slowCheck ? "still checking…" : "checking…"
+                opacity: root.lock.verifying ? 0.7 : 0
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                font.pixelSize: 13
+                font.letterSpacing: 0.3
+            }
+            LockText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: (parent.height - height) / 2 + (root.lock.failed ? 0 : 6)
+                text: root.lock.failCount >= 3 ? `wrong password · ${root.lock.failCount} attempts` : "wrong password"
+                color: Appearance.colors.colError
+                opacity: root.lock.failed ? 0.95 : 0
+                Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                Behavior on y { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                font.pixelSize: 13
+                font.letterSpacing: 0.3
+            }
         }
     }
 }

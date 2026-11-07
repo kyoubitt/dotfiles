@@ -2,9 +2,9 @@ import QtQuick
 import qs.modules.common
 import qs.modules.waffle.startMenu
 
-// Material Symbols glyph for the lock screen. Always natively rendered and
-// unhinted at a whole-pixel size: the shared MaterialSymbol switches to
-// curve rendering for filled glyphs, which looks soft at small sizes.
+// Material Symbols glyph for the lock screen at a whole-pixel size, same recipe as BarIcon: default (light)
+// hinting snaps the horizontal strokes to the grid; the weight is picked per size so the stroke is about 2 px.
+// Not the shared MaterialSymbol: it switches to curve rendering for filled glyphs, which looks soft here.
 Item {
     id: root
 
@@ -25,7 +25,11 @@ Item {
         renderType: Text.NativeRendering
         font.family: Appearance.font.family.iconMaterial
         font.pixelSize: Math.round(root.iconSize)
-        font.hintingPreference: Font.PreferNoHinting
-        font.variableAxes: ({ "FILL": root.fill, "wght": root.iconSize <= 18 ? 600 : (root.iconSize <= 24 ? 500 : 400), "opsz": Math.max(20, Math.min(48, Math.round(root.iconSize))) })
+        font.hintingPreference: Font.PreferDefaultHinting
+        font.variableAxes: ({
+            "FILL": root.fill,
+            "wght": root.iconSize <= 16 ? 700 : root.iconSize <= 18 ? 650 : root.iconSize <= 20 ? 550 : 400,
+            "opsz": root.iconSize <= 20 ? 20 : Math.min(48, Math.round(root.iconSize))
+        })
     }
 }
