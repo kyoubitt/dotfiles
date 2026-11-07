@@ -16,7 +16,7 @@ Item {
     Rectangle {
         id: activeHighlight
         z: 3
-        radius: widget ? widget.s(widget.isCompact ? 7 : 8) : 8
+        radius: 5
         color: pillsGlass.active ? "transparent" : ((widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.05) : ThemeBackend.blue)
 
         GlassFill {
@@ -50,8 +50,8 @@ Item {
             if (index < 0 || !widget) return 0;
             let pos = 0;
             let spacing = widget.s(widget.isCompact ? 7 : 8);
-            let activeLen = widget.s(widget.isCompact ? 34 : 36);
-            let inactiveLen = widget.s(widget.isCompact ? 16 : 18);
+            let activeLen = 28;
+            let inactiveLen = 10;
             for (let i = 0; i < index; i++) {
                 if (typeof widget.isShown === "function" && !widget.isShown(i))
                     continue;
@@ -70,7 +70,7 @@ Item {
             }
             return (curIdx >= 0 && widget) ? getPos(curIdx, curIdx) : 0;
         }
-        property real targetEnd: (curIdx >= 0 && widget) ? targetStart + widget.s(widget.isCompact ? 34 : 36) : 0
+        property real targetEnd: (curIdx >= 0 && widget) ? targetStart + 28 : 0
         property real actualStart: targetStart
         property real actualEnd: targetEnd
 
@@ -83,7 +83,7 @@ Item {
         scale: 1.0 + 0.14 * lift
         transformOrigin: Item.Center
 
-        readonly property real thickness: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
+        readonly property real thickness: widget ? 10 : 18
 
         x: pillsFaceRoot.isVertical ? wsLayout.x + (wsLayout.width - width) / 2 : wsLayout.x + actualStart
         y: pillsFaceRoot.isVertical ? wsLayout.y + actualStart : wsLayout.y + (wsLayout.height - height) / 2
@@ -116,9 +116,9 @@ Item {
 
                 visible: shown
                 readonly property real length: shown
-                    ? (isActive ? (widget ? widget.s(widget.isCompact ? 34 : 36) : 36) : (widget ? widget.s(widget.isCompact ? 16 : 18) : 18))
+                    ? (isActive ? 28 : 10)
                     : 0
-                readonly property real thickness: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
+                readonly property real thickness: widget ? 10 : 18
                 width: pillsFaceRoot.isVertical ? thickness : length
                 height: pillsFaceRoot.isVertical ? length : thickness
 
@@ -134,14 +134,16 @@ Item {
                 Rectangle {
                     id: wsVisualShape
                     anchors.fill: parent
-                    radius: widget ? widget.s(widget.isCompact ? 8 : 10) : 10
-                    color: (wsPill.isActive || pillsShapeGlass.active) ? "transparent" : Qt.alpha(wsPill.isOccupied ? ThemeBackend.surface2 : ((widget && widget.isCompact) ? ThemeBackend.surface1 : ThemeBackend.surface0), ThemeBackend.elementOpacity)
+                    radius: 5
+                    color: (wsPill.isActive || !wsPill.isOccupied) ? "transparent" : Qt.alpha(ThemeBackend.text, 0.62)
+                    border.width: (wsPill.isActive || wsPill.isOccupied) ? 0 : 1.5
+                    border.color: Qt.alpha(ThemeBackend.text, 0.3)
 
                     GlassFill {
                         id: pillsShapeGlass
                         anchors.fill: parent
                         radius: parent.radius
-                        allowed: !wsPill.isActive
+                        allowed: false
                         tintColor: wsPill.isOccupied ? ThemeBackend.surface2 : ThemeBackend.surface0
                         tintAmount: 0.3
                         press: wsPillMouse.pressed ? 0.8 : (wsPillMouse.containsMouse ? 0.25 : 0)

@@ -15,7 +15,9 @@ QtObject {
     readonly property var rawSettings: ({
         bar: {
             workspacesStyle: root.top.workspaceStyle === "numbers" ? "numbers" : "pills",
-            hideEmptyWorkspaces: false
+            hideEmptyWorkspaces: false,
+            // only the workspaces niri really has: the face grows to the highest existing one
+            workspaceCount: 2
         },
         idle: { manualInhibit: Svc.Idle.inhibit, caffeineEndTime: 0 }
     })

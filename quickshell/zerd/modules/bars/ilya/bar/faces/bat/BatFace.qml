@@ -215,6 +215,7 @@ BarFaceBase {
                 anchors.centerIn: parent
                 text: ThemeBackend.symOf(root.batIcon) || root.batIcon
                 font.family: ThemeBackend.symOf(root.batIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                 font.pixelSize: ThemeBackend.symOf(root.batIcon) !== "" ? 18 : 15
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter

@@ -95,7 +95,7 @@ Item {
         : (isPreview || (player !== null && player.playbackState !== MprisPlaybackState.Stopped && player.trackTitle !== ""))
     readonly property bool isPlaying: isVertical
         ? (targetPlayer ? (targetPlayer.playbackState === MprisPlaybackState.Playing || targetPlayer.isPlaying) : false)
-        : (isPreview || (isMediaActive && (player ? (player.playbackState === MprisPlaybackState.Playing || player.isPlaying) : MprisController.isPlaying)))
+        : (isPreview || (isMediaActive && MprisController.isPlaying))
 
     property string rawArtUrl: {
         if (!targetPlayer) return "";
@@ -317,9 +317,13 @@ Item {
                                         ? (root.isPreview ? I18n.t("guide.bar.media.preview.author", "Song author") : (isMediaActive && player ? (player.trackArtist || "") : ""))
                                         : (root.isPreview ? "01:24 / 03:42" : (isMediaActive && player ? (root.formatTime(MprisController.livePosition) + " / " + root.formatTime(player.length)) : ""))
                                     font.family: ThemeBackend.fontFamily
-                                    font.weight: Font.Black
-                                    font.pixelSize: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
-                                    color: root.isCompact ? ThemeBackend.overlay2 : ThemeBackend.subtext0
+                                    font.weight: Font.Medium
+                                    font.features: { "tnum": 1 }
+                                    lineHeightMode: Text.FixedHeight
+                                    lineHeight: 13
+                                    horizontalAlignment: Text.AlignLeft
+                                    font.pixelSize: 11
+                                    color: ThemeBackend.subtext0
                                     width: parent.width
                                     elide: Text.ElideRight
                                     visible: isMediaActive

@@ -7,6 +7,8 @@ QtObject {
     id: root
 
     readonly property var c: Common.Appearance.colors
+    // the bar and its popups follow wallust (~/.cache/wallust/colors.json, watched by WallustTheme): background, foreground, colour4
+    readonly property color bg: Svc.WallustTheme.rawBackground
     property string fontFamily: Common.Appearance.font.family.expressive
     property string iconFont: "JetBrainsMono Nerd Font Mono"
     property int borderRadius: 16
@@ -18,14 +20,14 @@ QtObject {
     readonly property bool liquidGlass: false
 
     // a soft tint of the accent over the surface, not flat black
-    readonly property color base: Qt.tint(Qt.tint(c.colLayer1, Qt.rgba(text.r, text.g, text.b, 0.05)), Qt.rgba(blue.r, blue.g, blue.b, 0.10))
+    readonly property color base: Qt.tint(Qt.tint(bg, Qt.rgba(text.r, text.g, text.b, 0.07)), Qt.rgba(blue.r, blue.g, blue.b, 0.08))
     // popups and menus: the same tint, nearly opaque, so text over a busy window stays crisp
     readonly property color card: Qt.alpha(base, 0.97)
-    readonly property color mantle: c.colLayer0
-    readonly property color crust: Qt.darker(c.colLayer0, 1.25)
-    readonly property color text: c.colOnLayer1
-    readonly property color subtext0: c.colSubtext
-    readonly property color subtext1: Qt.tint(c.colSubtext, Qt.rgba(text.r, text.g, text.b, 0.4))
+    readonly property color mantle: bg
+    readonly property color crust: Qt.darker(bg, 1.4)
+    readonly property color text: Svc.WallustTheme.textPrimary
+    readonly property color subtext0: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.62))
+    readonly property color subtext1: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.8))
     readonly property color onSurface: text
     readonly property color surface0: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.08))
     readonly property color surface1: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.13))
@@ -75,6 +77,7 @@ QtObject {
         "F0493": "settings",
         "F0349": "search",
         "F0594": "bedtime",
+        "F001D": "flight",
         "F0176": "coffee",
         "F049D": "shuffle",
         "F0599": "sunny",
@@ -93,6 +96,9 @@ QtObject {
         return cp >= 0xF0000 ? (root.symbols[cp.toString(16).toUpperCase()] ?? "") : "";
     }
     readonly property string symbolFont: "Material Symbols Rounded"
+
+    // TEMP DEBUG: the resolved palette, printed whenever wallust changes it
+    onBaseChanged: console.log("WALLDBG base", base, "text", text, "accent", blue)
 
     function faded(col) {
         return Qt.alpha(col, root.elementOpacity);
