@@ -66,7 +66,7 @@ Item {
     readonly property bool showIcon: isVertical ? (readBool("mediaShowIcon", "mediaShowIcon") || !showControls) : readBool("mediaShowIcon", "mediaShowIcon")
 
     property var player: MprisController.activePlayer
-    readonly property bool hasArt: !isPreview && isMediaActive && !!MprisController.artUrl
+    readonly property bool hasArt: false
 
     property var playerList: {
         if (!Mpris.players || !Mpris.players.values) return [];

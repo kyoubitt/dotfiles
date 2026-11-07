@@ -8,29 +8,10 @@ singleton WidgetRegistry 1.0 WidgetRegistry.qml
 singleton BarActivity 1.0 BarActivity.qml
 BarText 1.0 BarText.qml
 BarIcon 1.0 BarIcon.qml
-BarPill 1.0 BarPill.qml
 BarCava 1.0 BarCava.qml
-WorkspacesFace 1.0 WorkspacesFace.qml
-MediaFace 1.0 MediaFace.qml
-SysMonFace 1.0 SysMonFace.qml
-ClockFace 1.0 ClockFace.qml
-VolumeFace 1.0 VolumeFace.qml
-NetFace 1.0 NetFace.qml
-BatteryFace 1.0 BatteryFace.qml
-TrayFace 1.0 TrayFace.qml
-WeatherFace 1.0 WeatherFace.qml
-FocusFace 1.0 FocusFace.qml
-PowerFace 1.0 PowerFace.qml
 TopBar 1.0 TopBar.qml
-SideBar 1.0 SideBar.qml
-ControlsFace 1.0 ControlsFace.qml
-IslandFace 1.0 IslandFace.qml
-StatusFace 1.0 StatusFace.qml
 BarPopupHost 1.0 BarPopupHost.qml
 BarCava 1.0 BarCava.qml
-ControlsFace 1.0 ControlsFace.qml
-ToolsFace 1.0 ToolsFace.qml
-KeyboardFace 1.0 KeyboardFace.qml
 BarRing 1.0 BarRing.qml
 WeatherPopup 1.0 WeatherPopup.qml
 MediaPopup 1.0 MediaPopup.qml
@@ -44,8 +25,6 @@ BarTip 1.0 BarTip.qml
 TrayPopup 1.0 TrayPopup.qml
 BatteryPopup 1.0 BatteryPopup.qml
 Sidebars 1.0 Sidebars.qml
-InfoFace 1.0 InfoFace.qml
-EndFace 1.0 EndFace.qml
 CalendarCard 1.0 CalendarCard.qml
 QuickHeader 1.0 QuickHeader.qml
 QuickToggles 1.0 QuickToggles.qml
@@ -66,8 +45,6 @@ BarButton 1.0 BarButton.qml
 BarCard 1.0 BarCard.qml
 BarSwitch 1.0 BarSwitch.qml
 BarHoverFill 1.0 BarHoverFill.qml
-BarCell 1.0 BarCell.qml
-BarArc 1.0 BarArc.qml
 BarTabs 1.0 BarTabs.qml
 TrayMenu 1.0 TrayMenu.qml
 BatteryWave 1.0 BatteryWave.qml
@@ -98,3 +75,4 @@ PanelHeader 1.0 PanelHeader.qml
 PanelButton 1.0 PanelButton.qml
 QuickSlider 1.0 QuickSlider.qml
 QuickRing 1.0 QuickRing.qml
+BarBlock 1.0 BarBlock.qml
