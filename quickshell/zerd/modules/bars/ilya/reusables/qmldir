@@ -14,3 +14,4 @@ GlassLens 1.0 display/GlassLens.qml
 Draggable 1.0 behavior/Draggable.qml
 LiquidFill 1.0 display/LiquidFill.qml
 Switch 1.0 inputs/Switch.qml
+FillButton 1.0 buttons/FillButton.qml
