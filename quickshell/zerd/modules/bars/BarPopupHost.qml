@@ -33,14 +33,14 @@ Scope {
     // The copied popups: file, size, and which screen corner they sit in (his WindowRegistry layout).
     readonly property var copied: ({
         volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 },
-        calendar: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
-        weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
+        calendar: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 },
+        weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 },
         network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
         media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
-        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
-        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
-        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
-        clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
+        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
     function close(): void { GlobalStates.barPopup = null }
@@ -70,7 +70,7 @@ Scope {
                 id: stage
                 visible: pl.active
                 width: root.spec?.w ?? 0
-                height: root.spec?.full ? win.height : (root.spec?.h ?? 0)
+                height: root.spec?.fit ? Math.min(win.height - 64, Math.max(300, pl.item?.contentHeight ?? 640)) : (root.spec?.full ? win.height : (root.spec?.h ?? 0))
                 x: root.spec?.at === "left" ? (root.spec?.m ?? 0) : root.spec?.at === "center" ? Math.round((win.width - width) / 2) : win.width - width - (root.spec?.m ?? 0)
                 y: root.spec?.full ? 0 : 52
                 MouseArea { anchors.fill: parent }
@@ -85,8 +85,8 @@ Scope {
                 target: root
                 function onPopupChanged() {
                     console.log("POPUPDBG changed", root.popup?.kind ?? "closed", root.spec ? String(root.spec.src).split("/").pop() : "no-spec") /* TEMP DEBUG */
-                    if (root.popup && !root.wasOpen) Ilya.Sounds.popupOpened()
-                    else if (!root.popup && root.wasOpen) Ilya.Sounds.popupClosed()
+                    if (root.popup && !root.wasOpen) { console.log("SFXDBG", root.popup.kind, "open") /* TEMP DEBUG */; Ilya.Sounds.popupOpened() }
+                    else if (!root.popup && root.wasOpen) { console.log("SFXDBG", "popup", "close") /* TEMP DEBUG */; Ilya.Sounds.popupClosed() }
                     root.wasOpen = !!root.popup
                     if (root.popup && root.spec) {
                         if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }

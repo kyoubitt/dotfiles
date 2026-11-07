@@ -129,8 +129,12 @@ PanelWindow {
             [/new/, "add"], [/help|about/, "help"], [/pause/, "pause"], [/next/, "skip_next"], [/previous|prev/, "skip_previous"]
         ];
         for (const r of rules) if (r[0].test(l)) return r[1];
-        return "fiber_manual_record";
+        const it = trayMenuWindow.activeItem;
+        const who = String((it && (it.id || it.title)) || "").toLowerCase();
+        return who.indexOf("steam") !== -1 ? "sports_esports" : "";
     }
+
+    property bool pointerMoved: false
 
     function closeMenu() {
         clearSubmenus();
@@ -174,6 +178,9 @@ PanelWindow {
     }
 
     onIsVisibleChanged: {
+        if (!isVisible) pointerMoved = false;
+        console.log("SFXDBG traymenu", isVisible ? "open" : "close") /* TEMP DEBUG */;
+        if (isVisible) Sounds.popupOpened(); else Sounds.popupClosed();
         if (!isVisible) {
             clearSubmenus();
         } else if (!activeItem) {
@@ -492,23 +499,7 @@ PanelWindow {
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
 
-                    GlassLens {
-                        id: rootHoverLens
-                        z: -1
-                        targetX: menuList.hoverItem ? menuList.hoverItem.x : 0
-                        targetY: menuList.hoverItem ? menuList.hoverItem.y : 0
-                        targetWidth: menuList.hoverItem ? menuList.hoverItem.width : 0
-                        targetHeight: menuList.hoverItem ? menuList.hoverItem.height : 0
-                        radius: trayMenuWindow.s(4)
-                        tintColor: ThemeBackend.surface0
-                        tintAmount: 0.3
-                        shadow: 0
-                        restPress: 0.2
-                        magnify: trayMenuWindow.s(3)
-                        press: menuList.hoverItem && menuList.hoverItem.pressed ? 0.8 : 0
-                    }
-
-                    header: Item {
+                                        header: Item {
                         width: menuList.width
                         height: trayMenuWindow.activeItem ? trayMenuWindow.s(46) : 0
                         visible: height > 0
@@ -547,7 +538,7 @@ PanelWindow {
                         height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(13) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
                         visible: height > 0
                         readonly property bool pressed: itemMouse.pressed
-                        readonly property bool lensWanted: itemMouse.containsMouse
+                        readonly property bool lensWanted: itemMouse.containsMouse && trayMenuWindow.pointerMoved
 
                         onLensWantedChanged: {
                             if (lensWanted) menuList.hoverItem = rootItemDelegate;
@@ -568,17 +559,7 @@ PanelWindow {
                             color: "transparent"
                             opacity: (modelData && modelData.enabled) ? 1.0 : 0.4
 
-                            GlassFill {
-                                id: rootHoverGlass
-                                anchors.fill: parent
-                                radius: parent.radius
-                                allowed: itemMouse.containsMouse && !rootHoverLens.glassActive
-                                tintColor: ThemeBackend.surface0
-                                tintAmount: 0.3
-                                press: itemMouse.pressed ? 0.8 : 0.2
-                            }
-
-                            Image {
+                                                        Image {
                                 id: itemIcon
                                 anchors.left: parent.left
                                 anchors.leftMargin: trayMenuWindow.s(8)
@@ -601,6 +582,7 @@ PanelWindow {
                                 visible: !itemIcon.visible && !rootItemDelegate.isSep
                                 text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                                 color: (rootItemDelegate.danger && itemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
                             }
@@ -630,6 +612,7 @@ PanelWindow {
                                 text: trayMenuWindow.rootExpandRight ? "chevron_right" : "chevron_left"
                                 color: ThemeBackend.subtext0
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                             }
 
@@ -637,6 +620,7 @@ PanelWindow {
                                 id: itemMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                onPositionChanged: trayMenuWindow.pointerMoved = true
                                 enabled: modelData ? modelData.enabled : false
                                 cursorShape: Qt.PointingHandCursor
                                 onEntered: {
@@ -859,29 +843,13 @@ PanelWindow {
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
 
-                    GlassLens {
-                            id: subHoverLens
-                            z: -1
-                            targetX: subListView.hoverItem ? subListView.hoverItem.x : 0
-                            targetY: subListView.hoverItem ? subListView.hoverItem.y : 0
-                            targetWidth: subListView.hoverItem ? subListView.hoverItem.width : 0
-                            targetHeight: subListView.hoverItem ? subListView.hoverItem.height : 0
-                            radius: trayMenuWindow.s(4)
-                            tintColor: ThemeBackend.surface0
-                            tintAmount: 0.3
-                            shadow: 0
-                            restPress: 0.2
-                            magnify: trayMenuWindow.s(3)
-                            press: subListView.hoverItem && subListView.hoverItem.pressed ? 0.8 : 0
-                        }
-
-                        delegate: Item {
+                                            delegate: Item {
                             id: subItemDelegate
                             width: subListView.width
                             height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(13) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
                             visible: height > 0
                             readonly property bool pressed: subItemMouse.pressed
-                            readonly property bool lensWanted: subItemMouse.containsMouse
+                            readonly property bool lensWanted: subItemMouse.containsMouse && trayMenuWindow.pointerMoved
 
                             onLensWantedChanged: {
                                 if (lensWanted) subListView.hoverItem = subItemDelegate;
@@ -902,17 +870,7 @@ PanelWindow {
                                 color: "transparent"
                                 opacity: (modelData && modelData.enabled) ? 1.0 : 0.4
 
-                                GlassFill {
-                                    id: subHoverGlass
-                                    anchors.fill: parent
-                                    radius: parent.radius
-                                    allowed: subItemMouse.containsMouse && !subHoverLens.glassActive
-                                    tintColor: ThemeBackend.surface0
-                                    tintAmount: 0.3
-                                    press: subItemMouse.pressed ? 0.8 : 0.2
-                                }
-
-                                Image {
+                                                                Image {
                                     id: subItemIcon
                                     anchors.left: parent.left
                                     anchors.leftMargin: trayMenuWindow.s(8)
@@ -935,6 +893,7 @@ PanelWindow {
                                 visible: !subItemIcon.visible && !subItemDelegate.isSep
                                 text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                                 color: (subItemDelegate.danger && subItemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
                             }
@@ -964,6 +923,7 @@ PanelWindow {
                                     text: submenuPopout.expandRight ? "chevron_right" : "chevron_left"
                                     color: ThemeBackend.subtext0
                                     font.family: "Material Symbols Rounded"
+                                    font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                     font.pixelSize: trayMenuWindow.s(18)
                                 }
 
@@ -971,6 +931,7 @@ PanelWindow {
                                     id: subItemMouse
                                     anchors.fill: parent
                                     hoverEnabled: true
+                                    onPositionChanged: trayMenuWindow.pointerMoved = true
                                     enabled: modelData ? modelData.enabled : false
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: {

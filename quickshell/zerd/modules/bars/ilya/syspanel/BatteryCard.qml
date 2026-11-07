@@ -58,6 +58,7 @@ Rectangle {
                         visible: card.charging
                         text: "bolt"
                         font.family: ThemeBackend.symbolFont
+                        font.variableAxes: ({ "wght": 600, "opsz": 20 })
                         font.pixelSize: panel.s(20)
                         color: ThemeBackend.crust
                     }
