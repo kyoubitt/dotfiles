@@ -3,6 +3,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Effects
+import QtCore
 import SddmComponents 2.0
 
 Rectangle {
@@ -275,9 +276,16 @@ Rectangle {
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0
 
-    readonly property string themeMode: "dark"
+    // Night light: the moon button lays a warm, dimmed, blue-free tint over the whole greeter. The choice is kept in the greeter's own
+    // state file (the sddm user owns /var/lib/sddm); theme.conf's NightLight ("on"/"off") is only the first-boot default.
     property int modeOverride: -1
-    readonly property bool isDark: modeOverride >= 0 ? modeOverride === 1 : (themeMode === "dark" || (themeMode === "auto" && (now.getHours() >= 19 || now.getHours() < 7)))
+    readonly property bool night: modeOverride >= 0 ? modeOverride === 1 : cfg("NightLight", "off") === "on"
+    Settings {
+        id: store
+        location: "file://" + root.cfg("StateFile", "/var/lib/sddm/zerd-login.ini")
+        category: "ui"
+        property string choice: ""
+    }
     property bool themeGrabPending: false
     property bool themeSwitching: false
     property bool themeBusy: false
@@ -291,6 +299,7 @@ Rectangle {
     function setMode(v) {
         themeSwitching = true;
         modeOverride = v;
+        store.choice = v === 1 ? "on" : "off";
         switchTimer.restart();
     }
 
@@ -319,9 +328,9 @@ Rectangle {
             themeOverlay.source = result.url;
             root.themeOriginX = p.x / root.width;
             root.themeOriginY = p.y / root.height;
-            root.themePrevDark = root.isDark;
+            root.themePrevDark = root.night;
             root.themeProgress = 0;
-            root.setMode(root.isDark ? 0 : 1);
+            root.setMode(root.night ? 0 : 1);
             root.themeForward = true;
             root.themeBusy = true;
             root.themeGrabPending = false;
@@ -479,6 +488,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        if (store.choice === "on" || store.choice === "off") modeOverride = store.choice === "on" ? 1 : 0;
         fadeAnim.start();
         if (typeof keyboard !== "undefined") keyboard.numLock = true;
     }
@@ -497,6 +507,18 @@ Rectangle {
         anchors.fill: parent
         source: cfg("Background", "/var/cache/sddm-wallust/background.jpg")
         fillMode: Image.PreserveAspectCrop
+    }
+
+    // soft vignette: the edges settle, the middle stays clear
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.32) }
+            GradientStop { position: 0.35; color: Qt.rgba(0, 0, 0, 0.12) }
+            GradientStop { position: 0.65; color: Qt.rgba(0, 0, 0, 0.12) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.4) }
+        }
+        opacity: root.ui1
     }
 
     MouseArea {
@@ -602,7 +624,7 @@ Rectangle {
                                 font.weight: Font.Black
                                 font.variableAxes: ({ "wght": 1000, "ROND": 100, "wdth": 100 })
                                 renderType: Text.NativeRendering
-                                color: root.isDark ? Qt.rgba(0, 0, 0, modelData.alpha * 1.6) : Qt.rgba(0.18, 0.1, 0.29, modelData.alpha)
+                                color: Qt.rgba(0, 0, 0, modelData.alpha * 1.6)
                             }
                         }
 
@@ -1371,15 +1393,15 @@ Rectangle {
             width: 36 * s
             height: 36 * s
             radius: root.radius
-            color: themeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
-            scale: themeMa.pressed ? 0.94 : 1.0
+            color: themeMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (themeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
+            scale: themeMa.pressed ? 0.96 : 1.0
             Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
             Ico {
                 anchors.centerIn: parent
-                name: root.isDark ? "sun" : "moon"
-                tint: "#ffffff"
+                name: root.night ? "sun" : "moon"
+                tint: root.night ? "#ffb347" : root.cText
                 size: 16 * s
             }
 
@@ -1399,8 +1421,8 @@ Rectangle {
             width: 36 * s
             height: 36 * s
             radius: root.radius
-            color: root.powerMenuOpen ? Qt.rgba(1, 1, 1, 0.18) : (toggleMa.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent")
-            scale: toggleMa.pressed ? 0.94 : 1.0
+            color: toggleMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (root.powerMenuOpen || toggleMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
+            scale: toggleMa.pressed ? 0.96 : 1.0
             Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
@@ -1422,6 +1444,22 @@ Rectangle {
                 }
             }
         }
+    }
+
+    // night light tint: warm wash plus a dim; flips under the reveal snapshot, eases when there is none
+    Rectangle {
+        anchors.fill: parent
+        z: 90
+        color: Qt.rgba(1.0, 0.52, 0.1, 1)
+        opacity: root.night ? 0.11 : 0
+        Behavior on opacity { enabled: !root.themeSwitching; NumberAnimation { duration: 300 } }
+    }
+    Rectangle {
+        anchors.fill: parent
+        z: 91
+        color: Qt.rgba(0.05, 0.02, 0, 1)
+        opacity: root.night ? 0.1 : 0
+        Behavior on opacity { enabled: !root.themeSwitching; NumberAnimation { duration: 300 } }
     }
     }
 
