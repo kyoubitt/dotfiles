@@ -100,11 +100,11 @@ QtObject {
             defaultVariant: "default",
             face: "faces/info/InfoFace.qml"
         },
-        "weather": {
-            name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.weather", "Weather") : "Weather",
-            icon: "󰖐",
+        "cpuram": {
+            name: "CPU and memory",
+            icon: "󰍛",
             defaultVariant: "default",
-            face: "faces/weather/WeatherFace.qml"
+            face: "faces/cpuram/CpuRamFace.qml"
         },
         "sysmon": {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.sysmon", "System Monitor") : "System Monitor",

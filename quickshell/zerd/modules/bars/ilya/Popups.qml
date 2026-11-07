@@ -4,7 +4,13 @@ import qs
 
 // Where his faces called qs_manager.sh toggle <name>: opens or closes zerd's bar popup under the clicked item.
 QtObject {
+    // a click counts once: hover flips and double events inside 300 ms are ignored
+    property double last: 0
     function toggle(kind, item) {
+        const now = Date.now();
+        if (now - last < 300) return;
+        last = now;
+        console.log("POPUPDBG toggle", kind, "current", GlobalStates.barPopup?.kind ?? "none") /* TEMP DEBUG */;
         const map = { music: "media", wifi: "network", bt: "network", system: "battery" };
         const k = map[kind] ?? kind;
         if (k === "settings") { GlobalStates.settingsOpen = !GlobalStates.settingsOpen; return; }

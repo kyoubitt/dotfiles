@@ -107,8 +107,8 @@ Scope {
             readonly property bool shown: !autoHide || pointerOn || top.forced || GlobalStates.barPopup !== null || (BarState.sidebar !== "" && !win.mixedFullscreen)
 
             // Which block sits where (Settings > Bar). Order inside a side is fixed, so moving a block never scrambles the rest.
-            readonly property var defaultSide: ({ left: "left", media: "left", timedate: "middle", sysmon: "right", weather: "right", info: "right", tray: "right", dnd: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden", vis: "hidden" })
-            readonly property var blockOrder: ["left", "media", "timedate", "sysmon", "weather", "info", "tray", "dnd", "wifi", "bt", "vol", "bat", "focus", "vis"]
+            readonly property var defaultSide: ({ left: "left", media: "left", timedate: "middle", sysmon: "right", cpuram: "right", info: "right", tray: "right", dnd: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden", vis: "hidden" })
+            readonly property var blockOrder: ["left", "media", "timedate", "sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat", "focus", "vis"]
             readonly property var layout: {
                 const l = { left: [].concat(options.layoutLeft ?? []), middle: [].concat(options.layoutMiddle ?? []), right: [].concat(options.layoutRight ?? []), hidden: [].concat(options.layoutHidden ?? []) }
                 const seen = {}
@@ -120,7 +120,7 @@ Scope {
                 return win.layout[where].filter(id => win.blockOrder.includes(id))
             }
             // The status icons share one plate; every other block keeps its own.
-            readonly property var plateOf: ({ weather: "status", dnd: "status", wifi: "status", bt: "status", vol: "status", bat: "status", info: "status" })
+            readonly property var plateOf: ({ cpuram: "status", dnd: "status", wifi: "status", bt: "status", vol: "status", bat: "status", info: "status" })
             function runs(where: string): var {
                 const out = []
                 let lastKey = ""

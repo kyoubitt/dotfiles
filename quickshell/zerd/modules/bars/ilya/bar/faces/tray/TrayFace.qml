@@ -135,8 +135,10 @@ Item {
 
                 property bool isHovered: trayMouse.containsMouse
                 property bool initAnimTrigger: false
-                opacity: initAnimTrigger ? (isHovered ? 1.0 : (root.isCompact ? 0.9 : 0.8)) : 0.0
-                scale: initAnimTrigger ? (isHovered ? 1.15 : 1.0) : 0.0
+                opacity: isHovered ? 1.0 : 0.88
+                scale: isHovered ? 1.15 : 1.0
+                // TEMP DEBUG
+                Timer { interval: 4000; running: true; repeat: false; onTriggered: console.log("TRAYDBG icon", index, modelData.id, "opacity", trayIcon.opacity, "w", trayIcon.width, "visible", trayIcon.visible, "status", trayIcon.status, "src", String(trayIcon.source).slice(0, 60)) }
 
                 Component.onCompleted: {
                     if (barWindow && !barWindow.startupCascadeFinished) {
