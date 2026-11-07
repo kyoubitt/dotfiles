@@ -179,6 +179,8 @@ PanelWindow {
 
     onIsVisibleChanged: {
         if (!isVisible) pointerMoved = false;
+        console.log("SFXDBG traymenu", isVisible ? "open" : "close") /* TEMP DEBUG */;
+        if (isVisible) Sounds.popupOpened(); else Sounds.popupClosed();
         if (!isVisible) {
             clearSubmenus();
         } else if (!activeItem) {
