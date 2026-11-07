@@ -8,7 +8,7 @@ Column {
 
     property date now: new Date()
     spacing: 14
-    width: 300
+    width: 320
     Timer { interval: 1000; repeat: true; running: true; onTriggered: root.now = new Date() }
 
     // Other zones come from `date` itself: the JS engine here ignores timeZone options.
@@ -49,14 +49,17 @@ Column {
         BarText { text: Qt.formatDate(root.now, "dddd, d MMMM yyyy"); color: BarStyle.subtext }
     }
 
-    Column {
-        spacing: 4
+    BarCard {
         width: parent.width
-        Rectangle {
-            width: parent.width; height: 6; radius: 3; color: BarStyle.border
-            Rectangle { width: parent.width * root.dayProgress; height: 6; radius: 3; color: BarStyle.accent }
+        Column {
+            spacing: 6
+            width: parent.width
+            Rectangle {
+                width: parent.width; height: 8; radius: 4; color: BarStyle.cardHigh
+                Rectangle { width: Math.max(8, parent.width * root.dayProgress); height: 8; radius: 4; color: BarStyle.accent }
+            }
+            BarText { text: Math.round(root.dayProgress * 100) + "% of the day gone"; font.pixelSize: 12; color: BarStyle.subtext }
         }
-        BarText { text: Math.round(root.dayProgress * 100) + "% of the day gone"; font.pixelSize: 11; color: BarStyle.subtext }
     }
 
     Column {
@@ -67,7 +70,7 @@ Column {
             model: root.zones
             delegate: Item {
                 required property string modelData
-                width: 300; height: 28
+                width: 320; height: 28
                 BarText { anchors.verticalCenter: parent.verticalCenter; text: WorldClock.labelFor(modelData); width: 170; elide: Text.ElideRight; font.pixelSize: 12 }
                 BarText { anchors.verticalCenter: parent.verticalCenter; x: 170; text: root.zoneDay(modelData); font.pixelSize: 11; color: BarStyle.subtext; width: 60 }
                 BarText { anchors.verticalCenter: parent.verticalCenter; anchors.right: parent.right; text: root.zoneTime(modelData); font.weight: Font.DemiBold }

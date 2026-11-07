@@ -123,22 +123,6 @@ Column {
         checked: on
         onToggled: tapped()
     }
-    component Tab: Rectangle {
-        id: tab
-        property string icon
-        property string text
-        property bool on: false
-        signal tapped()
-        width: (320 - 12) / 3; height: 34; radius: 17
-        color: on ? BarStyle.accent : BarStyle.plateHover
-        Behavior on color { ColorAnimation { duration: 110 } }
-        Row {
-            anchors.centerIn: parent; spacing: 6
-            BarIcon { name: tab.icon; size: 16; color: tab.on ? BarStyle.onAccent : BarStyle.subtext }
-            BarText { text: tab.text; font.pixelSize: 12; color: tab.on ? BarStyle.onAccent : BarStyle.text }
-        }
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: tab.tapped() }
-    }
     // A connected-thing card: big icon, name, state, and an info view.
     component Core: Rectangle {
         id: core
@@ -149,7 +133,7 @@ Column {
         property var details: []
         width: 320; height: 64 + (root.info ? details.length * 22 + 10 : 0)
         radius: BarStyle.radiusMedium
-        color: connected ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.16) : BarStyle.plateHover
+        color: connected ? BarStyle.accentContainer : BarStyle.card
         border.width: 1; border.color: connected ? BarStyle.accent : BarStyle.border
         clip: true
         Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
@@ -215,11 +199,14 @@ Column {
         }
     }
 
-    Row {
-        spacing: 6
-        Tab { icon: "lan"; text: "Wired"; on: root.mode === "eth"; onTapped: root.mode = "eth" }
-        Tab { icon: "wifi"; text: "Wi-Fi"; on: root.mode === "wifi"; onTapped: root.mode = "wifi" }
-        Tab { icon: "bluetooth"; text: "Bluetooth"; on: root.mode === "bt"; onTapped: root.mode = "bt"; visible: BluetoothStatus.available }
+    readonly property var tabIds: BluetoothStatus.available ? ["eth", "wifi", "bt"] : ["eth", "wifi"]
+    BarTabs {
+        width: 320
+        model: BluetoothStatus.available
+            ? [{ icon: "lan", text: "Wired" }, { icon: "wifi", text: "Wi-Fi" }, { icon: "bluetooth", text: "Bluetooth" }]
+            : [{ icon: "lan", text: "Wired" }, { icon: "wifi", text: "Wi-Fi" }]
+        current: Math.max(0, root.tabIds.indexOf(root.mode))
+        onPicked: i => root.mode = root.tabIds[i]
     }
 
     // ---- Wired

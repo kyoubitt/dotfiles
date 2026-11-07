@@ -20,14 +20,14 @@ Column {
         spacing: 8
         Repeater {
             model: [0.1, 0.25, 0.5, 0.75, 0.99]
-            delegate: Rectangle {
+            delegate: BarButton {
+                id: chip
                 required property real modelData
                 readonly property bool on: Math.abs((root.mon?.brightness ?? 0) - modelData) < 0.04
-                width: 54; height: 28; radius: 14
-                color: on ? BarStyle.accent : BarStyle.plateHover
-                Behavior on color { ColorAnimation { duration: 110 } }
-                BarText { anchors.centerIn: parent; text: Math.round(parent.modelData * 100) + "%"; font.pixelSize: 12; color: parent.on ? BarStyle.onAccent : BarStyle.text }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.mon?.setBrightness(parent.modelData) }
+                width: 56; height: 30; radius: pressed ? BarStyle.radiusSmall : 15
+                tone: "tonal"; toggled: on
+                onTapped: root.mon?.setBrightness(chip.modelData)
+                BarText { anchors.centerIn: parent; text: Math.round(chip.modelData * 100) + "%"; font.pixelSize: 12; color: chip.ink }
             }
         }
     }

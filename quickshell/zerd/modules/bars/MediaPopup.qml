@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.services
+import qs.modules.common.widgets
 
 // Cover, track, seek bar, transport, shuffle/loop, volume and player switch.
 Column {
@@ -38,8 +39,8 @@ Column {
         visible: root.p !== null
         spacing: 14
         ClippingRectangle {
-            width: 96; height: 96; radius: BarStyle.radiusMedium
-            color: BarStyle.plateHover
+            width: 104; height: 104; radius: BarStyle.radiusMedium
+            color: BarStyle.cardHigh
             Image {
                 anchors.fill: parent
                 source: root.p?.trackArtUrl ?? ""
@@ -53,7 +54,7 @@ Column {
             BarIcon { anchors.centerIn: parent; name: "music_note"; size: 36; color: BarStyle.subtext; visible: (root.p?.trackArtUrl ?? "") === "" }
         }
         Column {
-            width: root.width - 110
+            width: root.width - 118
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
             BarMarquee { width: parent.width; text: root.p?.trackTitle ?? "Nothing playing"; pixelSize: 16; weight: Font.DemiBold }
@@ -67,16 +68,13 @@ Column {
         visible: root.p !== null
         width: parent.width
         spacing: 2
-        Item {
-            width: parent.width; height: 14
-            Rectangle { y: 5; width: parent.width; height: 4; radius: 2; color: BarStyle.border }
-            Rectangle { y: 5; width: root.len > 0 ? parent.width * Math.min(1, root.pos / root.len) : 0; height: 4; radius: 2; color: BarStyle.accent }
-            MouseArea {
-                anchors.fill: parent
-                enabled: (root.p?.canSeek ?? false) && root.len > 0
-                cursorShape: Qt.PointingHandCursor
-                onPressed: mouse => { root.p.position = root.len * Math.max(0, Math.min(1, mouse.x / width)) }
-            }
+        WavySeekbar {
+            width: parent.width
+            progress: root.len > 0 ? Math.min(1, root.pos / root.len) : 0
+            accentColor: BarStyle.accent
+            dimColor: BarStyle.border
+            animate: (root.p?.isPlaying ?? false) && root.visible
+            onSeekRequested: f => { if ((root.p?.canSeek ?? false) && root.len > 0) root.p.position = root.len * f }
         }
         Item {
             width: parent.width; height: 16
@@ -119,16 +117,11 @@ Column {
         visible: root.p !== null && MprisController.canChangeVolume
         spacing: 10
         BarIcon { name: "volume_up"; size: 16; color: BarStyle.subtext }
-        Item {
-            width: root.width - 26; height: 18
-            Rectangle { y: 7; width: parent.width; height: 4; radius: 2; color: BarStyle.border }
-            Rectangle { y: 7; width: parent.width * (root.p?.volume ?? 0); height: 4; radius: 2; color: BarStyle.accent }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onPressed: mouse => { root.p.volume = Math.max(0, Math.min(1, mouse.x / width)) }
-                onPositionChanged: mouse => { if (pressed) root.p.volume = Math.max(0, Math.min(1, mouse.x / width)) }
-            }
+        BarSlider {
+            width: root.width - 26; trackHeight: 22
+            value: root.p?.volume ?? 0
+            label: Math.round((root.p?.volume ?? 0) * 100) + "%"
+            onMoved: v => { if (root.p) root.p.volume = v }
         }
     }
 
@@ -141,7 +134,7 @@ Column {
                 required property var modelData
                 readonly property bool on: modelData === root.p
                 height: 24; width: nameText.implicitWidth + 20; radius: 12
-                color: on ? BarStyle.accent : BarStyle.plateHover
+                color: on ? BarStyle.accent : BarStyle.card
                 BarText { id: nameText; anchors.centerIn: parent; text: modelData.identity ?? "Player"; font.pixelSize: 11; color: parent.on ? BarStyle.onAccent : BarStyle.text }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: MprisController.setActivePlayer(modelData) }
             }

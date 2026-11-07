@@ -51,8 +51,7 @@ Column {
             property string value
             property string label
             width: 106; height: 52; radius: BarStyle.radiusSmall
-            color: BarStyle.plateHover
-            opacity: 0.9
+            color: BarStyle.card
             Column {
                 anchors.centerIn: parent
                 spacing: 0
