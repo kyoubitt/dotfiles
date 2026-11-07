@@ -294,7 +294,7 @@ Singleton {
                     property bool edgeHover: true
                     property string edgeSide: "both"
                     property list<string> expanded: ["today", "calendar", "timer", "clipboard", "tasks", "widgets"]
-                    // Right panel: section order and the ones switched off (names as in RightSections).
+                    // Right panel: section order and the ones switched off.
                     property list<string> rightOrder: []
                     property list<string> leftOrder: []
                     property list<string> rightHidden: []
@@ -826,6 +826,46 @@ Singleton {
                     // Codes follow what `trans` expects, e.g. "es" and "en"
                     property string targetLanguage: "en" // American English
                     property string sourceLanguage: "es" // Spanish
+                }
+            }
+
+            property JsonObject sidebar: JsonObject {
+                property JsonObject quickSliders: JsonObject {
+                    property bool enable: true
+                    property bool showMic: false
+                    property bool showVolume: true
+                    property bool showBrightness: true
+                }
+                property JsonObject quickToggles: JsonObject {
+                    property JsonObject android: JsonObject {
+                        property int columns: 4
+                        property list<var> toggles: [
+                            { "size": 2, "type": "network" },
+                            { "size": 2, "type": "bluetooth" },
+                            { "size": 2, "type": "notifications" },
+                            { "size": 2, "type": "audio" },
+                            { "size": 2, "type": "nightLight" },
+                            { "size": 2, "type": "focus" },
+                            { "size": 1, "type": "idleInhibitor" },
+                            { "size": 1, "type": "mic" },
+                            { "size": 1, "type": "powerProfile" },
+                            { "size": 1, "type": "screenSnip" }
+                        ]
+                    }
+                }
+                property JsonObject translator: JsonObject {
+                    property bool enable: true
+                }
+                property JsonObject ai: JsonObject {
+                    property bool textFadeIn: false
+                }
+            }
+
+            property JsonObject interactions: JsonObject {
+                property JsonObject scrolling: JsonObject {
+                    property real mouseScrollFactor: 50
+                    property real touchpadScrollFactor: 100
+                    property real mouseScrollDeltaThreshold: 120
                 }
             }
 

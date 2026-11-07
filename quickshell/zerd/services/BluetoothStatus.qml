@@ -18,6 +18,15 @@ Singleton {
     readonly property int activeDeviceCount: Bluetooth.defaultAdapter?.devices.values.filter(device => device.connected).length ?? 0
     readonly property bool connected: Bluetooth.devices.values.some(d => d.connected)
 
+    // Connected devices first, then paired ones, then the rest found while scanning.
+    readonly property list<var> friendlyDeviceList: {
+        const all = Bluetooth.defaultAdapter?.devices.values ?? []
+        const connected = all.filter(d => d.connected)
+        const paired = all.filter(d => !d.connected && (d.paired || d.bonded))
+        const other = all.filter(d => !d.connected && !(d.paired || d.bonded))
+        return [...connected, ...paired, ...other]
+    }
+
     // For the vendored iRiS controls card: name of the connected device, or a count.
     function activeDeviceSummary(): string {
         if (!enabled) return ""
