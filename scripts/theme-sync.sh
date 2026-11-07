@@ -644,6 +644,10 @@ update_sddm_theme() {
   color4=$(jq -r '.colors.color4' "$wallust_colors_file")
   color6=$(jq -r '.colors.color6' "$wallust_colors_file")
   color7=$(jq -r '.colors.color7' "$wallust_colors_file")
+  # the shell's accent (a colour picked in Settings wins over the wallpaper's), so the login screen matches the lock screen
+  local accent_pick
+  accent_pick=$(jq -r '.colours.accent // ""' "$HOME/.config/zerda-shell/config.json" 2> /dev/null)
+  [[ "$accent_pick" =~ ^#[0-9A-Fa-f]{6}$ ]] && color4="$accent_pick"
 
   cp "$wallpaper_path" "$sddm_bg_cache"
 
