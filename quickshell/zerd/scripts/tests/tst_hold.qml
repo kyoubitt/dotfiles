@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../../modules/sessionScreen"
 
 Item {
     id: top

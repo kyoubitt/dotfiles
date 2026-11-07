@@ -1,0 +1,4 @@
+module qs.modules.bars
+singleton BarStyle 1.0 BarStyle.qml
+BarText 1.0 BarText.qml
+BarIcon 1.0 BarIcon.qml
