@@ -294,7 +294,7 @@ Singleton {
                     property bool edgeHover: true
                     property string edgeSide: "both"
                     property list<string> expanded: ["today", "calendar", "timer", "clipboard", "tasks", "widgets"]
-                    // Right panel: section order and the ones switched off (names as in RightSections).
+                    // Right panel: section order and the ones switched off.
                     property list<string> rightOrder: []
                     property list<string> leftOrder: []
                     property list<string> rightHidden: []

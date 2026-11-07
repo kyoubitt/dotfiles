@@ -8,8 +8,8 @@ import qs
 import qs.services
 import qs.modules.common
 
-// Two slide-in panels. Left: the quick panel (toggles, sliders, player, tasks, stats).
-// Right: collapsible sections for calendar, weather, notifications and system.
+// Two slide-in panels. Left: assistant, translator and the shell's tools. Right: system buttons, sliders, quick toggles,
+// notifications, and calendar / to do / timer / media.
 // Open from the bar buttons or with `ipc call sidebars toggle left|right`: that pins the panel
 // (click outside or Escape closes it). Resting the pointer on a screen edge only peeks: no click
 // catcher, the panel leaves with the pointer, and touching anything inside pins it.
@@ -17,12 +17,6 @@ Scope {
     id: root
 
     readonly property var options: Config.options?.bars?.sidebars ?? ({})
-    // The movable sections under the fixed part of the quick panel, in the saved order.
-    readonly property var leftNames: ["clipboard", "shots", "notifrules", "battery", "tasks"]
-    readonly property var leftOrder: {
-        const saved = Config.options?.bars?.sidebars?.leftOrder ?? []
-        return saved.filter(n => root.leftNames.includes(n)).concat(root.leftNames.filter(n => !saved.includes(n)))
-    }
     readonly property bool edgeHover: options.edgeHover ?? true
     readonly property string edgeSide: options.edgeSide ?? "both"
 
@@ -40,6 +34,20 @@ Scope {
         function onSidebarChanged(): void { if (BarState.sidebar === "") { root.cooling = true; cool.restart() } }
     }
     Timer { id: cool; interval: 600; onTriggered: root.cooling = false }
+
+    // The rest of the shell reads these two (notification popups, the dock) and closes the panel through them.
+    Connections {
+        target: BarState
+        function onSidebarChanged(): void {
+            GlobalStates.sidebarRightOpen = BarState.sidebar === "right"
+            GlobalStates.sidebarLeftOpen = BarState.sidebar === "left"
+        }
+    }
+    Connections {
+        target: GlobalStates
+        function onSidebarRightOpenChanged(): void { if (!GlobalStates.sidebarRightOpen && BarState.sidebar === "right") BarState.closeAll() }
+        function onSidebarLeftOpenChanged(): void { if (!GlobalStates.sidebarLeftOpen && BarState.sidebar === "left") BarState.closeAll() }
+    }
 
     IpcHandler {
         target: "sidebars"
@@ -173,7 +181,7 @@ Scope {
             Rectangle {
                 id: panel
                 readonly property int margin: 10
-                readonly property int fullWidth: 380
+                readonly property int fullWidth: Appearance.sizes.sidebarWidth
                 readonly property real screenW: win.screen?.width ?? 1920
                 readonly property real p: win.progress
                 visible: p > 0.001
@@ -186,9 +194,9 @@ Scope {
                 x: win.onRight ? screenW - width - margin * p : margin * p
                 radius: 2 + 22 * p
                 antialiasing: true
-                color: BarStyle.surface
+                color: Appearance.colors.colLayer0
                 border.width: 1
-                border.color: BarStyle.border
+                border.color: Appearance.colors.colLayer0Border
                 MouseArea { anchors.fill: parent }
 
                 // A panel opened by the screen edge leaves when the pointer does. The gap between the
@@ -207,132 +215,20 @@ Scope {
                     scale: 0.97 + 0.03 * panel.p
                     transformOrigin: win.onRight ? Item.Right : Item.Left
 
-                // The same header on both sides: picture and name on the quick panel, a glyph on the sections panel;
-                // pin (keeps it open) and close on the right.
-                PanelHeader {
-                    id: head
-                    x: 20; y: 14; width: parent.width - 40
-                    avatar: !win.onRight
-                    icon: "widgets"
-                    title: win.onRight ? "Sections" : (Config.options?.account?.name || SystemInfo.displayName)
-                    subtitle: win.onRight ? "Calendar, weather and tools" : ""
-                    PanelButton { icon: "push_pin"; size: 36; toggled: BarState.pinned; tip: BarState.pinned ? "Pinned: stays until closed" : "Pin open"; onTapped: BarState.pinned = !BarState.pinned }
-                    PanelButton { icon: "close"; size: 36; tip: "Close"; onTapped: BarState.closeAll() }
-                }
-
-                Flickable {
-                    id: flick
+                Loader {
                     anchors.fill: parent
-                    anchors.margins: 20
-                    anchors.topMargin: 76
-                    anchors.bottomMargin: 8
-                    contentHeight: column.implicitHeight + 24
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    flickableDirection: Flickable.VerticalFlick
-
-                    Column {
-                        id: column
-                        width: parent.width
-                        spacing: 12
-
-                        // ---- Left: quick panel
-                        Column {
-                            visible: !win.onRight
-                            width: parent.width
-                            spacing: 12
-                            QuickHeader { width: parent.width }
-                            QuickToggles { width: parent.width }
-                            QuickSliders { width: parent.width; screen: win.screen }
-                            QuickMedia { width: parent.width }
-                            QuickRings { width: parent.width }
-                            Component {
-                                id: cClipboard
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "clipboard"; icon: "content_paste"; title: "Clipboard"
-                                    summary: "Search, pin, images"
-                                    ClipboardSection { width: parent.width }
-                                }
-                            }
-                            Component {
-                                id: cShots
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "shots"; icon: "screenshot_region"; title: "Screenshots"
-                                    summary: "Latest shots"
-                                    ScreenshotsSection { width: parent.width }
-                                }
-                            }
-                            Component {
-                                id: cRules
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "notifrules"; icon: "notifications_paused"; title: "Notification rules"
-                                    summary: NotifRules.raw.length + " custom"
-                                    NotifRulesSection { width: parent.width }
-                                }
-                            }
-                            Component {
-                                id: cBattery
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "battery"; icon: "battery_full"; title: "Battery"
-                                    summary: Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? "  ·  charging" : "")
-                                    BatteryPopup { width: parent.width }
-                                }
-                            }
-                            Component {
-                                id: cTasks
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "tasks"; icon: "checklist"; title: "Tasks"
-                                    summary: Todo.list.filter(t => !t.done).length + " to do"
-                                    TasksSection { width: parent.width }
-                                }
-                            }
-                            SectionStack {
-                                id: stack
-                                width: parent.width
-                                names: root.leftNames
-                                order: root.leftOrder
-                                hidden: Battery.available ? [] : ["battery"]
-                                comps: ({ clipboard: cClipboard, shots: cShots, notifrules: cRules, battery: cBattery, tasks: cTasks })
-                                onMoved: list => Config.options.bars.sidebars.leftOrder = list
-                            }
-                        }
-
-                        // ---- Right: sections
-                        RightSections {
-                            visible: win.onRight
-                            width: parent.width
-                        }
-                    }
+                    active: win.onRight
+                    sourceComponent: SidebarRightContent { screen: win.screen }
                 }
-
-                // Fade and a slim scrollbar so cut-off content reads as "scrolls", not "cropped".
-                Rectangle {
-                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 1; rightMargin: 1; bottomMargin: 1 }
-                    height: 36
-                    radius: panel.radius
-                    opacity: flick.contentY + flick.height < flick.contentHeight - 4 ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 120 } }
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: Qt.rgba(BarStyle.surface.r, BarStyle.surface.g, BarStyle.surface.b, 0) }
-                        GradientStop { position: 1; color: BarStyle.surface }
-                    }
-                }
-                Rectangle {
-                    visible: flick.contentHeight > flick.height + 2
-                    x: parent.width - 8; width: 3; radius: 1.5
-                    y: flick.y + (flick.height - height) * (flick.contentY / Math.max(1, flick.contentHeight - flick.height))
-                    height: Math.max(24, flick.height * flick.height / flick.contentHeight)
-                    color: BarStyle.border
+                Loader {
+                    anchors.fill: parent
+                    active: !win.onRight && win.displaySide !== ""
+                    sourceComponent: SidebarLeftContent {}
                 }
 
                 // Any press inside pins a peeked panel. It refuses the press, so the control under it still gets it.
                 MouseArea {
-                    anchors { left: parent.left; right: parent.right; top: head.bottom; bottom: parent.bottom }
+                    anchors.fill: parent
                     z: 100
                     onPressed: mouse => { if (!BarState.pinned) BarState.pinned = true; mouse.accepted = false }
                 }

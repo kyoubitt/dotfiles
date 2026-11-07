@@ -47,8 +47,6 @@ Sidebars 1.0 Sidebars.qml
 InfoFace 1.0 InfoFace.qml
 EndFace 1.0 EndFace.qml
 CalendarCard 1.0 CalendarCard.qml
-QuickHeader 1.0 QuickHeader.qml
-QuickToggles 1.0 QuickToggles.qml
 QuickSliders 1.0 QuickSliders.qml
 QuickMedia 1.0 QuickMedia.qml
 QuickRings 1.0 QuickRings.qml
@@ -56,7 +54,6 @@ ClockPopup 1.0 ClockPopup.qml
 ActivityChips 1.0 ActivityChips.qml
 BarMarquee 1.0 BarMarquee.qml
 AccordionSection 1.0 AccordionSection.qml
-TasksSection 1.0 TasksSection.qml
 NotesSection 1.0 NotesSection.qml
 TimerSection 1.0 TimerSection.qml
 ClipboardSection 1.0 ClipboardSection.qml
@@ -72,7 +69,6 @@ BarTabs 1.0 BarTabs.qml
 TrayMenu 1.0 TrayMenu.qml
 BatteryWave 1.0 BatteryWave.qml
 NotifRulesSection 1.0 NotifRulesSection.qml
-RightSections 1.0 RightSections.qml
 CalculatorSection 1.0 CalculatorSection.qml
 ConverterSection 1.0 ConverterSection.qml
 SectionStack 1.0 SectionStack.qml
@@ -94,8 +90,6 @@ singleton NiriBinds 1.0 NiriBinds.qml
 NotifRuleSweep 1.0 NotifRuleSweep.qml
 EditorPlate 1.0 EditorPlate.qml
 EditorChip 1.0 EditorChip.qml
-PanelHeader 1.0 PanelHeader.qml
-PanelButton 1.0 PanelButton.qml
 QuickSlider 1.0 QuickSlider.qml
 QuickRing 1.0 QuickRing.qml
 AbstractQuickPanel 1.0 AbstractQuickPanel.qml
