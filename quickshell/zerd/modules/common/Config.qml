@@ -829,6 +829,35 @@ Singleton {
                 }
             }
 
+            property JsonObject sidebar: JsonObject {
+                property JsonObject quickSliders: JsonObject {
+                    property bool enable: true
+                    property bool showMic: false
+                    property bool showVolume: true
+                    property bool showBrightness: true
+                }
+                property JsonObject quickToggles: JsonObject {
+                    property JsonObject android: JsonObject {
+                        property int columns: 4
+                        property list<var> toggles: [
+                            { "size": 2, "type": "network" },
+                            { "size": 2, "type": "bluetooth" },
+                            { "size": 2, "type": "notifications" },
+                            { "size": 2, "type": "audio" },
+                            { "size": 2, "type": "nightLight" },
+                            { "size": 2, "type": "focus" },
+                            { "size": 1, "type": "idleInhibitor" },
+                            { "size": 1, "type": "mic" },
+                            { "size": 1, "type": "powerProfile" },
+                            { "size": 1, "type": "screenSnip" }
+                        ]
+                    }
+                }
+                property JsonObject translator: JsonObject {
+                    property bool enable: true
+                }
+            }
+
             property JsonObject light: JsonObject {
                 property JsonObject night: JsonObject {
                     property bool automatic: true

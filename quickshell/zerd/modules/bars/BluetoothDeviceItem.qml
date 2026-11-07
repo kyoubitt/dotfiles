@@ -14,13 +14,6 @@ DialogListItem {
     onClicked: expanded = !expanded
     altAction: () => expanded = !expanded
     
-    component ActionButton: DialogButton {
-        colBackground: Appearance.colors.colPrimary
-        colBackgroundHover: Appearance.colors.colPrimaryHover
-        colRipple: Appearance.colors.colPrimaryActive
-        colText: Appearance.colors.colOnPrimary
-    }
-
     contentItem: ColumnLayout {
         anchors {
             fill: parent
@@ -83,7 +76,7 @@ DialogListItem {
             Item {
                 Layout.fillWidth: true
             }
-            ActionButton {
+            BluetoothActionButton {
                 readonly property bool p: root.device?.paired ?? false
                 colBackground: p ? Appearance.colors.colError : ColorUtils.transparentize(Appearance.colors.colLayer3, 1)
                 colBackgroundHover: p ? Appearance.colors.colErrorHover : ColorUtils.transparentize(Appearance.colors.colLayer3, 1)
@@ -99,7 +92,7 @@ DialogListItem {
                     }
                 }
             }
-            ActionButton {
+            BluetoothActionButton {
                 buttonText: root.device?.connected ? Translation.tr("Disconnect") : Translation.tr("Connect")
 
                 onClicked: {

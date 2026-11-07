@@ -19,19 +19,19 @@ Rectangle {
             "type": "calendar",
             "name": Translation.tr("Calendar"),
             "icon": "calendar_month",
-            "widget": "calendar/CalendarWidget.qml"
+            "widget": "CalendarWidget.qml"
         },
         {
             "type": "todo",
             "name": Translation.tr("To Do"),
             "icon": "done_outline",
-            "widget": "todo/TodoWidget.qml"
+            "widget": "TodoWidget.qml"
         },
         {
             "type": "timer",
             "name": Translation.tr("Timer"),
             "icon": "schedule",
-            "widget": "pomodoro/PomodoroWidget.qml"
+            "widget": "PomodoroWidget.qml"
         },
     ]
 
@@ -134,7 +134,7 @@ Rectangle {
         }
 
         anchors.fill: parent
-        // implicitHeight: tabStack.implicitHeight
+        // implicitHeight: tabLoader.implicitHeight
         spacing: 20
 
         // Navigation rail
@@ -189,15 +189,15 @@ Rectangle {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            // implicitHeight: tabStack.implicitHeight
+            // implicitHeight: tabLoader.implicitHeight
 
             Loader {
-                id: tabStack
+                id: tabLoader
                 anchors.fill: parent
                 anchors.bottomMargin: -anchors.topMargin
 
                 Component.onCompleted: {
-                    tabStack.source = root.tabs[root.selectedTab].widget;
+                    tabLoader.source = root.tabs[root.selectedTab].widget;
                 }
 
                 Connections {
@@ -207,7 +207,7 @@ Rectangle {
                             tabSwitchBehavior.animation.down = true;
                         else if (root.currentTab < root.previousIndex)
                             tabSwitchBehavior.animation.down = false;
-                        tabStack.source = root.tabs[root.selectedTab].widget;
+                        tabLoader.source = root.tabs[root.selectedTab].widget;
                     }
                 }
 
@@ -216,60 +216,10 @@ Rectangle {
                     animation: TabSwitchAnim {
                         id: upAnim
                         down: true
+                        tabStack: tabLoader
+                        nextSource: root.tabs[root.selectedTab].widget
                     }
                 }
-            }
-        }
-    }
-
-    component TabSwitchAnim: SequentialAnimation {
-        id: switchAnim
-        property bool down: false
-        ParallelAnimation {
-            PropertyAnimation {
-                target: tabStack
-                properties: "opacity"
-                to: 0
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-            }
-            PropertyAnimation {
-                target: tabStack.anchors
-                properties: "topMargin"
-                to: 10 * (switchAnim.down ? -1 : 1)
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-            }
-        }
-        PropertyAction {
-            target: tabStack
-            property: "source"
-            value: root.tabs[root.selectedTab].widget
-        } // The source change happens here
-        ParallelAnimation {
-            PropertyAnimation {
-                target: tabStack.anchors
-                properties: "topMargin"
-                from: 10 * -(switchAnim.down ? -1 : 1)
-                to: 0
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
-            }
-            PropertyAnimation {
-                target: tabStack
-                properties: "opacity"
-                to: 1
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
-            }
-        }
-        ScriptAction {
-            script: {
-                root.previousIndex = root.selectedTab;
             }
         }
     }
