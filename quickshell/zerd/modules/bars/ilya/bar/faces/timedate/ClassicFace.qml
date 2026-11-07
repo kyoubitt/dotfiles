@@ -86,10 +86,12 @@ Item {
                 color: Qt.rgba(1, 1, 1, 0.09)
             }
 
+            // text block: 1 px of air above, 29 px high; the progress line owns the last 2 px of the plate
             Column {
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: -1
-                spacing: 3
+                id: textCol
+                x: Math.round((parent.width - width) / 2)
+                y: 1
+                spacing: 4
 
                 Text {
                     renderType: Text.NativeRendering
@@ -99,9 +101,9 @@ Item {
                     readonly property string colon: "<font color='" + ThemeBackend.blue.toString() + "'>:</font>"
                     text: classicFaceRoot.parsedTime.hours + colon + classicFaceRoot.parsedTime.minutes + (plate.wide && classicFaceRoot.parsedTime.hasSeconds ? colon + classicFaceRoot.parsedTime.seconds : "")
                     font.family: ThemeBackend.fontFamily
-                    font.pixelSize: 22
+                    font.pixelSize: 20
                     lineHeightMode: Text.FixedHeight
-                    lineHeight: 19
+                    lineHeight: 17
                     font.weight: Font.Bold
                     color: ThemeBackend.text
                 }
@@ -113,23 +115,27 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: DateTime.format("ddd, d MMM", DateTime.now).toUpperCase()
                     font.family: ThemeBackend.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: 9
                     font.letterSpacing: 1
                     lineHeightMode: Text.FixedHeight
-                    lineHeight: 9
+                    lineHeight: 8
                     font.weight: Font.Medium
                     color: ThemeBackend.subtext0
                 }
             }
 
-            // a hairline that fills across the minute
+            // progress across the minute, on the very bottom edge of the plate (the face sits 16 px inside it)
             Rectangle {
-                anchors { bottom: parent.bottom; bottomMargin: 2; horizontalCenter: parent.horizontalCenter }
-                width: parent.width
-                height: 1
+                id: track
+                x: -6
+                width: parent.width + 12
+                y: parent.height - 2
+                height: 2
+                radius: 1
                 color: Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.08)
                 Rectangle {
                     height: parent.height
+                    radius: 1
                     width: parent.width * Math.min(1, (parseInt(classicFaceRoot.parsedTime.seconds) || parseInt(DateTime.second) || 0) / 60)
                     color: ThemeBackend.blue
                     Behavior on width { NumberAnimation { duration: 900; easing.type: Easing.Linear } }
