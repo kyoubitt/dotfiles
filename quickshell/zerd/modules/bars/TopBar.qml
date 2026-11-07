@@ -107,8 +107,8 @@ Scope {
             readonly property bool shown: !autoHide || pointerOn || top.forced || GlobalStates.barPopup !== null || (BarState.sidebar !== "" && !win.mixedFullscreen)
 
             // Which block sits where (Settings > Bar). Order inside a side is fixed, so moving a block never scrambles the rest.
-            readonly property var defaultSide: ({ left: "left", workspaces: "left", media: "left", timedate: "middle", sysmon: "right", weather: "right", info: "right", tray: "right", kb: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden" })
-            readonly property var blockOrder: ["left", "workspaces", "media", "timedate", "sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat", "focus"]
+            readonly property var defaultSide: ({ left: "left", workspaces: "left", media: "left", timedate: "middle", sysmon: "right", weather: "right", info: "right", tray: "right", kb: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden", vis: "hidden" })
+            readonly property var blockOrder: ["left", "workspaces", "media", "timedate", "sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat", "focus", "vis"]
             readonly property var layout: {
                 const l = { left: [].concat(options.layoutLeft ?? []), middle: [].concat(options.layoutMiddle ?? []), right: [].concat(options.layoutRight ?? []), hidden: [].concat(options.layoutHidden ?? []) }
                 const seen = {}
@@ -119,14 +119,51 @@ Scope {
             function blocks(where: string): var {
                 return win.layout[where].filter(id => win.blockOrder.includes(id))
             }
+            // The status icons share one plate; every other block keeps its own.
+            readonly property var plateOf: ({ weather: "status", kb: "status", wifi: "status", bt: "status", vol: "status", bat: "status", info: "status" })
+            function runs(where: string): var {
+                const out = []
+                let lastKey = ""
+                for (const id of win.blocks(where)) {
+                    const key = win.plateOf[id] ?? ""
+                    if (key !== "" && key === lastKey) out[out.length - 1].push(id)
+                    else out.push([id])
+                    lastKey = key
+                }
+                return out
+            }
             readonly property Component chooser: Component {
-                BarBlock {
-                    required property string modelData
-                    blockId: modelData
-                    barHeight: win.barHeight
-                    screen: win.modelData
-                    revealed: win.shown
-                    flat: win.look !== "pills"
+                Item {
+                    id: run
+                    required property var modelData
+                    readonly property bool grouped: modelData.length > 1
+                    readonly property bool flat: win.look !== "pills"
+                    width: runRow.width > 0 ? runRow.width + (grouped ? 8 : 0) : 0
+                    height: win.barHeight
+                    visible: width > 0
+                    Rectangle {
+                        visible: run.grouped && !run.flat
+                        anchors.fill: parent
+                        radius: 14
+                        color: BarStyle.plate
+                    }
+                    Row {
+                        id: runRow
+                        x: run.grouped ? 4 : 0
+                        spacing: run.grouped ? 2 : 0
+                        Repeater {
+                            model: run.modelData
+                            delegate: BarBlock {
+                                required property string modelData
+                                blockId: modelData
+                                barHeight: win.barHeight
+                                screen: win.modelData
+                                revealed: win.shown
+                                flat: run.flat
+                                grouped: run.grouped
+                            }
+                        }
+                    }
                 }
             }
 
@@ -199,7 +236,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    Repeater { model: win.blocks("left"); delegate: win.chooser }
+                    Repeater { model: win.runs("left"); delegate: win.chooser }
                 }
                 Row {
                     id: centre
@@ -207,7 +244,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    Repeater { model: win.blocks("middle"); delegate: win.chooser }
+                    Repeater { model: win.runs("middle"); delegate: win.chooser }
                 }
                 Row {
                     id: right
@@ -215,7 +252,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: BarStyle.gap
                     HoverHandler { onHoveredChanged: hovered ? win.enter() : win.leave() }
-                    Repeater { model: win.blocks("right"); delegate: win.chooser }
+                    Repeater { model: win.runs("right"); delegate: win.chooser }
                 }
             }
         }

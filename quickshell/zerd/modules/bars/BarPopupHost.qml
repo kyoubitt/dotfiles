@@ -75,7 +75,7 @@ Scope {
                     id: pl
                     anchors.fill: parent
                     active: false
-                    onLoaded: item.visible = true
+                    onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
             Connections {
@@ -84,7 +84,7 @@ Scope {
                     if (root.popup && root.spec) {
                         if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }
                         pl.active = true
-                        if (pl.item) pl.item.visible = true
+                        if (pl.item) { pl.item.visible = true; if (root.popup.tab && pl.item.gotoTab) pl.item.gotoTab(root.popup.tab) }
                     } else if (pl.active) {
                         if (pl.item && pl.item.startExit) pl.item.startExit(() => { if (!root.popup || !root.spec) pl.active = false })
                         else pl.active = false

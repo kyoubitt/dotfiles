@@ -190,7 +190,7 @@ ColumnLayout {
             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : ThemeBackend.elementOpacity
             textColor: isHoveredOrHighlighted ? (ThemeBackend.text || "#cdd6f4") : (ThemeBackend.subtext0 || "#a6adc8")
             Layout.alignment: Qt.AlignVCenter
-            onClicked: if (root.targetPlayer && root.targetPlayer.canGoPrevious) root.targetPlayer.previous()
+            onClicked: MprisController.previous()
         }
 
         IconButton {
@@ -204,7 +204,7 @@ ColumnLayout {
             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : ThemeBackend.elementOpacity
             textColor: isHoveredOrHighlighted ? (ThemeBackend.mauve || "#cba6f7") : (ThemeBackend.text || "#cdd6f4")
             Layout.alignment: Qt.AlignVCenter
-            onClicked: if (root.targetPlayer && root.targetPlayer.canTogglePlaying) root.targetPlayer.togglePlaying()
+            onClicked: MprisController.togglePlaying()
         }
 
         IconButton {
@@ -218,7 +218,7 @@ ColumnLayout {
             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : ThemeBackend.elementOpacity
             textColor: isHoveredOrHighlighted ? (ThemeBackend.text || "#cdd6f4") : (ThemeBackend.subtext0 || "#a6adc8")
             Layout.alignment: Qt.AlignVCenter
-            onClicked: if (root.targetPlayer && root.targetPlayer.canGoNext) root.targetPlayer.next()
+            onClicked: MprisController.next()
         }
     }
 }

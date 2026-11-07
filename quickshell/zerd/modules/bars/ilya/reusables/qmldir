@@ -18,3 +18,13 @@ FillButton 1.0 buttons/FillButton.qml
 FlipIcon 1.0 display/FlipIcon.qml
 ImageBox 1.0 display/ImageBox.qml
 NotificationBox 1.0 display/NotificationBox.qml
+CloseButton 1.0 buttons/CloseButton.qml
+Dropdown 1.0 inputs/Dropdown.qml
+FilePicker 1.0 inputs/FilePicker.qml
+Input 1.0 inputs/Input.qml
+LyricsPicker 1.0 inputs/LyricsPicker.qml
+Toggle 1.0 inputs/Toggle.qml
+LyricsView 1.0 media/LyricsView.qml
+Visualizer 1.0 media/Visualizer.qml
+WavySeekBar 1.0 media/WavySeekBar.qml
+SettingsRow 1.0 guide/SettingsRow.qml

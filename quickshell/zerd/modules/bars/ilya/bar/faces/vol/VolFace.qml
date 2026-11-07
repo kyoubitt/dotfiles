@@ -167,7 +167,7 @@ BarFaceBase {
                 font.pixelSize: s(root.isCompact ? 14 : 15)
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.mauve, 1.15) : (root.isSoundActive ? ThemeBackend.mauve : ThemeBackend.subtext0)
+                color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.blue, 1.15) : (root.isSoundActive ? ThemeBackend.blue : ThemeBackend.subtext0)
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
         }
@@ -208,7 +208,7 @@ BarFaceBase {
             buttonText: root.showPercent ? root.volPercent : ""
             textFontSize: s(root.isCompact ? 11 : 12)
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.12) : ThemeBackend.surface1)
+            accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.12) : ThemeBackend.surface1)
             textColor: isActive ? ThemeBackend.base : (root.isCompact ? ThemeBackend.text : ThemeBackend.subtext0)
 
             property real targetWidth: (root.showIcon || root.showPercent) ? implicitWidth : 0
@@ -256,7 +256,7 @@ BarFaceBase {
             cornerRadius: Math.max(0, ThemeBackend.borderRadius - s(2))
             buttonIcon: root.showIcon ? root.volIcon : ""
             iconFontSize: s(root.isCompact ? 14 : 15)
-            accentColor: root.isSoundActive ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.12) : ThemeBackend.surface1)
+            accentColor: root.isSoundActive ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.12) : ThemeBackend.surface1)
             textColor: root.isSoundActive ? ThemeBackend.base : (root.isCompact ? ThemeBackend.text : ThemeBackend.subtext0)
             onClicked: if (!root.isPreview) Popups.toggle("volume", root)
         }

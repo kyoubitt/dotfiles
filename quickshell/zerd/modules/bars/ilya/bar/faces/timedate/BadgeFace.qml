@@ -177,7 +177,7 @@ Item {
                         property var pattern: matrixFont.getPattern(character)
                         property color activeColor: {
                             if (/[0-9]/.test(character)) {
-                                return (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.peach, 1.08) : ThemeBackend.peach
+                                return (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue
                             }
                             if (/[\.\-\/\,]/.test(character)) {
                                 return ThemeBackend.surface2
@@ -328,7 +328,7 @@ Item {
                             property int charIndex: index
                             property string character: badgeFaceRoot.dayStr.charAt(charIndex)
                             property var pattern: matrixFont.getPattern(character)
-                            property color activeColor: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.peach, 1.08) : ThemeBackend.peach
+                            property color activeColor: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue
 
                             columns: 3
                             rows: 5

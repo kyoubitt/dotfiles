@@ -11,6 +11,8 @@ Item {
     property bool revealed: true
     // strip and floating looks draw one plate behind everything, so the pills go flat
     property bool flat: false
+    // inside a shared plate: no pill of its own
+    property bool grouped: false
 
     readonly property alias module: mod
     width: mod.width
@@ -45,6 +47,7 @@ Item {
         moduleId: root.blockId
         barWindow: host
         isSolid: root.flat
+        isGrouped: root.grouped
         moduleActive: true
     }
 }
