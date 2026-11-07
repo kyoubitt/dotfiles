@@ -108,25 +108,25 @@ BarFaceBase {
 
     property color batDynamicColor: {
         if (isDesktop) return ThemeBackend.red;
-        if (isCharging) return isVertical ? ThemeBackend.green : Qt.lighter(ThemeBackend.green, 1.15);
+        if (isCharging) return isVertical ? ThemeBackend.blue : Qt.lighter(ThemeBackend.blue, 1.15);
         if (batCap <= 15) return ThemeBackend.red;
-        if (batCap <= 25) return ThemeBackend.peach;
-        return ThemeBackend.teal;
+        if (batCap <= 25) return ThemeBackend.blue;
+        return ThemeBackend.blue;
     }
 
     property color calmBatFillColor: {
         if (isDesktop) return ThemeBackend.subtext0;
-        if (isCharging) return ThemeBackend.green;
+        if (isCharging) return ThemeBackend.blue;
         if (batCap <= 15) return ThemeBackend.red;
-        if (batCap <= 25) return ThemeBackend.peach;
-        return ThemeBackend.teal;
+        if (batCap <= 25) return ThemeBackend.blue;
+        return ThemeBackend.blue;
     }
 
     property color calmBatBorderColor: {
         if (isDesktop) return ThemeBackend.subtext0;
-        if (isCharging) return ThemeBackend.green;
+        if (isCharging) return ThemeBackend.blue;
         if (batCap <= 15) return ThemeBackend.red;
-        if (batCap <= 25) return ThemeBackend.peach;
+        if (batCap <= 25) return ThemeBackend.blue;
         return ThemeBackend.subtext0;
     }
 
@@ -136,9 +136,9 @@ BarFaceBase {
     readonly property int pillHeight: s(lockLook ? 36 : (root.isCompact ? 28 : 30))
     readonly property color lockBatColor: {
         if (isDesktop) return ThemeBackend.red;
-        if (isCharging) return ThemeBackend.green;
+        if (isCharging) return ThemeBackend.blue;
         if (batCap <= 15) return ThemeBackend.red;
-        if (batCap <= 25) return ThemeBackend.peach;
+        if (batCap <= 25) return ThemeBackend.blue;
         return ThemeBackend.text;
     }
 

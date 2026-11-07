@@ -63,29 +63,29 @@ Item {
 
         Column {
             id: timeCol
-            spacing: -2
+            spacing: 0
 
             Text {
                 renderType: Text.NativeRendering
                 id: timeText
-                anchors.left: parent.left
-                text: widget ? widget.timeStr : (typeof DateTime !== "undefined" ? DateTime.time : "12:00")
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: classicFaceRoot.parsedTime.hours + ":" + classicFaceRoot.parsedTime.minutes + ((widget && widget.hovered && classicFaceRoot.parsedTime.hasSeconds) ? ":" + classicFaceRoot.parsedTime.seconds : "")
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: widget ? widget.s(widget.isCompact ? 14 : 15) : 15
-                font.weight: Font.Black
-                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.1) : ThemeBackend.blue
+                font.pixelSize: 17
+                font.weight: Font.DemiBold
+                color: ThemeBackend.text
             }
 
             Text {
                 renderType: Text.NativeRendering
                 id: dateText
                 visible: widget ? widget.showDate : true
-                anchors.left: parent.left
-                text: widget ? widget.dateStr : (typeof DateTime !== "undefined" ? DateTime.fullDate : "Mon, Jan 1")
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: DateTime.format("ddd, d MMM", DateTime.now)
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: widget ? widget.s(widget.isCompact ? 9 : 10) : 10
-                font.weight: Font.Bold
-                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.subtext0, 1.08) : ThemeBackend.subtext0
+                font.pixelSize: 10
+                font.weight: Font.Medium
+                color: ThemeBackend.subtext0
             }
         }
     }
@@ -115,7 +115,7 @@ Item {
                 font.family: ThemeBackend.fontFamily
                 font.pixelSize: widget ? widget.s(widget.isCompact ? 13 : 14) : 14
                 font.weight: Font.Black
-                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.sapphire, 1.1) : ThemeBackend.sapphire
+                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.1) : ThemeBackend.blue
             }
 
             Text {
@@ -126,7 +126,7 @@ Item {
                 font.family: ThemeBackend.fontFamily
                 font.pixelSize: widget ? widget.s(widget.isCompact ? 11 : 12) : 12
                 font.weight: Font.Bold
-                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.teal, 1.1) : ThemeBackend.teal
+                color: (widget && widget.isCompact) ? Qt.lighter(ThemeBackend.blue, 1.1) : ThemeBackend.blue
             }
 
             Text {

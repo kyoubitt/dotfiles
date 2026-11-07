@@ -247,7 +247,7 @@ BarFaceBase {
                 font.pixelSize: s(root.isCompact ? 14 : 15)
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.mauve, 1.15) : (root.isBtOn ? ThemeBackend.mauve : ThemeBackend.subtext0)
+                color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.blue, 1.15) : (root.isBtOn ? ThemeBackend.blue : ThemeBackend.subtext0)
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
         }
@@ -288,7 +288,7 @@ BarFaceBase {
             iconFontSize: s(root.isCompact ? 14 : 15)
             buttonText: root.showName ? root.btDevice : ""
             textFontSize: s(root.isCompact ? 11 : 12)
-            accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
+            accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: isActive ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
 
             property real targetWidth: (root.isDesktop || (!root.showIcon && !root.showName)) ? 0 : implicitWidth
@@ -315,7 +315,7 @@ BarFaceBase {
             iconFontSize: s(root.isCompact ? 14 : 15)
             buttonText: (!root.showIcon && root.showName) ? (root.btDevice.length > 3 ? root.btDevice.substring(0, 3) : root.btDevice) : ""
             textFontSize: s(root.isCompact ? 9 : 10)
-            accentColor: root.isBtOn ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
+            accentColor: root.isBtOn ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: root.isBtOn ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
             onClicked: if (!root.isPreview) Popups.toggle("bt", root)
         }

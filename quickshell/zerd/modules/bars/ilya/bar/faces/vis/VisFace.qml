@@ -129,7 +129,7 @@ Item {
             ? "start"
             : ((root.visAlignment === "bottom" || root.visAlignment === "right") ? "end" : "center")
         count: root.visContinuous ? root.sampleCount : root.barCount
-        color: root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve
+        color: root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue
         previewDemo: Boolean(root.activeTarget && root.activeTarget.isPreview)
 
         // Bars: low frequencies first. Wave: low frequencies in the middle, mirrored

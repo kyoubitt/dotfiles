@@ -151,7 +151,7 @@ Item {
         id: menuBtn
         property string glyph: ""
         property bool active: false
-        property color activeColor: ThemeBackend.peach
+        property color activeColor: ThemeBackend.blue
         property int glyphYOffset: 0
         signal clicked()
 
@@ -224,7 +224,7 @@ Item {
                 glyph: BarModuleRegistry.menuItemIcon(itemId)
                 glyphYOffset: itemId === "nightlight" ? -1 : 0
                 active: itemId === "nightlight" ? root.nightLightActive : (itemId === "caffeine" ? root.caffeineActive : false)
-                activeColor: itemId === "caffeine" ? Qt.tint(ThemeBackend.peach, "#5c3016") : ThemeBackend.peach
+                activeColor: itemId === "caffeine" ? Qt.tint(ThemeBackend.blue, "#5c3016") : ThemeBackend.blue
                 onClicked: {
                     if (root.isPreview) return;
                     if (itemId === "settings") Popups.toggle("settings", root);

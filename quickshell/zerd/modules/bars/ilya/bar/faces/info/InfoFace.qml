@@ -27,7 +27,7 @@ Item {
 
     readonly property var timerEntries: TimerState.entries
     readonly property bool isTimerActive: timerEntries.length > 0
-    readonly property color greenColor: (typeof ThemeBackend !== "undefined" && ThemeBackend.green !== undefined) ? ThemeBackend.green : Qt.rgba(166/255, 227/255, 161/255, 1.0)
+    readonly property color greenColor: (typeof ThemeBackend !== "undefined" && ThemeBackend.blue !== undefined) ? ThemeBackend.blue : Qt.rgba(166/255, 227/255, 161/255, 1.0)
 
     readonly property bool hasActiveContent: isRecording || isTimerActive
 
@@ -130,7 +130,7 @@ Item {
                         horizontalItemAlignment: Grid.AlignHCenter
                         verticalItemAlignment: Grid.AlignVCenter
                         required property var modelData
-                        readonly property color entryColor: modelData.colorType === "green" ? root.greenColor : ThemeBackend.mauve
+                        readonly property color entryColor: modelData.colorType === "green" ? root.greenColor : ThemeBackend.blue
                         spacing: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 3 : 4) : (root.isCompact ? 3 : 4)) : (barWindow ? barWindow.cs(root.isCompact ? 5 : 6) : (root.isCompact ? 5 : 6))
 
                         Text {

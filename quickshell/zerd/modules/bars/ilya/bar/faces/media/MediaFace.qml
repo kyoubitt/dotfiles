@@ -58,7 +58,7 @@ Item {
     }
 
     readonly property string infoMode: readValue("mediaInfoMode", "mediaInfoMode", "duration")
-    readonly property real configuredWidth: Number(readValue("mediaWidth", "mediaWidth", 120))
+    readonly property real configuredWidth: Number(readValue("mediaWidth", "mediaWidth", 150))
     readonly property bool showControls: readBool("mediaShowControls", "mediaShowControls")
     readonly property bool hideWhenIdle: Boolean(readValue("mediaHideWhenIdle", "mediaHideWhenIdle", false))
     readonly property bool idleHidden: hideWhenIdle && !isPreview && !isMediaActive
@@ -138,7 +138,8 @@ Item {
         }
         let btnW = 0;
         if (showControls) {
-            btnW = (barWindow ? barWindow.cs(isCompact ? 28 : 30) : (isCompact ? 28 : 30)) * 3 + btnSpacing * 2 + innerSpacing;
+            let nBtn = isMediaActive ? 3 : 1;
+            btnW = 28 * nBtn + btnSpacing * (nBtn - 1) + innerSpacing;
         }
         let margins = sidePadding * 2;
         return iconW + colWidth + btnW + margins;
@@ -267,11 +268,11 @@ Item {
 
                                 MarqueeText {
                                     width: parent.width
-                                    text: root.isPreview ? I18n.t("guide.bar.media.preview.title", "Song title") : (isMediaActive ? (player ? player.trackTitle : "") : I18n.t("music.nothing_playing"))
+                                    text: root.isPreview ? I18n.t("guide.bar.media.preview.title", "Song title") : (isMediaActive ? (player ? player.trackTitle : "") : "Nothing playing")
                                     color: ThemeBackend.text
                                     font.family: ThemeBackend.fontFamily
-                                    font.weight: Font.Black
-                                    font.pixelSize: barWindow ? barWindow.cs(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)
+                                    font.weight: Font.DemiBold
+                                    font.pixelSize: 12
                                     marqueeSpacing: barWindow ? barWindow.cs(40) : 40
                                     speed: 30
                                     active: Boolean(root.visible && (!barWindow || barWindow.visible) && (!module || module.moduleActive) && root.isPlaying)
@@ -302,42 +303,44 @@ Item {
 
                         IconButton {
                             id: prevMediaButton
-                            height: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            width: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            cornerRadius: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
+                            visible: root.isMediaActive
+                            height: 28
+                            width: 28
+                            cornerRadius: 14
                             buttonIcon: "󰒮"
-                            iconFontSize: barWindow ? barWindow.cs(root.isCompact ? 7 : 8) : (root.isCompact ? 7 : 8)
-                            accentColor: root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0
+                            iconFontSize: 18
+                            accentColor: ThemeBackend.surface0
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
-                            textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
+                            textColor: isHoveredOrHighlighted ? ThemeBackend.text : ThemeBackend.subtext0
                             anchors.verticalCenter: parent.verticalCenter
                             onClicked: MprisController.previous()
                         }
 
                         IconButton {
                             id: playMediaButton
-                            height: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            width: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            cornerRadius: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
+                            height: 28
+                            width: 28
+                            cornerRadius: 14
                             buttonIcon: root.isPlaying ? "󰏤" : "󰐊"
-                            iconFontSize: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
-                            accentColor: root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0
+                            iconFontSize: 18
+                            accentColor: ThemeBackend.surface0
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
-                            textColor: isHoveredOrHighlighted ? ThemeBackend.green : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.1) : ThemeBackend.text)
+                            textColor: root.isPlaying ? ThemeBackend.blue : ThemeBackend.text
                             anchors.verticalCenter: parent.verticalCenter
                             onClicked: MprisController.togglePlaying()
                         }
 
                         IconButton {
                             id: nextMediaButton
-                            height: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            width: barWindow ? barWindow.cs(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
-                            cornerRadius: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
+                            visible: root.isMediaActive
+                            height: 28
+                            width: 28
+                            cornerRadius: 14
                             buttonIcon: "󰒭"
-                            iconFontSize: barWindow ? barWindow.cs(root.isCompact ? 7 : 8) : (root.isCompact ? 7 : 8)
-                            accentColor: root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0
+                            iconFontSize: 18
+                            accentColor: ThemeBackend.surface0
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
-                            textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
+                            textColor: isHoveredOrHighlighted ? ThemeBackend.text : ThemeBackend.subtext0
                             anchors.verticalCenter: parent.verticalCenter
                             onClicked: MprisController.next()
                         }
@@ -482,7 +485,7 @@ Item {
                         iconFontSize: barWindow ? barWindow.cs(root.isCompact ? 8 : 9) : (root.isCompact ? 8 : 9)
                         accentColor: root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0
                         bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
-                        textColor: isHoveredOrHighlighted ? ThemeBackend.green : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.1) : ThemeBackend.text)
+                        textColor: isHoveredOrHighlighted ? ThemeBackend.blue : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.1) : ThemeBackend.text)
                         anchors.horizontalCenter: parent.horizontalCenter
                         onClicked: if (targetPlayer && targetPlayer.canTogglePlaying) targetPlayer.togglePlaying()
                     }
