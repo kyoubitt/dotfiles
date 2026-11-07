@@ -147,7 +147,7 @@ Rectangle {
             clip: true
             color: btn.hot ? root.cSurfaceHover : root.cSurfaceSolid
             scale: (ma.pressed && !btn.isTriggered ? 0.96 : (btn.hot ? 1.02 : 1.0)) * btn.popScale
-            Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutQuint } }
 
             SequentialAnimation {
@@ -279,76 +279,25 @@ Rectangle {
     // Night light: the moon button lays a warm, dimmed, blue-free tint over the whole greeter. The choice is kept in the greeter's own
     // state file (the sddm user owns /var/lib/sddm); theme.conf's NightLight ("on"/"off") is only the first-boot default.
     property int modeOverride: -1
-    readonly property bool night: modeOverride >= 0 ? modeOverride === 1 : cfg("NightLight", "off") === "on"
+    readonly property bool nightHours: hourNow >= 19 || hourNow < 7
+    property int hourNow: new Date().getHours()
+    Timer { interval: 60000; repeat: true; running: true; onTriggered: root.hourNow = new Date().getHours() }
+    // your own choice wins; otherwise it follows the clock (evening to morning) or the first-boot default in theme.conf
+    readonly property bool night: modeOverride >= 0 ? modeOverride === 1 : (cfg("NightLight", "off") === "on" || nightHours)
     Settings {
         id: store
         location: "file://" + root.cfg("StateFile", "/var/lib/sddm/zerd-login.ini")
         category: "ui"
         property string choice: ""
     }
-    property bool themeGrabPending: false
-    property bool themeSwitching: false
-    property bool themeBusy: false
-    property bool themeForward: true
-    property bool themePrevDark: false
-    property real themeProgress: 0
-    property real themeOriginX: 1
-    property real themeOriginY: 1
-    property var snapResult: null
 
     function setMode(v) {
-        themeSwitching = true;
         modeOverride = v;
         store.choice = v === 1 ? "on" : "off";
-        switchTimer.restart();
     }
 
-    Timer {
-        id: switchTimer
-        interval: 80
-        onTriggered: root.themeSwitching = false
-    }
-
-    function toggleTheme() {
-        if (themeBusy) {
-            themeAnim.stop();
-            themeForward = !themeForward;
-            let to = themeForward ? 1 : 0;
-            themeAnim.from = themeProgress;
-            themeAnim.to = to;
-            themeAnim.duration = Math.max(150, 750 * Math.abs(to - themeProgress));
-            themeAnim.restart();
-            return;
-        }
-        if (themeGrabPending) return;
-        themeGrabPending = true;
-        let p = themeButton.mapToItem(root, themeButton.width / 2, themeButton.height / 2);
-        scene.grabToImage(function(result) {
-            root.snapResult = result;
-            themeOverlay.source = result.url;
-            root.themeOriginX = p.x / root.width;
-            root.themeOriginY = p.y / root.height;
-            root.themePrevDark = root.night;
-            root.themeProgress = 0;
-            root.setMode(root.night ? 0 : 1);
-            root.themeForward = true;
-            root.themeBusy = true;
-            root.themeGrabPending = false;
-            themeOverlay.visible = true;
-            themeAnim.from = 0;
-            themeAnim.to = 1;
-            themeAnim.duration = 750;
-            themeAnim.restart();
-        });
-    }
-
-    function finishTheme() {
-        if (!themeForward) setMode(themePrevDark ? 1 : 0);
-        themeOverlay.visible = false;
-        themeOverlay.source = "";
-        snapResult = null;
-        themeBusy = false;
-    }
+    // a plain switch: the warm tint just fades in or out, nothing is grabbed or laid out again
+    function toggleTheme() { setMode(night ? 0 : 1) }
 
     // palette from theme.conf: scripts/theme-sync.sh rewrites it from wallust on every wallpaper change
     function cfg(name, fallback) { return (typeof config !== "undefined" && config[name]) ? config[name] : fallback }
@@ -504,9 +453,13 @@ Rectangle {
         anchors.fill: parent
 
     Image {
+        id: wall
         anchors.fill: parent
         source: cfg("Background", "/var/cache/sddm-wallust/background.jpg")
         fillMode: Image.PreserveAspectCrop
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect { blurEnabled: true; blur: 0.45; blurMax: 40; brightness: -0.04 }
     }
 
     // soft vignette: the edges settle, the middle stays clear
@@ -603,7 +556,7 @@ Rectangle {
                         readonly property string digit: (row === 0 ? digits.h : digits.m).charAt(col)
                         readonly property var ink: digits.inkRects[digit >= "0" && digit <= "9" ? Number(digit) : 0]
                         readonly property real textX: (digits.cellW - ink.width * digits.sf) / 2 - ink.x * digits.sf
-                        readonly property color tint: (row + col) % 2 === 0 ? root.cText : root.cMid
+                        readonly property color tint: root.cText
 
                         x: col * digits.cellW
                         y: row * digits.cellH
@@ -806,7 +759,7 @@ Rectangle {
                     radius: root.radius
                     color: "transparent"
                     border.width: 0
-                    Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                    Behavior on color { ColorAnimation { duration: 150 } }
                     // no box: a thin line under the text instead
                     Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 2 * s; radius: height / 2; color: root.cText; opacity: 0.55 }
                 }
@@ -827,7 +780,7 @@ Rectangle {
                         anchors.fill: parent
                         radius: pw.btnRadius
                         color: lockMa.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
-                        Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: 150 } }
                     }
 
                     SequentialAnimation {
@@ -949,7 +902,7 @@ Rectangle {
                         color: pw.isBusy ? submitBtn.accent : (submitMa.pressed ? Qt.darker(submitBtn.accent, 1.12) : (submitBtn.hot ? Qt.lighter(submitBtn.accent, 1.12) : submitBtn.accent))
                         opacity: pw.isBusy ? 0.5 : 1.0
                         scale: (pw.isBusy ? 1.0 : (submitMa.pressed ? 1.08 : (submitBtn.hot ? 1.04 : 1.0))) * submitBtn.popScale
-                        Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: 150 } }
                         Behavior on opacity { NumberAnimation { duration: 150 } }
                         Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutQuint } }
 
@@ -1231,7 +1184,7 @@ Rectangle {
                 radius: root.radius
                 color: userMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (userMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
                 scale: userMa.pressed ? 0.96 : 1.0
-                Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: 150 } }
                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
                 Row {
@@ -1277,7 +1230,7 @@ Rectangle {
                 radius: root.radius
                 color: sessionMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (sessionMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
                 scale: sessionMa.pressed ? 0.96 : 1.0
-                Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: 150 } }
                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
                 Row {
@@ -1395,7 +1348,7 @@ Rectangle {
             radius: root.radius
             color: themeMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (themeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
             scale: themeMa.pressed ? 0.96 : 1.0
-            Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
             Ico {
@@ -1423,7 +1376,7 @@ Rectangle {
             radius: root.radius
             color: toggleMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (root.powerMenuOpen || toggleMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
             scale: toggleMa.pressed ? 0.96 : 1.0
-            Behavior on color { enabled: !root.themeSwitching; ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
             Ico {
@@ -1451,53 +1404,15 @@ Rectangle {
         anchors.fill: parent
         z: 90
         color: Qt.rgba(1.0, 0.52, 0.1, 1)
-        opacity: root.night ? 0.11 : 0
-        Behavior on opacity { enabled: !root.themeSwitching; NumberAnimation { duration: 300 } }
+        opacity: root.night ? 0.14 : 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
     }
     Rectangle {
         anchors.fill: parent
         z: 91
         color: Qt.rgba(0.05, 0.02, 0, 1)
-        opacity: root.night ? 0.1 : 0
-        Behavior on opacity { enabled: !root.themeSwitching; NumberAnimation { duration: 300 } }
+        opacity: root.night ? 0.12 : 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
     }
-    }
-
-    ShaderEffect {
-        id: themeMask
-        anchors.fill: parent
-        visible: false
-        layer.enabled: themeOverlay.visible
-        property vector2d itemSize: Qt.vector2d(width, height)
-        property real progress: root.themeProgress
-        property real transitionType: 2.0
-        property vector2d origin: Qt.vector2d(root.themeOriginX, root.themeOriginY)
-        property vector4d params: Qt.vector4d(0.0, 0.0, 0.0, 0.0)
-        fragmentShader: Qt.resolvedUrl("shaders/wallpaper_transition.frag.qsb")
-    }
-
-    Image {
-        id: themeOverlay
-        anchors.fill: parent
-        z: 1000
-        visible: false
-        cache: false
-        fillMode: Image.Stretch
-        layer.enabled: visible
-        layer.effect: MultiEffect {
-            maskEnabled: true
-            maskSource: themeMask
-            maskInverted: true
-            maskThresholdMin: 0.0
-            maskSpreadAtMin: 0.0
-        }
-    }
-
-    NumberAnimation {
-        id: themeAnim
-        target: root
-        property: "themeProgress"
-        easing.type: Easing.InOutCubic
-        onFinished: root.finishTheme()
     }
 }
