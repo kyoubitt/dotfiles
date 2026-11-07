@@ -311,7 +311,7 @@ Item {
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
                             textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
                             anchors.verticalCenter: parent.verticalCenter
-                            onClicked: if (player && player.canGoPrevious) player.previous()
+                            onClicked: MprisController.previous()
                         }
 
                         IconButton {
@@ -325,7 +325,7 @@ Item {
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
                             textColor: isHoveredOrHighlighted ? ThemeBackend.green : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.1) : ThemeBackend.text)
                             anchors.verticalCenter: parent.verticalCenter
-                            onClicked: if (player && player.canTogglePlaying) player.togglePlaying()
+                            onClicked: MprisController.togglePlaying()
                         }
 
                         IconButton {
@@ -339,7 +339,7 @@ Item {
                             bgOpacity: ThemeBackend.liquidGlass ? 1.0 : root.barOpacity
                             textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
                             anchors.verticalCenter: parent.verticalCenter
-                            onClicked: if (player && player.canGoNext) player.next()
+                            onClicked: MprisController.next()
                         }
                     }
                 }

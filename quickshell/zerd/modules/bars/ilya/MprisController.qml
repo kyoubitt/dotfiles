@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import "."
+import qs.services as Svc
 
 Singleton {
     id: root
@@ -21,33 +22,17 @@ Singleton {
 
     property string lastPlayingBus: ""
 
-    readonly property MprisPlayer activePlayer: {
-        let _ = _playerWatch;
-        try {
-            let players = Mpris.players.values.filter(p => p).sort((a, b) => (a.busName || "").localeCompare(b.busName || ""));
-            let playing = players.find(p => p.isPlaying);
-            if (playing) return playing;
-            let last = root.lastPlayingBus !== "" ? players.find(p => p.busName === root.lastPlayingBus) : null;
-            if (last) return last;
-            let loaded = players.find(p => p.playbackState !== MprisPlaybackState.Stopped && p.trackTitle !== "");
-            if (loaded) return loaded;
-            let controllable = players.find(p => p.canControl);
-            if (controllable) return controllable;
-            return players.length > 0 ? players[0] : null;
-        } catch (e) {
-            return null;
-        }
-    }
+    // what plays is decided by zerd's NowPlaying (Spotify/MPRIS or Orbit), not by his own picker
+    readonly property var activePlayer: Svc.NowPlaying.player ?? null
+    function togglePlaying() { Svc.NowPlaying.togglePlaying(); }
+    function next() { Svc.NowPlaying.next(); }
+    function previous() { Svc.NowPlaying.previous(); }
+    readonly property bool canGoNext: Svc.NowPlaying.canGoNext
+    readonly property bool canGoPrevious: Svc.NowPlaying.canGoPrevious
 
     readonly property string activePlayerId: activePlayer ? (activePlayer.busName || activePlayer.identity || "") : ""
     readonly property bool hasActivePlayer: activePlayer !== null
-    readonly property bool isPlaying: {
-        try {
-            return activePlayer ? activePlayer.isPlaying === true : false;
-        } catch (e) {
-            return false;
-        }
-    }
+    readonly property bool isPlaying: Svc.NowPlaying.isPlaying
     readonly property string trackTitle: {
         try {
             return activePlayer ? String(activePlayer.trackTitle || "") : "";
