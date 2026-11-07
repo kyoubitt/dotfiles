@@ -40,6 +40,7 @@ Scope {
         battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        sysmon: { src: Qt.resolvedUrl("ilya/sysmon/SystemMonitorPopup.qml"), w: 520, h: 0, at: "right", m: 5, fit: true },
         clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
