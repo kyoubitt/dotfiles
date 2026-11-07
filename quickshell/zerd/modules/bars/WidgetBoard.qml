@@ -217,9 +217,10 @@ Scope {
                 }
                 MouseArea { anchors.fill: parent; onClicked: { win.selected = ""; win.pickerOpen = false } }
             }
+            // Dark enough that the windows behind never compete with the cards being arranged.
             Rectangle {
                 anchors.fill: parent
-                color: Qt.rgba(0, 0, 0, 0.5)
+                color: Qt.rgba(0.02, 0.01, 0.015, 0.88)
                 opacity: BarState.board ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 120 } }
                 enabled: false
@@ -248,9 +249,15 @@ Scope {
                     }
                 }
             }
-            // Alignment guides while dragging.
-            Rectangle { visible: win.guideX >= 0; x: win.guideX; y: 0; width: 1; height: parent.height; color: BarStyle.accent; opacity: 0.8 }
-            Rectangle { visible: win.guideY >= 0; y: win.guideY; x: 0; height: 1; width: parent.width; color: BarStyle.accent; opacity: 0.8 }
+            // Snap guides: the four edges the dropped card will sit on, as faint lines through the whole screen, so
+            // you can read which grid lines it locks to (and, in the stronger line below, what it lines up with).
+            Rectangle { visible: win.ghost !== null && root.lock; x: (win.ghost?.x ?? 0); y: 0; width: 1; height: parent.height; color: BarStyle.accent; opacity: 0.3 }
+            Rectangle { visible: win.ghost !== null && root.lock; x: (win.ghost?.x ?? 0) + (win.ghost?.w ?? 0) - 1; y: 0; width: 1; height: parent.height; color: BarStyle.accent; opacity: 0.3 }
+            Rectangle { visible: win.ghost !== null && root.lock; y: (win.ghost?.y ?? 0); x: 0; height: 1; width: parent.width; color: BarStyle.accent; opacity: 0.3 }
+            Rectangle { visible: win.ghost !== null && root.lock; y: (win.ghost?.y ?? 0) + (win.ghost?.h ?? 0) - 1; x: 0; height: 1; width: parent.width; color: BarStyle.accent; opacity: 0.3 }
+            // Alignment guides while dragging: the screen's edges and middle, and the edges of the other cards.
+            Rectangle { visible: win.guideX >= 0; x: win.guideX; y: 0; width: 1; height: parent.height; color: BarStyle.accent; opacity: 0.85 }
+            Rectangle { visible: win.guideY >= 0; y: win.guideY; x: 0; height: 1; width: parent.width; color: BarStyle.accent; opacity: 0.85 }
             // Where the dragged card will land.
             Rectangle {
                 visible: win.ghost !== null
@@ -258,7 +265,16 @@ Scope {
                 radius: BarStyle.radiusLarge; color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.12)
                 border.width: 2; border.color: BarStyle.accent
             }
-            BarText { anchors.horizontalCenter: parent.horizontalCenter; y: 56; text: "Drag a card. It locks to the grid; hold Alt to place it freely. Arrows nudge, Delete removes."; color: Qt.rgba(1, 1, 1, 0.73); font.pixelSize: 12 }
+            // Its place on the screen, over the corner of the ghost (under it when the card is at the top edge).
+            Rectangle {
+                visible: win.ghost !== null
+                x: Math.max(8, Math.min(win.width - width - 8, win.ghost?.x ?? 0))
+                y: (win.ghost?.y ?? 0) > 40 ? (win.ghost?.y ?? 0) - height - 8 : (win.ghost?.y ?? 0) + (win.ghost?.h ?? 0) + 8
+                width: ghostText.implicitWidth + 20; height: 24; radius: 12
+                color: BarStyle.surface; border.width: 1; border.color: BarStyle.edge
+                BarText { id: ghostText; anchors.centerIn: parent; text: Math.round(win.ghost?.x ?? 0) + ", " + Math.round(win.ghost?.y ?? 0); font.pixelSize: 11; color: BarStyle.accent }
+            }
+            BarText { anchors.horizontalCenter: parent.horizontalCenter; y: 56; text: "Drag a card. It locks to the grid; hold Alt to place it freely. Arrows nudge, Delete removes."; color: BarStyle.subtext; font.pixelSize: 12 }
 
             Repeater {
                 model: WidgetRegistry.cards.filter(c => DesktopWidgets.enabled(c.name))
@@ -319,8 +335,8 @@ Scope {
                     Rectangle {
                         visible: frame.selected || dragHover.hovered
                         anchors { left: parent.left; bottom: parent.top; bottomMargin: 6 }
-                        height: 24; width: tagText.implicitWidth + 18; radius: 12
-                        color: BarStyle.surface; border.width: 1; border.color: BarStyle.border
+                        height: 26; width: tagText.implicitWidth + 20; radius: 13
+                        color: BarStyle.surface; border.width: 1; border.color: BarStyle.edge
                         BarText { id: tagText; anchors.centerIn: parent; text: frame.modelData.title + (frame.selected ? "  ·  " + frame.width + " × " + frame.height : ""); font.pixelSize: 11 }
                     }
                     MouseArea {
@@ -365,15 +381,14 @@ Scope {
                         spacing: 4
                         Repeater {
                             model: [{ l: "S", v: 0.8 }, { l: "M", v: 1 }, { l: "L", v: 1.25 }, { l: "XL", v: 1.5 }]
-                            delegate: Rectangle {
+                            delegate: BarButton {
                                 id: sz
                                 required property var modelData
                                 readonly property bool on: Math.abs(WidgetRegistry.scaleOf(frame.modelData.name) - modelData.v) < 0.01
-                                width: sz.modelData.l.length > 1 ? 36 : 30; height: 28; radius: 14
-                                color: on ? BarStyle.accent : BarStyle.surface
-                                border.width: 1; border.color: on ? BarStyle.accent : BarStyle.border
-                                BarText { anchors.centerIn: parent; text: sz.modelData.l; font.pixelSize: 11; font.weight: Font.DemiBold; color: sz.on ? BarStyle.onAccent : BarStyle.text }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.setCardScale(frame.modelData.name, sz.modelData.v) }
+                                width: sz.modelData.l.length > 1 ? 38 : 32; height: 28; radius: 14
+                                tone: on ? "filled" : "outlined"
+                                BarText { anchors.centerIn: parent; text: sz.modelData.l; font.pixelSize: 11; font.weight: Font.DemiBold; color: sz.ink }
+                                onTapped: root.setCardScale(frame.modelData.name, sz.modelData.v)
                             }
                         }
                     }
@@ -399,18 +414,18 @@ Scope {
                             }
                         }
                     }
-                    Rectangle {
+                    BarButton {
+                        id: closeBtn
                         anchors { top: parent.top; right: parent.right; margins: 8 }
                         width: 26; height: 26; radius: 13
-                        color: closeArea.pressed ? BarStyle.border : BarStyle.plateHover
-                        BarIcon { anchors.centerIn: parent; name: "close"; size: 14 }
-                        MouseArea { id: closeArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.removeCard(frame.modelData.name) }
+                        BarIcon { anchors.centerIn: parent; name: "close"; size: 14; color: closeBtn.ink }
+                        onTapped: root.removeCard(frame.modelData.name)
                     }
                 }
             }
 
-            // ---- Add-widget picker: search + a vertical list grouped by kind.
-            Rectangle {
+            // ---- Add-widget picker: search and a list grouped by kind. As tall as its list, and it sits on the tool strip.
+            EditorPlate {
                 id: picker
                 visible: opacity > 0
                 opacity: win.pickerOpen ? 1 : 0
@@ -418,32 +433,37 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: toolbar.top
                 anchors.bottomMargin: 12
-                width: 360
-                height: Math.min(460, win.height - 220)
-                radius: 24
-                color: BarStyle.surface
-                border.width: 1; border.color: BarStyle.border
-                MouseArea { anchors.fill: parent }
+                width: 380
+                title: "Add a widget"; icon: "widgets"
+                hint: WidgetRegistry.cards.filter(c => DesktopWidgets.enabled(c.name)).length + " of " + WidgetRegistry.cards.length + " on the desktop"
                 Rectangle {
                     id: searchBox
-                    x: 14; y: 14; width: parent.width - 28; height: 36; radius: 18
-                    color: BarStyle.plateHover
-                    border.width: 1; border.color: search.activeFocus ? BarStyle.accent : BarStyle.border
-                    BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 16; color: BarStyle.subtext }
-                    BarText { x: 36; anchors.verticalCenter: parent.verticalCenter; visible: search.text.length === 0; text: "Search widgets"; color: BarStyle.subtext }
+                    width: parent.width; height: 38; radius: 19
+                    color: BarStyle.card
+                    border.width: 1; border.color: search.activeFocus ? BarStyle.accent : BarStyle.edge
+                    BarIcon { x: 13; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 17; color: BarStyle.subtext }
+                    BarText { x: 38; anchors.verticalCenter: parent.verticalCenter; visible: search.text.length === 0; text: "Search widgets"; color: BarStyle.subtext }
                     TextInput {
                         id: search
-                        x: 36; width: parent.width - 48; height: parent.height
+                        x: 38; width: parent.width - 66; height: parent.height
                         verticalAlignment: TextInput.AlignVCenter
                         color: BarStyle.text; font.pixelSize: BarStyle.fontSize; clip: true
+                        selectionColor: BarStyle.accent; selectedTextColor: BarStyle.onAccent
                         onVisibleChanged: if (visible && win.pickerOpen) forceActiveFocus(); else text = ""
                         Keys.onEscapePressed: win.pickerOpen = false
+                    }
+                    BarIcon {
+                        visible: search.text.length > 0
+                        anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                        name: "close"; size: 16; color: BarStyle.subtext
+                        MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: search.text = "" }
                     }
                 }
                 ListView {
                     id: list
-                    x: 8; y: searchBox.y + searchBox.height + 8
-                    width: parent.width - 16; height: parent.height - y - 10
+                    y: searchBox.height + 8
+                    width: parent.width
+                    height: Math.min(contentHeight, Math.max(140, Math.min(380, win.height - 380)))
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
                     flickDeceleration: 4000
@@ -459,107 +479,91 @@ Scope {
                     section.delegate: Item {
                         required property string section
                         width: list.width; height: 28
-                        BarText { x: 10; anchors.bottom: parent.bottom; anchors.bottomMargin: 4; text: parent.section; font.pixelSize: 11; color: BarStyle.subtext }
+                        BarText { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 4; text: parent.section; font.pixelSize: 11; font.weight: Font.DemiBold; color: BarStyle.subtext }
                     }
                     delegate: BarButton {
                         id: row
                         tone: "plain"
                         required property var modelData
                         readonly property bool added: DesktopWidgets.enabled(modelData.name)
-                        width: list.width; height: 46; radius: BarStyle.radiusSmall
+                        width: list.width; height: 50; radius: BarStyle.radiusSmall
                         onTapped: { if (row.added) root.removeCard(row.modelData.name); else { root.add(row.modelData.name); win.selected = row.modelData.name } }
-                        BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: row.modelData.icon; size: 20; fill: 1; color: row.added ? BarStyle.accent : BarStyle.subtext }
-                        BarText { x: 44; anchors.verticalCenter: parent.verticalCenter; text: row.modelData.title; color: row.added ? BarStyle.subtext : BarStyle.text }
-                        BarText { anchors.right: parent.right; anchors.rightMargin: 40; anchors.verticalCenter: parent.verticalCenter; text: row.modelData.w + "×" + row.modelData.h; font.pixelSize: 11; color: BarStyle.subtext }
-                        BarIcon { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; name: row.added ? "check_circle" : "add_circle"; size: 20; color: row.added ? BarStyle.accent : BarStyle.subtext }
+                        Rectangle {
+                            x: 6; anchors.verticalCenter: parent.verticalCenter
+                            width: 38; height: 38; radius: 12
+                            color: row.added ? BarStyle.accentContainer : BarStyle.cardHigh
+                            BarIcon { anchors.centerIn: parent; name: row.modelData.icon; size: 20; fill: 1; color: row.added ? BarStyle.accent : BarStyle.subtext }
+                        }
+                        Column {
+                            x: 54; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 54 - 46
+                            BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.title; color: BarStyle.text }
+                            BarText { width: parent.width; elide: Text.ElideRight; text: row.modelData.w + " × " + row.modelData.h; font.pixelSize: 11; color: BarStyle.subtext }
+                        }
+                        BarIcon { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; name: row.added ? "check_circle" : "add_circle"; size: 22; fill: row.added ? 1 : 0; color: row.added ? BarStyle.accent : BarStyle.subtext }
                     }
                 }
+                BarText { visible: list.count === 0; y: searchBox.height + 12; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: "No widget matches"; color: BarStyle.subtext; font.pixelSize: 12 }
             }
 
             // ---- Align: with a card selected, line it up with the screen.
-            Rectangle {
+            EditorPlate {
                 id: alignBar
+                pill: true; fitWidth: true
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: toolbar.top
-                anchors.bottomMargin: win.pickerOpen ? 484 : 12
+                anchors.bottomMargin: 12
                 visible: opacity > 0
                 opacity: win.selected !== "" && !win.pickerOpen ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 110 } }
-                width: alignRow.implicitWidth + 20; height: 44; radius: 22
-                color: BarStyle.surface; border.width: 1; border.color: BarStyle.border
-                MouseArea { anchors.fill: parent }
                 Row {
-                    id: alignRow
-                    anchors.centerIn: parent; spacing: 2
+                    spacing: 2
                     Repeater {
                         model: [{ m: "left", i: "align_horizontal_left" }, { m: "centre", i: "align_horizontal_center" }, { m: "right", i: "align_horizontal_right" },
                                 { m: "top", i: "align_vertical_top" }, { m: "middle", i: "align_vertical_center" }, { m: "bottom", i: "align_vertical_bottom" }]
-                        delegate: Rectangle {
+                        delegate: BarButton {
+                            id: al
                             required property var modelData
-                            width: 34; height: 34; radius: 17
-                            color: ah.hovered ? BarStyle.plateHover : "transparent"
-                            Behavior on color { ColorAnimation { duration: 90 } }
-                            BarIcon { anchors.centerIn: parent; name: parent.modelData.i; size: 18 }
-                            HoverHandler { id: ah }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.alignTo(win.selected, parent.modelData.m, win.width, win.height) }
-                            BarTip { text: "Align " + parent.modelData.m }
+                            tone: "plain"
+                            width: 36; height: 36; radius: 18
+                            BarIcon { anchors.centerIn: parent; name: al.modelData.i; size: 18; color: al.ink }
+                            onTapped: root.alignTo(win.selected, al.modelData.m, win.width, win.height)
+                            BarTip { text: "Align " + al.modelData.m }
                         }
                     }
                 }
             }
 
-            // ---- Toolbar: add, grid size, auto grid lock, tidy, done.
-            Rectangle {
+            // ---- Toolbar: add, grid size, snap, tidy, history, done.
+            EditorPlate {
                 id: toolbar
+                pill: true; fitWidth: true
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 40
-                width: bar.implicitWidth + 28
-                height: 56
-                radius: 28
-                color: BarStyle.surface
-                border.width: 1; border.color: BarStyle.border
-                MouseArea { anchors.fill: parent }
-                component Pill: BarButton {
-                    id: pill
-                    property string label
-                    property string icon: ""
-                    property bool on: false
-                    property bool primary: false
-                    tone: primary ? "filled" : "outlined"
-                    toggled: on
-                    height: 38; width: pr.implicitWidth + 26; radius: 19
-                    Row {
-                        id: pr
-                        anchors.centerIn: parent; spacing: 6
-                        BarIcon { visible: pill.icon.length > 0; anchors.verticalCenter: parent.verticalCenter; name: pill.icon; size: 16; color: pill.primary || pill.on ? pill.ink : pill.inkSoft }
-                        BarText { anchors.verticalCenter: parent.verticalCenter; text: pill.label; font.pixelSize: 12; font.weight: pill.primary ? Font.DemiBold : Font.Medium; color: pill.ink }
-                    }
-                }
                 Row {
                     id: bar
-                    anchors.centerIn: parent
                     spacing: 8
-                    Pill { icon: "add"; label: "Add widget"; on: win.pickerOpen; onTapped: win.pickerOpen = !win.pickerOpen }
-                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.border }
+                    EditorChip { size: 40; icon: "add"; label: "Add widget"; toggled: win.pickerOpen; onTapped: win.pickerOpen = !win.pickerOpen }
+                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.edge }
                     BarText { anchors.verticalCenter: parent.verticalCenter; text: "Grid"; color: BarStyle.subtext; font.pixelSize: 12 }
                     Repeater {
                         model: [0, 8, 16, 32, 64]
-                        delegate: Pill {
+                        delegate: EditorChip {
                             required property int modelData
+                            size: 40
                             label: modelData === 0 ? "Off" : String(modelData)
-                            on: root.grid === modelData
+                            toggled: root.grid === modelData
                             onTapped: root.setBoard("grid", modelData)
                         }
                     }
-                    Pill { icon: root.lock ? "grid_on" : "open_with"; label: root.lock ? "Snap" : "Free"; on: root.lock; onTapped: root.setBoard("snap", !root.lock) }
-                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.border }
-                    Pill { icon: "auto_fix_high"; label: "Tidy"; onTapped: root.tidy() }
-                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.border }
-                    Pill { icon: "undo"; label: "Undo"; opacity: root.undoStack.length > 0 ? 1 : 0.4; onTapped: root.undo() }
-                    Pill { icon: "redo"; label: "Redo"; opacity: root.redoStack.length > 0 ? 1 : 0.4; onTapped: root.redo() }
-                    Pill { icon: "restart_alt"; label: "Reset"; onTapped: root.resetAll() }
-                    Pill { label: "Done"; primary: true; onTapped: BarState.board = false }
+                    EditorChip { size: 40; icon: root.lock ? "grid_on" : "open_with"; label: root.lock ? "Snap" : "Free"; toggled: root.lock; onTapped: root.setBoard("snap", !root.lock) }
+                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.edge }
+                    EditorChip { size: 40; icon: "auto_fix_high"; label: "Tidy"; onTapped: root.tidy() }
+                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 1; height: 24; color: BarStyle.edge }
+                    EditorChip { size: 40; icon: "undo"; label: "Undo"; dim: root.undoStack.length === 0; onTapped: root.undo() }
+                    EditorChip { size: 40; icon: "redo"; label: "Redo"; dim: root.redoStack.length === 0; onTapped: root.redo() }
+                    EditorChip { size: 40; icon: "restart_alt"; label: "Reset"; onTapped: root.resetAll() }
+                    EditorChip { size: 40; label: "Done"; primary: true; onTapped: BarState.board = false }
                 }
             }
         }

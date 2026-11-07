@@ -1,3 +1,4 @@
+// Date cells as rounded squares after end-4/dots-hyprland CalendarDayButton (GPL-3.0).
 import QtQuick
 import qs.services
 
@@ -32,7 +33,7 @@ Column {
             anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; spacing: 6
             Rectangle {
                 visible: !cal.sameDay(cal.shown, new Date()) || !cal.sameDay(cal.selected, new Date())
-                width: todayText.implicitWidth + 14; height: 22; radius: 11; color: BarStyle.plateHover
+                width: todayText.implicitWidth + 16; height: 24; radius: 12; color: BarStyle.cardHigh
                 BarText { id: todayText; anchors.centerIn: parent; text: "Today"; font.pixelSize: 11 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cal.today() }
             }
@@ -56,14 +57,14 @@ Column {
                 readonly property bool isToday: valid && cal.sameDay(cellDate, new Date())
                 readonly property bool isSelected: valid && cal.sameDay(cellDate, cal.selected)
                 readonly property bool hasEvents: valid && (Events.list, Events.getEventsForDate(cellDate).length > 0)
-                width: col === 0 ? 24 : cal.cellW; height: 26
+                width: col === 0 ? 24 : cal.cellW; height: 30
                 visible: row < cal.rowsNeeded
                 // Week number at the start of each row.
                 BarText { visible: parent.col === 0 && parent.row < 6 && (parent.row * 7 - cal.first + 1) <= cal.days; anchors.centerIn: parent; text: cal.isoWeek(new Date(cal.shown.getFullYear(), cal.shown.getMonth(), Math.max(1, parent.row * 7 - cal.first + 1))); color: BarStyle.subtext; font.pixelSize: 10 }
                 Rectangle {
                     visible: parent.valid
-                    anchors.fill: parent; radius: height / 2
-                    color: parent.isToday ? BarStyle.accent : (parent.isSelected ? BarStyle.plateHover : (dayAreaHv.hovered ? BarStyle.plateHover : "transparent"))
+                    anchors.fill: parent; anchors.margins: 1; radius: BarStyle.radiusSmall
+                    color: parent.isToday ? BarStyle.accent : (parent.isSelected ? BarStyle.cardHigh : (dayAreaHv.hovered ? BarStyle.cardHigh : "transparent"))
                     border.width: parent.isSelected && !parent.isToday ? 1 : 0
                     border.color: BarStyle.accent
                     Behavior on color { ColorAnimation { duration: 100 } }
@@ -97,7 +98,7 @@ Column {
         // "18:30 dinner" or just "dentist" (all day)
         Rectangle {
             width: parent.width; height: 32; radius: 16
-            color: BarStyle.plateHover
+            color: BarStyle.cardHigh
             border.width: 1; border.color: addInput.activeFocus ? BarStyle.accent : BarStyle.border
             BarText { x: 14; anchors.verticalCenter: parent.verticalCenter; visible: addInput.text.length === 0; text: "Add event  (e.g. 18:30 dinner)"; color: BarStyle.subtext; font.pixelSize: 12 }
             TextInput {

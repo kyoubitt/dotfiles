@@ -17,6 +17,7 @@ Singleton {
     property bool hasKey: false
     property bool connected: false          // the websocket is up
     property bool loggedIn: false           // the device has been paired with the account
+    property bool active: false             // Orbit is the account's current player; false while the Spotify app or another device holds playback
     property string note: ""
 
     // ---- what is playing, in the shape the Web API uses, so the rest of the window does not care where it came from
@@ -111,6 +112,7 @@ Singleton {
         switch (m.type) {
         case "auth_state":
             root.loggedIn = m.logged_in === true
+            root.active = m.is_active === true
             if (root.loggedIn) root.note = ""
             else root.note = "Pick \"Orbit\" in the Spotify app's device list once to connect it"
             break
@@ -123,6 +125,7 @@ Singleton {
         case "queue_changed": root.upcoming = (m.upcoming ?? []).map(e => e.item).filter(i => i); break
         case "playback_changed": root.status = m.status ?? root.status; root.anchor(null); root.rebuild(); break
         case "context_changed": root.contextEntity = m.context ?? null; root.rebuild(); break
+        case "device_changed": root.active = m.is_active === true; break
         case "volume_changed": root.volume = m.volume ?? root.volume; root.rebuild(); break
         case "options_changed": root.shuffle = m.options?.shuffle ?? root.shuffle; root.repeat = m.options?.repeat ?? root.repeat; root.rebuild(); break
         case "position_sync": root.anchor(m.position); root.rebuild(); break
@@ -155,10 +158,12 @@ Singleton {
     }
     Timer { id: queueTimer; interval: 1500; property var rest: []
         onTriggered: { for (const u of rest) root.send({ command: "add_to_queue", uri: u }); rest = [] } }
-    function resume(): void { root.send({ command: "play" }) }
+    // playback may sit on another device (the Spotify app): Orbit takes it over first, or "play" goes nowhere
+    function wake(): void { if (!root.active) root.send({ command: "activate" }) }
+    function resume(): void { root.wake(); root.send({ command: "play" }) }
     function pause(): void { root.send({ command: "pause" }) }
-    function next(): void { root.send({ command: "skip_next" }) }
-    function previous(): void { root.send({ command: "skip_prev" }) }
+    function next(): void { root.wake(); root.send({ command: "skip_next" }) }
+    function previous(): void { root.wake(); root.send({ command: "skip_prev" }) }
     function seek(ms: real): void { root.send({ command: "seek", position_ms: Math.round(ms) }) }
     function setVolume(p: int): void { root.volume = p; root.send({ command: "set_volume", volume: p }) }
     function setShuffle(on: bool): void { root.send({ command: "set_shuffle", enabled: on }) }

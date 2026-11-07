@@ -207,37 +207,24 @@ Scope {
                     scale: 0.97 + 0.03 * panel.p
                     transformOrigin: win.onRight ? Item.Right : Item.Left
 
-                // Title, pin (keeps it open) and close.
-                Item {
+                // The same header on both sides: picture and name on the quick panel, a glyph on the sections panel;
+                // pin (keeps it open) and close on the right.
+                PanelHeader {
                     id: head
-                    x: 20; y: 10; width: parent.width - 40; height: 32
-                    BarText { anchors.verticalCenter: parent.verticalCenter; text: win.onRight ? "Sections" : "Quick panel"; color: BarStyle.subtext; font.pixelSize: 12; font.weight: Font.DemiBold }
-                    Row {
-                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                        component HeadBtn: Rectangle {
-                            id: hb
-                            property string icon
-                            property bool lit: false
-                            property string tip
-                            signal tapped()
-                            width: 32; height: 32; radius: 16
-                            color: hbArea.pressed ? BarStyle.border : (hb.lit ? BarStyle.plateHover : (hbHv.hovered ? BarStyle.plateHover : "transparent"))
-                            Behavior on color { ColorAnimation { duration: 100 } }
-                            BarIcon { anchors.centerIn: parent; name: hb.icon; size: 17; fill: hb.lit ? 1 : 0; color: hb.lit ? BarStyle.accent : BarStyle.subtext }
-                            MouseArea { id: hbArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: hb.tapped() }
-                            HoverHandler { id: hbHv }
-                            BarTip { text: hb.tip; external: hbHv.hovered }
-                        }
-                        HeadBtn { icon: "push_pin"; lit: BarState.pinned; tip: BarState.pinned ? "Pinned: stays until closed" : "Pin open"; onTapped: BarState.pinned = !BarState.pinned }
-                        HeadBtn { icon: "close"; tip: "Close"; onTapped: BarState.closeAll() }
-                    }
+                    x: 20; y: 14; width: parent.width - 40
+                    avatar: !win.onRight
+                    icon: "widgets"
+                    title: win.onRight ? "Sections" : (Config.options?.account?.name || SystemInfo.displayName)
+                    subtitle: win.onRight ? "Calendar, weather and tools" : ""
+                    PanelButton { icon: "push_pin"; size: 36; toggled: BarState.pinned; tip: BarState.pinned ? "Pinned: stays until closed" : "Pin open"; onTapped: BarState.pinned = !BarState.pinned }
+                    PanelButton { icon: "close"; size: 36; tip: "Close"; onTapped: BarState.closeAll() }
                 }
 
                 Flickable {
                     id: flick
                     anchors.fill: parent
                     anchors.margins: 20
-                    anchors.topMargin: 52
+                    anchors.topMargin: 76
                     anchors.bottomMargin: 8
                     contentHeight: column.implicitHeight + 24
                     clip: true
@@ -247,13 +234,13 @@ Scope {
                     Column {
                         id: column
                         width: parent.width
-                        spacing: 16
+                        spacing: 12
 
                         // ---- Left: quick panel
                         Column {
                             visible: !win.onRight
                             width: parent.width
-                            spacing: 16
+                            spacing: 12
                             QuickHeader { width: parent.width }
                             QuickToggles { width: parent.width }
                             QuickSliders { width: parent.width; screen: win.screen }
@@ -338,7 +325,7 @@ Scope {
                 Rectangle {
                     visible: flick.contentHeight > flick.height + 2
                     x: parent.width - 8; width: 3; radius: 1.5
-                    y: 52 + (flick.height - height) * (flick.contentY / Math.max(1, flick.contentHeight - flick.height))
+                    y: flick.y + (flick.height - height) * (flick.contentY / Math.max(1, flick.contentHeight - flick.height))
                     height: Math.max(24, flick.height * flick.height / flick.contentHeight)
                     color: BarStyle.border
                 }
