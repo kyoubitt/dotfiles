@@ -157,6 +157,7 @@ Item {
     
             Text {
                 renderType: Text.NativeRendering
+    
                 id: pwrIcon
                 anchors.centerIn: parent
                 font.family: ThemeBackend.fontFamily
