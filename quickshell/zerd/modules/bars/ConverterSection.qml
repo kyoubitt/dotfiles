@@ -34,7 +34,7 @@ Column {
         property bool on: false
         signal tapped()
         width: chipText.implicitWidth + 18; height: 26; radius: 13
-        color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.plateHover)
+        color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.cardHigh)
         Behavior on color { ColorAnimation { duration: 100 } }
         BarText { id: chipText; anchors.centerIn: parent; text: chip.label; font.pixelSize: 12; color: chip.on ? BarStyle.onAccent : BarStyle.text }
         MouseArea { id: chipArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: chip.tapped() }
@@ -55,7 +55,7 @@ Column {
 
     Rectangle {
         width: parent.width; height: 40; radius: 20
-        color: BarStyle.plateHover
+        color: BarStyle.cardHigh
         border.width: 1; border.color: input.activeFocus ? BarStyle.accent : BarStyle.border
         TextInput {
             id: input
@@ -92,7 +92,7 @@ Column {
 
     Rectangle {
         width: parent.width; height: 48; radius: 24
-        color: resultArea.pressed ? BarStyle.border : BarStyle.plateHover
+        color: resultArea.pressed ? BarStyle.border : BarStyle.cardHigh
         Behavior on color { ColorAnimation { duration: 100 } }
         BarText {
             anchors.verticalCenter: parent.verticalCenter

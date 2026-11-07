@@ -25,7 +25,7 @@ Column {
                 required property var modelData
                 readonly property bool on: root.tab === modelData.id
                 width: (root.width - 12) / 3; height: 30; radius: 15
-                color: on ? BarStyle.accent : BarStyle.plateHover
+                color: on ? BarStyle.accent : BarStyle.cardHigh
                 Behavior on color { ColorAnimation { duration: 100 } }
                 BarText { anchors.centerIn: parent; text: modelData.label; font.pixelSize: 12; color: parent.on ? BarStyle.onAccent : BarStyle.text }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.tab = modelData.id }
@@ -39,7 +39,7 @@ Column {
         property bool primary: false
         signal tapped()
         width: primary ? 56 : 40; height: primary ? 56 : 40; radius: width / 2
-        color: primary ? BarStyle.accent : (m.pressed ? BarStyle.border : BarStyle.plateHover)
+        color: primary ? BarStyle.accent : (m.pressed ? BarStyle.border : BarStyle.cardHigh)
         Behavior on color { ColorAnimation { duration: 100 } }
         BarIcon { anchors.centerIn: parent; name: b.icon; size: primary ? 26 : 20; fill: 1; color: primary ? BarStyle.onAccent : BarStyle.text }
         MouseArea { id: m; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: b.tapped() }

@@ -17,17 +17,16 @@ Column {
     readonly property var hidden: Config.options?.bars?.sidebars?.rightHidden ?? []
 
     // One button; the cards themselves are added and moved on the board.
-    Rectangle {
-        width: parent.width; height: 44; radius: 22
-        color: editArea.pressed ? BarStyle.border : BarStyle.plateHover
-        border.width: 1; border.color: BarStyle.border
-        Behavior on color { ColorAnimation { duration: 100 } }
+    BarButton {
+        id: editBtn
+        tone: "tonal"
+        width: parent.width; height: 48; radius: height / 2
+        onTapped: BarState.openBoard()
         Row {
             anchors.centerIn: parent; spacing: 8
-            BarIcon { name: "widgets"; size: 18; color: BarStyle.accent }
-            BarText { text: "Edit widgets"; font.weight: Font.DemiBold }
+            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "widgets"; size: 18; fill: 1; color: BarStyle.accent }
+            BarText { anchors.verticalCenter: parent.verticalCenter; text: "Edit widgets"; font.weight: Font.DemiBold; color: editBtn.ink }
         }
-        MouseArea { id: editArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: BarState.openBoard() }
     }
 
     // ---- Sections
