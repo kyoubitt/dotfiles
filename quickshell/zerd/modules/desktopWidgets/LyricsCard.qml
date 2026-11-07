@@ -15,6 +15,9 @@ IrisWidgetFace {
     readonly property var lines: LyricsStore.lines
     property real pos: 0
     property int cur: 0
+    // the sung line as a fractional position that glides to the new line: sizes, fades and the column all follow it, so nothing jumps
+    property real fidx: cur
+    Behavior on fidx { NumberAnimation { duration: 380; easing.type: Easing.OutCubic } }
     property real frac: 0
     readonly property int reach: Math.max(2, Math.min(5, Math.round(height / 80)))      // lines shown each side: a bigger card shows more lines, not bigger letters
     property real base: 0               // the player's last answer, in seconds
@@ -54,27 +57,30 @@ IrisWidgetFace {
         Behavior on opacity { NumberAnimation { duration: 250 } }
         // Every line is built once and only moves: a line change shrinks the one just sung and grows the next, and the
         // whole column follows. Nothing is laid out again, so the change costs a few transforms, not ten text layouts.
-        readonly property Item curItem: rep.count > 0 ? rep.itemAt(Math.max(0, Math.min(rep.count - 1, root.cur))) : null
+        readonly property int i0: Math.max(0, Math.min(rep.count - 1, Math.floor(root.fidx)))
+        readonly property real fr: Math.max(0, Math.min(1, root.fidx - i0))
+        readonly property Item itemA: rep.count > 0 ? rep.itemAt(i0) : null
+        readonly property Item itemB: rep.count > 0 ? rep.itemAt(Math.min(rep.count - 1, i0 + 1)) : null
+        // the column keeps the sung position at the middle, between the centres of the two lines it is gliding between
+        readonly property real centreY: (itemA ? itemA.y + itemA.height / 2 : 0) * (1 - fr) + (itemB ? itemB.y + itemB.height / 2 : 0) * fr
         Column {
             id: col
             width: parent.width
             spacing: 8
-            y: Math.round(stage.height / 2 - (stage.curItem ? stage.curItem.y + stage.curItem.height / 2 : 0))
+            y: stage.height / 2 - stage.centreY
             Repeater {
                 id: rep
                 model: root.lines.length
                 delegate: Item {
                     id: ln
                     required property int index
-                    readonly property int off: index - root.cur
-                    readonly property bool sel: off === 0
+                    readonly property real dist: Math.abs(index - root.fidx)
+                    readonly property bool sel: index === root.cur
                     readonly property string line: root.lines[index]?.s ?? ""
-                    property real k: sel ? 1 : 0.64
-                    Behavior on k { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                    readonly property real k: Math.max(0.64, 1 - dist * 0.36)
                     width: col.width
                     height: base.height * k
-                    opacity: Math.abs(off) > root.reach ? 0 : (sel ? 1 : Math.max(0.15, 0.55 - Math.abs(off) * 0.12))
-                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    opacity: (dist <= 1 ? 1 - dist * 0.57 : Math.max(0.15, 0.43 - (dist - 1) * 0.12)) * Math.max(0, Math.min(1, root.reach + 1 - dist))
                     Item {
                         width: col.width; height: base.height
                         scale: ln.k; transformOrigin: Item.TopLeft

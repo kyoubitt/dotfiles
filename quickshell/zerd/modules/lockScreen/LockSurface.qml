@@ -152,7 +152,7 @@ Item {
         // Caelestia's clock, side by side, but every digit solid in the text colour with a soft shadow so it reads on any wallpaper
         Row {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 8
+            spacing: 4
             LockText {
                 text: Qt.locale().toString(DateTime.clock.date, "hh")
                 color: "#ffffff"
@@ -160,6 +160,20 @@ Item {
                 font.pixelSize: 150
                 font.weight: Font.DemiBold
                 font.letterSpacing: -2
+            }
+            LockText {
+                text: ":"
+                color: "#ffffff"
+                style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.45)
+                font.pixelSize: 150
+                font.weight: Font.DemiBold
+                topPadding: -6
+                SequentialAnimation on opacity {
+                    running: clockView.visible
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.35; duration: 900; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1; duration: 900; easing.type: Easing.InOutSine }
+                }
             }
             LockText {
                 text: Qt.locale().toString(DateTime.clock.date, "mm")

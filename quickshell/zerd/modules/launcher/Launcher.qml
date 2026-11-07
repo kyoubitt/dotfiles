@@ -1230,12 +1230,12 @@ PanelWindow {
             if (launcherWindow.isCentered) {
                 let baseH = launcherWindow.collapsedCenterHeight;
                 let targetH = Math.max(baseH, launcherWindow.animatedLauncherHeight);
-                return baseH + (targetH - baseH) * animProgress;
+                return Math.round(baseH + (targetH - baseH) * animProgress);
             }
             if (!launcherWindow.isSideAttached) {
-                return launcherWindow.animatedLauncherHeight * animProgress;
+                return Math.round(launcherWindow.animatedLauncherHeight * animProgress);
             }
-            return launcherWindow.animatedLauncherHeight;
+            return Math.round(launcherWindow.animatedLauncherHeight);
         }
 
         opacity: launcherWindow.isCentered
@@ -2114,7 +2114,7 @@ PanelWindow {
                                         renderType: Text.NativeRendering
                                         font.hintingPreference: Font.PreferFullHinting
                                         font.family: ThemeBackend.fontFamily
-                                        font.pixelSize: launcherWindow.s(9)
+                                        font.pixelSize: launcherWindow.s(11)
                                         font.weight: emojiDelegateRoot.isSelected ? Font.Bold : Font.Normal
                                         color: emojiDelegateRoot.isSelected ? ((emojiGlass.active || emojiDelegateRoot.lensHandled) ? ThemeBackend.text : ThemeBackend.crust) : ThemeBackend.subtext0
                                         elide: Text.ElideRight

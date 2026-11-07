@@ -3,7 +3,6 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Effects
-import QtCore
 import SddmComponents 2.0
 
 Rectangle {
@@ -276,28 +275,11 @@ Rectangle {
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0
 
-    // Night light: the moon button lays a warm, dimmed, blue-free tint over the whole greeter. The choice is kept in the greeter's own
-    // state file (the sddm user owns /var/lib/sddm); theme.conf's NightLight ("on"/"off") is only the first-boot default.
-    property int modeOverride: -1
-    readonly property bool nightHours: hourNow >= 19 || hourNow < 7
-    property int hourNow: new Date().getHours()
-    Timer { interval: 60000; repeat: true; running: true; onTriggered: root.hourNow = new Date().getHours() }
-    // your own choice wins; otherwise it follows the clock (evening to morning) or the first-boot default in theme.conf
-    readonly property bool night: modeOverride >= 0 ? modeOverride === 1 : (cfg("NightLight", "off") === "on" || nightHours)
-    Settings {
-        id: store
-        location: "file://" + root.cfg("StateFile", "/var/lib/sddm/zerd-login.ini")
-        category: "ui"
-        property string choice: ""
-    }
-
-    function setMode(v) {
-        modeOverride = v;
-        store.choice = v === 1 ? "on" : "off";
-    }
-
-    // a plain switch: the warm tint just fades in or out, nothing is grabbed or laid out again
-    function toggleTheme() { setMode(night ? 0 : 1) }
+    // Night light: automatic. From 19:00 to 07:00 a warm, slightly dimmed, blue-free tint lies over the whole greeter; it fades in or
+    // out by itself when the hour changes while the screen is open. There is no switch for it.
+    property int hourNow: cfg("TestHour", "") !== "" ? Number(cfg("TestHour", "")) : new Date().getHours()
+    Timer { interval: 30000; repeat: true; running: cfg("TestHour", "") === ""; onTriggered: root.hourNow = new Date().getHours() }
+    readonly property bool night: hourNow >= 19 || hourNow < 7
 
     // palette from theme.conf: scripts/theme-sync.sh rewrites it from wallust on every wallpaper change
     function cfg(name, fallback) { return (typeof config !== "undefined" && config[name]) ? config[name] : fallback }
@@ -437,7 +419,6 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        if (store.choice === "on" || store.choice === "off") modeOverride = store.choice === "on" ? 1 : 0;
         fadeAnim.start();
         if (typeof keyboard !== "undefined") keyboard.numLock = true;
     }
@@ -455,6 +436,7 @@ Rectangle {
     Image {
         id: wall
         anchors.fill: parent
+        anchors.margins: -24 * s
         source: cfg("Background", "/var/cache/sddm-wallust/background.jpg")
         fillMode: Image.PreserveAspectCrop
         layer.enabled: true
@@ -466,10 +448,10 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.32) }
-            GradientStop { position: 0.35; color: Qt.rgba(0, 0, 0, 0.12) }
-            GradientStop { position: 0.65; color: Qt.rgba(0, 0, 0, 0.12) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.4) }
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.2) }
+            GradientStop { position: 0.3; color: Qt.rgba(0, 0, 0, 0.0) }
+            GradientStop { position: 0.7; color: Qt.rgba(0, 0, 0, 0.0) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.26) }
         }
         opacity: root.ui1
     }
@@ -505,92 +487,35 @@ Rectangle {
         Rectangle {
             id: clockCard
             anchors.horizontalCenter: parent.horizontalCenter
-            width: digits.width
-            height: digits.height
+            width: clockRow.width
+            height: clockRow.height
             color: "transparent"
 
-            Item {
-                id: digits
+            // the time as hh:mm in one row, solid digits with a soft shadow, the colon breathing once a second
+            Row {
+                id: clockRow
                 anchors.centerIn: parent
-                readonly property real fitSize: 130 * s
-                readonly property var inkRects: {
-                    var rects = [];
-                    for (var i = 0; i < 10; i++) rects.push(ref.tightBoundingRect(String(i)));
-                    return rects;
-                }
-                readonly property real refCellW: {
-                    var m = 1;
-                    for (var i = 0; i < inkRects.length; i++) m = Math.max(m, inkRects[i].width);
-                    return m;
-                }
-                readonly property real refCellH: {
-                    var m = 1;
-                    for (var i = 0; i < inkRects.length; i++) m = Math.max(m, inkRects[i].height);
-                    return m;
-                }
-                readonly property real pixelSize: Math.min(fitSize / (2 * refCellW), fitSize / (2 * refCellH)) * 100
-                readonly property real sf: pixelSize / 100
-                readonly property real cellW: refCellW * sf
-                readonly property real cellH: refCellH * sf
-                readonly property string h: Qt.formatTime(root.now, "hh")
-                readonly property string m: Qt.formatTime(root.now, "mm")
-
-                width: cellW * 2
-                height: cellH * 2
-
-                FontMetrics {
-                    id: ref
-                    font.family: root.flexName
-                    font.pixelSize: 100
-                    font.weight: Font.Black
-                    font.variableAxes: ({ "wght": 1000, "ROND": 100, "wdth": 100 })
-                }
-
+                spacing: 4 * s
+                readonly property real px: Math.round(112 * s)
                 Repeater {
-                    model: 4
-
-                    delegate: Item {
-                        id: cell
-                        readonly property int col: index % 2
-                        readonly property int row: Math.floor(index / 2)
-                        readonly property string digit: (row === 0 ? digits.h : digits.m).charAt(col)
-                        readonly property var ink: digits.inkRects[digit >= "0" && digit <= "9" ? Number(digit) : 0]
-                        readonly property real textX: (digits.cellW - ink.width * digits.sf) / 2 - ink.x * digits.sf
-                        readonly property color tint: root.cText
-
-                        x: col * digits.cellW
-                        y: row * digits.cellH
-                        width: digits.cellW
-                        height: digits.cellH
-
-                        Repeater {
-                            model: [
-                                { dy: 0.045, alpha: 0.10 },
-                                { dy: 0.022, alpha: 0.18 }
-                            ]
-                            delegate: Text {
-                                x: cell.textX
-                                y: cell.height - baselineOffset + digits.pixelSize * modelData.dy
-                                text: cell.digit
-                                font.family: root.flexName
-                                font.pixelSize: digits.pixelSize
-                                font.weight: Font.Black
-                                font.variableAxes: ({ "wght": 1000, "ROND": 100, "wdth": 100 })
-                                renderType: Text.NativeRendering
-                                color: Qt.rgba(0, 0, 0, modelData.alpha * 1.6)
-                            }
-                        }
-
-                        Text {
-                            x: cell.textX
-                            y: cell.height - baselineOffset
-                            text: cell.digit
-                            font.family: root.flexName
-                            font.pixelSize: digits.pixelSize
-                            font.weight: Font.Black
-                            font.variableAxes: ({ "wght": 1000, "ROND": 100, "wdth": 100 })
-                            renderType: Text.NativeRendering
-                            color: cell.tint
+                    model: [{ t: Qt.formatTime(root.now, "hh"), colon: false }, { t: ":", colon: true }, { t: Qt.formatTime(root.now, "mm"), colon: false }]
+                    delegate: Text {
+                        required property var modelData
+                        text: modelData.t
+                        font.family: root.flexName
+                        font.pixelSize: clockRow.px
+                        font.weight: Font.Bold
+                        font.letterSpacing: -1 * s
+                        renderType: Text.NativeRendering
+                        style: Text.Raised
+                        styleColor: Qt.rgba(0, 0, 0, 0.45)
+                        color: root.cText
+                        verticalAlignment: Text.AlignVCenter
+                        SequentialAnimation on opacity {
+                            running: modelData.colon
+                            loops: Animation.Infinite
+                            NumberAnimation { to: 0.35; duration: 900; easing.type: Easing.InOutSine }
+                            NumberAnimation { to: 1; duration: 900; easing.type: Easing.InOutSine }
                         }
                     }
                 }
@@ -1335,35 +1260,6 @@ Rectangle {
                         if (!root.isQuickshell) sddm.powerOff();
                     }
                 }
-            }
-        }
-
-        Rectangle {
-            id: themeButton
-            anchors.right: toggle.left
-            anchors.rightMargin: 8 * s
-            anchors.bottom: parent.bottom
-            width: 36 * s
-            height: 36 * s
-            radius: root.radius
-            color: themeMa.pressed ? Qt.rgba(1, 1, 1, 0.16) : (themeMa.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
-            scale: themeMa.pressed ? 0.96 : 1.0
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-
-            Ico {
-                anchors.centerIn: parent
-                name: root.night ? "sun" : "moon"
-                tint: root.night ? "#ffb347" : root.cText
-                size: 16 * s
-            }
-
-            MouseArea {
-                id: themeMa
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleTheme()
             }
         }
 
