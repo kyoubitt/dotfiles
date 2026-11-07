@@ -1447,7 +1447,10 @@ Item {
                         implicitWidth: menuRowLabel.implicitWidth + 52 * root.d
                         buttonRadius: IrisStyle.radiusChip
                         pressScaleEnabled: false
-                        colBackgroundHover: IrisStyle.tintFill(IrisStyle.accent)
+                        // a close entry is plainly red: the text, the glyph and the hover wash
+                        readonly property color red: "#ff6b63"
+                        colBackgroundHover: menuRow.danger ? Qt.rgba(1, 0.42, 0.39, 0.18) : IrisStyle.tintFill(IrisStyle.accent)
+                        opacity: 1
                         Accessible.name: menuRow.label
                         RowLayout {
                             anchors.fill: parent
@@ -1457,14 +1460,14 @@ Item {
                             MaterialSymbol {
                                 text: menuRow.glyph
                                 iconSize: Math.round(15 * root.d)
-                                color: menuRow.danger ? IrisStyle.danger : IrisStyle.subtext
+                                color: menuRow.danger ? menuRow.red : IrisStyle.subtext
                             }
                             IrisText {
                                 id: menuRowLabel
                                 Layout.fillWidth: true
                                 text: menuRow.label
                                 elide: Text.ElideRight
-                                color: menuRow.danger ? IrisStyle.danger : IrisStyle.text
+                                color: menuRow.danger ? menuRow.red : IrisStyle.text
                                 font.pixelSize: IrisStyle.typeLabel
                             }
                         }
