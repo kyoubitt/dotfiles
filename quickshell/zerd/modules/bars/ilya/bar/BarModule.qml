@@ -96,6 +96,8 @@ Rectangle {
     color: isGrouped || pillGlass.active ? "transparent" : (isSolid ? (distinctPills ? Qt.alpha(Qt.darker(ThemeBackend.surface0, 1.15), root.barOpacity) : "transparent") : Qt.alpha(ThemeBackend.base, root.barOpacity))
     clip: true
 
+    GlassSheen { blurred: false }
+
     WallpaperBlur {
         id: ownBlur
         z: -1

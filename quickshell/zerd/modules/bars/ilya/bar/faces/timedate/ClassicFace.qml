@@ -65,17 +65,17 @@ Item {
             id: plate
             readonly property real fullH: (widget && widget.barWindow) ? widget.barWindow.barHeight : 32
             readonly property bool wide: widget ? widget.hovered : false
-            implicitWidth: Math.max(widthProbe.implicitWidth, dateText.implicitWidth)
+            implicitWidth: Math.max(widthProbe.implicitWidth + 48, dateText.implicitWidth + 8)
             implicitHeight: fullH
 
-            // the widest the time ever gets (with seconds), so hovering never moves the plate
+            // the time plus room for the seconds, so the plate never changes size
             Text {
                 id: widthProbe
                 visible: false
                 renderType: Text.NativeRendering
-                text: "00:00:00"
+                text: "00:00"
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 22
+                font.pixelSize: 20
                 font.weight: Font.Bold
             }
 
@@ -86,43 +86,53 @@ Item {
                 color: Qt.rgba(1, 1, 1, 0.09)
             }
 
-            // text block: 1 px of air above, 29 px high; the progress line owns the last 2 px of the plate
-            Column {
-                id: textCol
-                x: Math.round((parent.width - width) / 2)
+            // Everything is placed by hand inside a plate of fixed size: hovering only fades the seconds in, nothing reflows.
+            Text {
+                renderType: Text.NativeRendering
+                id: timeText
+                x: Math.round((plate.width - implicitWidth) / 2)
                 y: 1
-                spacing: 4
+                textFormat: Text.StyledText
+                readonly property string colon: "<font color='" + ThemeBackend.blue.toString() + "'>:</font>"
+                text: classicFaceRoot.parsedTime.hours + colon + classicFaceRoot.parsedTime.minutes
+                font.family: ThemeBackend.fontFamily
+                font.pixelSize: 20
+                lineHeightMode: Text.FixedHeight
+                lineHeight: 17
+                font.weight: Font.Bold
+                font.features: { "tnum": 1 }
+                color: ThemeBackend.text
+            }
 
-                Text {
-                    renderType: Text.NativeRendering
-                    id: timeText
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    textFormat: Text.StyledText
-                    readonly property string colon: "<font color='" + ThemeBackend.blue.toString() + "'>:</font>"
-                    text: classicFaceRoot.parsedTime.hours + colon + classicFaceRoot.parsedTime.minutes + (plate.wide && classicFaceRoot.parsedTime.hasSeconds ? colon + classicFaceRoot.parsedTime.seconds : "")
-                    font.family: ThemeBackend.fontFamily
-                    font.pixelSize: 20
-                    lineHeightMode: Text.FixedHeight
-                    lineHeight: 17
-                    font.weight: Font.Bold
-                    font.features: { "tnum": 1 }
-                    color: ThemeBackend.text
-                }
+            // seconds: an overlay to the right of the minutes
+            Text {
+                renderType: Text.NativeRendering
+                x: timeText.x + timeText.implicitWidth + 1
+                y: 5
+                text: ":" + classicFaceRoot.parsedTime.seconds
+                font.family: ThemeBackend.fontFamily
+                font.pixelSize: 12
+                font.weight: Font.DemiBold
+                font.features: { "tnum": 1 }
+                color: ThemeBackend.subtext0
+                opacity: (plate.wide && classicFaceRoot.parsedTime.hasSeconds) ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+            }
 
-                Text {
-                    renderType: Text.NativeRendering
-                    id: dateText
-                    visible: widget ? widget.showDate : true
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: DateTime.format("ddd, d MMM", DateTime.now).toUpperCase()
-                    font.family: ThemeBackend.fontFamily
-                    font.pixelSize: 9
-                    font.letterSpacing: 1
-                    lineHeightMode: Text.FixedHeight
-                    lineHeight: 8
-                    font.weight: Font.Medium
-                    color: ThemeBackend.subtext0
-                }
+            Text {
+                renderType: Text.NativeRendering
+                id: dateText
+                visible: widget ? widget.showDate : true
+                x: Math.round((plate.width - implicitWidth) / 2)
+                y: 22
+                text: DateTime.format("ddd, d MMM", DateTime.now).toUpperCase()
+                font.family: ThemeBackend.fontFamily
+                font.pixelSize: 9
+                font.letterSpacing: 1
+                lineHeightMode: Text.FixedHeight
+                lineHeight: 8
+                font.weight: Font.Medium
+                color: ThemeBackend.subtext0
             }
 
             // progress across the minute, on the very bottom edge of the plate (the face sits 16 px inside it)

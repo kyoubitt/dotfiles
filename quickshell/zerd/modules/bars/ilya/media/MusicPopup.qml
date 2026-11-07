@@ -407,6 +407,8 @@ MusicEqualizerState {
             color: ThemeBackend.card
             radius: ThemeBackend.borderRadius
 
+            GlassSheen {}
+
             WallpaperBlur {
                 z: -1
                 anchors.fill: parent

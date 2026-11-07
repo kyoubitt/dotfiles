@@ -444,6 +444,8 @@ PanelWindow {
                 bottomRightRadius: (flatCorners && (trayMenuWindow.isSideBar ? trayMenuWindow.alignRight : trayMenuWindow.alignBottom)) ? 0 : trayMenuWindow.cornerRadius
                 clip: true
 
+                GlassSheen {}
+
                 WallpaperBlur {
                     z: -1
                     anchors.fill: parent
@@ -483,18 +485,34 @@ PanelWindow {
                     interactive: contentHeight > height
                     property Item hoverItem: null
 
+                    // the highlight takes exactly the hovered row's rectangle (in the list's own coordinates) and keeps it while it fades out
+                    property real glideX: 0
+                    property real glideY: 0
+                    property real glideW: 0
+                    property real glideH: 0
+                    function syncGlide() {
+                        const it = menuList.hoverItem;
+                        if (!it) return;
+                        const p = it.mapToItem(menuList.contentItem, 0, 0);
+                        glideX = p.x; glideY = p.y; glideW = it.width; glideH = it.height;
+                    }
+                    onHoverItemChanged: syncGlide()
+                    onContentYChanged: syncGlide()
+
                     Rectangle {
                         id: menuListGlide
+                        parent: menuList.contentItem
                         z: -1
                         radius: trayMenuWindow.s(10)
-                        x: menuList.hoverItem ? menuList.hoverItem.x : 0
-                        y: menuList.hoverItem ? menuList.hoverItem.y : 0
-                        width: menuList.hoverItem ? menuList.hoverItem.width : 0
-                        height: menuList.hoverItem ? menuList.hoverItem.height : 0
+                        x: menuList.glideX
+                        y: menuList.glideY
+                        width: menuList.glideW
+                        height: menuList.glideH
                         opacity: menuList.hoverItem ? 1 : 0
                         color: (menuList.hoverItem && menuList.hoverItem.danger) ? Qt.alpha(ThemeBackend.red, 0.22) : Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, 0.26))
-                        Behavior on y { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on x { enabled: menuListGlide.opacity > 0.5; NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                        Behavior on y { enabled: menuListGlide.opacity > 0.5; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                        Behavior on height { enabled: menuListGlide.opacity > 0.5; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                         Behavior on opacity { NumberAnimation { duration: 110 } }
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
@@ -788,6 +806,8 @@ PanelWindow {
                     bottomRightRadius: !submenuPopout.expandRight ? 0 : trayMenuWindow.cornerRadius
                     clip: true
 
+                    GlassSheen {}
+
                     WallpaperBlur {
                         z: -1
                         anchors.fill: parent
@@ -827,21 +847,37 @@ PanelWindow {
                         interactive: contentHeight > height
                         property Item hoverItem: null
 
+                        // the highlight takes exactly the hovered row's rectangle (in the list's own coordinates) and keeps it while it fades out
+                        property real glideX: 0
+                        property real glideY: 0
+                        property real glideW: 0
+                        property real glideH: 0
+                        function syncGlide() {
+                            const it = subListView.hoverItem;
+                            if (!it) return;
+                            const p = it.mapToItem(subListView.contentItem, 0, 0);
+                            glideX = p.x; glideY = p.y; glideW = it.width; glideH = it.height;
+                        }
+                        onHoverItemChanged: syncGlide()
+                        onContentYChanged: syncGlide()
+
                         Rectangle {
-                        id: subListViewGlide
-                        z: -1
-                        radius: trayMenuWindow.s(10)
-                        x: subListView.hoverItem ? subListView.hoverItem.x : 0
-                        y: subListView.hoverItem ? subListView.hoverItem.y : 0
-                        width: subListView.hoverItem ? subListView.hoverItem.width : 0
-                        height: subListView.hoverItem ? subListView.hoverItem.height : 0
-                        opacity: subListView.hoverItem ? 1 : 0
-                        color: (subListView.hoverItem && subListView.hoverItem.danger) ? Qt.alpha(ThemeBackend.red, 0.22) : Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, 0.26))
-                        Behavior on y { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                        Behavior on opacity { NumberAnimation { duration: 110 } }
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                    }
+                            id: subListViewGlide
+                            parent: subListView.contentItem
+                            z: -1
+                            radius: trayMenuWindow.s(10)
+                            x: subListView.glideX
+                            y: subListView.glideY
+                            width: subListView.glideW
+                            height: subListView.glideH
+                            opacity: subListView.hoverItem ? 1 : 0
+                            color: (subListView.hoverItem && subListView.hoverItem.danger) ? Qt.alpha(ThemeBackend.red, 0.22) : Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, 0.26))
+                            Behavior on x { enabled: subListViewGlide.opacity > 0.5; NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                            Behavior on y { enabled: subListViewGlide.opacity > 0.5; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            Behavior on height { enabled: subListViewGlide.opacity > 0.5; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 110 } }
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                        }
 
                                             delegate: Item {
                             id: subItemDelegate

@@ -56,8 +56,9 @@ QtObject {
         const steps = r.steps ?? [];
         const forecast = days.map((d, i) => {
             const code = parseInt(d.code);
-            const own = i === 0 ? (r.hourly ?? []) : steps.filter(s => s.day === d.date);
+            const own = steps.filter(s => s.day === d.date);
             return {
+                date: d.date,
                 day_full: Qt.formatDate(new Date(d.date + "T12:00:00"), "dddd"),
                 icon: root.iconFor(code),
                 hex: root.hexFor(code),
@@ -69,6 +70,7 @@ QtObject {
                 pop: steps.filter(s => s.day === d.date).reduce((a, s) => Math.max(a, s.rain), 0),
                 feels_like: i === 0 ? (parseInt(r.tempFeelsLike) || 0) : Number(d.high),
                 hourly: own.map(s => ({
+                    hour: s.hour,
                     time: String(s.hour).padStart(2, "0") + ":00",
                     temp: Number(s.temp),
                     icon: root.iconFor(parseInt(s.code)),

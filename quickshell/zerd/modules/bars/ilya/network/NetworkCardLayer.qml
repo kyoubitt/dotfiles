@@ -155,13 +155,15 @@ Item {
                 ? Math.sin(window.globalOrbitAngle * 6) * window.s(10) * (1 - unifiedRatio)
                 : 0
 
-            x: targetX
-            y: targetY + liveBob
+            // whole pixels, so the labels are never drawn between two
+            // clamped inside the card area, so no pill (and no device name) is ever cut off at an edge
+            x: Math.round(Math.max(window.s(6), Math.min(orbitContainer.width - width - window.s(6), targetX)))
+            y: Math.round(Math.max(window.s(6), Math.min(orbitContainer.height - height - window.s(6), targetY + liveBob)))
 
             property bool isHoveredOrHighlighted: isMyActionable ? fillBtn.isHoveredOrHighlighted : clickBtn.isHoveredOrHighlighted
             property real currentPopScale: isMyActionable ? fillBtn.popScale : clickBtn.popScale
 
-            scale: (!isLoaded ? 0.0 : (isHoveredOrHighlighted ? dynamicScale * 1.025 : dynamicScale)) * currentPopScale
+            scale: (!isLoaded ? 0.0 : dynamicScale) * currentPopScale
             Behavior on scale { enabled: window.visible; NumberAnimation { duration: 250; easing.type: Easing.OutQuint } }
             z: floatCardDelegateContainer.isCardHovered ? 10 : index
 
@@ -310,7 +312,7 @@ Item {
                 action_highlight: isHighlighted
                 contentAlignment: Qt.AlignLeft
                 horizontalPadding: window.s(10)
-                textFontSize: window.s(12)
+                textFontSize: 13
                 iconFontSize: window.s(18)
                 fillLevel: myFillLevel
                 onTriggered: floatCardDelegateContainer.handleTrigger()
@@ -360,19 +362,41 @@ Item {
                             Behavior on color { enabled: window.visible; ColorAnimation { duration: 250 } }
                         }
 
-                        MarqueeText {
-                            id: marqueeClip
+                        // resting: the name elided inside the pill; hovered: it scrolls from the left edge
+                        Item {
+                            id: labelBox
                             width: floatCardDelegateContainer.width - window.s(20) - (overlayIcon.visible ? overlayIcon.implicitWidth + window.s(6) : 0)
                             height: parent.height
-                            text: myButtonText
-                            font.family: ThemeBackend.fontFamily
-                            font.weight: Font.Bold
-                            font.pixelSize: window.s(12)
-                            color: dynamicTextColor
-                            marqueeSpacing: window.s(30)
-                            active: window.visible
+                            clip: true
 
-                            Behavior on color { enabled: window.visible; ColorAnimation { duration: 250 } }
+                            Text {
+                                renderType: Text.NativeRendering
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: !floatCardDelegateContainer.isHoveredOrHighlighted
+                                text: myButtonText
+                                elide: Text.ElideRight
+                                font.family: ThemeBackend.fontFamily
+                                font.weight: Font.DemiBold
+                                font.pixelSize: 13
+                                color: dynamicTextColor
+                                Behavior on color { enabled: window.visible; ColorAnimation { duration: 250 } }
+                            }
+
+                            MarqueeText {
+                                id: marqueeClip
+                                anchors.fill: parent
+                                visible: floatCardDelegateContainer.isHoveredOrHighlighted
+                                text: myButtonText
+                                font.family: ThemeBackend.fontFamily
+                                font.weight: Font.DemiBold
+                                font.pixelSize: 13
+                                color: dynamicTextColor
+                                marqueeSpacing: window.s(30)
+                                pauseDuration: 500
+                                active: window.visible && floatCardDelegateContainer.isHoveredOrHighlighted
+                            }
                         }
                     }
                 }
@@ -430,8 +454,8 @@ Item {
                                                 renderType: Text.NativeRendering
                                                 text: myButtonText
                                                 font.family: ThemeBackend.fontFamily
-                                                font.weight: Font.Bold
-                                                font.pixelSize: window.s(12)
+                                                font.weight: Font.DemiBold
+                                                font.pixelSize: 13
                                                 color: floatCardDelegateContainer.filledContentColor
                                             }
 
@@ -439,8 +463,8 @@ Item {
                                                 renderType: Text.NativeRendering
                                                 text: myButtonText
                                                 font.family: ThemeBackend.fontFamily
-                                                font.weight: Font.Bold
-                                                font.pixelSize: window.s(12)
+                                                font.weight: Font.DemiBold
+                                                font.pixelSize: 13
                                                 color: floatCardDelegateContainer.filledContentColor
                                                 visible: marqueeClip.canMarquee
                                             }

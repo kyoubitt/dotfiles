@@ -57,7 +57,9 @@ Item {
     readonly property var dayStr: isVertical ? ((typeof DateTime !== "undefined" && DateTime.day) ? DateTime.day : "18") : undefined
     readonly property var monthStr: isVertical ? ((typeof DateTime !== "undefined" && DateTime.monthShort) ? DateTime.monthShort : "Sep") : undefined
     readonly property string fullDateStr: (typeof DateTime !== "undefined" && DateTime.fullDate) ? DateTime.fullDate : (isVertical ? "Fri, Sep 18" : "")
-    readonly property bool hovered: bgMouse.containsMouse
+    // one hover source on the face itself, whose size never changes
+    readonly property bool hovered: faceHover.hovered
+    HoverHandler { id: faceHover }
     property int typeInIndex: 0
     property string dateStr: fullDateStr.substring(0, typeInIndex)
 

@@ -273,6 +273,15 @@ Item {
                                     opacity: 0.15
                                     visible: root.hasArt && mediaArtImg.status === Image.Ready
                                 }
+
+                                // 1 px inner edge over everything in the tile
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: parent.radius
+                                    color: "transparent"
+                                    border.width: 1
+                                    border.color: Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.14)
+                                }
                             }
 
                             Column {
