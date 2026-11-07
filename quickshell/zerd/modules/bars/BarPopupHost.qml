@@ -76,7 +76,7 @@ Scope {
                     id: pl
                     anchors.fill: parent
                     active: false
-                    onLoaded: { console.log("POPUPDBG loaded", root.popup?.kind, pl.source, "size", item.width, item.height) /* TEMP DEBUG */; item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
+                    onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
             Connections {
