@@ -32,7 +32,7 @@ ListView {
     ScrollBar.vertical: StyledScrollBar {}
 
     MouseArea {
-        visible: Config.options?.interactions?.scrolling?.fasterTouchpadScroll
+        visible: Config.options?.interactions?.scrolling?.fasterTouchpadScroll ?? false
         anchors.fill: parent
         acceptedButtons: Qt.NoButton
         onWheel: function(wheelEvent) {
