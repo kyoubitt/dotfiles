@@ -16,19 +16,12 @@ Item {
         BarText { text: Qt.formatDate(DateTime.clock.date, "dddd, d MMMM"); color: BarStyle.subtext; font.pixelSize: 12 }
     }
 
-    Rectangle {
+    Row {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        width: group.width + 8; height: 44; radius: 22
-        color: BarStyle.card
-        border.width: 1; border.color: BarStyle.edge
-        Row {
-            id: group
-            x: 4; y: 4
-            spacing: 2
-            PanelButton { tone: "plain"; size: 36; icon: "settings"; tip: "Settings"; onTapped: { BarState.closeAll(); Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "settings", "open"]) } }
-            PanelButton { tone: "plain"; size: 36; icon: "lock"; tip: "Lock"; onTapped: { BarState.closeAll(); Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) } }
-            PanelButton { tone: "plain"; size: 36; icon: "power_settings_new"; tip: "Session"; onTapped: { BarState.closeAll(); GlobalStates.sessionOpen = true } }
-        }
+        spacing: 8
+        PanelButton { tone: "tonal"; size: 42; iconSize: 20; icon: "settings"; tip: "Settings"; onTapped: { BarState.closeAll(); Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "settings", "open"]) } }
+        PanelButton { tone: "tonal"; size: 42; iconSize: 20; icon: "lock"; tip: "Lock"; onTapped: { BarState.closeAll(); Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) } }
+        PanelButton { tone: "filled"; size: 42; iconSize: 20; icon: "power_settings_new"; tip: "Session"; onTapped: { BarState.closeAll(); GlobalStates.sessionOpen = true } }
     }
 }
