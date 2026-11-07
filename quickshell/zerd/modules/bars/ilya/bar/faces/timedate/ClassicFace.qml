@@ -61,35 +61,79 @@ Item {
     Component {
         id: topBodyComponent
 
-        Column {
-            id: timeCol
-            spacing: 0
+        Item {
+            id: plate
+            readonly property real fullH: (widget && widget.barWindow) ? widget.barWindow.barHeight : 32
+            readonly property bool wide: widget ? widget.hovered : false
+            implicitWidth: Math.max(widthProbe.implicitWidth, dateText.implicitWidth)
+            implicitHeight: fullH
 
+            // the widest the time ever gets (with seconds), so hovering never moves the plate
             Text {
+                id: widthProbe
+                visible: false
                 renderType: Text.NativeRendering
-                id: timeText
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: classicFaceRoot.parsedTime.hours + ":" + classicFaceRoot.parsedTime.minutes + ((widget && widget.hovered && classicFaceRoot.parsedTime.hasSeconds) ? ":" + classicFaceRoot.parsedTime.seconds : "")
+                text: "00:00:00"
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 20
-                lineHeightMode: Text.FixedHeight
-                lineHeight: 21
-                font.weight: Font.DemiBold
-                color: ThemeBackend.text
+                font.pixelSize: 22
+                font.weight: Font.Bold
             }
 
-            Text {
-                renderType: Text.NativeRendering
-                id: dateText
-                visible: widget ? widget.showDate : true
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: DateTime.format("ddd, d MMM", DateTime.now)
-                font.family: ThemeBackend.fontFamily
-                font.pixelSize: 11
-                lineHeightMode: Text.FixedHeight
-                lineHeight: 12
-                font.weight: Font.Normal
-                color: ThemeBackend.subtext0
+            // soft highlight along the top edge: the plate reads as raised
+            Rectangle {
+                anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: -4; rightMargin: -4 }
+                height: 1
+                color: Qt.rgba(1, 1, 1, 0.09)
+            }
+
+            Column {
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -1
+                spacing: 3
+
+                Text {
+                    renderType: Text.NativeRendering
+                    id: timeText
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    textFormat: Text.StyledText
+                    readonly property string colon: "<font color='" + ThemeBackend.blue.toString() + "'>:</font>"
+                    text: classicFaceRoot.parsedTime.hours + colon + classicFaceRoot.parsedTime.minutes + (plate.wide && classicFaceRoot.parsedTime.hasSeconds ? colon + classicFaceRoot.parsedTime.seconds : "")
+                    font.family: ThemeBackend.fontFamily
+                    font.pixelSize: 22
+                    lineHeightMode: Text.FixedHeight
+                    lineHeight: 19
+                    font.weight: Font.Bold
+                    color: ThemeBackend.text
+                }
+
+                Text {
+                    renderType: Text.NativeRendering
+                    id: dateText
+                    visible: widget ? widget.showDate : true
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: DateTime.format("ddd, d MMM", DateTime.now).toUpperCase()
+                    font.family: ThemeBackend.fontFamily
+                    font.pixelSize: 10
+                    font.letterSpacing: 1
+                    lineHeightMode: Text.FixedHeight
+                    lineHeight: 9
+                    font.weight: Font.Medium
+                    color: ThemeBackend.subtext0
+                }
+            }
+
+            // a hairline that fills across the minute
+            Rectangle {
+                anchors { bottom: parent.bottom; bottomMargin: 2; horizontalCenter: parent.horizontalCenter }
+                width: parent.width
+                height: 1
+                color: Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.08)
+                Rectangle {
+                    height: parent.height
+                    width: parent.width * Math.min(1, (parseInt(classicFaceRoot.parsedTime.seconds) || parseInt(DateTime.second) || 0) / 60)
+                    color: ThemeBackend.blue
+                    Behavior on width { NumberAnimation { duration: 900; easing.type: Easing.Linear } }
+                }
             }
         }
     }
