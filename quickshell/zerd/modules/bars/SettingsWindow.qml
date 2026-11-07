@@ -141,6 +141,9 @@ Scope {
                 { t: "toggle", icon: "volume_up", label: "Volume and brightness pill", path: "bars.osd.enable", def: true },
                 { t: "choice", art: "pill", icon: "vertical_align_bottom", label: "Pill position", path: "bars.osd.position", opts: ["bottom", "top"], def: "bottom" },
                 { t: "step", icon: "timer", label: "Pill time (ms)", path: "bars.osd.timeout", min: 800, max: 4000, by: 100, def: 1500 } ] },
+            { title: "Sounds", rows: [
+                { t: "toggle", icon: "music_note", label: "Shell sounds", hint: "Clicks and chimes the shell plays itself", path: "bars.sounds.enable", def: true },
+                { t: "slider", icon: "volume_up", label: "Sound volume", path: "bars.sounds.volume", def: 0.5 } ] },
             { title: "Closing windows", rows: [
                 { t: "toggle", icon: "help", label: "Ask before closing important apps", hint: "Mod+Q closes at once when this is off", path: "closeConfirm.enabled", def: false } ] } ] }
     ]
@@ -399,12 +402,13 @@ Scope {
                                                 readonly property real inner: width - 32
 
                                                 Loader {
-                                                    sourceComponent: ({ toggle: toggleC, choice: row.spec.art ? artC : (row.stacked ? wrapC : chipsC), step: stepC, actions: actionsC, info: infoC,
+                                                    sourceComponent: ({ toggle: toggleC, slider: sliderC, choice: row.spec.art ? artC : (row.stacked ? wrapC : chipsC), step: stepC, actions: actionsC, info: infoC,
                                                         preview: previewC, user: userC, profiles: profilesC, binds: bindsC, cards: cardsC, swatches: swatchC, list: listC,
                                                         overview: overviewC, wallpaper: wallpaperC })[row.spec.t]
                                                 }
 
                                                 // ---- controls
+                                                Component { id: sliderC; BarSlider { width: 240; icon: "volume_up"; value: Number(row.value); onMoved: v => Config.setNestedValue(row.spec.path, Math.round(v * 100) / 100) } }
                                                 Component { id: toggleC; BarSwitch { checked: !!row.value; onToggled: Config.setNestedValue(row.spec.path, !row.value) } }
                                                 Component {
                                                     id: chipC
@@ -801,8 +805,8 @@ Scope {
                                                     id: overviewC
                                                     Column {
                                                         id: overviewCol
-                                                        width: row.inner; spacing: 14
-                                                        topPadding: 4; bottomPadding: 6
+                                                        width: row.inner; spacing: 16
+                                                        topPadding: 8; bottomPadding: 8
                                                         Rectangle {
                                                             width: parent.width; height: 128; radius: BarStyle.radiusMedium
                                                             gradient: Gradient {
@@ -813,15 +817,17 @@ Scope {
                                                             border.width: 1; border.color: BarStyle.border
                                                             LockAvatar { x: 22; anchors.verticalCenter: parent.verticalCenter; size: 84 }
                                                             Column {
-                                                                x: 128; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                                                                BarText { text: "Hello, " + (Config.options?.account?.name || SystemInfo.displayName); font.pixelSize: 24; font.weight: Font.DemiBold }
-                                                                BarText { text: DateTime.date + "   ·   up " + DateTime.uptime; color: BarStyle.subtext }
-                                                                BarText { visible: Profiles.active !== ""; text: "Profile: " + Profiles.active; color: BarStyle.accent; font.pixelSize: 12 }
+                                                                x: 126; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                                                                width: parent.width - 126 - 132 - 18 - 16
+                                                                BarText { width: parent.width; elide: Text.ElideRight; text: "Hello, " + (Config.options?.account?.name || SystemInfo.displayName); font.pixelSize: 24; font.weight: Font.DemiBold }
+                                                                BarText { width: parent.width; elide: Text.ElideRight; text: DateTime.date; color: BarStyle.subtext }
+                                                                BarText { width: parent.width; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; text: "Up " + DateTime.uptime; color: BarStyle.subtext }
+                                                                BarText { visible: Profiles.active !== ""; width: parent.width; elide: Text.ElideRight; text: "Profile: " + Profiles.active; color: BarStyle.accent; font.pixelSize: 12 }
                                                             }
                                                             ClippingRectangle {
                                                                 anchors { right: parent.right; rightMargin: 18; verticalCenter: parent.verticalCenter }
-                                                                width: 170; height: 96; radius: BarStyle.radiusSmall; color: BarStyle.surface
-                                                                Image { anchors.fill: parent; source: WallpaperState.thumbUrl(WallpaperState.current); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 340 }
+                                                                width: 132; height: 82; radius: BarStyle.radiusSmall; color: BarStyle.surface
+                                                                Image { anchors.fill: parent; source: WallpaperState.thumbUrl(WallpaperState.current); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 264 }
                                                                 TapHandler { onTapped: Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "open"]) }
                                                                 HoverHandler { cursorShape: Qt.PointingHandCursor }
                                                                 Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 26; color: Qt.rgba(0, 0, 0, 0.6)
@@ -829,7 +835,7 @@ Scope {
                                                             }
                                                         }
                                                         Flow {
-                                                            width: parent.width; spacing: 8
+                                                            width: parent.width; spacing: 12
                                                             Repeater {
                                                                 model: [
                                                                     { icon: "music_note", text: "Orbit", on: false, tap: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "music", "open"]) },
@@ -864,7 +870,7 @@ Scope {
                                                                     required property var modelData
                                                                     required property int index
                                                                     tone: "outlined"
-                                                                    width: Math.floor((overviewCol.width - 20) / 3); height: 84; radius: BarStyle.radiusMedium
+                                                                    width: Math.floor((overviewCol.width - 20) / 3); height: Math.max(84, pcText.height + 32); radius: BarStyle.radiusMedium
                                                                     onTapped: root.page = pc.index + 1
                                                                     Rectangle {
                                                                         x: 14; anchors.verticalCenter: parent.verticalCenter; width: 44; height: 44; radius: 22
@@ -872,9 +878,10 @@ Scope {
                                                                         BarIcon { anchors.centerIn: parent; name: pc.modelData.icon; size: 22; color: BarStyle.onAccentContainer }
                                                                     }
                                                                     Column {
-                                                                        x: 70; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 80; spacing: 2
-                                                                        BarText { text: pc.modelData.name; font.weight: Font.DemiBold }
-                                                                        BarText { width: parent.width; elide: Text.ElideRight; text: pc.modelData.blurb; font.pixelSize: 11; color: BarStyle.subtext }
+                                                                        id: pcText
+                                                                        x: 70; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 82; spacing: 2
+                                                                        BarText { width: parent.width; elide: Text.ElideRight; text: pc.modelData.name; font.weight: Font.DemiBold }
+                                                                        BarText { width: parent.width; wrapMode: Text.WordWrap; maximumLineCount: 3; text: pc.modelData.blurb; font.pixelSize: 11; color: BarStyle.subtext }
                                                                     }
                                                                 }
                                                             }
