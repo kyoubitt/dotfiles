@@ -29,6 +29,7 @@ Scope {
         property bool chosen: false             // this is the capsule that fired
         readonly property real level: hold.level
         readonly property bool lit: hold.resting || hold.level > 0.001
+        property alias face: capsule             // the capsule itself: where the liquid floods out from
         signal activated()
         signal tapped()
         function press(): void { hold.keyDown() }
@@ -117,21 +118,24 @@ Scope {
 
             anchors { top: true; bottom: true; left: true; right: true }
 
-            // The whole menu fades in on open and, for everything except Lock, fades out before the command runs.
+            // The whole menu fades in on open. Once a capsule has fired, everything except Lock is flooded by its liquid
+            // (ExitFx) and what is under the flood stops drawing; Lock keeps the blurred backdrop for the lock screen.
             Item {
                 id: stage
                 anchors.fill: parent
-                opacity: Math.min(content.enter * 3, 1) * (content.fadeBackdrop ? 1 - content.leave : 1)
+                opacity: Math.min(content.enter * 3, 1)
 
                 // Real frosted-glass backdrop: the actual wallpaper, blurred live.
                 LockBackdrop {
                     anchors.fill: parent
+                    visible: !fx.covered
                 }
 
                 ColumnLayout {
                     id: content
                     anchors.centerIn: parent
                     spacing: 32
+                    opacity: fx.covered ? 0 : 1           // not visible:false, it keeps the keyboard focus (Escape still works)
 
                     focus: true
                     property int sel: -1
@@ -139,36 +143,52 @@ Scope {
                     property real leave: 0                // 0..1 once a capsule has fired
                     property bool fadeBackdrop: true      // false for Lock: the lock screen shows the same blurred wallpaper
                     property int chosen: -1
+                    // fx is how the screen goes once the capsule has fired (ExitFx): fade to black, dim under a moon, or CRT off
                     readonly property var actions: [
-                        { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+                        { icon: "logout", label: "Log out", hint: "E", weight: 0.9, tone: "#f0b35a", fx: "fade", cmd: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
                         { icon: "lock", label: "Lock", hint: "L", weight: 0.6, tone: "accent", lock: true, cmd: ["/usr/bin/qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"] },
-                        { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
-                        { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", cmd: ["systemctl", "reboot"] },
-                        { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", cmd: ["systemctl", "poweroff"] }
+                        { icon: "bedtime", label: "Sleep", hint: "S", weight: 0.8, tone: "#9a97f5", fx: "sleep", cmd: ["sh", "-c", "sleep 1; systemctl suspend"] },
+                        { icon: "restart_alt", label: "Restart", hint: "R", weight: 1.3, tone: "#f58f5f", fx: "crt", cmd: ["systemctl", "reboot"] },
+                        { icon: "power_settings_new", label: "Shut down", hint: "U", weight: 1.6, tone: "#f2766d", fx: "crt", cmd: ["systemctl", "poweroff"] }
                     ]
                     property string hintText: "Hold a button to confirm"
+                    property bool sent: false
 
-                    // The capsule fired: the others fade away, then the command goes out. Lock keeps the blurred
-                    // backdrop up until the lock screen is really on screen, so the desktop never flashes between them.
+                    // The capsule fired: the others fade away and, except for Lock, its liquid floods the window; the command
+                    // goes out when that is over (send), with the window still up, and the window goes later (finish). Lock keeps
+                    // the blurred backdrop up until the lock screen is really on screen, so the desktop never flashes between them.
                     function run(i: int): void {
                         if (chosen >= 0) return
                         chosen = i
                         const a = actions[i]
                         fadeBackdrop = !a.lock
+                        leaveAnim.duration = a.lock ? 340 : 240
                         leaveAnim.start()
                         if (a.lock) {
                             Quickshell.execDetached(a.cmd.slice())
                             lockWait.start()
+                            return
                         }
+                        // the capsule as it is on screen right now (pressed in, scaled): the liquid starts as its exact shape
+                        const f = capAt(i).face
+                        const p = f.mapToItem(fx, 0, 0)
+                        const q = f.mapToItem(fx, f.width, f.height)
+                        fx.begin(a.fx, a.tone, a.icon, a.label, p.x, p.y, q.x - p.x, q.y - p.y, f.radius * (q.x - p.x) / f.width)
+                        exitGuard.restart()
+                    }
+                    function send(): void {
+                        if (sent) return
+                        sent = true
+                        Quickshell.execDetached(actions[chosen].cmd.slice())
                     }
                     function finish(): void {
-                        const a = actions[chosen]
-                        if (!a.lock) Quickshell.execDetached(a.cmd.slice())
+                        if (!actions[chosen].lock) send()
                         GlobalStates.sessionOpen = false
                     }
                     NumberAnimation on enter { id: enterAnim; from: 0; to: 1; duration: 720; easing.type: Easing.OutCubic; running: true }
-                    NumberAnimation { id: leaveAnim; target: content; property: "leave"; from: 0; to: 1; duration: 340; easing.type: Easing.InOutCubic
-                        onFinished: if (!content.actions[content.chosen].lock) content.finish() }
+                    NumberAnimation { id: leaveAnim; target: content; property: "leave"; from: 0; to: 1; duration: 340; easing.type: Easing.InOutCubic }
+                    // If the effect never gets to send the command (no frames are being drawn), send it and close anyway
+                    Timer { id: exitGuard; interval: 1600; onTriggered: if (!content.sent) content.finish() }
                     // Lock: close once the lock screen covers us, or after a moment if it never does
                     Timer { id: lockWait; interval: 1500; onTriggered: content.finish() }
                     Connections {
@@ -259,6 +279,14 @@ Scope {
                         Behavior on color { ColorAnimation { duration: 160 } }
                     }
                     Timer { id: hintReset; interval: 1800; onTriggered: content.hintText = "Hold a button to confirm" }
+                }
+
+                // On top of everything: the liquid of the fired capsule flooding the window, and what follows it
+                ExitFx {
+                    id: fx
+                    anchors.fill: parent
+                    onFire: content.send()
+                    onFinished: content.finish()
                 }
             }
         }
