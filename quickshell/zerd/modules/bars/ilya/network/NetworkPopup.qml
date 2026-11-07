@@ -1531,7 +1531,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: ThemeBackend.borderRadius
-            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+            color: ThemeBackend.card
             clip: true
 
             WallpaperBlur {

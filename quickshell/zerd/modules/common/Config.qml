@@ -306,6 +306,11 @@ Singleton {
                     // A focus (pomodoro) lap turns do not disturb on, and off again after.
                     property bool focusDnd: true
                 }
+                // UI sounds taken from serpantinum (popup open and close, buttons, toggles, notifications, volume)
+                property JsonObject sounds: JsonObject {
+                    property bool enable: true
+                    property int volume: 60
+                }
                 property JsonObject top: JsonObject {
                     property bool enable: false
                     property int height: 34
@@ -319,9 +324,9 @@ Singleton {
                     property bool showFocus: false
                     property bool showTools: true
                     // Which block sits in which box (Edit bar in Settings): left, middle, right or hidden.
-                    property list<string> layoutLeft: ["left", "media"]
+                    property list<string> layoutLeft: ["left", "workspaces", "media"]
                     property list<string> layoutMiddle: ["timedate"]
-                    property list<string> layoutRight: ["sysmon", "weather", "info", "tray", "dnd", "wifi", "bt", "vol", "bat"]
+                    property list<string> layoutRight: ["sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat"]
                     property list<string> layoutHidden: ["focus", "vis"]
                     // Single items inside the Info and Status blocks.
                     // pills (a capsule per group), strip (one full-width bar), floating (one rounded bar, inset)

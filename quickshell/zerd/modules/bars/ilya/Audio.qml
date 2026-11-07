@@ -43,6 +43,18 @@ Singleton {
         objects: root.trackedNodes
     }
 
+    // helper streams of our own shell (cava's capture, UI sounds) and nameless ones are not apps
+    function isHelperStream(node) {
+        const p = node?.properties ?? ({});
+        const name = String(p["application.name"] ?? "").toLowerCase();
+        const bin = String(p["application.process.binary"] ?? "").toLowerCase();
+        const media = String(p["media.name"] ?? "").toLowerCase();
+        if (name === "" || name === "unknown app" || name.includes("cava") || bin.includes("cava")) return true;
+        if (name === "quickshell" || bin === "quickshell" || bin === "qs") return true;
+        if (bin === "pw-play" || name === "pw-play" || media.includes("zerd-sfx")) return true;
+        return false;
+    }
+
     function isSerpantinumStream(node) {
         if (!node || !node.properties) return false;
         let p = node.properties;
@@ -81,7 +93,8 @@ Singleton {
         for (const n of root.pipewireNodes()) {
             if (n.isStream && n.audio
                 && n.properties?.["application.id"] !== "org.PulseAudio.pavucontrol"
-                && !isSerpantinumStream(n)) {
+                && !isSerpantinumStream(n)
+                && !isHelperStream(n)) {
                 arr.push(n);
             }
         }

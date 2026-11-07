@@ -407,7 +407,7 @@ Item {
     Rectangle {
         id: sidebarPanel
         anchors.fill: parent
-        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+        color: ThemeBackend.card
         radius: Math.min(ThemeBackend.borderRadius, root.s(28))
         topLeftRadius: root.isLeftAnchored ? 0 : radius
         bottomLeftRadius: root.isLeftAnchored ? 0 : radius
@@ -560,156 +560,11 @@ Item {
                     panel: root
                 }
 
-                Rectangle {
+                BatteryCard {
                     id: batteryBox
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.isDesktop ? root.s(52) : root.s(72)
-                    Layout.maximumHeight: Layout.preferredHeight
-                    radius: root.isDesktop ? root.s(15) : root.boxRadius
-                    color: (root.isDesktop || batteryGlass.active) ? "transparent" : ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
-                    clip: true
+                    panel: root
                     opacity: root.introCore
                     transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introCore) }
-
-                    property real fillLevel: root.animCapacity / 100
-                    property real maxWaveAmp: root.isCharging ? root.s(10) : root.s(6.5)
-                    property real waveAmp: (fillLevel < 0.99 && fillLevel > 0.01) ? maxWaveAmp * Math.sin(fillLevel * Math.PI) : 0
-
-                    GlassFill {
-                        id: batteryGlass
-                        anchors.fill: parent
-                        allowed: !root.isDesktop
-                        radius: parent.radius
-                        tintColor: ThemeBackend.surface0
-                        tintAmount: 0.3
-                    }
-
-                    FluidWave {
-                        id: waveCanvas
-                        anchors.fill: parent
-                        visible: !batteryGlass.active && root.visible && !root.isDesktop && batteryBox.fillLevel > 0.001
-
-                        property real wavePhase: 0.0
-                        NumberAnimation on wavePhase {
-                            running: root.visible && !root.isDesktop && batteryBox.fillLevel > 0.0 && batteryBox.fillLevel < 1.0
-                            loops: Animation.Infinite
-                            from: 0; to: Math.PI * 2; duration: root.isCharging ? 1200 : 2200
-                        }
-
-                        radius: batteryBox.radius
-                        fillLevel: batteryBox.fillLevel
-                        waveAmp: (batteryBox.fillLevel < 0.99 && batteryBox.waveAmp > 0) ? Math.min(batteryBox.waveAmp, Math.min(width * batteryBox.fillLevel, width * (1.0 - batteryBox.fillLevel))) : 0
-                        phase: wavePhase
-                        vertical: 0.0
-                        color1: root.batColorFlat
-                        color2: root.batColorFlat
-                    }
-
-                    LiquidFill {
-                        anchors.fill: parent
-                        visible: batteryGlass.active && root.visible && !root.isDesktop && batteryBox.fillLevel > 0.001
-                        radius: batteryBox.radius
-                        fillLevel: batteryBox.fillLevel
-                        waveAmp: waveCanvas.waveAmp
-                        phase: waveCanvas.wavePhase
-                        color1: Qt.alpha(Qt.lighter(root.batColorFlat, 1.1), 0.6)
-                        color2: Qt.alpha(root.batColorFlat, 0.6)
-                        bodyAlpha: 0.18
-                    }
-
-                    BatteryContent {
-                        anchors.fill: parent
-                        contentTextColor: ThemeBackend.text
-                        iconColor: root.batColorFlat
-                        glass: batteryGlass.active
-                        visible: !root.isDesktop
-                    }
-
-                    Item {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        visible: !root.isDesktop
-
-                        property real phaseOffset: Math.sin(waveCanvas.wavePhase) - Math.cos(waveCanvas.wavePhase)
-                        property real centerOffset: batteryBox.fillLevel > 0.01 && batteryBox.fillLevel < 0.99 ? 0.375 * batteryBox.waveAmp * phaseOffset : 0
-
-                        width: Math.max(0, Math.min(parent.width, (parent.width * batteryBox.fillLevel) + centerOffset))
-                        clip: true
-
-                        BatteryContent {
-                            width: batteryBox.width
-                            height: batteryBox.height
-                            contentTextColor: batteryGlass.active ? ThemeBackend.text : ThemeBackend.crust
-                            iconColor: batteryGlass.active ? ThemeBackend.text : ThemeBackend.crust
-                            glass: batteryGlass.active
-                        }
-                    }
-
-                    Item {
-                        id: profileSwitchWrapper
-                        anchors.fill: root.isDesktop ? parent : undefined
-                        anchors.right: root.isDesktop ? undefined : parent.right
-                        anchors.verticalCenter: root.isDesktop ? undefined : parent.verticalCenter
-                        anchors.rightMargin: root.isDesktop ? 0 : root.s(12)
-                        implicitWidth: root.isDesktop ? parent.width : profileSwitch.implicitWidth
-                        implicitHeight: profileSwitch.implicitHeight
-
-                        Rectangle {
-                            id: profileSwitchShadow
-                            visible: !root.isDesktop && !profileSwitch.glassActive
-                            anchors.fill: parent
-                            anchors.topMargin: root.s(1.5)
-                            anchors.bottomMargin: -root.s(1.5)
-                            radius: profileSwitch.cornerRadius
-                            color: Qt.rgba(0, 0, 0, 0.25)
-                        }
-
-                        Switch {
-                            id: profileSwitch
-                            anchors.fill: parent
-                            implicitWidth: root.isDesktop ? parent.width : (PowerProfiles.hasPerformanceProfile ? root.s(240) : root.s(162))
-                            implicitHeight: root.isDesktop ? root.s(48) : root.s(52)
-                            cornerRadius: root.s(15)
-                            fontPixelSize: root.isDesktop ? root.s(14) : root.s(22)
-                            options: {
-                                if (root.isDesktop) {
-                                    return PowerProfiles.hasPerformanceProfile
-                                        ? ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced"), "󰓅 " + I18n.t("syspanel.profiles.performance")]
-                                        : ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced")];
-                                } else {
-                                    return PowerProfiles.hasPerformanceProfile
-                                        ? ["󰌪", "󰗑", "󰓅"]
-                                        : ["󰌪", "󰗑"];
-                                }
-                            }
-                            accentColor: root.profileColor
-                            baseColor: ThemeBackend.surface1
-                            textColor: ThemeBackend.text
-                            activeTextColor: ThemeBackend.crust
-                            currentIndex: {
-                                if (PowerProfiles.hasPerformanceProfile) {
-                                    if (root.powerProfile === "power-saver") return 0;
-                                    if (root.powerProfile === "balanced") return 1;
-                                    return 2;
-                                } else {
-                                    if (root.powerProfile === "power-saver") return 0;
-                                    return 1;
-                                }
-                            }
-
-                            onValueChanged: (idx, val) => {
-                                if (PowerProfiles.hasPerformanceProfile) {
-                                    if (idx === 0) PowerProfiles.profile = PowerProfile.PowerSaver;
-                                    else if (idx === 1) PowerProfiles.profile = PowerProfile.Balanced;
-                                    else PowerProfiles.profile = PowerProfile.Performance;
-                                } else {
-                                    if (idx === 0) PowerProfiles.profile = PowerProfile.PowerSaver;
-                                    else PowerProfiles.profile = PowerProfile.Balanced;
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
