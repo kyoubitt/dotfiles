@@ -40,14 +40,14 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         
-        renderType: (!root.useNerd && root.fill !== 0) ? Text.CurveRendering : Text.NativeRendering
+        renderType: Text.NativeRendering
         font {
-            hintingPreference: Font.PreferFullHinting
+            hintingPreference: Font.PreferDefaultHinting
             family: (root.useNerd && root.hasNerdGlyph) 
                 ? (Appearance?.font.family.monospace ?? "JetBrainsMono Nerd Font") 
                 : (Appearance?.font.family.iconMaterial ?? "Material Symbols Rounded")
             pixelSize: root.effectiveFontSize
-            weight: (root.useNerd && root.hasNerdGlyph) ? Font.Normal : (Font.Normal + (Font.DemiBold - Font.Normal) * root.truncatedFill)
+            weight: Font.Normal
             variableAxes: (root.useNerd && root.hasNerdGlyph) ? ({}) : ({ 
                 "FILL": root.truncatedFill,
                 "wght": root.iconSize <= 18 ? 600 : (root.iconSize <= 24 ? 500 : 400),
