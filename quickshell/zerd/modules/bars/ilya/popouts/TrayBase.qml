@@ -182,7 +182,7 @@ PanelWindow {
     }
 
     property real menuWidth: s(200)
-    property real itemHeight: s(32)
+    property real itemHeight: s(34)
     property int menuCount: {
         if (!menuOpener.children) return 0;
         if (menuOpener.children.values) return menuOpener.children.values.length;
@@ -191,7 +191,7 @@ PanelWindow {
         return 0;
     }
 
-    property real rawHeight: (menuCount * itemHeight) + s(16)
+    property real rawHeight: menuList.contentHeight + s(16)
     property real targetMenuHeight: Math.max(s(40), rawHeight)
     property real menuHeight: targetMenuHeight
 
@@ -480,7 +480,8 @@ PanelWindow {
                     delegate: Item {
                         id: rootItemDelegate
                         width: menuList.width
-                        height: trayMenuWindow.itemHeight
+                        height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(9) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
+                        visible: height > 0
                         readonly property bool pressed: itemMouse.pressed
                         readonly property bool lensWanted: itemMouse.containsMouse
 
@@ -498,7 +499,7 @@ PanelWindow {
                         Rectangle {
                             anchors.fill: parent
                             visible: !rootItemDelegate.isSep
-                            radius: trayMenuWindow.s(4)
+                            radius: trayMenuWindow.s(8)
                             color: (rootHoverGlass.active || rootHoverLens.glassActive) ? "transparent" : (itemMouse.containsMouse ? ThemeBackend.surface0 : "transparent")
                             opacity: (modelData && modelData.enabled) ? 1.0 : 0.4
 
@@ -649,7 +650,7 @@ PanelWindow {
                     return 0;
                 }
 
-                property real subMenuRawHeight: (subMenuCount * trayMenuWindow.itemHeight) + trayMenuWindow.s(16)
+                property real subMenuRawHeight: subListView.contentHeight + trayMenuWindow.s(16)
                 property real subMenuTargetHeight: Math.max(trayMenuWindow.s(40), subMenuRawHeight)
                 property real subMenuHeight: subMenuTargetHeight
 
@@ -782,7 +783,8 @@ PanelWindow {
                         delegate: Item {
                             id: subItemDelegate
                             width: subListView.width
-                            height: trayMenuWindow.itemHeight
+                            height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(9) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
+                            visible: height > 0
                             readonly property bool pressed: subItemMouse.pressed
                             readonly property bool lensWanted: subItemMouse.containsMouse
 
