@@ -28,6 +28,13 @@ Singleton {
     readonly property color plateActive: Qt.tint(plate, Qt.rgba(text.r, text.g, text.b, 0.12))
     readonly property color cardHover: Qt.tint(card, Qt.rgba(text.r, text.g, text.b, 0.08))
 
+    // shared look tokens for the other bar widgets
+    readonly property color plateGlass: Qt.rgba(1, 1, 1, 0.06)          // a chip or box on a dark scrim
+    readonly property color hoverFill: Qt.rgba(text.r, text.g, text.b, 0.08)
+    readonly property color pressFill: Qt.rgba(text.r, text.g, text.b, 0.12)
+    readonly property color focusRing: Qt.rgba(accent.r, accent.g, accent.b, 0.9)
+    readonly property int focusRingWidth: 2
+
     readonly property int fontSize: 13
     readonly property int iconSize: 18
     // The strip and floating bar styles draw one plate behind everything, so the capsules themselves go flat.

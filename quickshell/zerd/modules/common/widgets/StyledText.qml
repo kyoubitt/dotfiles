@@ -10,14 +10,14 @@ Text {
     renderType: Text.NativeRendering
     verticalAlignment: Text.AlignVCenter
     property bool shouldUseNumberFont: /^\d+$/.test(root.text)
-    property var defaultFont: shouldUseNumberFont ? Appearance.font.family.numbers : Appearance.font.family.main
+    property var defaultFont: Appearance.font.family.expressive
     
     font {
-        hintingPreference: Font.PreferDefaultHinting
+        hintingPreference: pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+        weight: pixelSize === 13 ? Font.Normal : Font.Medium
         family: defaultFont
         pixelSize: Appearance?.font.pixelSize.small ?? 15
-        variableAxes: shouldUseNumberFont ? ({}) : Appearance.font.variableAxes.main
-    }
+            }
     color: Appearance?.m3colors.m3onBackground ?? "black"
     linkColor: Appearance?.m3colors.m3primary
 
