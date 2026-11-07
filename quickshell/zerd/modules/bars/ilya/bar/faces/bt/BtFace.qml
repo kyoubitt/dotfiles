@@ -242,9 +242,9 @@ BarFaceBase {
                 renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
-                text: root.btIcon
-                font.family: ThemeBackend.iconFont
-                font.pixelSize: s(root.isCompact ? 14 : 15)
+                text: ThemeBackend.symOf(root.btIcon) || root.btIcon
+                font.family: ThemeBackend.symOf(root.btIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                font.pixelSize: ThemeBackend.symOf(root.btIcon) !== "" ? 18 : 15
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.blue, 1.15) : (root.isBtOn ? ThemeBackend.blue : ThemeBackend.subtext0)
