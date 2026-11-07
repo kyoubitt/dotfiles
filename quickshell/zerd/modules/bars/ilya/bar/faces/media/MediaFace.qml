@@ -213,6 +213,18 @@ Item {
                                     tintAmount: 0.3
                                 }
 
+                                Image {
+                                    id: appIcon
+                                    anchors.centerIn: parent
+                                    width: 18; height: 18
+                                    sourceSize: Qt.size(36, 36)
+                                    fillMode: Image.PreserveAspectFit
+                                    readonly property string entry: String(root.player?.desktopEntry || root.player?.identity || "").toLowerCase().replace(/\s+/g, "-")
+                                    readonly property string path: entry !== "" ? Quickshell.iconPath(entry, true) : ""
+                                    source: path !== "" ? (path.startsWith("/") ? "file://" + path : path) : ""
+                                    visible: source !== "" && status === Image.Ready
+                                }
+
                                 Text {
                                     renderType: Text.NativeRendering
                                     anchors.centerIn: parent
@@ -220,7 +232,7 @@ Item {
                                     font.family: ThemeBackend.iconFont
                                     font.pixelSize: barWindow ? barWindow.cs(root.isCompact ? 13 : 14) : (root.isCompact ? 13 : 14)
                                     color: root.isCompact ? ThemeBackend.text : ThemeBackend.subtext0
-                                    visible: !root.hasArt
+                                    visible: !root.hasArt && !appIcon.visible
                                 }
 
                                 BoundedImage {
@@ -266,16 +278,35 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: root.colWidth
 
-                                MarqueeText {
+                                Item {
                                     width: parent.width
-                                    text: root.isPreview ? I18n.t("guide.bar.media.preview.title", "Song title") : (isMediaActive ? (player ? player.trackTitle : "") : "Nothing playing")
-                                    color: ThemeBackend.text
-                                    font.family: ThemeBackend.fontFamily
-                                    font.weight: Font.DemiBold
-                                    font.pixelSize: 12
-                                    marqueeSpacing: barWindow ? barWindow.cs(40) : 40
-                                    speed: 30
-                                    active: Boolean(root.visible && (!barWindow || barWindow.visible) && (!module || module.moduleActive) && root.isPlaying)
+                                    height: 16
+                                    // resting: the start of the title, elided; hovered: it scrolls from the left edge
+                                    Text {
+                                        renderType: Text.NativeRendering
+                                        anchors.fill: parent
+                                        visible: !mediaInfoMouse.containsMouse
+                                        text: root.isPreview ? I18n.t("guide.bar.media.preview.title", "Song title") : (isMediaActive ? (player ? player.trackTitle : "") : "Nothing playing")
+                                        elide: Text.ElideRight
+                                        verticalAlignment: Text.AlignVCenter
+                                        color: ThemeBackend.text
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: 12
+                                    }
+                                    MarqueeText {
+                                        anchors.fill: parent
+                                        visible: mediaInfoMouse.containsMouse
+                                        text: root.isPreview ? I18n.t("guide.bar.media.preview.title", "Song title") : (isMediaActive ? (player ? player.trackTitle : "") : "Nothing playing")
+                                        color: ThemeBackend.text
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: 12
+                                        marqueeSpacing: 40
+                                        pauseDuration: 600
+                                        speed: 30
+                                        active: mediaInfoMouse.containsMouse
+                                    }
                                 }
 
                                 Text {

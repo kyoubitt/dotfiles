@@ -71,7 +71,9 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: classicFaceRoot.parsedTime.hours + ":" + classicFaceRoot.parsedTime.minutes + ((widget && widget.hovered && classicFaceRoot.parsedTime.hasSeconds) ? ":" + classicFaceRoot.parsedTime.seconds : "")
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 17
+                font.pixelSize: 20
+                lineHeightMode: Text.FixedHeight
+                lineHeight: 21
                 font.weight: Font.DemiBold
                 color: ThemeBackend.text
             }
@@ -83,8 +85,10 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: DateTime.format("ddd, d MMM", DateTime.now)
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 10
-                font.weight: Font.Medium
+                font.pixelSize: 11
+                lineHeightMode: Text.FixedHeight
+                lineHeight: 12
+                font.weight: Font.Normal
                 color: ThemeBackend.subtext0
             }
         }

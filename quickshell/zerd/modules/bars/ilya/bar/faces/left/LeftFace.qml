@@ -140,9 +140,9 @@ Item {
 
     readonly property int menuCount: menuItems ? menuItems.length : 0
     readonly property real buttonsLength: menuCount > 0
-        ? menuCount * (isVertical ? s(isCompact ? 28 : 30) : s(isCompact ? 30 : 32)) + (menuCount - 1) * s(isCompact ? 2 : 4)
+        ? menuCount * 28 + (menuCount - 1) * 4
         : 0
-    property real targetLength: (!module || module.moduleActive) ? (buttonsLength + s(isCompact ? 6 : 8)) : 0
+    property real targetLength: (!module || module.moduleActive) ? (buttonsLength + 12) : 0
 
     implicitWidth: isVertical ? (parent ? parent.width : 0) : targetLength
     implicitHeight: isVertical ? targetLength : (parent ? parent.height : 0)
@@ -155,8 +155,8 @@ Item {
         property int glyphYOffset: 0
         signal clicked()
 
-        width: root.isVertical ? root.s(root.isCompact ? 28 : 30) : root.s(root.isCompact ? 30 : 32)
-        height: root.s(root.isCompact ? 28 : 30)
+        width: 28
+        height: 28
 
         opacity: (root.isVertical || root.showLayout) ? 1.0 : 0.0
         transform: Translate {
@@ -168,10 +168,10 @@ Item {
         IconButton {
             anchors.fill: parent
             visible: !root.iconOnly
-            cornerRadius: Math.max(0, ThemeBackend.borderRadius - root.s(2))
+            cornerRadius: 14
             buttonIcon: menuBtn.glyph
             iconOffsetY: menuBtn.glyphYOffset
-            iconFontSize: root.s(root.isCompact ? 14 : 15)
+            iconFontSize: 16
             accentColor: menuBtn.active ? menuBtn.activeColor : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             bgOpacity: menuBtn.active ? 1.0 : root.barOpacity
             textColor: menuBtn.active ? ThemeBackend.crust : (isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2))
@@ -207,11 +207,11 @@ Item {
         vertical: root.isVertical
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter
-        spacing: root.s(root.isCompact ? 2 : 4)
+        spacing: 4
         anchors.centerIn: root.isVertical ? parent : undefined
         anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
         anchors.left: root.isVertical ? undefined : parent.left
-        anchors.leftMargin: root.isVertical ? 0 : root.s(root.isCompact ? 3 : 4)
+        anchors.leftMargin: root.isVertical ? 0 : 6
 
         Repeater {
             id: menuRepeater
@@ -222,7 +222,7 @@ Item {
                 required property string modelData
                 readonly property string itemId: modelData
                 glyph: BarModuleRegistry.menuItemIcon(itemId)
-                glyphYOffset: itemId === "nightlight" ? -1 : 0
+                glyphYOffset: 0
                 active: itemId === "nightlight" ? root.nightLightActive : (itemId === "caffeine" ? root.caffeineActive : false)
                 activeColor: itemId === "caffeine" ? Qt.tint(ThemeBackend.blue, "#5c3016") : ThemeBackend.blue
                 onClicked: {
