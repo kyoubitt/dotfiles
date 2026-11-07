@@ -582,6 +582,7 @@ PanelWindow {
                                 visible: !itemIcon.visible && !rootItemDelegate.isSep
                                 text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                                 color: (rootItemDelegate.danger && itemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
                             }
@@ -611,6 +612,7 @@ PanelWindow {
                                 text: trayMenuWindow.rootExpandRight ? "chevron_right" : "chevron_left"
                                 color: ThemeBackend.subtext0
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                             }
 
@@ -891,6 +893,7 @@ PanelWindow {
                                 visible: !subItemIcon.visible && !subItemDelegate.isSep
                                 text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
                                 font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                 font.pixelSize: trayMenuWindow.s(18)
                                 color: (subItemDelegate.danger && subItemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
                             }
@@ -920,6 +923,7 @@ PanelWindow {
                                     text: submenuPopout.expandRight ? "chevron_right" : "chevron_left"
                                     color: ThemeBackend.subtext0
                                     font.family: "Material Symbols Rounded"
+                                    font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                     font.pixelSize: trayMenuWindow.s(18)
                                 }
 

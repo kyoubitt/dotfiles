@@ -163,6 +163,7 @@ RowLayout {
                 renderType: Text.NativeRendering
                 anchors.centerIn: parent
                 font.family: ThemeBackend.symbolFont
+                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                 font.pixelSize: 20
                 color: isDisabled ? ThemeBackend.surface2 : (actionMa.containsMouse ? ThemeBackend.text : ThemeBackend.subtext0)
                 text: icon
@@ -182,6 +183,7 @@ RowLayout {
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: (actionCapsule.height / 2) - (height / 2) - (actionCapsule.height - parent.height)
                     font.family: ThemeBackend.symbolFont
+                    font.variableAxes: ({ "wght": 600, "opsz": 20 })
                     font.pixelSize: 20
                     color: capsuleGlass.active ? ThemeBackend.text : ThemeBackend.crust
                     text: icon

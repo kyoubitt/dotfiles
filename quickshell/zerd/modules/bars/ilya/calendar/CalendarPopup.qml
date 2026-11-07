@@ -104,6 +104,7 @@ Item {
             anchors.centerIn: parent
             text: arrow.glyph
             font.family: ThemeBackend.symbolFont
+            font.variableAxes: ({ "wght": 600, "opsz": 20 })
             font.pixelSize: 18
             color: ThemeBackend.text
         }
@@ -300,6 +301,7 @@ Item {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         text: root.sym(modelData.icon) || modelData.icon
                                         font.family: root.sym(modelData.icon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                                        font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                         font.pixelSize: 20
                                         color: modelData.hex
                                     }
@@ -364,6 +366,7 @@ Item {
                             renderType: Text.NativeRendering
                             text: root.day ? (root.sym(root.day.icon) || root.day.icon) : ""
                             font.family: root.day && root.sym(root.day.icon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                            font.variableAxes: ({ "wght": 600, "opsz": 20 })
                             font.pixelSize: 56
                             color: root.day ? root.day.hex : ThemeBackend.text
                         }
@@ -431,6 +434,7 @@ Item {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         text: modelData.s
                                         font.family: ThemeBackend.symbolFont
+                                        font.variableAxes: ({ "wght": 600, "opsz": 20 })
                                         font.pixelSize: 18
                                         color: ThemeBackend.subtext0
                                     }

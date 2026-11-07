@@ -75,6 +75,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 readonly property string sym: ThemeBackend.symOf(qaBtn.iconText)
                 font.family: sym !== "" ? ThemeBackend.symbolFont : (qaBtn.customFontFamily !== "" ? qaBtn.customFontFamily : ThemeBackend.iconFont)
+                font.variableAxes: ({ "wght": 600, "opsz": 20 })
                 font.pixelSize: sym !== "" ? 18 : (qaBtn.customFontSize > 0 ? qaBtn.customFontSize : 18)
                 font.weight: qaBtn.customFontSize > 0 ? Font.Bold : Font.Normal
                 color: (qaBtn.isActive && !qaGlass.active) ? ThemeBackend.crust : ((qaBtn.isActive || qaMa.containsMouse) ? ThemeBackend.text : ThemeBackend.subtext0)
