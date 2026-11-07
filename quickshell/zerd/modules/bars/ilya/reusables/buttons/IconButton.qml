@@ -91,9 +91,9 @@ Item {
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: root.iconOffsetX
             anchors.verticalCenterOffset: root.iconOffsetY
-            text: root.buttonIcon
-            font.family: root.iconFont
-            font.pixelSize: root.iconFontSize
+            text: ThemeBackend.symOf(root.buttonIcon) || root.buttonIcon
+            font.family: ThemeBackend.symOf(root.buttonIcon) !== "" ? ThemeBackend.symbolFont : root.iconFont
+            font.pixelSize: ThemeBackend.symOf(root.buttonIcon) !== "" ? 18 : root.iconFontSize
             color: root.displayTextColor
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

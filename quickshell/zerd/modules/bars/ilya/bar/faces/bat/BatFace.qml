@@ -213,9 +213,9 @@ BarFaceBase {
                 renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
-                text: root.batIcon
-                font.family: ThemeBackend.iconFont
-                font.pixelSize: root.isVertical ? (root.isDesktop ? s(root.isCompact ? 15 : 16) : s(root.isCompact ? 13 : 14)) : s(root.isCompact ? 14 : 15)
+                text: ThemeBackend.symOf(root.batIcon) || root.batIcon
+                font.family: ThemeBackend.symOf(root.batIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                font.pixelSize: ThemeBackend.symOf(root.batIcon) !== "" ? 18 : 15
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 color: textMouseArea.containsMouse ? Qt.lighter(root.batDynamicColor, 1.15) : root.batDynamicColor

@@ -12,8 +12,6 @@ singleton TimerState 1.0 TimerState.qml
 singleton RecordingState 1.0 RecordingState.qml
 singleton FloatingController 1.0 FloatingController.qml
 singleton OsdController 1.0 OsdController.qml
-singleton KeyboardLayout 1.0 KeyboardLayout.qml
-singleton NiriState 1.0 NiriState.qml
 singleton CurrentFocus 1.0 CurrentFocus.qml
 singleton SysData 1.0 SysData.qml
 singleton Weather 1.0 Weather.qml
@@ -22,8 +20,6 @@ singleton Config 1.0 Config.qml
 singleton ThemeBackend 1.0 ThemeBackend.qml
 singleton Popups 1.0 Popups.qml
 HoverMenuController 1.0 HoverMenuController.qml
-singleton MangoState 1.0 MangoState.qml
-singleton SwayState 1.0 SwayState.qml
 singleton Sounds 1.0 Sounds.qml
 singleton SideMusicController 1.0 SideMusicController.qml
 singleton Location 1.0 Location.qml

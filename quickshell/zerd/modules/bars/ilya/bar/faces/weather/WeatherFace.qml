@@ -72,9 +72,9 @@ Item {
 
             Text {
                 renderType: Text.NativeRendering
-                text: root.weatherIcon
-                font.family: ThemeBackend.iconFont
-                font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 16 : 18) : (root.isCompact ? 16 : 18)) : (barWindow ? barWindow.cs(root.isCompact ? 18 : 20) : (root.isCompact ? 18 : 20))
+                text: ThemeBackend.symOf(root.weatherIcon) || root.weatherIcon
+                font.family: ThemeBackend.symOf(root.weatherIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
+                font.pixelSize: ThemeBackend.symOf(root.weatherIcon) !== "" ? 18 : 15
                 color: Qt.tint(root.weatherHex, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, root.isCompact ? 0.3 : 0.4))
                 visible: !root.isWeatherLoading && root.weatherIcon !== ""
             }

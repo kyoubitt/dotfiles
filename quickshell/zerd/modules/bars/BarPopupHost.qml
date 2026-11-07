@@ -26,6 +26,8 @@ Scope {
         function open(kind: string): void { BarState.sidebar = ""; GlobalStates.barPopup = { kind: kind, x: 960 } }
         function close(): void { GlobalStates.barPopup = null }
 
+    }
+
     // The copied popups: file, size, and which screen corner they sit in (his WindowRegistry layout).
     readonly property var copied: ({
         volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 },
@@ -39,7 +41,6 @@ Scope {
         clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
-    }
     function close(): void { GlobalStates.barPopup = null }
 
     // Created once and shown/hidden, so a click never waits for the window to be built.
@@ -75,7 +76,7 @@ Scope {
                     id: pl
                     anchors.fill: parent
                     active: false
-                    onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
+                    onLoaded: { console.log("POPUPDBG loaded", root.popup?.kind, pl.source, "size", item.width, item.height) /* TEMP DEBUG */; item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
             Connections {

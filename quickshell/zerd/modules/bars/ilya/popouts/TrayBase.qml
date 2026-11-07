@@ -608,7 +608,7 @@ PanelWindow {
                             Text {
                                 renderType: Text.NativeRendering
                                 anchors.left: parent.left
-                                anchors.leftMargin: trayMenuWindow.s(8)
+                                anchors.leftMargin: trayMenuWindow.s(36)
                                 anchors.right: arrowText.visible ? arrowText.left : parent.right
                                 anchors.rightMargin: trayMenuWindow.s(8)
                                 anchors.verticalCenter: parent.verticalCenter
@@ -942,7 +942,7 @@ PanelWindow {
                                 Text {
                                     renderType: Text.NativeRendering
                                     anchors.left: parent.left
-                                    anchors.leftMargin: trayMenuWindow.s(8)
+                                    anchors.leftMargin: trayMenuWindow.s(36)
                                     anchors.right: subArrowText.visible ? subArrowText.left : parent.right
                                     anchors.rightMargin: trayMenuWindow.s(8)
                                     anchors.verticalCenter: parent.verticalCenter

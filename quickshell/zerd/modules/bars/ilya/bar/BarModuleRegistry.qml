@@ -41,35 +41,6 @@ QtObject {
                 }
             }
         },
-        "workspaces": {
-            name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.name", "Workspaces") : "Workspaces",
-            icon: "󰮯",
-            defaultVariant: "pills",
-            face: "faces/workspaces/WorkspacesFace.qml",
-            variants: {
-                "pills": {
-                    id: "pills",
-                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.pills", "Pills") : "Pills",
-                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.pills", "Minimal pill indicators") : "Minimal pill indicators",
-                    icon: "󰮯",
-                    face: "faces/workspaces/PillsFace.qml"
-                },
-                "numbers": {
-                    id: "numbers",
-                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.numbers", "Numbers") : "Numbers",
-                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.numbers", "Numbered indices") : "Numbered indices",
-                    icon: "󰎦",
-                    face: "faces/workspaces/NumbersFace.qml"
-                },
-                "pacman": {
-                    id: "pacman",
-                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.pacman", "Pacman") : "Pacman",
-                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.pacman", "Animated arcade dots") : "Animated arcade dots",
-                    icon: "󰮯",
-                    face: "faces/workspaces/PacmanFace.qml"
-                }
-            }
-        },
         "focus": {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.focus", "Focus") : "Focus",
             icon: "󰈈",
@@ -141,27 +112,11 @@ QtObject {
             defaultVariant: "default",
             face: "faces/sysmon/SysMonFace.qml"
         },
-        "kb": {
-            name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.keyboard", "Keyboard") : "Keyboard",
-            icon: "󰌌",
-            defaultVariant: "button",
-            face: "faces/kb/KbFace.qml",
-            variants: {
-                "button": {
-                    id: "button",
-                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.kb.style.name.button", "Button") : "Button",
-                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.kb.style.button", "Interactive button pill with background") : "Interactive button pill with background",
-                    icon: "󰌌",
-                    face: "faces/kb/KbFace.qml"
-                },
-                "text": {
-                    id: "text",
-                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.kb.style.name.text", "Text") : "Text",
-                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.kb.style.text", "Clean text and icon without background") : "Clean text and icon without background",
-                    icon: "󰌌",
-                    face: "faces/kb/KbFace.qml"
-                }
-            }
+        "dnd": {
+            name: "Notifications",
+            icon: "󰂚",
+            defaultVariant: "default",
+            face: "faces/dnd/DndFace.qml"
         },
         "wifi": {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.network", "Network") : "Network",
@@ -271,10 +226,6 @@ QtObject {
         let norm = normalizeId(moduleId);
         let bs = (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) ? Config.rawSettings.bar : {};
 
-        if (norm === "workspaces") {
-            if (bs.workspacesStyle) return bs.workspacesStyle;
-            return "pills";
-        }
         if (norm === "timedate") {
             if (bs.timeStyle) return bs.timeStyle;
             return "classic";
@@ -293,10 +244,6 @@ QtObject {
         }
         if (norm === "vol") {
             if (bs.volStyle) return bs.volStyle;
-            return "button";
-        }
-        if (norm === "kb") {
-            if (bs.kbStyle) return bs.kbStyle;
             return "button";
         }
         if (norm === "bat") {

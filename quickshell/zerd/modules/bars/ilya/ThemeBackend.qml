@@ -44,6 +44,54 @@ QtObject {
     readonly property color green: "#a6e3a1"
     readonly property color teal: "#94e2d5"
 
+
+    // Nerd Font glyph -> Material Symbol, so every bar icon is one font at one size
+    readonly property var symbols: ({
+        "F0079": "battery_full",
+        "F0083": "battery_alert",
+        "F0084": "battery_charging_full",
+        "F0425": "power_settings_new",
+        "F140B": "battery_alert",
+        "F00AF": "bluetooth",
+        "F00B2": "bluetooth_disabled",
+        "F037D": "headphones",
+        "F0388": "music_note",
+        "F03E4": "pause",
+        "F040A": "play_arrow",
+        "F04AD": "skip_next",
+        "F04AE": "skip_previous",
+        "F057E": "volume_up",
+        "F0580": "volume_down",
+        "F0581": "volume_off",
+        "F091F": "network_wifi_1_bar",
+        "F0922": "network_wifi_2_bar",
+        "F0925": "network_wifi_3_bar",
+        "F0928": "wifi",
+        "F092E": "wifi_off",
+        "F092F": "wifi_off",
+        "F0200": "lan",
+        "F0493": "settings",
+        "F0349": "search",
+        "F0594": "bedtime",
+        "F0176": "coffee",
+        "F049D": "shuffle",
+        "F0599": "sunny",
+        "F0595": "partly_cloudy_day",
+        "F0590": "cloud",
+        "F0591": "foggy",
+        "F0593": "thunderstorm",
+        "F0598": "weather_snowy",
+        "F067F": "weather_mix",
+        "F0597": "rainy"
+    })
+    function symOf(glyph) {
+        const g = String(glyph || "");
+        if (g.length === 0) return "";
+        const cp = g.codePointAt(0);
+        return cp >= 0xF0000 ? (root.symbols[cp.toString(16).toUpperCase()] ?? "") : "";
+    }
+    readonly property string symbolFont: "Material Symbols Rounded"
+
     function faded(col) {
         return Qt.alpha(col, root.elementOpacity);
     }

@@ -76,6 +76,9 @@ Item {
         }
     }
 
+    // TEMP DEBUG
+    Timer { interval: 5000; running: true; repeat: false; onTriggered: console.log("TRAYDBG items", SystemTray.items.values.length, "repeater", trayRepeater.count, "showLayout", root.showLayout, "targetLength", root.targetLength, "moduleActive", module ? module.moduleActive : "-") }
+
     Timer {
         running: (!module || module.moduleActive) && barWindow && barWindow.isStartupReady && barWindow.isDataReady
         interval: 100
