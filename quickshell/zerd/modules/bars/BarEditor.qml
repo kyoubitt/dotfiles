@@ -160,9 +160,10 @@ Scope {
             readonly property real areaH: barH + 2 * margin
             readonly property real cw: Math.min(1180, win.width - 96)
             readonly property real cx: Math.round((win.width - cw) / 2)
-            readonly property real hiddenY: areaH + 70
-            readonly property real hiddenH: 118
-            readonly property real optY: hiddenY + hiddenH + 16
+            // The boxes under the bar stack from here; the tool strip floats at the bottom.
+            readonly property real stackY: areaH + 20
+            readonly property real dockBottom: 40
+            readonly property real dockH: 56
 
             function repOf(key: string): Repeater { return key === "left" ? leftRep : key === "middle" ? midRep : key === "right" ? rightRep : hiddenRep }
             function rowOf(key: string): Item { return key === "left" ? leftRow : key === "middle" ? midRow : key === "right" ? rightRow : hiddenFlow }
@@ -207,7 +208,9 @@ Scope {
                 if (win.dragId === "") return
                 win.px = x; win.py = y
                 let zone
-                if (y > win.hiddenY - 12 && y < win.hiddenY + win.hiddenH + 12 && x > win.cx && x < win.cx + win.cw) zone = "hidden"
+                // the Hidden box sits wherever its content put it, so ask where it is now
+                const hp = hiddenPlate.mapToItem(canvas, 0, 0)
+                if (y > hp.y - 12 && y < hp.y + hiddenPlate.height + 12 && x > hp.x && x < hp.x + hiddenPlate.width) zone = "hidden"
                 else if (y < win.areaH + 40) {
                     // the bar: the nearest of its three groups
                     let best = 1e9
@@ -265,7 +268,8 @@ Scope {
                     } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Y) { root.redo(); event.accepted = true }
                 }
 
-                Rectangle { anchors.fill: parent; color: Qt.rgba(0.02, 0.01, 0.015, 0.82) }
+                // Nearly opaque: whatever window is behind never shows through the editor.
+                Rectangle { anchors.fill: parent; color: Qt.rgba(0.02, 0.01, 0.015, 0.94) }
 
                 // ---- the bar as it will look; its blocks are the real ones, only the clicks are the editor's
                 Item {
@@ -325,51 +329,143 @@ Scope {
                         x: modelData === "left" ? win.sidePad : modelData === "right" ? win.width - width - win.sidePad : Math.round((win.width - width) / 2)
                         y: Math.round((win.areaH - height) / 2)
                         width: 120; height: win.barH - 6; radius: height / 2
-                        color: "transparent"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.3)
-                        BarText { anchors.centerIn: parent; text: modelData; font.pixelSize: 11; color: Qt.rgba(1, 1, 1, 0.53) }
+                        color: "transparent"; border.width: 1; border.color: BarStyle.subtext
+                        BarText { anchors.centerIn: parent; text: modelData; font.pixelSize: 11; color: BarStyle.subtext }
                     }
                 }
 
-                BarText { x: win.cx; y: win.areaH + 22; text: "Drag a block in the bar above to move it, or down into Hidden to take it off the bar."; font.pixelSize: 13; color: Qt.rgba(1, 1, 1, 0.73) }
-
-                // hidden blocks
-                Rectangle {
-                    x: win.cx; y: win.hiddenY; width: win.cw; height: win.hiddenH; radius: BarStyle.radiusLarge + 2
-                    readonly property bool target: win.dragId !== "" && win.drop.zone === "hidden"
-                    color: target ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.14) : Qt.rgba(1, 1, 1, 0.06)
-                    border.width: target ? 2 : 1; border.color: target ? BarStyle.accent : BarStyle.edge
-                    BarText { x: 20; y: 14; text: "Hidden"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
-                    BarText { visible: root.layout.hidden.length === 0; anchors.centerIn: parent; text: "Nothing hidden. Drop a block here to hide it"; font.pixelSize: 12; color: Qt.rgba(1, 1, 1, 0.4) }
-                    Flow {
-                        id: hiddenFlow
-                        x: 14; y: 42; width: parent.width - 28; spacing: 8
-                        Repeater {
-                            id: hiddenRep
-                            model: root.layout.hidden
-                            delegate: Rectangle {
-                                id: hc
-                                required property string modelData
-                                height: 38; radius: 19; width: hcRow.implicitWidth + 30
-                                color: BarStyle.surface; border.width: 1; border.color: BarStyle.edge
-                                TapHandler { onTapped: root.toggleBlock(hc.modelData) }
-                                Row {
-                                    id: hcRow
-                                    anchors.centerIn: parent; spacing: 8
-                                    BarIcon { anchors.verticalCenter: parent.verticalCenter; name: root.info[hc.modelData]?.i ?? "widgets"; size: 18; color: BarStyle.accent }
-                                    BarText { anchors.verticalCenter: parent.verticalCenter; text: root.info[hc.modelData]?.t ?? hc.modelData; font.pixelSize: 13 }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // the drag surface: over the bar and the hidden box, under the switches and the toolbar
+                // the drag surface: the whole screen, under the boxes and the tool strip (their own controls come first)
                 MouseArea {
-                    x: 0; y: 0; width: parent.width; height: win.optY - 8
+                    anchors.fill: parent
                     cursorShape: win.dragId !== "" ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                     onPressed: m => win.beginDrag(m.x, m.y)
                     onPositionChanged: m => win.moveDrag(m.x, m.y)
                     onReleased: win.endDrag()
+                }
+
+                // ---- the boxes under the bar, stacked: each one is as tall as what is in it, so a wrapped row of
+                // blocks pushes the next box down instead of running into it. Scrolls on a screen too short for all.
+                Flickable {
+                    id: stackView
+                    x: win.cx; y: win.stackY
+                    width: win.cw
+                    height: Math.max(0, canvas.height - win.stackY - win.dockH - win.dockBottom - 24)
+                    contentWidth: width
+                    contentHeight: stack.height
+                    clip: true
+                    interactive: contentHeight > height && win.dragId === ""
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickableDirection: Flickable.VerticalFlick
+
+                    Column {
+                        id: stack
+                        width: stackView.width
+                        spacing: 12
+
+                        BarText {
+                            width: parent.width
+                            text: "Drag a block in the bar above to move it, or down into Hidden to take it off the bar."
+                            font.pixelSize: 13; color: BarStyle.subtext
+                            wrapMode: Text.Wrap
+                        }
+
+                        // hidden blocks: a drop zone; a tap puts a block back, a drag moves it onto the bar
+                        EditorPlate {
+                            id: hiddenPlate
+                            width: parent.width
+                            title: "Hidden"; icon: "visibility_off"
+                            hint: root.layout.hidden.length > 0 ? "tap a block to put it back" : ""
+                            target: win.dragId !== "" && win.drop.zone === "hidden"
+                            swallow: false
+                            Item {
+                                width: parent.width
+                                height: Math.max(34, hiddenFlow.implicitHeight)
+                                BarText { visible: root.layout.hidden.length === 0; anchors.verticalCenter: parent.verticalCenter; text: "Nothing hidden. Drop a block here to hide it"; font.pixelSize: 12; color: BarStyle.subtext }
+                                Flow {
+                                    id: hiddenFlow
+                                    width: parent.width; spacing: 8
+                                    Repeater {
+                                        id: hiddenRep
+                                        model: root.layout.hidden
+                                        delegate: Rectangle {
+                                            id: hc
+                                            required property string modelData
+                                            height: 34; radius: 17; width: hcRow.implicitWidth + 26
+                                            color: hcHover.hovered ? BarStyle.cardHover : BarStyle.card
+                                            border.width: 1; border.color: BarStyle.edge
+                                            Behavior on color { ColorAnimation { duration: 120 } }
+                                            HoverHandler { id: hcHover; cursorShape: Qt.PointingHandCursor }
+                                            TapHandler { onTapped: root.toggleBlock(hc.modelData) }
+                                            Row {
+                                                id: hcRow
+                                                x: 12; height: parent.height; spacing: 7
+                                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: root.info[hc.modelData]?.i ?? "widgets"; size: 16; color: BarStyle.accent }
+                                                BarText { anchors.verticalCenter: parent.verticalCenter; text: root.info[hc.modelData]?.t ?? hc.modelData; font.pixelSize: 13 }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // one click on a block: off the bar (into Hidden) or back where it belongs
+                        EditorPlate {
+                            width: parent.width
+                            title: "On the bar"; icon: "visibility"
+                            hint: "click a block to hide or show it"
+                            Flow {
+                                width: parent.width; spacing: 8
+                                Repeater {
+                                    model: Object.keys(root.info)
+                                    delegate: EditorChip {
+                                        id: bb
+                                        required property string modelData
+                                        readonly property bool off: root.isHidden(modelData)
+                                        toggled: !off
+                                        icon: off ? "visibility_off" : "visibility"
+                                        label: root.info[modelData].t
+                                        onTapped: root.toggleBlock(bb.modelData)
+                                    }
+                                }
+                            }
+                        }
+
+                        // the small things inside a block
+                        EditorPlate {
+                            width: parent.width
+                            title: "Inside the blocks"; icon: "tune"
+                            Column {
+                                width: parent.width
+                                spacing: 10
+                                Repeater {
+                                    model: ["System and weather", "Status icons"]
+                                    delegate: Row {
+                                        id: swRow
+                                        required property string modelData
+                                        width: parent.width
+                                        spacing: 12
+                                        BarText { width: 150; height: 34; verticalAlignment: Text.AlignVCenter; text: swRow.modelData; font.pixelSize: 12; color: BarStyle.subtext }
+                                        Flow {
+                                            width: swRow.width - 150 - swRow.spacing
+                                            spacing: 8
+                                            Repeater {
+                                                model: root.switches.filter(d => d.g === swRow.modelData)
+                                                delegate: EditorChip {
+                                                    id: sw
+                                                    required property var modelData
+                                                    readonly property bool on: root.top[modelData.k] ?? true
+                                                    toggled: on
+                                                    icon: on ? "check" : "close"
+                                                    label: modelData.t
+                                                    onTapped: { root.pushUndo(); root.setSwitch(sw.modelData.k, !sw.on) }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // where it will land
@@ -388,65 +484,13 @@ Scope {
                     scale: 1.05; z: 20
                 }
 
-                // switches for the small things inside a block
-                Rectangle {
-                    x: win.cx; y: win.optY; width: win.cw; height: 200; radius: BarStyle.radiusLarge + 2
-                    color: Qt.rgba(1, 1, 1, 0.06); border.width: 1; border.color: BarStyle.edge
-                    BarText { x: 20; y: 14; text: "On the bar (click to hide or show)"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
-                    Flow {
-                        x: 14; y: 38; width: parent.width - 28; spacing: 8
-                        Repeater {
-                            model: Object.keys(root.info)
-                            delegate: BarButton {
-                                id: bb
-                                required property string modelData
-                                readonly property bool off: root.isHidden(modelData)
-                                height: 34; radius: 17; width: bbText.implicitWidth + 54
-                                tone: "outlined"; toggled: !off
-                                BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: bb.off ? "visibility_off" : "visibility"; size: 16; color: bb.ink }
-                                BarText { id: bbText; x: 34; anchors.verticalCenter: parent.verticalCenter; text: root.info[bb.modelData].t; font.pixelSize: 13; color: bb.ink }
-                                onTapped: root.toggleBlock(bb.modelData)
-                            }
-                        }
-                    }
-                    BarText { x: 20; y: 92; text: "Inside the blocks"; font.pixelSize: 12; font.weight: Font.DemiBold; color: Qt.rgba(1, 1, 1, 0.67) }
-                    Column {
-                        x: 14; y: 114; spacing: 10
-                        Repeater {
-                            model: ["System and weather", "Status icons"]
-                            delegate: Row {
-                                id: swRow
-                                required property string modelData
-                                spacing: 8
-                                BarText { width: 150; height: 32; verticalAlignment: Text.AlignVCenter; leftPadding: 6; text: swRow.modelData; font.pixelSize: 12; color: Qt.rgba(1, 1, 1, 0.8) }
-                                Repeater {
-                                    model: root.switches.filter(d => d.g === swRow.modelData)
-                                    delegate: BarButton {
-                                        id: sw
-                                        required property var modelData
-                                        readonly property bool on: root.top[modelData.k] ?? true
-                                        height: 34; radius: 17; width: swText.implicitWidth + 54
-                                        tone: "outlined"; toggled: on
-                                        BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: sw.on ? "check" : "close"; size: 16; color: sw.ink }
-                                        BarText { id: swText; x: 34; anchors.verticalCenter: parent.verticalCenter; text: sw.modelData.t; font.pixelSize: 13; color: sw.ink }
-                                        onTapped: { root.pushUndo(); root.setSwitch(sw.modelData.k, !sw.on) }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // undo, redo, reset, done
-                Rectangle {
+                EditorPlate {
+                    pill: true; fitWidth: true
                     anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom; anchors.bottomMargin: 40
-                    width: tools.implicitWidth + 28; height: 56; radius: 28
-                    color: BarStyle.surface; border.width: 1; border.color: BarStyle.border
-                    MouseArea { anchors.fill: parent }
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: win.dockBottom
                     Row {
-                        id: tools
-                        anchors.centerIn: parent; spacing: 8
+                        spacing: 8
                         Repeater {
                             model: [
                                 { t: "Undo", i: "undo", a: "undo", off: root.undoStack.length === 0 },
@@ -454,20 +498,15 @@ Scope {
                                 { t: "Reset to default", i: "restart_alt", a: "reset", off: false },
                                 { t: "Done", i: "", a: "done", off: false }
                             ]
-                            delegate: BarButton {
+                            delegate: EditorChip {
                                 id: btn
                                 required property var modelData
-                                readonly property bool primary: modelData.a === "done"
-                                height: 40; width: btnRow.implicitWidth + 30; radius: 20
-                                tone: primary ? "filled" : "outlined"
-                                opacity: modelData.off ? 0.4 : 1
-                                enabled: !modelData.off
-                                Row {
-                                    id: btnRow
-                                    anchors.centerIn: parent; spacing: 6
-                                    BarIcon { visible: btn.modelData.i.length > 0; anchors.verticalCenter: parent.verticalCenter; name: btn.modelData.i; size: 18; color: btn.ink }
-                                    BarText { anchors.verticalCenter: parent.verticalCenter; text: btn.modelData.t; font.pixelSize: 13; font.weight: btn.primary ? Font.DemiBold : Font.Medium; color: btn.ink }
-                                }
+                                size: 40
+                                primary: modelData.a === "done"
+                                icon: modelData.i
+                                iconSize: 18
+                                label: modelData.t
+                                dim: modelData.off
                                 onTapped: {
                                     if (modelData.a === "undo") root.undo()
                                     else if (modelData.a === "redo") root.redo()

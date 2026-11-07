@@ -1849,11 +1849,11 @@ PanelWindow {
                                                     return "image://icon/" + baseName;
                                                 }
 
-                                                sourceSize: Qt.size(64, 64)
+                                                sourceSize: Qt.size(Math.round(width), Math.round(height))
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true
                                                 smooth: true
-                                                mipmap: true
+                                                mipmap: false
 
                                                 onStatusChanged: {
                                                     if (status === Image.Error) {
@@ -1872,6 +1872,8 @@ PanelWindow {
                                                     if (model.isCommand) return "󰆍";
                                                     return "󰵆";
                                                 }
+                                                renderType: Text.NativeRendering
+                                                font.hintingPreference: Font.PreferDefaultHinting
                                                 font.family: ThemeBackend.fontFamily
                                                 font.pixelSize: launcherWindow.s(16)
                                                 color: delegateRoot.isSelected ? ThemeBackend.mauve : ThemeBackend.subtext0
@@ -1892,6 +1894,8 @@ PanelWindow {
                                             id: delegateText
                                             Layout.fillWidth: true
                                             text: model.name
+                                            renderType: Text.NativeRendering
+                                            font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
                                             font.pixelSize: launcherWindow.s(12)
                                             font.weight: delegateRoot.isSelected ? Font.Bold : Font.Medium
@@ -1908,6 +1912,8 @@ PanelWindow {
                                             Layout.fillWidth: true
                                             visible: model.description !== undefined && model.description !== null && model.description !== ""
                                             text: model.description || ""
+                                            renderType: Text.NativeRendering
+                                            font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
                                             font.pixelSize: launcherWindow.s(10)
                                             font.weight: Font.Normal
@@ -2105,6 +2111,8 @@ PanelWindow {
                                         Layout.fillWidth: true
                                         Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                         text: model.name
+                                        renderType: Text.NativeRendering
+                                        font.hintingPreference: Font.PreferFullHinting
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: launcherWindow.s(9)
                                         font.weight: emojiDelegateRoot.isSelected ? Font.Bold : Font.Normal
@@ -2156,6 +2164,8 @@ PanelWindow {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: typeof I18n !== "undefined" ? I18n.t("applauncher.no_emojis_found", "No emojis found") : "No emojis found"
+                                renderType: Text.NativeRendering
+                                font.hintingPreference: Font.PreferFullHinting
                                 font.family: ThemeBackend.fontFamily
                                 font.pixelSize: launcherWindow.s(12)
                                 color: ThemeBackend.subtext0

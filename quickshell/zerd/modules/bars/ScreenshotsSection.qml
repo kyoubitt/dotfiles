@@ -33,7 +33,7 @@ Column {
                 required property string modelData
                 width: Math.floor((root.width - 16) / 3); height: Math.round(width * 0.64)
                 radius: 12
-                color: BarStyle.plate
+                color: BarStyle.cardHigh
                 Image {
                     anchors.fill: parent
                     source: "file://" + cell.modelData
