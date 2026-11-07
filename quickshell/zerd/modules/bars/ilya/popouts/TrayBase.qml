@@ -558,7 +558,6 @@ PanelWindow {
                         }
 
                         readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
-                        readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
                             property bool isSep: modelData ? modelData.isSeparator : false
                         property bool hasChildren: modelData ? (modelData.hasChildren === true) : false
 
@@ -893,7 +892,6 @@ PanelWindow {
                             }
 
                             readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
-                        readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
                             property bool isSep: modelData ? modelData.isSeparator : false
                             property bool hasChildren: modelData ? (modelData.hasChildren === true) : false
 
