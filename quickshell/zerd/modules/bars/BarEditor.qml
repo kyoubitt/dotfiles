@@ -37,30 +37,30 @@ Scope {
     function win0(): var { return variants.instances[0] ?? null }
 
     readonly property var info: ({
+        left: { t: "Menu", i: "menu" },
         workspaces: { t: "Workspaces", i: "grid_view" },
-        info: { t: "System and weather", i: "monitoring" },
-        focus: { t: "Window title", i: "web_asset" },
-        island: { t: "Clock and music", i: "schedule" },
-        tools: { t: "Tools", i: "build" },
-        keyboard: { t: "Keyboard layout", i: "keyboard" },
-        status: { t: "Status icons", i: "tune" },
+        media: { t: "Music", i: "music_note" },
+        timedate: { t: "Clock and date", i: "schedule" },
+        sysmon: { t: "System monitor", i: "monitoring" },
+        weather: { t: "Weather", i: "partly_cloudy_day" },
+        info: { t: "Indicators", i: "notifications" },
         tray: { t: "Tray", i: "apps" },
-        end: { t: "Power", i: "power_settings_new" }
+        kb: { t: "Keyboard layout", i: "keyboard" },
+        wifi: { t: "Network", i: "wifi" },
+        bt: { t: "Bluetooth", i: "bluetooth" },
+        vol: { t: "Volume", i: "volume_up" },
+        bat: { t: "Battery", i: "battery_full" },
+        focus: { t: "Window title", i: "web_asset" }
     })
     // Out of the box. Reset puts exactly this back.
     readonly property var defaults: ({
-        left: ["workspaces", "info"], middle: ["island"],
-        right: ["tools", "keyboard", "status", "tray", "end"], hidden: ["focus"]
+        left: ["left", "workspaces", "media"], middle: ["timedate"],
+        right: ["sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat"], hidden: ["focus"]
     })
     readonly property var zones: [
         { key: "left", title: "Left" }, { key: "middle", title: "Middle" }, { key: "right", title: "Right" }, { key: "hidden", title: "Hidden" }
     ]
-    readonly property var switches: [
-        { k: "showCpu", t: "CPU", g: "System and weather" }, { k: "showMemory", t: "Memory", g: "System and weather" },
-        { k: "showGpu", t: "GPU", g: "System and weather" }, { k: "showWeather", t: "Weather", g: "System and weather" },
-        { k: "showVolume", t: "Volume", g: "Status icons" }, { k: "showNetwork", t: "Network", g: "Status icons" },
-        { k: "showBluetooth", t: "Bluetooth", g: "Status icons" }, { k: "showBattery", t: "Battery", g: "Status icons" }, { k: "showBell", t: "Notifications", g: "Status icons" }
-    ]
+    readonly property var switches: []
 
     readonly property var top: Config.options?.bars?.top ?? ({})
     // What is in each box now; a block that is in none of them goes back to its default box.
@@ -306,18 +306,15 @@ Scope {
                         Repeater { id: rightRep; model: root.layout.right; delegate: chooser }
                     }
                 }
-                DelegateChooser {
+                Component {
                     id: chooser
-                    role: "modelData"
-                    DelegateChoice { roleValue: "workspaces"; WorkspacesFace { thickness: win.barH; output: win.modelData.name } }
-                    DelegateChoice { roleValue: "info"; InfoFace { thickness: win.barH } }
-                    DelegateChoice { roleValue: "focus"; FocusFace { thickness: win.barH; maxTextWidth: 300 } }
-                    DelegateChoice { roleValue: "island"; IslandFace { thickness: win.barH; maxTextWidth: 160 } }
-                    DelegateChoice { roleValue: "tools"; ToolsFace { thickness: win.barH } }
-                    DelegateChoice { roleValue: "keyboard"; KeyboardFace { thickness: win.barH } }
-                    DelegateChoice { roleValue: "status"; StatusFace { thickness: win.barH; parentScreen: win.screen } }
-                    DelegateChoice { roleValue: "tray"; TrayFace { thickness: win.barH; window: win } }
-                    DelegateChoice { roleValue: "end"; EndFace { thickness: win.barH } }
+                    BarBlock {
+                        required property string modelData
+                        blockId: modelData
+                        barHeight: win.barH
+                        screen: win.modelData
+                        flat: win.look !== "pills"
+                    }
                 }
                 // empty groups still get a place to drop
                 Repeater {
@@ -432,6 +429,7 @@ Scope {
 
                         // the small things inside a block
                         EditorPlate {
+                            visible: root.switches.length > 0
                             width: parent.width
                             title: "Inside the blocks"; icon: "tune"
                             Column {

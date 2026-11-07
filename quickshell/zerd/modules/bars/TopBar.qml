@@ -9,6 +9,7 @@ import qs
 import qs.modules.common
 import qs.services
 import qs.modules.notificationPopup as INiRNotif
+import "ilya/popouts"
 
 // Floating top bar in three groups: workspaces and the focused window on the
 // left, the clock/media island in the middle, the status capsule, tray and
@@ -24,6 +25,7 @@ Scope {
     property bool forced: false
 
     BarPopupHost {}
+    TrayBase {}
     Sidebars {}
     Osd {}
     AppSwitcher {}
@@ -105,33 +107,27 @@ Scope {
             readonly property bool shown: !autoHide || pointerOn || top.forced || GlobalStates.barPopup !== null || (BarState.sidebar !== "" && !win.mixedFullscreen)
 
             // Which block sits where (Settings > Bar). Order inside a side is fixed, so moving a block never scrambles the rest.
-            readonly property var defaultSide: ({ workspaces: "left", info: "left", focus: "hidden", island: "middle", tools: "right", keyboard: "right", status: "right", tray: "right", end: "right" })
+            readonly property var defaultSide: ({ left: "left", workspaces: "left", media: "left", timedate: "middle", sysmon: "right", weather: "right", info: "right", tray: "right", kb: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden" })
+            readonly property var blockOrder: ["left", "workspaces", "media", "timedate", "sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat", "focus"]
             readonly property var layout: {
                 const l = { left: [].concat(options.layoutLeft ?? []), middle: [].concat(options.layoutMiddle ?? []), right: [].concat(options.layoutRight ?? []), hidden: [].concat(options.layoutHidden ?? []) }
                 const seen = {}
                 for (const k in l) for (const id of l[k]) seen[id] = true
-                for (const id of win.blockOrder) if (!seen[id]) l[win.defaultSide[id] === "hidden" ? "hidden" : win.defaultSide[id]].push(id)
+                for (const id of win.blockOrder) if (!seen[id]) l[win.defaultSide[id]].push(id)
                 return l
             }
             function blocks(where: string): var {
-                return win.layout[where].filter(id => win.blockOrder.includes(id)).map(id => ({ type: id }))
+                return win.layout[where].filter(id => win.blockOrder.includes(id))
             }
-            // The free gap between the left and right groups. The middle group sits in it, and the song title
-            // shrinks to what is left, so the groups never run into each other.
-            readonly property real freeGap: right.x - (left.x + left.width) - 24
-            readonly property real titleMax: win.layout.middle.includes("island") ? Math.max(0, Math.min(220, win.freeGap - 300)) : 220
-            readonly property var blockOrder: ["workspaces", "info", "focus", "island", "tools", "keyboard", "status", "tray", "end"]
-            readonly property DelegateChooser chooser: DelegateChooser {
-                role: "type"
-                DelegateChoice { roleValue: "workspaces"; WorkspacesFace { thickness: win.barHeight; output: win.modelData.name } }
-                DelegateChoice { roleValue: "info"; InfoFace { thickness: win.barHeight } }
-                DelegateChoice { roleValue: "focus"; FocusFace { thickness: win.barHeight; maxTextWidth: 300 } }
-                DelegateChoice { roleValue: "island"; IslandFace { thickness: win.barHeight; maxTextWidth: win.titleMax } }
-                DelegateChoice { roleValue: "tools"; ToolsFace { thickness: win.barHeight } }
-                DelegateChoice { roleValue: "keyboard"; KeyboardFace { thickness: win.barHeight } }
-                DelegateChoice { roleValue: "status"; StatusFace { thickness: win.barHeight; parentScreen: win.screen } }
-                DelegateChoice { roleValue: "tray"; TrayFace { thickness: win.barHeight; window: win } }
-                DelegateChoice { roleValue: "end"; EndFace { thickness: win.barHeight } }
+            readonly property Component chooser: Component {
+                BarBlock {
+                    required property string modelData
+                    blockId: modelData
+                    barHeight: win.barHeight
+                    screen: win.modelData
+                    revealed: win.shown
+                    flat: win.look !== "pills"
+                }
             }
 
             screen: modelData

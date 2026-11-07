@@ -25,6 +25,20 @@ Scope {
         target: "barpopup"
         function open(kind: string): void { BarState.sidebar = ""; GlobalStates.barPopup = { kind: kind, x: 960 } }
         function close(): void { GlobalStates.barPopup = null }
+
+    // The copied popups: file, size, and which screen corner they sit in (his WindowRegistry layout).
+    readonly property var copied: ({
+        volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 },
+        calendar: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
+        weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
+        network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
+        media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
+        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
+    })
+    readonly property var spec: copied[popup?.kind ?? ""] ?? null
     }
     function close(): void { GlobalStates.barPopup = null }
 
@@ -32,7 +46,7 @@ Scope {
     Item {
         PanelWindow {
             id: win
-            visible: root.popup !== null && !NiriService.inOverview && !GlobalStates.screenLocked
+            visible: (root.popup !== null || pl.active) && !NiriService.inOverview && !GlobalStates.screenLocked
             screen: Quickshell.screens.find(s => s.name === GlobalStates.focusedScreen?.name) ?? Quickshell.screens[0]
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
@@ -46,8 +60,41 @@ Scope {
             MouseArea { id: backdrop; y: 50; width: parent.width; height: parent.height - 50; onClicked: root.close() }
             Item { focus: true; Keys.onEscapePressed: root.close() }
 
+            Shortcut { sequence: "Escape"; enabled: root.popup !== null; onActivated: root.close() }
+
+            // A popup copied from serpantinum: created when asked for, plays its own enter and leave.
+            Item {
+                id: stage
+                visible: pl.active
+                width: root.spec?.w ?? 0
+                height: root.spec?.full ? win.height : (root.spec?.h ?? 0)
+                x: root.spec?.at === "left" ? (root.spec?.m ?? 0) : root.spec?.at === "center" ? Math.round((win.width - width) / 2) : win.width - width - (root.spec?.m ?? 0)
+                y: root.spec?.full ? 0 : 52
+                MouseArea { anchors.fill: parent }
+                Loader {
+                    id: pl
+                    anchors.fill: parent
+                    active: false
+                    onLoaded: item.visible = true
+                }
+            }
+            Connections {
+                target: root
+                function onPopupChanged() {
+                    if (root.popup && root.spec) {
+                        if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }
+                        pl.active = true
+                        if (pl.item) pl.item.visible = true
+                    } else if (pl.active) {
+                        if (pl.item && pl.item.startExit) pl.item.startExit(() => { if (!root.popup || !root.spec) pl.active = false })
+                        else pl.active = false
+                    }
+                }
+            }
+
             Rectangle {
                 id: card
+                visible: root.spec === null
                 readonly property int pad: 14
                 width: Math.max(220, body.implicitWidth + 2 * pad)
                 height: body.implicitHeight + 2 * pad
@@ -72,23 +119,10 @@ Scope {
                     x: card.pad; y: card.pad
                     property real implicitWidth: item?.implicitWidth ?? 0
                     property real implicitHeight: item?.implicitHeight ?? 0
-                    sourceComponent: ({
-                        calendar: calendar, clock: clock, weather: weather, tray: tray, media: media, volume: volume, brightness: brightness,
-                        network: network, battery: battery, system: system, notifications: notifications, clipboard: clipboard, traymenu: traymenu
-                    })[root.popup?.kind ?? ""] ?? null
+                    sourceComponent: ({ notifications: notifications, clipboard: clipboard })[root.popup?.kind ?? ""] ?? null
                 }
             }
 
-            Component { id: calendar; CalendarCard {} }
-            Component { id: clock; ClockPopup {} }
-            Component { id: media; MediaPopup {} }
-            Component { id: weather; WeatherPopup {} }
-            Component { id: tray; TrayPopup { window: win } }
-            Component { id: traymenu; TrayMenu { itemId: root.popup?.item ?? "" } }
-            Component { id: volume; VolumePopup {} }
-            Component { id: brightness; BrightnessPopup { screen: win.screen } }
-            Component { id: network; NetworkPopup {} }
-            Component { id: battery; BatteryPopup {} }
             Component { id: notifications; NotificationsPopup {} }
             Component {
                 id: clipboard
@@ -118,7 +152,6 @@ Scope {
                     }
                 }
             }
-            Component { id: system; SystemPopup {} }
         }
     }
 }

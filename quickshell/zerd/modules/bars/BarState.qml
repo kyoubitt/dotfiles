@@ -17,7 +17,7 @@ Singleton {
     // so a label can stay claimed by the last item clicked. Any such change drops the label.
     onSidebarChanged: tipOwner = ""
     readonly property var openPopup: GlobalStates.barPopup
-    onOpenPopupChanged: tipOwner = ""
+    onOpenPopupChanged: { tipOwner = ""; if (openPopup) sidebar = "" }
     // Opened by a click or a command: stays until dismissed. Opened by the screen edge: leaves with the pointer.
     property bool pinned: true
     // How far the open side panel has grown (0 to 1); sections arrive in turn as it passes their share.

@@ -135,11 +135,6 @@ ShellRoot {
         active: Config.ready && (Config.options?.bars?.top?.enable ?? false)
         component: BarsModule.TopBar {}
     }
-    LazyLoader {
-        active: Config.ready && (Config.options?.bars?.side?.enable ?? false)
-        component: BarsModule.SideBar {}
-    }
-
     // Floating dock (modules/iris/dock), off until iris.dock.enable is set.
     // Independent of the side dock above.
     LazyLoader {
