@@ -128,25 +128,23 @@ Scope {
                 Behavior on y { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
                 Behavior on width { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
 
-                BarIcon { x: 20; anchors.verticalCenter: parent.verticalCenter; name: root.icon; size: 24; fill: 1; color: BarStyle.accent }
+                BarIcon { x: 18; anchors.verticalCenter: parent.verticalCenter; name: root.icon; size: 24; fill: 1; color: BarStyle.accent }
 
-                // Bar and percentage.
+                // Name and value on one line, the bar under them (the layout of his OsdValueIndicator).
                 Item {
                     visible: pill.bar
                     x: 58; anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - 58 - 78; height: 8
-                    Rectangle { anchors.fill: parent; radius: 4; color: BarStyle.border }
+                    width: parent.width - 58 - 22; height: 34
+                    BarText { anchors { left: parent.left; top: parent.top } text: root.label; font.pixelSize: 12; color: BarStyle.subtext }
+                    BarText { anchors { right: parent.right; top: parent.top } text: root.text; font.pixelSize: 12; font.weight: Font.DemiBold }
+                    Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom; }
+                        height: 6; radius: 3; color: BarStyle.border }
                     Rectangle {
-                        width: Math.max(8, parent.width * Math.max(0, Math.min(1, root.value))); height: parent.height; radius: 4
+                        anchors.bottom: parent.bottom
+                        width: Math.max(6, parent.width * Math.max(0, Math.min(1, root.value))); height: 6; radius: 3
                         color: BarStyle.accent
                         Behavior on width { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
                     }
-                }
-                BarText {
-                    visible: pill.bar
-                    anchors { right: parent.right; rightMargin: 20; verticalCenter: parent.verticalCenter }
-                    text: root.text
-                    font.weight: Font.DemiBold
                 }
 
                 // Text only.
