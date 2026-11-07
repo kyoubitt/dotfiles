@@ -11,7 +11,7 @@ Column {
 
     spacing: 10
 
-    readonly property var defaults: ["calendar", "notifications", "weather", "timer", "calculator", "converter", "translate", "notes"]
+    readonly property var defaults: ["calendar", "notifications", "weather", "timer", "calculator", "converter", "notes"]
     readonly property var stored: Config.options?.bars?.sidebars?.rightOrder ?? []
     readonly property var order: root.stored.filter(n => root.defaults.includes(n)).concat(root.defaults.filter(n => !root.stored.includes(n)))
     readonly property var hidden: Config.options?.bars?.sidebars?.rightHidden ?? []
@@ -85,15 +85,6 @@ Column {
         }
     }
     Component {
-        id: cTranslate
-        AccordionSection {
-            width: root.width
-            name: "translate"; icon: "translate"; title: "Translate"
-            summary: "Type or paste, pick the languages"
-            Translator { width: parent.width; height: 420 }
-        }
-    }
-    Component {
         id: cNotes
         AccordionSection {
             width: root.width
@@ -103,7 +94,7 @@ Column {
         }
     }
     readonly property var comps: ({
-        calendar: cCalendar, notifications: cNotifications, weather: cWeather, timer: cTimer, calculator: cCalculator, converter: cConverter, translate: cTranslate, notes: cNotes
+        calendar: cCalendar, notifications: cNotifications, weather: cWeather, timer: cTimer, calculator: cCalculator, converter: cConverter, notes: cNotes
     })
 
     SectionStack {

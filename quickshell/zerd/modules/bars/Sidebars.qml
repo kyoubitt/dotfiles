@@ -18,7 +18,7 @@ Scope {
 
     readonly property var options: Config.options?.bars?.sidebars ?? ({})
     // The movable sections under the fixed part of the quick panel, in the saved order.
-    readonly property var leftNames: ["translate", "clipboard", "shots", "notifrules", "battery", "tasks"]
+    readonly property var leftNames: ["clipboard", "shots", "notifrules", "battery", "tasks"]
     readonly property var leftOrder: {
         const saved = Config.options?.bars?.sidebars?.leftOrder ?? []
         return saved.filter(n => root.leftNames.includes(n)).concat(root.leftNames.filter(n => !saved.includes(n)))
@@ -125,10 +125,12 @@ Scope {
             property string displaySide: ""
             property bool on: false
             property bool swapping: false
+            // the panel shows its sections, or the translator as a tab of its own; closing resets it
+            property string tab: "main"
             readonly property bool onRight: displaySide === "right"
             // How far the panel has grown out of its screen edge (iNiR's morph): 0 = a thin band on the edge, 1 = open.
             property real progress: 0
-            onOnChanged: progress = on ? 1 : 0
+            onOnChanged: { progress = on ? 1 : 0; if (!on) tab = "main" }
             Behavior on progress { NumberAnimation { id: slide; duration: win.on ? 150 : 100; easing.type: win.on ? Easing.OutCubic : Easing.InCubic } }
             Binding { target: BarState; property: "panelEnter"; value: win.progress }
             onWantedChanged: {
@@ -220,11 +222,43 @@ Scope {
                     PanelButton { icon: "close"; size: 36; tip: "Close"; onTapped: BarState.closeAll() }
                 }
 
-                Flickable {
-                    id: flick
+                // tabs under the header: the panel, and the translator as its own page
+                Row {
+                    id: tabs
+                    x: 20; y: 62
+                    spacing: 6
+                    Repeater {
+                        model: [{ k: "main", t: win.onRight ? "Sections" : "Quick panel", i: win.onRight ? "widgets" : "toggle_on" }, { k: "translate", t: "Translate", i: "translate" }]
+                        delegate: BarButton {
+                            id: tb
+                            required property var modelData
+                            tone: "tonal"; toggled: win.tab === modelData.k
+                            height: 32; radius: 16; width: tbRow.implicitWidth + 28
+                            onTapped: win.tab = modelData.k
+                            Row {
+                                id: tbRow
+                                anchors.centerIn: parent; spacing: 6
+                                BarIcon { anchors.verticalCenter: parent.verticalCenter; name: tb.modelData.i; size: 16; fill: tb.toggled ? 1 : 0; color: tb.ink }
+                                BarText { anchors.verticalCenter: parent.verticalCenter; text: tb.modelData.t; font.pixelSize: 12; font.weight: Font.DemiBold; color: tb.ink }
+                            }
+                        }
+                    }
+                }
+
+                Translator {
+                    visible: win.tab === "translate"
                     anchors.fill: parent
                     anchors.margins: 20
-                    anchors.topMargin: 76
+                    anchors.topMargin: 108
+                    anchors.bottomMargin: 16
+                }
+
+                Flickable {
+                    id: flick
+                    visible: win.tab === "main"
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    anchors.topMargin: 108
                     anchors.bottomMargin: 8
                     contentHeight: column.implicitHeight + 24
                     clip: true
@@ -283,15 +317,6 @@ Scope {
                                 }
                             }
                             Component {
-                                id: cTranslate
-                                AccordionSection {
-                                    width: stack.width
-                                    name: "translate"; icon: "translate"; title: "Translate"
-                                    summary: "Type or paste, pick the languages"
-                                    Translator { width: parent.width; height: 420 }
-                                }
-                            }
-                            Component {
                                 id: cTasks
                                 AccordionSection {
                                     width: stack.width
@@ -306,7 +331,7 @@ Scope {
                                 names: root.leftNames
                                 order: root.leftOrder
                                 hidden: Battery.available ? [] : ["battery"]
-                                comps: ({ translate: cTranslate, clipboard: cClipboard, shots: cShots, notifrules: cRules, battery: cBattery, tasks: cTasks })
+                                comps: ({ clipboard: cClipboard, shots: cShots, notifrules: cRules, battery: cBattery, tasks: cTasks })
                                 onMoved: list => Config.options.bars.sidebars.leftOrder = list
                             }
                         }
