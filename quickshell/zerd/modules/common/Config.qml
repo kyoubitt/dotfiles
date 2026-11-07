@@ -286,6 +286,11 @@ Singleton {
                     property string position: "bottom"
                     property int timeout: 1500
                 }
+                property JsonObject sounds: JsonObject {
+                    // The shell's own sounds (read by the sound service); Settings has the switch and the volume.
+                    property bool enable: true
+                    property real volume: 0.5
+                }
                 property JsonObject clipboard: JsonObject {
                     // Text snippets kept at the top of the clipboard palette.
                     property list<string> pinned: []
