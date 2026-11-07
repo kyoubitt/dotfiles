@@ -37,9 +37,9 @@ Scope {
         weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
         network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
         media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
-        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
-        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
-        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
@@ -70,7 +70,7 @@ Scope {
                 id: stage
                 visible: pl.active
                 width: root.spec?.w ?? 0
-                height: root.spec?.full ? win.height : (root.spec?.h ?? 0)
+                height: root.spec?.fit ? Math.min(win.height - 64, Math.max(300, pl.item?.contentHeight ?? 640)) : (root.spec?.full ? win.height : (root.spec?.h ?? 0))
                 x: root.spec?.at === "left" ? (root.spec?.m ?? 0) : root.spec?.at === "center" ? Math.round((win.width - width) / 2) : win.width - width - (root.spec?.m ?? 0)
                 y: root.spec?.full ? 0 : 52
                 MouseArea { anchors.fill: parent }

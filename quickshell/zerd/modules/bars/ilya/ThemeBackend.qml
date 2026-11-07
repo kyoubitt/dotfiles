@@ -75,6 +75,7 @@ QtObject {
         "F0493": "settings",
         "F0349": "search",
         "F0594": "bedtime",
+        "F001D": "flight",
         "F0176": "coffee",
         "F049D": "shuffle",
         "F0599": "sunny",

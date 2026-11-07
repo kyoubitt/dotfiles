@@ -21,6 +21,7 @@ Item {
 
         property bool isActive: false
         property string iconText: ""
+        property string label: ""
         property color activeColor: ThemeBackend.blue
         readonly property bool isHovered: qaMa.containsMouse
         property real customFontSize: 0
@@ -66,17 +67,29 @@ Item {
             NumberAnimation { duration: 250; easing.type: Easing.OutQuart }
         }
 
-        Text {
-            renderType: Text.NativeRendering
+        Column {
             anchors.centerIn: parent
-            font.family: qaBtn.customFontFamily !== "" ? qaBtn.customFontFamily : ThemeBackend.iconFont
-            font.pixelSize: qaBtn.customFontSize > 0 ? qaBtn.customFontSize : view.panel.s(18)
-            font.weight: qaBtn.customFontSize > 0 ? Font.Bold : Font.Normal
-            color: (qaBtn.isActive && !qaGlass.active) ? ThemeBackend.crust : ((qaBtn.isActive || qaMa.containsMouse) ? ThemeBackend.text : ThemeBackend.subtext0)
-            text: qaBtn.iconText
-            Behavior on color {
-                enabled: view.panel.visible
-                ColorAnimation { duration: 150 }
+            spacing: 3
+            Text {
+                renderType: Text.NativeRendering
+                anchors.horizontalCenter: parent.horizontalCenter
+                readonly property string sym: ThemeBackend.symOf(qaBtn.iconText)
+                font.family: sym !== "" ? ThemeBackend.symbolFont : (qaBtn.customFontFamily !== "" ? qaBtn.customFontFamily : ThemeBackend.iconFont)
+                font.pixelSize: sym !== "" ? 18 : (qaBtn.customFontSize > 0 ? qaBtn.customFontSize : 18)
+                font.weight: qaBtn.customFontSize > 0 ? Font.Bold : Font.Normal
+                color: (qaBtn.isActive && !qaGlass.active) ? ThemeBackend.crust : ((qaBtn.isActive || qaMa.containsMouse) ? ThemeBackend.text : ThemeBackend.subtext0)
+                text: sym !== "" ? sym : qaBtn.iconText
+                Behavior on color { enabled: view.panel.visible; ColorAnimation { duration: 150 } }
+            }
+            Text {
+                renderType: Text.NativeRendering
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: qaBtn.label !== ""
+                text: qaBtn.label
+                font.family: ThemeBackend.fontFamily
+                font.pixelSize: 11
+                font.weight: Font.Medium
+                color: (qaBtn.isActive && !qaGlass.active) ? ThemeBackend.crust : ThemeBackend.subtext0
             }
         }
 
@@ -108,7 +121,8 @@ Item {
         QuickActionBtn {
             id: nightLightBtn
             iconText: "󰖔"
-            activeColor: ThemeBackend.peach
+            label: "Night"
+            activeColor: ThemeBackend.blue
 
             function updateState() {
                 let anyEnabled = false;
@@ -187,7 +201,7 @@ Item {
 
         QuickActionBtn {
             id: coffeeBtn
-            activeColor: Qt.tint(ThemeBackend.peach, "#5c3016")
+            activeColor: ThemeBackend.blue
 
             property double coffeeStartTime: 0
             property double coffeeEndTime: 0
@@ -206,6 +220,7 @@ Item {
             }
 
             iconText: (isActive && isHovered) ? remainingTimeString : "󰅶"
+            label: "Awake"
             customFontSize: (isActive && isHovered) ? view.panel.s(12) : 0
             customFontFamily: (isActive && isHovered) ? ThemeBackend.fontFamily : ""
 
@@ -320,6 +335,7 @@ Item {
 
         QuickActionBtn {
             iconText: isActive ? "󰤨" : "󰤮"
+            label: "Wi-Fi"
             activeColor: ThemeBackend.blue
             isActive: view.panel.wifiRadioEnabled
             onLeftClicked: {
@@ -334,7 +350,8 @@ Item {
 
         QuickActionBtn {
             iconText: isActive ? "󰂯" : "󰂲"
-            activeColor: ThemeBackend.mauve
+            label: "Bluetooth"
+            activeColor: ThemeBackend.blue
             isActive: view.panel.btRadioEnabled
             onLeftClicked: {
                 Sounds.playSfx("system/quick_click.wav");
@@ -350,7 +367,8 @@ Item {
 
         QuickActionBtn {
             iconText: "󰀝"
-            activeColor: ThemeBackend.red
+            label: "Flight"
+            activeColor: ThemeBackend.blue
             isActive: !view.panel.wifiRadioEnabled && !view.panel.btRadioEnabled
             onLeftClicked: {
                 Sounds.playSfx("system/quick_click.wav");

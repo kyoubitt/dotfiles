@@ -19,9 +19,9 @@ RowLayout {
     Repeater {
         model: ListModel {
             ListElement { cmd: "lock"; icon: ""; weight: 1.0 }
-            ListElement { cmd: "sleep"; icon: "ᶻ 𝗓 𝗓"; weight: 1.0 }
-            ListElement { cmd: "hibernate"; icon: "󰤄"; weight: 1.5 }
-            ListElement { cmd: "reboot"; icon: "󰑓"; weight: 2.5 }
+            ListElement { cmd: "sleep"; icon: "bedtime"; weight: 1.0 }
+            ListElement { cmd: "hibernate"; icon: "nightlight"; weight: 1.5 }
+            ListElement { cmd: "reboot"; icon: "restart_alt"; weight: 2.5 }
             ListElement { cmd: "poweroff"; icon: ""; weight: 3.5 }
         }
 
@@ -162,8 +162,8 @@ RowLayout {
             Text {
                 renderType: Text.NativeRendering
                 anchors.centerIn: parent
-                font.family: ThemeBackend.iconFont
-                font.pixelSize: panel.s(19)
+                font.family: ThemeBackend.symbolFont
+                font.pixelSize: 20
                 color: isDisabled ? ThemeBackend.surface2 : (actionMa.containsMouse ? ThemeBackend.text : ThemeBackend.subtext0)
                 text: icon
                 Behavior on color {
@@ -181,8 +181,8 @@ RowLayout {
                     renderType: Text.NativeRendering
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: (actionCapsule.height / 2) - (height / 2) - (actionCapsule.height - parent.height)
-                    font.family: ThemeBackend.iconFont
-                    font.pixelSize: panel.s(19)
+                    font.family: ThemeBackend.symbolFont
+                    font.pixelSize: 20
                     color: capsuleGlass.active ? ThemeBackend.text : ThemeBackend.crust
                     text: icon
                 }
