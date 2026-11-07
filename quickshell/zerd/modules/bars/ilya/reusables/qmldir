@@ -15,3 +15,6 @@ Draggable 1.0 behavior/Draggable.qml
 LiquidFill 1.0 display/LiquidFill.qml
 Switch 1.0 inputs/Switch.qml
 FillButton 1.0 buttons/FillButton.qml
+FlipIcon 1.0 display/FlipIcon.qml
+ImageBox 1.0 display/ImageBox.qml
+NotificationBox 1.0 display/NotificationBox.qml

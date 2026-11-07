@@ -33,6 +33,9 @@ Scope {
         weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
         network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
         media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
+        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
+        brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 500, h: 0, at: "right", m: 0, full: true },
         clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
@@ -64,9 +67,9 @@ Scope {
                 id: stage
                 visible: pl.active
                 width: root.spec?.w ?? 0
-                height: root.spec?.h ?? 0
+                height: root.spec?.full ? win.height : (root.spec?.h ?? 0)
                 x: root.spec?.at === "left" ? (root.spec?.m ?? 0) : root.spec?.at === "center" ? Math.round((win.width - width) / 2) : win.width - width - (root.spec?.m ?? 0)
-                y: 52
+                y: root.spec?.full ? 0 : 52
                 MouseArea { anchors.fill: parent }
                 Loader {
                     id: pl
@@ -116,23 +119,10 @@ Scope {
                     x: card.pad; y: card.pad
                     property real implicitWidth: item?.implicitWidth ?? 0
                     property real implicitHeight: item?.implicitHeight ?? 0
-                    sourceComponent: ({
-                        calendar: calendar, clock: clock, weather: weather, tray: tray, media: media, volume: volume, brightness: brightness,
-                        network: network, battery: battery, system: system, notifications: notifications, clipboard: clipboard, traymenu: traymenu
-                    })[root.popup?.kind ?? ""] ?? null
+                    sourceComponent: ({ notifications: notifications, clipboard: clipboard })[root.popup?.kind ?? ""] ?? null
                 }
             }
 
-            Component { id: calendar; CalendarCard {} }
-            Component { id: clock; ClockPopup {} }
-            Component { id: media; MediaPopup {} }
-            Component { id: weather; WeatherPopup {} }
-            Component { id: tray; TrayPopup { window: win } }
-            Component { id: traymenu; TrayMenu { itemId: root.popup?.item ?? "" } }
-            Component { id: volume; VolumePopup {} }
-            Component { id: brightness; BrightnessPopup { screen: win.screen } }
-            Component { id: network; NetworkPopup {} }
-            Component { id: battery; BatteryPopup {} }
             Component { id: notifications; NotificationsPopup {} }
             Component {
                 id: clipboard
@@ -162,7 +152,6 @@ Scope {
                     }
                 }
             }
-            Component { id: system; SystemPopup {} }
         }
     }
 }
