@@ -267,6 +267,7 @@ Singleton {
             // windows stop at the bar; otherwise it floats over them.
             property JsonObject bars: JsonObject {
                 // Notification banners: "rice" is the shell's own, "waffle" the old Waffle ones. `rules` are "app|silent" or "app|mute".
+                property bool liquidGlass: false
                 property JsonObject notifications: JsonObject {
                     property string engine: "inir"
                     property string position: "top"
