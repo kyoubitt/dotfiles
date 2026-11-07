@@ -377,7 +377,7 @@ Scope {
                     // size steps for the selected card
                     Row {
                         visible: frame.selected
-                        anchors { right: parent.right; bottom: parent.top; bottomMargin: 6 }
+                        anchors { left: parent.left; top: parent.bottom; topMargin: 10 }
                         spacing: 4
                         Repeater {
                             model: [{ l: "S", v: 0.8 }, { l: "M", v: 1 }, { l: "L", v: 1.25 }, { l: "XL", v: 1.5 }]

@@ -16,7 +16,7 @@ Column {
     property var stack: []
     readonly property var current: stack.length > 0 ? stack[stack.length - 1] : (item?.menu ?? null)
     spacing: 2
-    implicitWidth: Math.max(210, Math.min(340, widest + 24))
+    width: Math.max(210, Math.min(340, widest + 24))
     property real widest: 0
 
     onItemIdChanged: stack = []
