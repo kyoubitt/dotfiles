@@ -1873,7 +1873,7 @@ PanelWindow {
                                                     return "󰵆";
                                                 }
                                                 renderType: Text.NativeRendering
-                                                font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+                                                font.hintingPreference: Font.PreferDefaultHinting
                                                 font.family: ThemeBackend.fontFamily
                                                 font.pixelSize: launcherWindow.s(16)
                                                 color: delegateRoot.isSelected ? ThemeBackend.mauve : ThemeBackend.subtext0
@@ -1895,7 +1895,7 @@ PanelWindow {
                                             Layout.fillWidth: true
                                             text: model.name
                                             renderType: Text.NativeRendering
-                                            font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+                                            font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
                                             font.pixelSize: launcherWindow.s(12)
                                             font.weight: delegateRoot.isSelected ? Font.Bold : Font.Medium
@@ -1913,7 +1913,7 @@ PanelWindow {
                                             visible: model.description !== undefined && model.description !== null && model.description !== ""
                                             text: model.description || ""
                                             renderType: Text.NativeRendering
-                                            font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+                                            font.hintingPreference: Font.PreferFullHinting
                                             font.family: ThemeBackend.fontFamily
                                             font.pixelSize: launcherWindow.s(10)
                                             font.weight: Font.Normal
@@ -2112,7 +2112,7 @@ PanelWindow {
                                         Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                         text: model.name
                                         renderType: Text.NativeRendering
-                                        font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+                                        font.hintingPreference: Font.PreferFullHinting
                                         font.family: ThemeBackend.fontFamily
                                         font.pixelSize: launcherWindow.s(9)
                                         font.weight: emojiDelegateRoot.isSelected ? Font.Bold : Font.Normal
@@ -2165,7 +2165,7 @@ PanelWindow {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: typeof I18n !== "undefined" ? I18n.t("applauncher.no_emojis_found", "No emojis found") : "No emojis found"
                                 renderType: Text.NativeRendering
-                                font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+                                font.hintingPreference: Font.PreferFullHinting
                                 font.family: ThemeBackend.fontFamily
                                 font.pixelSize: launcherWindow.s(12)
                                 color: ThemeBackend.subtext0

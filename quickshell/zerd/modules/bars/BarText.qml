@@ -7,12 +7,14 @@ import qs.modules.common
 //    Light hinting plus fractional glyph positions is what looked grainy. From 14 px on both look the same, so default.
 //  - At 13 px full hinting rounds the x-height up (+17 % ink), so Regular there keeps the weight Medium had before.
 Text {
+    // read through a plain property: a font binding that reads font.pixelSize itself loops
+    readonly property int px: font.pixelSize
     color: BarStyle.text
     renderType: Text.NativeRendering
     font.family: Appearance.font.family.expressive
     font.pixelSize: BarStyle.fontSize
-    font.weight: font.pixelSize === 13 ? Font.Normal : Font.Medium
-    font.hintingPreference: font.pixelSize <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
+    font.weight: px === 13 ? Font.Normal : Font.Medium
+    font.hintingPreference: px <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
     lineHeightMode: Text.FixedHeight
     lineHeight: 2 * Math.ceil(font.pixelSize * 1.3 / 2)
     verticalAlignment: Text.AlignVCenter
