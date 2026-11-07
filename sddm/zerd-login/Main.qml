@@ -441,7 +441,7 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         layer.enabled: true
         layer.smooth: true
-        layer.effect: MultiEffect { blurEnabled: true; blur: 0.45; blurMax: 40; brightness: -0.04 }
+        layer.effect: MultiEffect { source: wall; anchors.fill: wall; blurEnabled: true; blur: 0.85; blurMax: 40; brightness: -0.04 }
     }
 
     // soft vignette: the edges settle, the middle stays clear
