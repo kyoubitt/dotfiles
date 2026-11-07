@@ -75,7 +75,7 @@ Singleton {
         const days = apiData.days ?? [];
         const nowH = new Date().getHours();
         const steps = [];
-        for (const d of days.slice(0, 2)) {
+        for (const d of days.slice(0, 3)) {
             for (const h of (d.hourly ?? [])) {
                 const hh = Math.floor(parseInt(h.time) / 100);
                 steps.push({ day: d.date, hour: hh, temp: root.useUSCS ? h.tempF : h.tempC, code: h.weatherCode, rain: parseInt(h.chanceofrain ?? 0) });
@@ -84,6 +84,7 @@ Singleton {
         const todayStr = days[0]?.date ?? "";
         const from = steps.findIndex(x => x.day !== todayStr || x.hour + 3 > nowH);
         result.hourly = steps.slice(Math.max(0, from), Math.max(0, from) + 8);
+        result.steps = steps;
         result.daily = days.slice(0, 3).map(d => ({
             date: d.date,
             high: root.useUSCS ? d.maxtempF : d.maxtempC,

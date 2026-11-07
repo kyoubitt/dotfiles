@@ -26,3 +26,4 @@ singleton MangoState 1.0 MangoState.qml
 singleton SwayState 1.0 SwayState.qml
 singleton Sounds 1.0 Sounds.qml
 singleton SideMusicController 1.0 SideMusicController.qml
+singleton Location 1.0 Location.qml

@@ -28,7 +28,10 @@ Scope {
 
     // The copied popups: file, size, and which screen corner they sit in (his WindowRegistry layout).
     readonly property var copied: ({
-        volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 }
+        volume: { src: Qt.resolvedUrl("ilya/volume/VolumePopup.qml"), w: 410, h: 580, at: "right", m: 5 },
+        calendar: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
+        weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 },
+        clock: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1360, h: 510, at: "center", m: 0 }
     })
     readonly property var spec: copied[popup?.kind ?? ""] ?? null
     }
@@ -38,7 +41,7 @@ Scope {
     Item {
         PanelWindow {
             id: win
-            visible: root.popup !== null && !NiriService.inOverview && !GlobalStates.screenLocked
+            visible: (root.popup !== null || pl.active) && !NiriService.inOverview && !GlobalStates.screenLocked
             screen: Quickshell.screens.find(s => s.name === GlobalStates.focusedScreen?.name) ?? Quickshell.screens[0]
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
