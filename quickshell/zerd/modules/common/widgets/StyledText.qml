@@ -3,7 +3,6 @@ import QtQuick
 
 Text {
     id: root
-    readonly property int px: font.pixelSize      // a font binding must not read font.pixelSize itself (binding loop)
     property bool animateChange: false
     property real animationDistanceX: 0
     property real animationDistanceY: 6
@@ -14,8 +13,8 @@ Text {
     property var defaultFont: Appearance.font.family.expressive
     
     font {
-        hintingPreference: root.px <= 13 ? Font.PreferFullHinting : Font.PreferDefaultHinting
-        weight: root.px === 13 ? Font.Normal : Font.Medium
+        hintingPreference: Font.PreferFullHinting
+        weight: Font.Medium
         family: defaultFont
         pixelSize: Appearance?.font.pixelSize.small ?? 15
             }
