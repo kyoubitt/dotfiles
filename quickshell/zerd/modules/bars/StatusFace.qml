@@ -3,69 +3,52 @@ import qs
 import qs.modules.common
 import qs.services
 
-// One capsule for the system status: cpu/memory, brightness, volume,
-// network, battery and do-not-disturb. Each part opens its popup; scrolling
-// over volume or brightness changes them.
+// One capsule for the system status: brightness, volume, network, bluetooth, battery and do-not-disturb. Round
+// buttons sharing a liquid hover; each opens its popup, scrolling over volume or brightness changes them.
 BarPill {
     id: root
+    strip: true
 
     property var parentScreen: null
     Component.onCompleted: ResourceUsage.keepAlive()
     Component.onDestruction: ResourceUsage.releaseKeepAlive()
 
-    component Divider: Rectangle { width: 1; height: 14; color: BarStyle.border }
+    component Divider: Item {
+        width: 7; height: 14
+        Rectangle { anchors.centerIn: parent; width: 1; height: 14; color: BarStyle.border }
+    }
 
-    component Part: Item {
+    component Part: BarCell {
         id: part
         property string popup: ""
         property string icon: ""
         property string label: ""
-        property string tip: ""
         property color tint: BarStyle.text
         property bool lit: false
-        signal tapped()
-        signal scrolled(var event)
-        // 0..1 draws a progress arc around the icon (volume, brightness); -1 none.
+        // 0..1 draws a ring around the icon (volume, brightness); -1 none.
         property real arc: -1
         property real arcShown: arc
-        Behavior on arcShown { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-        implicitWidth: partRow.implicitWidth + (arc >= 0 ? 6 : 0)
-        implicitHeight: 24
-        Canvas {
-            visible: part.arc >= 0
-            x: 0; y: Math.round((part.height - 24) / 2)
-            width: 24; height: 24
-            property real v: part.arcShown
-            property color col: part.lit ? BarStyle.accent : BarStyle.text
-            onVChanged: requestPaint()
-            onColChanged: requestPaint()
-            onPaint: {
-                const c = getContext("2d"); c.reset()
-                c.lineWidth = 2; c.lineCap = "round"
-                c.strokeStyle = Qt.rgba(col.r, col.g, col.b, 0.22)
-                c.beginPath(); c.arc(12, 12, 10, 0, 2 * Math.PI); c.stroke()
-                c.strokeStyle = BarStyle.accent
-                c.beginPath()
-                c.arc(12, 12, 10, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * Math.max(0.02, Math.min(1, v)))
-                c.stroke()
-            }
-        }
-        Row {
-            id: partRow
+        Behavior on arcShown { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+        signal scrolled(var event)
+        wheelEnabled: arc >= 0
+        onWheel: event => part.scrolled(event)
+        onTapped: if (popup.length > 0) root.openPopup(popup)
+        fill: lit ? BarStyle.accentContainer : "transparent"
+        padding: label.length > 0 ? 8 : 5
+
+        Item {
+            width: BarStyle.iconSize; height: BarStyle.iconSize
             anchors.verticalCenter: parent.verticalCenter
-            x: part.arc >= 0 ? 4 : 0
-            spacing: 4
-            BarIcon { name: part.icon; size: 16; color: part.lit ? BarStyle.accent : part.tint; fill: part.lit ? 1 : 0 }
-            BarText { visible: part.label.length > 0; text: part.label }
+            BarArc {
+                visible: part.arc >= 0
+                anchors.centerIn: parent
+                size: 26; lineWidth: 2
+                value: part.arcShown
+                color: BarStyle.accent
+            }
+            BarIcon { anchors.centerIn: parent; name: part.icon; color: part.lit ? BarStyle.onAccentContainer : part.tint; fill: part.lit ? 1 : 0 }
         }
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -3
-            cursorShape: Qt.PointingHandCursor
-            onClicked: part.popup.length > 0 ? root.openPopup(part.popup) : part.tapped()
-            onWheel: wheel => part.scrolled(wheel)
-        }
-        BarTip { text: part.tip }
+        BarText { visible: part.label.length > 0; anchors.verticalCenter: parent.verticalCenter; text: part.label; font.weight: Font.DemiBold }
     }
 
     Part {
@@ -100,7 +83,14 @@ BarPill {
         tint: BarStyle.subtext
     }
     Divider { visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true) }
-    Part { visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true); popup: "battery"; tip: "Battery " + Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " charging" : ""); icon: Battery.isCharging ? "battery_charging_full" : "battery_full"; label: Math.round(Battery.percentage * 100) + "%"; tint: Battery.isCritical ? BarStyle.danger : BarStyle.text }
+    Part {
+        visible: Battery.available && (Config.options?.bars?.top?.showBattery ?? true)
+        popup: "battery"
+        tip: "Battery " + Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " charging" : "")
+        icon: Battery.isCharging ? "battery_charging_full" : "battery_full"
+        label: Math.round(Battery.percentage * 100) + "%"
+        tint: Battery.isCritical ? BarStyle.danger : BarStyle.text
+    }
     Divider {}
     Part {
         visible: Config.options?.bars?.top?.showBell ?? true

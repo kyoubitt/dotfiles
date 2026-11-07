@@ -11,6 +11,6 @@ BarPill {
     tip: "Keyboard layout"
     onClicked: Quickshell.execDetached(["niri", "msg", "action", "switch-layout", "next"])
 
-    BarIcon { name: "keyboard"; size: 16; color: BarStyle.subtext }
-    BarText { text: String(NiriService.getCurrentKeyboardLayoutName() ?? "").slice(0, 2).toUpperCase() }
+    BarIcon { name: "keyboard"; color: BarStyle.subtext }
+    BarText { text: String(NiriService.getCurrentKeyboardLayoutName() ?? "").slice(0, 2).toUpperCase(); font.weight: Font.DemiBold }
 }

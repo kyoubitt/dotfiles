@@ -119,7 +119,7 @@ Scope {
             // The free gap between the left and right groups. The middle group sits in it, and the song title
             // shrinks to what is left, so the groups never run into each other.
             readonly property real freeGap: right.x - (left.x + left.width) - 24
-            readonly property real titleMax: win.layout.middle.includes("island") ? Math.max(0, Math.min(220, win.freeGap - 175)) : 220
+            readonly property real titleMax: win.layout.middle.includes("island") ? Math.max(0, Math.min(220, win.freeGap - 300)) : 220
             readonly property var blockOrder: ["workspaces", "info", "focus", "island", "tools", "keyboard", "status", "tray", "end"]
             readonly property DelegateChooser chooser: DelegateChooser {
                 role: "type"

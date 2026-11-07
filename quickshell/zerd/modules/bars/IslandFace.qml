@@ -1,112 +1,121 @@
 import QtQuick
+import Quickshell.Widgets
 import qs
 import qs.services
 
-// Centre capsule: clock and date; when something plays, its title and cava
-// bars join it. Click the clock for the calendar, the media part for controls.
-BarPill {
+// Centre block, two capsules: the clock and date (click the time for the clock, the date for the calendar) and, next
+// to it, what plays: cover, title with cava, previous / play / next. Nothing playing leaves a quiet music button.
+Item {
     id: root
 
-    readonly property var player: NowPlaying.player
-    // a soft accent edge while music plays
-    border.color: NowPlaying.isPlaying ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.45) : BarStyle.border
-    Behavior on border.color { ColorAnimation { duration: 300 } }
+    property int thickness: 34
     property int maxTextWidth: 220
+    readonly property var player: NowPlaying.player
 
-    // Red dot while something records, shares the screen or uses the mic.
-    Rectangle {
-        visible: BarActivity.any
-        width: 8; height: 8; radius: 4
-        color: BarActivity.hot ? BarStyle.danger : BarStyle.subtext
-        SequentialAnimation on opacity { running: BarActivity.hot; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 800 } NumberAnimation { to: 1; duration: 800 } }
-        BarTip { text: BarActivity.chips.map(c => c.text + (c.sub ? " (" + c.sub + ")" : "")).join("  ·  ") }
-    }
-    // The time and the date are separate widgets: the clock and the calendar.
-    Item {
-        id: timePart
-        implicitWidth: timeText.implicitWidth
-        implicitHeight: timeText.implicitHeight
-        BarText { id: timeText; text: DateTime.time; font.weight: Font.DemiBold }
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -4
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.openPopup("clock")
-        }
-        BarTip { text: "Clock" }
-    }
-    Item {
-        id: datePart
-        visible: !root.vertical
-        implicitWidth: dateText.implicitWidth
-        implicitHeight: dateText.implicitHeight
-        BarText { id: dateText; text: DateTime.shortDate; color: BarStyle.subtext }
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -4
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.openPopup("calendar")
-        }
-        BarTip { text: "Calendar" }
-    }
-    Rectangle {
-        visible: !root.vertical
-        width: 1; height: 14
-        color: BarStyle.border
-    }
-    // Nothing playing: say so, quietly; a click still opens the player.
-    Item {
-        id: idlePart
-        visible: root.player === null && !root.vertical
-        implicitWidth: idleRow.implicitWidth
-        implicitHeight: idleRow.implicitHeight
-        Row {
-            id: idleRow
-            spacing: 6
-            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "music_off"; size: 16; color: BarStyle.subtext }
-            BarText { anchors.verticalCenter: parent.verticalCenter; text: "No media playing"; color: BarStyle.subtext }
-        }
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openPopup("media") }
-    }
+    implicitWidth: row.implicitWidth
+    implicitHeight: thickness
+
     Row {
-        id: mediaPart
-        visible: root.player !== null && !root.vertical
-        spacing: 8
-        // Play / pause is its own target; the rest opens the player.
-        Item {
-            width: 24; height: 24
-            BarIcon { anchors.centerIn: parent; name: NowPlaying.isPlaying ? "pause" : "play_arrow"; fill: 1; color: BarStyle.accent }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: NowPlaying.togglePlaying()
+        id: row
+        spacing: BarStyle.gap
+
+        BarPill {
+            id: clockPlate
+            strip: true
+            thickness: root.thickness
+            // a soft accent edge while music plays
+            border.color: NowPlaying.isPlaying ? Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.45) : BarStyle.border
+            Behavior on border.color { ColorAnimation { duration: 300 } }
+
+            // Red dot while something records, shares the screen or uses the mic.
+            Item {
+                visible: BarActivity.any
+                width: 14; height: 14
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 8; height: 8; radius: 4
+                    color: BarActivity.hot ? BarStyle.danger : BarStyle.subtext
+                    SequentialAnimation on opacity { running: BarActivity.hot; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 800 } NumberAnimation { to: 1; duration: 800 } }
+                }
+                BarTip { text: BarActivity.chips.map(c => c.text + (c.sub ? " (" + c.sub + ")" : "")).join("  ·  ") }
             }
-            BarTip { text: NowPlaying.isPlaying ? "Pause" : "Play" }
+            BarCell {
+                tip: "Clock"
+                padding: 9
+                onTapped: clockPlate.openPopup("clock")
+                BarText { text: DateTime.time; font.weight: Font.DemiBold }
+            }
+            BarCell {
+                tip: "Calendar"
+                padding: 9
+                onTapped: clockPlate.openPopup("calendar")
+                BarText { text: DateTime.shortDate; color: BarStyle.subtext }
+            }
         }
-        Item {
-            width: titleRow.implicitWidth; height: 24
-            Row {
-                id: titleRow
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
-                BarCava { visible: NowPlaying.isPlaying; count: 6 }
+
+        // Nothing playing.
+        BarPill {
+            id: idlePlate
+            visible: root.player === null
+            strip: true
+            thickness: root.thickness
+            BarCell {
+                tip: "Nothing playing"
+                onTapped: idlePlate.openPopup("media")
+                BarIcon { name: "music_note"; color: BarStyle.subtext }
+            }
+        }
+
+        BarPill {
+            id: mediaPlate
+            visible: root.player !== null
+            strip: true
+            thickness: root.thickness
+            readonly property bool wide: root.maxTextWidth >= 60
+
+            BarCell {
+                tip: root.player?.trackAlbum ? root.player.trackAlbum : "Player"
+                padding: 2
+                onTapped: mediaPlate.openPopup("media")
+                onMiddle: NowPlaying.togglePlaying()
+                ClippingRectangle {
+                    width: 24; height: 24; radius: 8
+                    color: BarStyle.cardHigh
+                    Image {
+                        anchors.fill: parent
+                        source: NowPlaying.activeTrack?.artUrl ?? ""
+                        sourceSize: Qt.size(48, 48)
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        visible: status === Image.Ready
+                    }
+                    BarIcon { anchors.centerIn: parent; name: "music_note"; size: 16; color: BarStyle.subtext; visible: (NowPlaying.activeTrack?.artUrl ?? "") === "" }
+                }
+            }
+            BarCell {
+                visible: mediaPlate.wide
+                tip: (root.player?.trackTitle ?? "") + ((root.player?.trackArtist ?? "") ? "  ·  " + root.player.trackArtist : "")
+                padding: 6
+                wheelEnabled: true
+                onTapped: mediaPlate.openPopup("media")
+                onMiddle: NowPlaying.togglePlaying()
+                onWheel: event => event.angleDelta.y > 0 ? NowPlaying.previous() : NowPlaying.next()
+                BarCava { visible: NowPlaying.isPlaying; anchors.verticalCenter: parent.verticalCenter; count: 6 }
                 BarMarquee {
-                    text: root.player?.trackTitle ?? ""
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: (root.player?.trackTitle ?? "") + ((root.player?.trackArtist ?? "") ? "  ·  " + root.player.trackArtist : "")
                     width: 2 * Math.ceil(Math.min(measure.implicitWidth, root.maxTextWidth) / 2)
-                    BarText { id: measure; visible: false; text: root.player?.trackTitle ?? "" }
+                    BarText { id: measure; visible: false; text: parent.text }
                 }
             }
-            MouseArea {
-                anchors.fill: parent
-                anchors.margins: -2
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-                onClicked: mouse => {
-                    if (mouse.button === Qt.MiddleButton) NowPlaying.togglePlaying()
-                    else root.openPopup("media")
-                }
-                onWheel: wheel => wheel.angleDelta.y > 0 ? NowPlaying.previous() : NowPlaying.next()
+            BarCell { tip: "Previous"; onTapped: NowPlaying.previous(); BarIcon { name: "skip_previous"; fill: 1; color: BarStyle.text } }
+            BarCell {
+                tip: NowPlaying.isPlaying ? "Pause" : "Play"
+                fill: BarStyle.accent
+                onTapped: NowPlaying.togglePlaying()
+                BarIcon { name: NowPlaying.isPlaying ? "pause" : "play_arrow"; size: 20; fill: 1; color: BarStyle.onAccent }
             }
+            BarCell { tip: "Next"; onTapped: NowPlaying.next(); BarIcon { name: "skip_next"; fill: 1; color: BarStyle.text } }
         }
     }
 }

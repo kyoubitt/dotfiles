@@ -2,9 +2,11 @@ import QtQuick
 import qs.modules.common
 import qs.services
 
-// Left info capsule: cpu / memory / gpu, then the weather. Each half opens its popup.
+// Left info capsule: cpu / memory / gpu, then the weather. Each half is a button with the shared liquid hover and
+// opens its popup.
 BarPill {
     id: root
+    strip: true
 
     readonly property var opts: Config.options?.bars?.top ?? ({})
     readonly property bool cpuOn: opts.showCpu ?? true
@@ -22,38 +24,31 @@ BarPill {
         property string icon
         property real value
         spacing: 4
-        BarIcon { name: parent.icon; size: 16; color: BarStyle.subtext }
-        BarText { text: Math.round(parent.value * 100) + "%"; font.pixelSize: 12 }
+        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: parent.icon; color: BarStyle.subtext }
+        BarText { anchors.verticalCenter: parent.verticalCenter; text: Math.round(parent.value * 100) + "%"; font.pixelSize: 12 }
     }
 
-    Item {
-        id: sysItem
+    BarCell {
         visible: root.sysShown
-        implicitWidth: sys.implicitWidth
-        implicitHeight: 24
+        tip: "System"
+        padding: 10
+        onTapped: root.openPopup("system")
         Row {
-            id: sys
-            anchors.verticalCenter: parent.verticalCenter
             spacing: 10
             Stat { visible: root.cpuOn; icon: "memory"; value: ResourceUsage.cpuUsage }
             Stat { visible: root.memOn; icon: "developer_board"; value: ResourceUsage.memoryUsedPercentage }
             Stat { visible: root.gpuOn; icon: "videogame_asset"; value: ResourceUsage.gpuUsage }
         }
-        MouseArea { anchors.fill: parent; anchors.margins: -3; cursorShape: Qt.PointingHandCursor; onClicked: root.openPopup("system") }
-        BarTip { text: "System" }
     }
-    Rectangle { visible: root.weatherShown && root.sysShown; width: 1; height: 14; color: BarStyle.border }
-    Item {
-        id: weather
+    BarCell {
         visible: root.weatherShown
-        implicitWidth: wRow.implicitWidth
-        implicitHeight: 24
+        tip: BarStyle.weatherText(Weather.data.wCode) + "  " + Weather.data.city
+        padding: 10
+        onTapped: root.openPopup("weather")
         Row {
-            id: wRow
-            anchors.verticalCenter: parent.verticalCenter
             spacing: 6
-            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: BarStyle.weatherIcon(Weather.data.wCode); size: 18; fill: 1; color: BarStyle.weatherColor(Weather.data.wCode) }
-            BarText { anchors.verticalCenter: parent.verticalCenter; text: Weather.data.temp; font.pixelSize: 13; font.weight: Font.DemiBold }
+            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: BarStyle.weatherIcon(Weather.data.wCode); fill: 1; color: BarStyle.weatherColor(Weather.data.wCode) }
+            BarText { anchors.verticalCenter: parent.verticalCenter; text: Weather.data.temp; font.weight: Font.DemiBold }
             // Today's high and low, each with its own arrow.
             Row {
                 visible: Weather.data.high !== undefined
@@ -61,17 +56,15 @@ BarPill {
                 spacing: 5
                 Row {
                     spacing: 1
-                    BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "arrow_upward"; size: 11; color: BarStyle.warm }
+                    BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "arrow_upward"; size: 12; color: BarStyle.warm }
                     BarText { anchors.verticalCenter: parent.verticalCenter; text: String(Weather.data.high).replace(/[^0-9-]/g, "") + "°"; font.pixelSize: 11; color: BarStyle.subtext }
                 }
                 Row {
                     spacing: 1
-                    BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "arrow_downward"; size: 11; color: BarStyle.cool }
+                    BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "arrow_downward"; size: 12; color: BarStyle.cool }
                     BarText { anchors.verticalCenter: parent.verticalCenter; text: String(Weather.data.low).replace(/[^0-9-]/g, "") + "°"; font.pixelSize: 11; color: BarStyle.subtext }
                 }
             }
         }
-        MouseArea { anchors.fill: parent; anchors.margins: -3; cursorShape: Qt.PointingHandCursor; onClicked: root.openPopup("weather") }
-        BarTip { text: BarStyle.weatherText(Weather.data.wCode) + "  " + Weather.data.city }
     }
 }

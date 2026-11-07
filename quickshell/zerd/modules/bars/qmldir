@@ -66,6 +66,10 @@ BarButton 1.0 BarButton.qml
 BarCard 1.0 BarCard.qml
 BarSwitch 1.0 BarSwitch.qml
 BarHoverFill 1.0 BarHoverFill.qml
+BarCell 1.0 BarCell.qml
+BarArc 1.0 BarArc.qml
+BarTabs 1.0 BarTabs.qml
+TrayMenu 1.0 TrayMenu.qml
 BatteryWave 1.0 BatteryWave.qml
 NotifRulesSection 1.0 NotifRulesSection.qml
 RightSections 1.0 RightSections.qml

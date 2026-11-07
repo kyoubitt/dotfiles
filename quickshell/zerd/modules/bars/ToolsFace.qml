@@ -2,43 +2,42 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs
+import qs.modules.common
 import qs.services
 
 // Small tools: region screenshot, screen recording, colour picker, clipboard
-// history, caffeine (blocks idle/sleep) and night light. Each is a plain icon
-// button; recording, caffeine and night light light up while running.
+// history, caffeine (blocks idle/sleep) and night light. Round buttons in one capsule
+// sharing a liquid hover; recording, caffeine and night light fill while running.
 BarPill {
     id: root
+    strip: true
 
-    component Tool: Item {
+    component Tool: BarCell {
         id: tool
         property string icon
         property bool lit: false
-        property string tip: ""
-        signal tapped()
-        implicitWidth: 28
-        implicitHeight: 28
-        Rectangle {
-            anchors.fill: parent
-            radius: width / 2
-            color: tool.lit ? BarStyle.accent : (areaHover.hovered ? BarStyle.plateHover : "transparent")
-            Behavior on color { ColorAnimation { duration: 110 } }
-        }
+        property color litFill: BarStyle.accent
+        property color litInk: BarStyle.onAccent
+        fill: lit ? litFill : "transparent"
         BarIcon {
-            anchors.centerIn: parent
-            name: tool.icon; size: 18
+            name: tool.icon; size: BarStyle.iconSize
             fill: tool.lit ? 1 : 0
-            color: tool.lit ? BarStyle.onAccent : (areaHover.hovered ? BarStyle.text : BarStyle.subtext)
+            color: tool.lit ? tool.litInk : (tool.hovered ? BarStyle.text : BarStyle.subtext)
             Behavior on color { ColorAnimation { duration: 110 } }
         }
-        MouseArea { id: area; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: tool.tapped() }
-        HoverHandler { id: areaHover }
-        BarTip { text: tool.tip }
     }
-    component Divider: Rectangle { width: 1; height: 14; color: BarStyle.border }
+    component Divider: Item {
+        width: 7; height: 14
+        Rectangle { anchors.centerIn: parent; width: 1; height: 14; color: BarStyle.border }
+    }
 
     Tool { tip: "Screenshot"; icon: "screenshot_region"; onTapped: Quickshell.execDetached(["niri", "msg", "action", "screenshot"]) }
-    Tool { tip: BarTools.recording ? "Stop recording  " + BarTools.clock(BarTools.recordSeconds) : "Record screen (saved to OBS Recordings)"; icon: BarTools.recording ? "stop_circle" : "screen_record"; lit: BarTools.recording; onTapped: BarTools.toggleRecording() }
+    Tool {
+        tip: BarTools.recording ? "Stop recording  " + BarTools.clock(BarTools.recordSeconds) : "Record screen (saved to OBS Recordings)"
+        icon: BarTools.recording ? "stop_circle" : "screen_record"
+        lit: BarTools.recording; litFill: BarStyle.danger; litInk: Appearance.colors.colOnError
+        onTapped: BarTools.toggleRecording()
+    }
     Tool { tip: "Colour picker"; icon: "colorize"; onTapped: Quickshell.execDetached(["hyprpicker", "-a"]) }
     Divider {}
     Tool { tip: "Clipboard"; icon: "content_paste"; onTapped: root.openPopup("clipboard") }

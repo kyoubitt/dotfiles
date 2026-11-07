@@ -74,50 +74,9 @@ Scope {
                     property real implicitHeight: item?.implicitHeight ?? 0
                     sourceComponent: ({
                         calendar: calendar, clock: clock, weather: weather, tray: tray, media: media, volume: volume, brightness: brightness,
-                        network: network, battery: battery, system: system, notifications: notifications, clipboard: clipboard
+                        network: network, battery: battery, system: system, notifications: notifications, clipboard: clipboard, traymenu: traymenu
                     })[root.popup?.kind ?? ""] ?? null
                 }
-            }
-
-            component Row2: Row {
-                property string label
-                property string value
-                spacing: 12
-                BarText { text: parent.label; color: BarStyle.subtext; width: 90 }
-                BarText { text: parent.value }
-            }
-            component Slider: Item {
-                id: s
-                property real value: 0
-                signal moved(real v)
-                implicitWidth: 220
-                implicitHeight: 22
-                Rectangle { y: 9; width: parent.width; height: 4; radius: 2; color: BarStyle.border }
-                Rectangle { y: 9; width: s.width * Math.max(0, Math.min(1, s.value)); height: 4; radius: 2; color: BarStyle.accent }
-                Rectangle { x: Math.round(s.width * Math.max(0, Math.min(1, s.value)) - 7); y: 4; width: 14; height: 14; radius: 7; color: BarStyle.text }
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: mouse => s.moved(Math.max(0, Math.min(1, mouse.x / s.width)))
-                    onPositionChanged: mouse => { if (pressed) s.moved(Math.max(0, Math.min(1, mouse.x / s.width))) }
-                }
-            }
-            component Toggle: Item {
-                id: tg
-                property string icon
-                property string label
-                property bool on: false
-                signal clicked()
-                implicitWidth: 220
-                implicitHeight: 34
-                BarHoverFill { anchors.fill: parent; hovered: tgArea.containsMouse; pressed: tgArea.pressed }
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
-                    x: 8; spacing: 10
-                    BarIcon { name: tg.icon; color: tg.on ? BarStyle.accent : BarStyle.subtext; fill: tg.on ? 1 : 0 }
-                    BarText { text: tg.label }
-                }
-                BarText { anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter; text: tg.on ? "On" : "Off"; color: tg.on ? BarStyle.accent : BarStyle.subtext }
-                MouseArea { id: tgArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: tg.clicked() }
             }
 
             Component { id: calendar; CalendarCard {} }
@@ -125,6 +84,7 @@ Scope {
             Component { id: media; MediaPopup {} }
             Component { id: weather; WeatherPopup {} }
             Component { id: tray; TrayPopup { window: win } }
+            Component { id: traymenu; TrayMenu { itemId: root.popup?.item ?? "" } }
             Component { id: volume; VolumePopup {} }
             Component { id: brightness; BrightnessPopup { screen: win.screen } }
             Component { id: network; NetworkPopup {} }
@@ -133,18 +93,18 @@ Scope {
             Component {
                 id: clipboard
                 Column {
-                    id: clip
+                    id: clipCol
                     spacing: 4
                     property var rows: []
                     Process {
                         running: true
                         command: ["sh", "-c", "cliphist list | head -8"]
-                        stdout: StdioCollector { onStreamFinished: clip.rows = text.split("\n").filter(l => l.length > 0) }
+                        stdout: StdioCollector { onStreamFinished: clipCol.rows = text.split("\n").filter(l => l.length > 0) }
                     }
                     BarText { text: "Clipboard"; font.weight: Font.DemiBold }
-                    BarText { visible: clip.rows.length === 0; text: "Empty"; color: BarStyle.subtext }
+                    BarText { visible: clipCol.rows.length === 0; text: "Empty"; color: BarStyle.subtext }
                     Repeater {
-                        model: clip.rows
+                        model: clipCol.rows
                         delegate: Item {
                             required property string modelData
                             width: 280; height: 28
