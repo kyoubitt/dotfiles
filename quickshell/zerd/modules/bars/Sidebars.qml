@@ -18,7 +18,7 @@ Scope {
 
     readonly property var options: Config.options?.bars?.sidebars ?? ({})
     // The movable sections under the fixed part of the quick panel, in the saved order.
-    readonly property var leftNames: ["clipboard", "shots", "notifrules", "battery", "tasks"]
+    readonly property var leftNames: ["translate", "clipboard", "shots", "notifrules", "battery", "tasks"]
     readonly property var leftOrder: {
         const saved = Config.options?.bars?.sidebars?.leftOrder ?? []
         return saved.filter(n => root.leftNames.includes(n)).concat(root.leftNames.filter(n => !saved.includes(n)))
@@ -283,6 +283,15 @@ Scope {
                                 }
                             }
                             Component {
+                                id: cTranslate
+                                AccordionSection {
+                                    width: stack.width
+                                    name: "translate"; icon: "translate"; title: "Translate"
+                                    summary: "Type or paste, pick the languages"
+                                    Translator { width: parent.width; height: 420 }
+                                }
+                            }
+                            Component {
                                 id: cTasks
                                 AccordionSection {
                                     width: stack.width
@@ -297,7 +306,7 @@ Scope {
                                 names: root.leftNames
                                 order: root.leftOrder
                                 hidden: Battery.available ? [] : ["battery"]
-                                comps: ({ clipboard: cClipboard, shots: cShots, notifrules: cRules, battery: cBattery, tasks: cTasks })
+                                comps: ({ translate: cTranslate, clipboard: cClipboard, shots: cShots, notifrules: cRules, battery: cBattery, tasks: cTasks })
                                 onMoved: list => Config.options.bars.sidebars.leftOrder = list
                             }
                         }
