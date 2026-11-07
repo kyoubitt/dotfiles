@@ -35,6 +35,8 @@ Item {
     property real iconTextWidth: buttonIcon !== "" ? iconFontSize : 0
     property real textColWidth: Math.max(buttonText !== "" ? buttonText.length * (textFontSize * 0.6) : 0, subText !== "" ? subText.length * (textFontSize * 0.4) : 0)
     property real calculatedContentWidth: iconTextWidth + (iconTextWidth > 0 && textColWidth > 0 ? 12 : 0) + textColWidth
+    // the label may take what the icon and the padding leave
+    readonly property real maxLabelWidth: Math.max(20, width - horizontalPadding * 2 - iconTextWidth - (iconTextWidth > 0 ? 12 : 0))
     property real desiredWidth: Math.max(200, calculatedContentWidth + horizontalPadding * 2)
 
     signal triggered()
@@ -128,12 +130,26 @@ Item {
                     Behavior on color { ColorAnimation { duration: 150 } }
                 }
 
+                Text {
+                    renderType: Text.NativeRendering
+                    id: mainLabel
+                    visible: !I18n.rtl && root.buttonText !== ""
+                    Layout.maximumWidth: root.maxLabelWidth
+                    text: root.buttonText
+                    elide: Text.ElideRight
+                    font.family: ThemeBackend.fontFamily
+                    font.weight: Font.DemiBold
+                    font.pixelSize: root.textFontSize
+                    color: bRoot.contentTextColor
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
                 Row {
                     id: charRow
-                    visible: !I18n.rtl
+                    visible: false
                     spacing: 0
                     Repeater {
-                        model: Array.from(root.buttonText)
+                        model: []
                         Item {
                             id: charSlot
                             required property string modelData
