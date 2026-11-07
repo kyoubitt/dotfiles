@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import "."
 import "../"
+import "../../"
 
 Item {
     id: root

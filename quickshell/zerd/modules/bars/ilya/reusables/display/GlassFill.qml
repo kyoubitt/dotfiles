@@ -2,6 +2,7 @@ import QtQuick
 import "."
 import "../"
 import "glassNesting.js" as Nesting
+import "../../"
 
 Item {
     id: root

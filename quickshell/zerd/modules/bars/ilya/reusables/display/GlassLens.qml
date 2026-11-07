@@ -1,6 +1,7 @@
 import QtQuick
 import "."
 import "../"
+import "../../"
 
 Item {
     id: root
