@@ -71,7 +71,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 text: root.weatherIcon
                 font.family: ThemeBackend.iconFont
@@ -81,7 +80,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 text: root.weatherTemp
                 font.family: ThemeBackend.fontFamily

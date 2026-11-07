@@ -159,7 +159,6 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
@@ -174,7 +173,6 @@ BarFaceBase {
         }
 
         Text {
-
             renderType: Text.NativeRendering
             visible: root.showPercent
             text: root.volPercent

@@ -213,7 +213,6 @@ Item {
                                 }
 
                                 Text {
-
                                     renderType: Text.NativeRendering
                                     anchors.centerIn: parent
                                     text: "󰎈"
@@ -279,7 +278,6 @@ Item {
                                 }
 
                                 Text {
-
                                     renderType: Text.NativeRendering
                                     text: root.infoMode === "author"
                                         ? (root.isPreview ? I18n.t("guide.bar.media.preview.author", "Song author") : (isMediaActive && player ? (player.trackArtist || "") : ""))
@@ -401,7 +399,6 @@ Item {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         anchors.centerIn: parent
                         text: "󰎈"

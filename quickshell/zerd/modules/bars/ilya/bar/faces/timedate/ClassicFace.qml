@@ -66,7 +66,6 @@ Item {
             spacing: -2
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: timeText
                 anchors.left: parent.left
@@ -78,7 +77,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: dateText
                 visible: widget ? widget.showDate : true
@@ -100,7 +98,6 @@ Item {
             spacing: widget ? widget.s(1) : 1
 
             Text {
-
                 renderType: Text.NativeRendering
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: parsedTime.hours
@@ -111,7 +108,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 visible: parsedTime.hasMinutes
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -123,7 +119,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 visible: parsedTime.hasSeconds
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -135,7 +130,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 visible: parsedTime.ampm !== ""
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -162,7 +156,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 visible: widget ? widget.showDate : true
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -174,7 +167,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 visible: widget ? widget.showDate : true
                 anchors.horizontalCenter: parent.horizontalCenter

@@ -179,7 +179,6 @@ Item {
         }
 
         Text {
-
             renderType: Text.NativeRendering
             anchors.centerIn: parent
             anchors.verticalCenterOffset: menuBtn.glyphYOffset

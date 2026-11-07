@@ -333,7 +333,6 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
@@ -348,7 +347,6 @@ BarFaceBase {
         }
 
         Text {
-
             renderType: Text.NativeRendering
             visible: root.showName
             text: root.isVertical ? (root.effectiveName.length > 6 ? (root.effectiveName.substring(0, 5) + "…") : root.effectiveName) : root.effectiveName

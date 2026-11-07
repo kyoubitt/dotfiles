@@ -352,7 +352,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: monthLabel
                     anchors.horizontalCenter: parent.horizontalCenter

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../"
+import "."
 
 Item {
     id: root
@@ -57,7 +57,6 @@ Item {
             spacing: root.marqueeSpacing
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: mainText
                 text: root.text
@@ -67,7 +66,6 @@ Item {
             }
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: cloneText
                 text: root.text

@@ -104,7 +104,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: recText
                     text: root.recTimeFormatted
@@ -135,7 +134,6 @@ Item {
                         spacing: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 3 : 4) : (root.isCompact ? 3 : 4)) : (barWindow ? barWindow.cs(root.isCompact ? 5 : 6) : (root.isCompact ? 5 : 6))
 
                         Text {
-
                             renderType: Text.NativeRendering
                             text: timerItem.modelData.icon
                             font.family: ThemeBackend.iconFont
@@ -145,7 +143,6 @@ Item {
                         }
 
                         Text {
-
                             renderType: Text.NativeRendering
                             text: timerItem.modelData.time
                             font.family: ThemeBackend.fontFamily

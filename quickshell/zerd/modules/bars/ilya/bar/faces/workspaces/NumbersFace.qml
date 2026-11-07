@@ -190,7 +190,6 @@ Item {
                 Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     anchors.centerIn: parent
                     text: (wsPill.index + 1).toString()

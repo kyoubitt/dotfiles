@@ -210,7 +210,6 @@ BarFaceBase {
             height: root.isVertical ? textIcon.implicitHeight : width
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: textIcon
                 anchors.centerIn: parent
@@ -225,7 +224,6 @@ BarFaceBase {
         }
 
         Text {
-
             renderType: Text.NativeRendering
             visible: !root.isDesktop && root.effectiveShowPercent
             text: root.batPercent
@@ -302,7 +300,6 @@ BarFaceBase {
                 property color accentColor: batMouseArea.pressed ? Qt.darker(baseAccentColor, 1.15) : (batMouseArea.containsMouse ? Qt.lighter(baseAccentColor, 1.08) : baseAccentColor)
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: dummyPercentMetrics
                     visible: false
@@ -313,7 +310,6 @@ BarFaceBase {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: dummyIconMetrics
                     visible: false
@@ -382,7 +378,6 @@ BarFaceBase {
                     spacing: root.isDesktop ? 0 : s(root.isCompact ? 5 : 6)
 
                     Text {
-
                         renderType: Text.NativeRendering
                         id: batIconText
                         visible: root.effectiveShowIcon
@@ -394,7 +389,6 @@ BarFaceBase {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         id: batPercentText
                         visible: !root.isDesktop && root.effectiveShowPercent
@@ -422,7 +416,6 @@ BarFaceBase {
                         spacing: contentRow.spacing
 
                         Text {
-
                             renderType: Text.NativeRendering
                             visible: batIconText.visible
                             text: batIconText.text
@@ -433,7 +426,6 @@ BarFaceBase {
                         }
 
                         Text {
-
                             renderType: Text.NativeRendering
                             visible: batPercentText.visible
                             text: batPercentText.text
@@ -581,7 +573,6 @@ BarFaceBase {
                     height: sideBatIconText.implicitHeight
 
                     Text {
-
                         renderType: Text.NativeRendering
                         id: sideBatIconText
                         anchors.centerIn: parent
@@ -602,7 +593,6 @@ BarFaceBase {
                     visible: !root.isDesktop && root.effectiveShowIcon && batBtn.fillRatio > 0
 
                     Text {
-
                         renderType: Text.NativeRendering
                         x: sideContentBox.x
                         y: sideContentBox.y - batBtn.fillY

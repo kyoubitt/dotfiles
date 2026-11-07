@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../../"
+import "."
 import "../"
 
 Item {
@@ -86,7 +86,6 @@ Item {
         }
 
         Text {
-
             renderType: Text.NativeRendering
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: root.iconOffsetX

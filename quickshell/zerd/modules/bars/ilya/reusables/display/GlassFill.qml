@@ -1,5 +1,5 @@
 import QtQuick
-import "../../"
+import "."
 import "../"
 import "glassNesting.js" as Nesting
 

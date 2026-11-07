@@ -82,7 +82,6 @@ Item {
                 rotation: root.isVertical ? 90 : 0
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: titleTextMain
                     text: root.displayText

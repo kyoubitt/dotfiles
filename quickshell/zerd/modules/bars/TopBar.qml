@@ -9,6 +9,7 @@ import qs
 import qs.modules.common
 import qs.services
 import qs.modules.notificationPopup as INiRNotif
+import "ilya/popouts"
 
 // Floating top bar in three groups: workspaces and the focused window on the
 // left, the clock/media island in the middle, the status capsule, tray and
@@ -24,6 +25,7 @@ Scope {
     property bool forced: false
 
     BarPopupHost {}
+    TrayBase {}
     Sidebars {}
     Osd {}
     AppSwitcher {}

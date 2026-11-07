@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../../"
+import "."
 import "../"
 
 Item {
@@ -111,7 +111,6 @@ Item {
             spacing: 8
 
             Text {
-
                 renderType: Text.NativeRendering
                 id: iconLabel
                 visible: root.buttonIcon !== ""
@@ -129,7 +128,6 @@ Item {
                 spacing: 0
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: mainLabel
                     visible: root.buttonText !== ""
@@ -144,7 +142,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: subLabel
                     visible: root.subText !== ""

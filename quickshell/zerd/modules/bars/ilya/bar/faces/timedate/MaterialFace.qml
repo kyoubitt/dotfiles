@@ -137,7 +137,6 @@ Item {
                 height: implicitHeight
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: hourText
                     x: 0
@@ -153,7 +152,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: minuteText
                     visible: !parsedTime.hasSeconds && parsedTime.hasMinutes
@@ -169,7 +167,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: ampmText
                     visible: !parsedTime.hasSeconds && parsedTime.ampm !== ""
@@ -208,7 +205,6 @@ Item {
                         }
 
                         Text {
-
                             renderType: Text.NativeRendering
                             visible: parsedTime.ampm !== ""
                             text: parsedTime.ampm
@@ -223,7 +219,6 @@ Item {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         x: widget ? widget.s(2) : 2
                         text: parsedTime.seconds
@@ -254,7 +249,6 @@ Item {
                 spacing: widget ? widget.s(widget.isCompact ? 2 : 3) : 3
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: dayText
                     anchors.verticalCenter: parent.verticalCenter
@@ -273,7 +267,6 @@ Item {
                     spacing: 0
 
                     Text {
-
                         renderType: Text.NativeRendering
                         visible: parsedDate.weekday !== ""
                         text: parsedDate.weekday
@@ -286,7 +279,6 @@ Item {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         visible: parsedDate.month !== ""
                         text: parsedDate.month
@@ -336,7 +328,6 @@ Item {
                 height: implicitHeight
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: sideHourText
                     x: 0
@@ -357,7 +348,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: sideMinuteText
                     visible: !parsedTime.hasSeconds && parsedTime.hasMinutes
@@ -373,7 +363,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     id: sideAmpmText
                     visible: !parsedTime.hasSeconds && parsedTime.ampm !== ""
@@ -399,7 +388,6 @@ Item {
                     spacing: widget ? widget.s(widget.isCompact ? 0 : 0.5) : 0.5
 
                     Text {
-
                         renderType: Text.NativeRendering
                         text: parsedTime.minutes
                         font.family: materialFaceRoot.clockFont
@@ -411,7 +399,6 @@ Item {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         x: widget ? widget.s(widget.isCompact ? 1 : 1.5) : 1.5
                         text: parsedTime.seconds
@@ -424,7 +411,6 @@ Item {
                     }
 
                     Text {
-
                         renderType: Text.NativeRendering
                         visible: parsedTime.ampm !== ""
                         x: widget ? widget.s(widget.isCompact ? 1 : 1.5) : 1.5
@@ -455,7 +441,6 @@ Item {
                 spacing: 0
 
                 Text {
-
                     renderType: Text.NativeRendering
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widget ? widget.dayStr : (typeof DateTime !== "undefined" ? DateTime.day : "18")
@@ -467,7 +452,6 @@ Item {
                 }
 
                 Text {
-
                     renderType: Text.NativeRendering
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widget ? widget.monthStr : (typeof DateTime !== "undefined" ? DateTime.monthShort : "Sep")

@@ -9,3 +9,5 @@ WallpaperBlur 1.0 display/WallpaperBlur.qml
 LiquidGlass 1.0 display/LiquidGlass.qml
 GlassFill 1.0 display/GlassFill.qml
 AxisFlow 1.0 layout/AxisFlow.qml
+GlassFillets 1.0 display/GlassFillets.qml
+GlassLens 1.0 display/GlassLens.qml
