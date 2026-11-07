@@ -1,13 +1,14 @@
+// Toggle tiles after end-4/dots-hyprland's AndroidQuickToggleButton (GPL-3.0): a pill when off, a rounded rectangle when on.
 import QtQuick
 import Quickshell.Bluetooth
 import qs
 import qs.services
 
-// The toggle grid. Click flips a setting; right-click opens that setting's details.
-Grid {
+// The toggle grid: two tiles to a row, the last one alone takes the whole row. Click flips a setting; right-click opens
+// that setting's details.
+Flow {
     id: root
 
-    columns: 2
     spacing: 8
 
     function details(kind: string): void { BarState.sidebar = ""; GlobalStates.barPopup = { kind: kind, x: 1700 } }
@@ -18,19 +19,41 @@ Grid {
         property string title
         property string sub
         property bool on: false
-        toggled: on
-        width: (root.width - 8) / 2; height: 62
-        radius: tile.pressed ? BarStyle.radiusSmall : BarStyle.radiusMedium
+        // Right-click opens details. As in end-4's wide toggles, only the icon chip lights up then; a plain toggle
+        // fills the whole tile with the accent.
+        property bool menu: false
+        // The last tile of an odd count takes the whole row.
+        property bool wide: false
+        readonly property bool whole: on && !menu
+        readonly property int chipSize: height - 12
+
+        tone: whole ? "filled" : "tonal"
+        width: wide ? root.width : Math.floor((root.width - 8) / 2)
+        height: 54
+        // the shape is the state: round when off, squarer when on, tight while pressed
+        radius: pressed ? BarStyle.radiusMedium : (on ? BarStyle.radiusLarge : height / 2)
         Behavior on radius { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
-        BarIcon { x: 16; anchors.verticalCenter: parent.verticalCenter; name: tile.icon; fill: tile.on ? 1 : 0; size: 22; color: tile.on ? BarStyle.accent : tile.inkSoft }
+
+        Rectangle {
+            id: chip
+            x: 6; anchors.verticalCenter: parent.verticalCenter
+            width: tile.chipSize; height: tile.chipSize
+            radius: Math.max(0, tile.radius - 6)
+            color: tile.menu ? (tile.on ? BarStyle.accent : BarStyle.cardHigh) : "transparent"
+            Behavior on color { ColorAnimation { duration: BarStyle.motionFast } }
+            BarIcon { anchors.centerIn: parent; name: tile.icon; fill: tile.on ? 1 : 0; size: 22; color: tile.on ? BarStyle.onAccent : BarStyle.text }
+        }
         Column {
-            x: 50; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 58
-            BarText { text: tile.title; width: parent.width; elide: Text.ElideRight; font.weight: Font.DemiBold; font.pixelSize: 13; color: tile.ink }
-            BarText { text: tile.sub; width: parent.width; elide: Text.ElideRight; font.pixelSize: 11; color: tile.inkSoft }
+            x: chip.x + chip.width + 9
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - x - 12
+            BarText { text: tile.title; width: parent.width; elide: Text.ElideRight; font.weight: Font.DemiBold; font.pixelSize: 12; color: tile.ink }
+            BarText { text: tile.sub; width: parent.width; elide: Text.ElideRight; font.pixelSize: 11; color: tile.inkSoft; opacity: tile.whole ? 0.85 : 1 }
         }
     }
 
     Tile {
+        menu: true
         icon: NetLink.iwd ? NetLink.icon : Network.materialSymbol
         title: "Wi-Fi"
         sub: NetLink.iwd ? (NetLink.connected ? NetLink.ssid : (NetLink.wifiEnabled ? "Not connected" : "Off")) : (Network.networkName || "Network")
@@ -40,6 +63,7 @@ Grid {
     }
     Tile {
         visible: BluetoothStatus.available
+        menu: true
         icon: BluetoothStatus.connected ? "bluetooth_connected" : "bluetooth"
         title: "Bluetooth"
         sub: !BluetoothStatus.enabled ? "Off" : (BluetoothStatus.activeDeviceSummary() || "On")
@@ -55,6 +79,7 @@ Grid {
         onTapped: Notifications.toggleSilent()
     }
     Tile {
+        menu: true
         icon: (Audio.sink?.audio?.muted ?? false) ? "volume_off" : "volume_up"
         title: "Sound"
         sub: (Audio.sink?.audio?.muted ?? false) ? "Muted" : Math.round(Audio.value * 100) + "%"
@@ -64,5 +89,5 @@ Grid {
     }
     Tile { icon: "bedtime"; title: "Night light"; sub: BarTools.nightLight ? "On" : "Off"; on: BarTools.nightLight; onTapped: BarTools.toggleNightLight() }
     Tile { icon: "self_improvement"; title: "Focus"; sub: BarTools.focusMode ? "On" : "Off"; on: BarTools.focusMode; onTapped: BarTools.toggleFocusMode() }
-    Tile { icon: "coffee"; title: "Caffeine"; sub: BarTools.caffeine ? "Staying awake" : "Off"; on: BarTools.caffeine; onTapped: BarTools.toggleCaffeine() }
+    Tile { wide: BluetoothStatus.available; icon: "coffee"; title: "Caffeine"; sub: BarTools.caffeine ? "Staying awake" : "Off"; on: BarTools.caffeine; onTapped: BarTools.toggleCaffeine() }
 }

@@ -99,7 +99,7 @@ Column {
     // ---- Search and filters
     Rectangle {
         width: parent.width; height: 36; radius: 18
-        color: BarStyle.plateHover
+        color: BarStyle.cardHigh
         border.width: 1; border.color: input.activeFocus ? BarStyle.accent : BarStyle.border
         BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 16; color: BarStyle.subtext }
         BarText { x: 36; anchors.verticalCenter: parent.verticalCenter; visible: input.text.length === 0; text: "Search clipboard"; color: BarStyle.subtext; font.pixelSize: 12 }
@@ -133,7 +133,7 @@ Column {
                     required property var modelData
                     readonly property bool on: root.tab === modelData.id
                     width: chipLabel.implicitWidth + 22; height: 26; radius: 13
-                    color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.plateHover)
+                    color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.cardHigh)
                     Behavior on color { ColorAnimation { duration: 100 } }
                     BarText { id: chipLabel; anchors.centerIn: parent; text: parent.modelData.label; font.pixelSize: 12; color: parent.on ? BarStyle.onAccent : BarStyle.text }
                     MouseArea { id: chipArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.tab = parent.modelData.id }
@@ -171,7 +171,7 @@ Column {
             width: list.width
             height: isImage ? 76 : 36
             radius: 12
-            color: picked || rowHover.hovered ? BarStyle.plateHover : "transparent"
+            color: picked || rowHover.hovered ? BarStyle.cardHigh : "transparent"
             Behavior on color { ColorAnimation { duration: 90 } }
             Component.onCompleted: if (isImage) Cliphist.requestContent(modelData.entry)
 
@@ -243,7 +243,7 @@ Column {
         Rectangle {
             anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
             width: wipeLabel.implicitWidth + 18; height: 22; radius: 11
-            color: root.confirmWipe ? BarStyle.danger : (wipeArea.pressed ? BarStyle.border : BarStyle.plateHover)
+            color: root.confirmWipe ? BarStyle.danger : (wipeArea.pressed ? BarStyle.border : BarStyle.cardHigh)
             Behavior on color { ColorAnimation { duration: 100 } }
             BarText { id: wipeLabel; anchors.centerIn: parent; text: root.confirmWipe ? "Really clear?" : "Clear all"; font.pixelSize: 10; color: root.confirmWipe ? "white" : BarStyle.text }
             MouseArea {
