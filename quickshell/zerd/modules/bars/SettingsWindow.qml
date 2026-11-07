@@ -59,91 +59,90 @@ Scope {
             { title: "", rows: [ { t: "overview", label: "" } ] } ] },
         { name: "Profile", nav: "You", icon: "person", blurb: "Who you are, and saved set-ups", groups: [
             { title: "You", rows: [ { t: "user", label: "You" } ] },
-            { title: "Saved set-ups", rows: [ { t: "profiles", label: "Profiles", hint: "A profile remembers the wallpaper, the colour scheme and the main bar, dock and panel settings" } ] } ] },
+            { title: "Saved set-ups", rows: [ { t: "profiles", icon: "badge", label: "Profiles", hint: "A profile remembers the wallpaper, the colour scheme and the main bar, dock and panel settings" } ] } ] },
         { name: "Colours", nav: "You", icon: "palette", blurb: "Wallpaper and colours", groups: [
             { title: "Wallpaper", rows: [
-                { t: "wallpaper", label: "Wallpaper", hint: "The colours of everything come from the wallpaper", acts: [
+                { t: "wallpaper", icon: "wallpaper", label: "Wallpaper", hint: "The colours of everything come from the wallpaper", acts: [
                     { text: "Choose…", cmd: ["qs", "-c", "zerd", "ipc", "call", "wallpaper", "open"] },
                     { text: "Random", cmd: ["qs", "-c", "zerd", "ipc", "call", "wallpaper", "random"] } ] } ] },
             { title: "Colour", rows: [
-                { t: "swatches", label: "Accent colour", hint: "Auto takes it from the wallpaper" },
-                { t: "choice", art: "scheme", label: "Scheme", hint: "Auto follows the system", path: "iris.appearance.scheme", opts: ["auto", "dark", "ink", "light"], def: "auto" },
-                { t: "toggle", label: "Colours follow the wallpaper (wallust)", hint: "Off keeps the solver's last palette for the dock, launcher and cards", path: "iris.wallust", def: true },
-                { t: "toggle", label: "Dock icons magnify under the pointer", path: "iris.dock.magnification", def: true } ] } ] },
+                { t: "swatches", icon: "palette", label: "Accent colour", hint: "Auto takes it from the wallpaper" },
+                { t: "choice", art: "scheme", icon: "contrast", label: "Scheme", hint: "Auto follows the system", path: "iris.appearance.scheme", opts: ["auto", "dark", "ink", "light"], def: "auto" },
+                { t: "toggle", icon: "format_color_fill", label: "Colours follow the wallpaper (wallust)", hint: "Off keeps the solver's last palette for the dock, launcher and cards", path: "iris.wallust", def: true },
+                { t: "toggle", icon: "zoom_in", label: "Dock icons magnify under the pointer", path: "iris.dock.magnification", def: true } ] } ] },
         { name: "Time", nav: "You", icon: "schedule", blurb: "Clock, dates and world clocks", groups: [
             { title: "Clock", rows: [
-                { t: "preview", label: "Right now" },
-                { t: "choice", label: "Clock", hint: "Bar, lock screen, clock widgets", path: "time.format", def: "hh:mm",
+                { t: "preview", icon: "schedule", label: "Right now" },
+                { t: "choice", icon: "schedule", label: "Clock", hint: "Bar, lock screen, clock widgets", path: "time.format", def: "hh:mm",
                   opts: [{ v: "hh:mm", l: "24-hour" }, { v: "hh:mm:ss", l: "24-hour, seconds" }, { v: "h:mm AP", l: "12-hour" }, { v: "h:mm:ss AP", l: "12-hour, seconds" }] },
-                { t: "choice", label: "Short date", hint: "Next to the clock in the bar. d = day, M = month, y = year", path: "time.shortDateFormat", def: "dd/MM",
+                { t: "choice", icon: "calendar_month", label: "Short date", hint: "Next to the clock in the bar. d = day, M = month, y = year", path: "time.shortDateFormat", def: "dd/MM",
                   opts: ["dd/MM", "MM/dd", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "yyyy-MM-dd", "d MMM", "MMM d", "ddd d"].map(f => ({ v: f, l: Qt.formatDateTime(new Date(), f) })) },
-                { t: "choice", label: "Long date", hint: "Calendar, widgets and the lock screen", path: "time.dateFormat", def: "ddd, dd/MM",
+                { t: "choice", icon: "event", label: "Long date", hint: "Calendar, widgets and the lock screen", path: "time.dateFormat", def: "ddd, dd/MM",
                   opts: ["ddd, dd/MM", "ddd, MM/dd", "ddd, dd/MM/yyyy", "ddd, MM/dd/yyyy", "dddd, d MMMM", "dddd, MMMM d", "dddd, MMMM d, yyyy", "ddd d MMM yyyy", "yyyy-MM-dd"].map(f => ({ v: f, l: Qt.formatDateTime(new Date(), f) })) } ] },
             { title: "Weather", rows: [
-                { t: "choice", label: "Temperature", hint: "Weather in the bar, the weather popup and widgets (Fahrenheit also switches wind to mph)", path: "bar.weather.useUSCS", def: false,
+                { t: "choice", icon: "thermostat", label: "Temperature", hint: "Weather in the bar, the weather popup and widgets (Fahrenheit also switches wind to mph)", path: "bar.weather.useUSCS", def: false,
                   opts: [{ v: false, l: "Celsius (°C)" }, { v: true, l: "Fahrenheit (°F)" }] } ] },
             { title: "Time zones", rows: [
-                { t: "list", label: "World clocks", hint: "Zones for the world clock widget, like Europe/London. Press Enter to add", path: "desktopWidgets.worldClock.timezones", keepCase: true },
-                { t: "info", label: "System time zone", hint: "Changing it needs admin rights: timedatectl set-timezone", key: "tzInfo" } ] } ] },
+                { t: "list", icon: "public", label: "World clocks", hint: "Zones for the world clock widget, like Europe/London. Press Enter to add", path: "desktopWidgets.worldClock.timezones", keepCase: true },
+                { t: "info", icon: "language", label: "System time zone", hint: "Changing it needs admin rights: timedatectl set-timezone", key: "tzInfo" } ] } ] },
         { name: "Bar", nav: "Shell", icon: "toolbar", blurb: "The top bar", groups: [
             { title: "Behaviour", rows: [
-                { t: "toggle", label: "Hide the bar until the pointer is at the top", hint: "Rest the pointer on the top edge to bring it back", path: "bars.top.autoHide", def: false },
-                { t: "toggle", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true } ] },
+                { t: "toggle", icon: "visibility_off", label: "Hide the bar until the pointer is at the top", hint: "Rest the pointer on the top edge to bring it back", path: "bars.top.autoHide", def: false },
+                { t: "toggle", icon: "fullscreen", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true } ] },
             { title: "Look", rows: [
-                { t: "choice", art: "barlook", label: "Bar style", hint: "Pills: a capsule per group. Strip: one full-width bar. Floating: one rounded bar", path: "bars.top.look", opts: [{ v: "pills", l: "Pills" }, { v: "strip", l: "Strip" }, { v: "floating", l: "Floating" }], def: "pills" },
-                { t: "choice", label: "Workspaces", hint: "Icons show the apps open on each workspace", path: "bars.top.workspaceStyle", opts: ["pills", "numbers", "icons"], def: "pills" },
-                { t: "step", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
-                { t: "step", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 } ] },
+                { t: "choice", art: "barlook", icon: "view_carousel", label: "Bar style", hint: "Pills: a capsule per group. Strip: one full-width bar. Floating: one rounded bar", path: "bars.top.look", opts: [{ v: "pills", l: "Pills" }, { v: "strip", l: "Strip" }, { v: "floating", l: "Floating" }], def: "pills" },
+                { t: "step", icon: "apps", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
+                { t: "step", icon: "height", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 } ] },
             { title: "Layout", rows: [
-                { t: "actions", label: "Layout", hint: "Drag the blocks where you want them, hide what you don't use. Window titles can show private chats, so that block starts hidden", acts: [
+                { t: "actions", icon: "dashboard_customize", label: "Layout", hint: "Drag the blocks where you want them, hide what you don't use. Window titles can show private chats, so that block starts hidden", acts: [
                     { text: "Edit bar layout", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "open"] },
                     { text: "Reset to default", cmd: ["qs", "-c", "zerd", "ipc", "call", "baredit", "reset"] } ] } ] } ] },
         { name: "Dock", nav: "Shell", icon: "dock_to_bottom", blurb: "The app dock", groups: [
             { title: "Behaviour", rows: [
-                { t: "toggle", label: "Hide the dock until the pointer is at the edge", hint: "Rest the pointer on the screen edge to show it", path: "iris.dock.autoHide", def: true },
-                { t: "toggle", label: "Attach to the screen edge", hint: "The dock grows out of the bottom edge with curved corners, like a notch", path: "iris.dock.notch", def: false },
-                { t: "toggle", label: "Drag icons to reorder", path: "iris.dock.reorder", def: true } ] },
+                { t: "toggle", icon: "visibility_off", label: "Hide the dock until the pointer is at the edge", hint: "Rest the pointer on the screen edge to show it", path: "iris.dock.autoHide", def: true },
+                { t: "toggle", icon: "vertical_align_bottom", label: "Attach to the screen edge", hint: "The dock grows out of the bottom edge with curved corners, like a notch", path: "iris.dock.notch", def: false },
+                { t: "toggle", icon: "drag_indicator", label: "Drag icons to reorder", path: "iris.dock.reorder", def: true } ] },
             { title: "Look", rows: [
-                { t: "choice", art: "dockstyle", label: "Style", hint: "Tiles: every icon on its own dark square in a flat plate. Classic: the floating pill", path: "iris.dock.style", opts: ["tiles", "classic"], def: "tiles" },
-                { t: "step", label: "Icon size", path: "iris.dock.iconSize", min: 28, max: 64, by: 2, def: 40 },
-                { t: "toggle", label: "Magnify icons under the pointer", path: "iris.dock.magnification", def: true },
-                { t: "toggle", label: "Badges", path: "iris.dock.badges", def: true } ] },
+                { t: "choice", art: "dockstyle", icon: "dock_to_bottom", label: "Style", hint: "Tiles: every icon on its own dark square in a flat plate. Classic: the floating pill", path: "iris.dock.style", opts: ["tiles", "classic"], def: "tiles" },
+                { t: "step", icon: "fit_screen", label: "Icon size", path: "iris.dock.iconSize", min: 28, max: 64, by: 2, def: 40 },
+                { t: "toggle", icon: "zoom_in", label: "Magnify icons under the pointer", path: "iris.dock.magnification", def: true },
+                { t: "toggle", icon: "notifications_active", label: "Badges", path: "iris.dock.badges", def: true } ] },
             { title: "Spectrum", rows: [
-                { t: "toggle", label: "Spectrum", hint: "Moves with the music while a song plays", path: "iris.dock.cava.enable", def: true },
-                { t: "choice", art: "spectrum", label: "Spectrum style", hint: "Wave: a soft hill along the bottom of the screen. Inside: bars in the dock plate", path: "iris.dock.cava.style", opts: ["wave", "inside"], def: "wave" } ] } ] },
+                { t: "toggle", icon: "equalizer", label: "Spectrum", hint: "Moves with the music while a song plays", path: "iris.dock.cava.enable", def: true },
+                { t: "choice", art: "spectrum", icon: "graphic_eq", label: "Spectrum style", hint: "Wave: a soft hill along the bottom of the screen. Inside: bars in the dock plate", path: "iris.dock.cava.style", opts: ["wave", "inside"], def: "wave" } ] } ] },
         { name: "Panels", nav: "Shell", icon: "side_navigation", blurb: "The quick panel and the sections panel", groups: [
             { title: "Edge panels", rows: [
-                { t: "toggle", label: "Open a panel from the screen edge", hint: "The pointer has to move onto the edge and rest there", path: "bars.sidebars.edgeHover", def: true },
-                { t: "choice", art: "edges", label: "Edges", path: "bars.sidebars.edgeSide", opts: ["left", "right", "both"], def: "both" },
-                { t: "toggle", label: "Focus timer turns Do not disturb on", path: "bars.sidebars.focusDnd", def: true } ] } ] },
+                { t: "toggle", icon: "side_navigation", label: "Open a panel from the screen edge", hint: "The pointer has to move onto the edge and rest there", path: "bars.sidebars.edgeHover", def: true },
+                { t: "choice", art: "edges", icon: "swap_horiz", label: "Edges", path: "bars.sidebars.edgeSide", opts: ["left", "right", "both"], def: "both" },
+                { t: "toggle", icon: "do_not_disturb_on", label: "Focus timer turns Do not disturb on", path: "bars.sidebars.focusDnd", def: true } ] } ] },
         { name: "Launcher", nav: "Shell", icon: "apps", blurb: "The app list", groups: [
             { title: "App list", rows: [
-                { t: "list", label: "Hidden from the app list", hint: "Part of an app's name or id. Typing the name still finds it", path: "iris.launcher.hidden" } ] } ] },
+                { t: "list", icon: "hide_source", label: "Hidden from the app list", hint: "Part of an app's name or id. Typing the name still finds it", path: "iris.launcher.hidden" } ] } ] },
         { name: "Widgets", nav: "Shell", icon: "widgets", blurb: "The desktop widget board", groups: [
             { title: "Desktop widgets", rows: [
-                { t: "cards", label: "Desktop widgets", hint: "Tap to show or hide one. They sit on the wallpaper, under your windows" },
-                { t: "actions", label: "Arrange", hint: "Drag them where you want them", acts: [
+                { t: "cards", icon: "widgets", label: "Desktop widgets", hint: "Tap to show or hide one. They sit on the wallpaper, under your windows" },
+                { t: "actions", icon: "open_with", label: "Arrange", hint: "Drag them where you want them", acts: [
                     { text: "Arrange on screen", cmd: ["qs", "-c", "zerd", "ipc", "call", "widgetboard", "toggle"] },
                     { text: "Show all", cmd: ["qs", "-c", "zerd", "ipc", "call", "widgets", "toggleAll"] } ] } ] },
             { title: "Board", rows: [
-                { t: "choice", label: "Board grid (px, 0 = off)", path: "bars.board.grid", opts: [0, 8, 16, 32, 64], def: 32 },
-                { t: "toggle", label: "Snap to the grid", path: "bars.board.snap", def: true },
-                { t: "toggle", label: "Draw the grid", path: "bars.board.showGrid", def: true } ] } ] },
+                { t: "choice", icon: "grid_4x4", label: "Board grid (px, 0 = off)", path: "bars.board.grid", opts: [0, 8, 16, 32, 64], def: 32 },
+                { t: "toggle", icon: "magnet", label: "Snap to the grid", path: "bars.board.snap", def: true },
+                { t: "toggle", icon: "grid_on", label: "Draw the grid", path: "bars.board.showGrid", def: true } ] } ] },
         { name: "Controls", nav: "Behaviour", icon: "keyboard", blurb: "Keyboard shortcuts", groups: [
             { title: "Shortcuts", rows: [
-                { t: "binds", label: "Keyboard shortcuts", hint: "Click Change, then press the new keys. Keys that are already taken run their own action instead" } ] } ] },
+                { t: "binds", icon: "keyboard", label: "Keyboard shortcuts", hint: "Click Change, then press the new keys. Keys that are already taken run their own action instead" } ] } ] },
         { name: "Notifications", nav: "Behaviour", icon: "notifications", blurb: "Banners", groups: [
             { title: "Banners", rows: [
-                { t: "choice", label: "Banners", path: "bars.notifications.engine", opts: ["inir", "waffle"], def: "inir" },
-                { t: "choice", art: "banner", label: "Position", path: "bars.notifications.position", opts: ["top", "bottom"], def: "top" },
-                { t: "step", label: "Width", path: "bars.notifications.width", min: 300, max: 520, by: 20, def: 380 } ] } ] },
+                { t: "choice", icon: "notifications", label: "Banners", path: "bars.notifications.engine", opts: ["inir", "waffle"], def: "inir" },
+                { t: "choice", art: "banner", icon: "vertical_align_top", label: "Position", path: "bars.notifications.position", opts: ["top", "bottom"], def: "top" },
+                { t: "step", icon: "straighten", label: "Width", path: "bars.notifications.width", min: 300, max: 520, by: 20, def: 380 } ] } ] },
         { name: "Feedback", nav: "Behaviour", icon: "volume_up", blurb: "Pills and confirmations", groups: [
             { title: "Volume and brightness", rows: [
-                { t: "toggle", label: "Volume and brightness pill", path: "bars.osd.enable", def: true },
-                { t: "choice", art: "pill", label: "Pill position", path: "bars.osd.position", opts: ["bottom", "top"], def: "bottom" },
-                { t: "step", label: "Pill time (ms)", path: "bars.osd.timeout", min: 800, max: 4000, by: 100, def: 1500 } ] },
+                { t: "toggle", icon: "volume_up", label: "Volume and brightness pill", path: "bars.osd.enable", def: true },
+                { t: "choice", art: "pill", icon: "vertical_align_bottom", label: "Pill position", path: "bars.osd.position", opts: ["bottom", "top"], def: "bottom" },
+                { t: "step", icon: "timer", label: "Pill time (ms)", path: "bars.osd.timeout", min: 800, max: 4000, by: 100, def: 1500 } ] },
             { title: "Closing windows", rows: [
-                { t: "toggle", label: "Ask before closing important apps", hint: "Mod+Q closes at once when this is off", path: "closeConfirm.enabled", def: false } ] } ] }
+                { t: "toggle", icon: "help", label: "Ask before closing important apps", hint: "Mod+Q closes at once when this is off", path: "closeConfirm.enabled", def: false } ] } ] }
     ]
 
     Process {
@@ -182,6 +181,17 @@ Scope {
                 readonly property var index: Search.buildIndex(root.pages, NiriBinds.list.map(b => ({ name: NiriBinds.nameOf(b), key: b.key })))
                 readonly property bool searching: query.trim().length > 0
                 onQueryChanged: picked = 0
+
+                // what Reset page puts back: every row of this page that has a default
+                readonly property var resettable: {
+                    const out = []
+                    for (const g of root.pages[root.page].groups) for (const r of g.rows) {
+                        if (r.t === "swatches") out.push({ path: "colours.accent", def: "" })
+                        else if (r.path && r.def !== undefined) out.push({ path: r.path, def: r.def })
+                    }
+                    return out
+                }
+                function resetPage(): void { for (const r of view.resettable) Config.setNestedValue(r.path, r.def) }
 
                 function jump(e: var): void {
                     searchIn.text = ""
@@ -262,7 +272,7 @@ Scope {
                         let y = 0, last = null
                         for (let i = 0; i < root.pages.length; i++) {
                             const n = root.pages[i].nav
-                            if (n !== last) { last = n; if (n !== "") { y += out.length > 0 ? 6 : 0; out.push({ heading: n, y: y }); y += 24 } }
+                            if (n !== last) { last = n; if (n !== "") { y += out.length > 0 ? 8 : 0; out.push({ heading: n, y: y }); y += 28 } }
                             out.push({ page: i, y: y }); y += 35
                         }
                         return out
@@ -270,7 +280,7 @@ Scope {
                     readonly property var pageY: { const m = []; for (const e of entries) if (e.page !== undefined) m[e.page] = e.y; return m }
                     Flickable {
                         x: 0; y: 118; width: nav.width; height: nav.height - 118
-                        contentHeight: navBody.height + 16
+                        contentHeight: navBody.height + 2
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         Item {
@@ -280,7 +290,7 @@ Scope {
                             Rectangle {
                                 y: nav.pageY[root.page] ?? 0; width: parent.width; height: 34; radius: 17
                                 color: BarStyle.accentContainer
-                                Behavior on y { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
+                                Behavior on y { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.BezierSpline; easing.bezierCurve: BarStyle.easeExpressive } }
                             }
                             Repeater {
                                 model: nav.entries
@@ -289,11 +299,11 @@ Scope {
                                     required property var modelData
                                     readonly property bool isPage: modelData.page !== undefined
                                     readonly property bool on: isPage && root.page === modelData.page
-                                    y: modelData.y; width: navBody.width; height: isPage ? 34 : 22
+                                    y: modelData.y; width: navBody.width; height: isPage ? 34 : 24
                                     BarText {
                                         visible: !ent.isPage
-                                        x: 14; y: 5; text: String(ent.modelData.heading ?? "").toUpperCase()
-                                        font.pixelSize: 11; font.weight: Font.DemiBold; font.letterSpacing: 0.8; color: BarStyle.subtext
+                                        x: 14; y: 3; text: String(ent.modelData.heading ?? "").toUpperCase()
+                                        font.pixelSize: 13; font.weight: Font.DemiBold; font.letterSpacing: 0.9; color: BarStyle.text; opacity: 0.72
                                     }
                                     Row {
                                         visible: ent.isPage
@@ -313,7 +323,8 @@ Scope {
                 // ---- Pages: each is built the first time it is shown and then kept, so switching is instant
                 Item {
                     id: host
-                    x: nav.width; width: parent.width - nav.width; height: parent.height
+                    x: nav.width; width: parent.width - nav.width; height: parent.height - footer.height
+                    clip: true
                     Repeater {
                         model: root.pages.length
                         delegate: Loader {
@@ -335,14 +346,14 @@ Scope {
                             readonly property int pageIndex: parent ? parent.index : 0
                             readonly property var pg: root.pages[pageIndex]
                             anchors.fill: parent
-                            contentHeight: body.height + 64
+                            contentHeight: body.height + 80
                             clip: true
                             boundsBehavior: Flickable.StopAtBounds
                             Component.onCompleted: view.flicks[pageIndex] = flick
 
                             Column {
                                 id: body
-                                x: 32; y: 30; width: flick.width - 64; spacing: 22
+                                x: 32; y: 32; width: flick.width - 64; spacing: 16
                                 // the big header
                                 Item {
                                     width: body.width; height: 64
@@ -379,12 +390,13 @@ Scope {
                                                 registry: view.rows
                                                 highlightId: view.highlightId
                                                 title: spec.t === "overview" || spec.t === "user" ? "" : spec.label
+                                                icon: spec.t === "overview" || spec.t === "user" ? "" : (spec.icon ?? "")
                                                 hint: spec.t === "overview" ? "" : (spec.hint ?? "")
                                                 stacked: block || !!spec.art || (spec.t === "choice" && (spec.opts?.length ?? 0) > 5) || (spec.t === "actions" && (spec.hint?.length ?? 0) > 46)
                                                 clickable: spec.t === "toggle"
                                                 divider: index < rowRep.count - 1
                                                 onTapped: Config.setNestedValue(spec.path, !value)
-                                                readonly property real inner: width - 36
+                                                readonly property real inner: width - 32
 
                                                 Loader {
                                                     sourceComponent: ({ toggle: toggleC, choice: row.spec.art ? artC : (row.stacked ? wrapC : chipsC), step: stepC, actions: actionsC, info: infoC,
@@ -608,7 +620,9 @@ Scope {
                                                 // ---- accent colours: the wallpaper's, then a few fixed ones
                                                 Component {
                                                     id: swatchC
-                                                    Row {
+                                                    Column {
+                                                      spacing: 16
+                                                      Row {
                                                         spacing: 10
                                                         Repeater {
                                                             model: [{ hex: "" }].concat(["#ef5350", "#ff7043", "#ffca28", "#66bb6a", "#26a69a", "#42a5f5", "#7e57c2", "#ec407a", "#bdbdbd"].map(h => ({ hex: h })))
@@ -627,6 +641,18 @@ Scope {
                                                                 TapHandler { onTapped: Config.setNestedValue("colours.accent", sw.modelData.hex) }
                                                             }
                                                         }
+                                                      }
+                                                      // the accent as it will look: a filled button, a tonal chip, a bar, a switch
+                                                      Row {
+                                                        spacing: 16
+                                                        Rectangle { width: 92; height: 34; radius: 17; color: BarStyle.accent
+                                                            BarText { anchors.centerIn: parent; text: "Button"; font.pixelSize: 12; font.weight: Font.DemiBold; color: BarStyle.onAccent } }
+                                                        Rectangle { width: 92; height: 34; radius: 17; color: BarStyle.accentContainer
+                                                            BarText { anchors.centerIn: parent; text: "Chip"; font.pixelSize: 12; font.weight: Font.DemiBold; color: BarStyle.onAccentContainer } }
+                                                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 120; height: 8; radius: 4; color: BarStyle.cardHigh
+                                                            Rectangle { width: 72; height: 8; radius: 4; color: BarStyle.accent } }
+                                                        BarSwitch { checked: true; enabled: false }
+                                                      }
                                                     }
                                                 }
 
@@ -696,7 +722,7 @@ Scope {
                                                     Column {
                                                         id: bindsCol
                                                         width: row.inner; spacing: 2
-                                                        Text { visible: NiriBinds.message.length > 0; text: NiriBinds.message; color: NiriBinds.message === "Changed" ? BarStyle.accent : BarStyle.danger; font.pixelSize: 12; bottomPadding: 6 }
+                                                        BarText { visible: NiriBinds.message.length > 0; text: NiriBinds.message; color: NiriBinds.message === "Changed" ? BarStyle.accent : BarStyle.danger; font.pixelSize: 12 }
                                                         Repeater {
                                                             model: NiriBinds.list
                                                             delegate: Item {
@@ -864,9 +890,52 @@ Scope {
                     }
                 }
 
+                // ---- Footer, pinned: where the settings live, and Reset page (asks first)
+                Rectangle {
+                    id: footer
+                    x: nav.width; y: parent.height - height; width: parent.width - nav.width; height: 56
+                    color: BarStyle.surface
+                    property bool confirm: false
+                    readonly property bool canReset: view.resettable.length > 0
+                    Connections { target: root; function onPageChanged() { footer.confirm = false } }
+                    Timer { interval: 4000; running: footer.confirm; onTriggered: footer.confirm = false }
+                    Rectangle { width: parent.width; height: 1; color: BarStyle.border; opacity: 0.6 }
+                    Row {
+                        visible: !footer.confirm
+                        x: 32; anchors.verticalCenter: parent.verticalCenter; spacing: 8
+                        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "folder_open"; size: 18; color: BarStyle.subtext }
+                        BarText { anchors.verticalCenter: parent.verticalCenter; width: Math.min(implicitWidth + 1, footer.width - 64 - 160); elide: Text.ElideMiddle
+                            text: Directories.shellConfigPath; font.pixelSize: 12; color: BarStyle.subtext }
+                    }
+                    BarText { visible: footer.confirm; x: 32; anchors.verticalCenter: parent.verticalCenter
+                        text: "Put everything on this page back to its default?"; color: BarStyle.text }
+                    Row {
+                        anchors { right: parent.right; rightMargin: 32; verticalCenter: parent.verticalCenter }
+                        spacing: 8
+                        BarButton {
+                            id: cancelBtn
+                            visible: footer.confirm
+                            tone: "outlined"; width: 76; height: 34; radius: 17
+                            onTapped: footer.confirm = false
+                            BarText { anchors.centerIn: parent; text: "Cancel"; font.pixelSize: 12; color: cancelBtn.ink }
+                        }
+                        BarButton {
+                            id: resetBtn
+                            visible: footer.canReset
+                            tone: footer.confirm ? "filled" : "outlined"; width: footer.confirm ? 76 : 110; height: 34; radius: 17
+                            onTapped: { if (footer.confirm) { view.resetPage(); footer.confirm = false } else footer.confirm = true }
+                            Row {
+                                anchors.centerIn: parent; spacing: 6
+                                BarIcon { anchors.verticalCenter: parent.verticalCenter; visible: !footer.confirm; name: "restart_alt"; size: 16; color: resetBtn.ink }
+                                BarText { anchors.verticalCenter: parent.verticalCenter; text: footer.confirm ? "Reset" : "Reset page"; font.pixelSize: 12; font.weight: Font.Medium; color: resetBtn.ink }
+                            }
+                        }
+                    }
+                }
+
                 // ---- Search results, over the page
                 Rectangle {
-                    x: nav.width; width: parent.width - nav.width; height: parent.height
+                    x: nav.width; width: parent.width - nav.width; height: parent.height - footer.height
                     visible: view.searching
                     color: BarStyle.surface
                     BarText {
@@ -897,7 +966,7 @@ Scope {
                                     }
                                     Column {
                                         x: 60; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 76; spacing: 1
-                                        BarText { width: parent.width; elide: Text.ElideRight; text: res.modelData.label; font.weight: Font.DemiBold; color: res.sel ? BarStyle.onAccentContainer : BarStyle.text }
+                                        BarText { width: parent.width; elide: Text.ElideRight; textFormat: Text.StyledText; text: Search.mark(res.modelData.label, view.query, String(BarStyle.accent)); font.weight: Font.DemiBold; color: res.sel ? BarStyle.onAccentContainer : BarStyle.text }
                                         BarText { width: parent.width; elide: Text.ElideRight; font.pixelSize: 12; color: BarStyle.subtext
                                             text: res.modelData.pageName + (res.modelData.group ? "  ›  " + res.modelData.group : "") }
                                     }

@@ -13,9 +13,9 @@ Item {
 
     BarText {
         visible: group.title.length > 0
-        x: 6; y: 0
+        x: 4; y: 2
         text: group.title
-        font.pixelSize: 12; font.weight: Font.DemiBold; color: BarStyle.subtext
+        font.pixelSize: 13; font.weight: Font.DemiBold; color: BarStyle.subtext
     }
     Rectangle {
         y: group.title.length > 0 ? 28 : 0

@@ -9,6 +9,7 @@ Item {
 
     property string title: ""
     property string hint: ""
+    property string icon: ""                // a Material Symbol for the chip on the left
     property string rowId: ""
     property bool stacked: false
     property bool clickable: false
@@ -18,14 +19,16 @@ Item {
     default property alias control: slot.data
     signal tapped()
 
-    readonly property real pad: 18
+    readonly property real pad: 16
+    readonly property real lead: icon.length > 0 ? 52 : 0      // the 36 px chip and a 16 px gap
+    readonly property real headH: Math.max(textH, icon.length > 0 ? 36 : 0)
     readonly property real slotW: slot.childrenRect.width
     readonly property real slotH: slot.childrenRect.height
-    readonly property real textW: stacked ? width - 2 * pad : Math.max(120, width - 2 * pad - slotW - 20)
+    readonly property real textW: (stacked ? width - 2 * pad : Math.max(120, width - 2 * pad - slotW - 16)) - lead
     readonly property real textH: (title.length > 0 ? titleText.height : 0) + (hintText.visible ? hintText.height + (title.length > 0 ? 2 : 0) : 0)
 
     width: parent ? parent.width : 400
-    height: stacked ? Math.round((textH > 0 ? textH + 26 : 12) + slotH + 14) : Math.round(Math.max(hint.length > 0 ? 64 : 54, textH + 24, slotH + 20))
+    height: stacked ? Math.round(16 + headH + (headH > 0 ? 16 : 0) + slotH + 16) : Math.round(Math.max(56, headH + 20, slotH + 20))
 
     BarHoverFill { anchors { fill: parent; margins: 4 } hovered: row.clickable && hover.hovered; pressed: row.clickable && tap.pressed }
     Rectangle {
@@ -43,10 +46,18 @@ Item {
     }
     onHighlightIdChanged: if (rowId.length > 0 && highlightId === rowId) flashAnim.restart()
 
+    Rectangle {
+        visible: row.icon.length > 0
+        x: row.pad
+        y: row.stacked ? 16 + Math.round((row.headH - 36) / 2) : Math.round((row.height - 36) / 2)
+        width: 36; height: 36; radius: 12
+        color: BarStyle.accentContainer
+        BarIcon { anchors.centerIn: parent; name: row.icon; size: 20; color: BarStyle.onAccentContainer }
+    }
     Column {
         id: texts
-        x: row.pad
-        y: row.stacked ? 14 : Math.round((row.height - row.textH) / 2)
+        x: row.pad + row.lead
+        y: row.stacked ? 16 + Math.round((row.headH - row.textH) / 2) : Math.round((row.height - row.textH) / 2)
         width: row.textW
         spacing: 2
         BarText { id: titleText; visible: row.title.length > 0; width: parent.width; elide: Text.ElideRight; text: row.title }
@@ -61,7 +72,7 @@ Item {
     Item {
         id: slot
         x: row.stacked ? row.pad : row.width - row.pad - width
-        y: row.stacked ? Math.round((row.textH > 0 ? 14 + row.textH + 12 : 12)) : Math.round((row.height - height) / 2)
+        y: row.stacked ? Math.round(16 + row.headH + (row.headH > 0 ? 16 : 0)) : Math.round((row.height - height) / 2)
         width: childrenRect.width; height: childrenRect.height
     }
 
