@@ -9,8 +9,9 @@ QtObject {
         const k = map[kind] ?? kind;
         if (k === "settings") { GlobalStates.settingsOpen = !GlobalStates.settingsOpen; return; }
         if (k === "launcher" || k === "applauncher") { GlobalStates.irisLauncherOpen = !GlobalStates.irisLauncherOpen; return; }
-        if (GlobalStates.barPopup?.kind === k) { GlobalStates.barPopup = null; return; }
+        const tab = (kind === "wifi" || kind === "bt") ? kind : "";
+        if (GlobalStates.barPopup?.kind === k && (GlobalStates.barPopup?.tab ?? "") === tab) { GlobalStates.barPopup = null; return; }
         const x = item ? item.mapToItem(null, item.width / 2, 0).x : 960;
-        GlobalStates.barPopup = { kind: k, x: Math.round(x) };
+        GlobalStates.barPopup = { kind: k, x: Math.round(x), tab: tab };
     }
 }

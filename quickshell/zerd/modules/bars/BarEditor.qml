@@ -50,12 +50,13 @@ Scope {
         bt: { t: "Bluetooth", i: "bluetooth" },
         vol: { t: "Volume", i: "volume_up" },
         bat: { t: "Battery", i: "battery_full" },
-        focus: { t: "Window title", i: "web_asset" }
+        focus: { t: "Window title", i: "web_asset" },
+        vis: { t: "Visualizer", i: "equalizer" }
     })
     // Out of the box. Reset puts exactly this back.
     readonly property var defaults: ({
         left: ["left", "workspaces", "media"], middle: ["timedate"],
-        right: ["sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat"], hidden: ["focus"]
+        right: ["sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat"], hidden: ["focus", "vis"]
     })
     readonly property var zones: [
         { key: "left", title: "Left" }, { key: "middle", title: "Middle" }, { key: "right", title: "Right" }, { key: "hidden", title: "Hidden" }

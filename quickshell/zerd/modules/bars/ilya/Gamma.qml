@@ -1,7 +1,12 @@
 pragma Singleton
 import QtQuick
+import qs.services as Svc
 
 QtObject {
-    function isAnyEnabled() { return false; }
-    function setEnabled(monitor, on) {}
+    signal settingsChanged()
+    function isAnyEnabled() { return Svc.Hyprsunset.active; }
+    function setEnabled(monitor, on) {
+        if (on) Svc.Hyprsunset.enable(); else Svc.Hyprsunset.disable();
+        settingsChanged();
+    }
 }

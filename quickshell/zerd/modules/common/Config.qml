@@ -317,7 +317,7 @@ Singleton {
                     property list<string> layoutLeft: ["left", "workspaces", "media"]
                     property list<string> layoutMiddle: ["timedate"]
                     property list<string> layoutRight: ["sysmon", "weather", "info", "tray", "kb", "wifi", "bt", "vol", "bat"]
-                    property list<string> layoutHidden: ["focus"]
+                    property list<string> layoutHidden: ["focus", "vis"]
                     // Single items inside the Info and Status blocks.
                     // pills (a capsule per group), strip (one full-width bar), floating (one rounded bar, inset)
                     property string look: "pills"
