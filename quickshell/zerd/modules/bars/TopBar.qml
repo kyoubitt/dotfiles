@@ -107,8 +107,8 @@ Scope {
             readonly property bool shown: !autoHide || pointerOn || top.forced || GlobalStates.barPopup !== null || (BarState.sidebar !== "" && !win.mixedFullscreen)
 
             // Which block sits where (Settings > Bar). Order inside a side is fixed, so moving a block never scrambles the rest.
-            readonly property var defaultSide: ({ left: "left", media: "left", timedate: "middle", sysmon: "right", cpuram: "right", info: "right", tray: "right", dnd: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden", vis: "hidden" })
-            readonly property var blockOrder: ["left", "media", "timedate", "sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat", "focus", "vis"]
+            readonly property var defaultSide: ({ left: "left", workspaces: "left", media: "left", timedate: "middle", sysmon: "right", cpuram: "right", info: "right", tray: "right", dnd: "right", wifi: "right", bt: "right", vol: "right", bat: "right", focus: "hidden", vis: "hidden" })
+            readonly property var blockOrder: ["left", "workspaces", "media", "timedate", "sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat", "focus", "vis"]
             readonly property var layout: {
                 const l = { left: [].concat(options.layoutLeft ?? []), middle: [].concat(options.layoutMiddle ?? []), right: [].concat(options.layoutRight ?? []), hidden: [].concat(options.layoutHidden ?? []) }
                 const seen = {}

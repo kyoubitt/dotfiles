@@ -27,3 +27,6 @@ singleton Lyrics 1.0 Lyrics.qml
 singleton Cava 1.0 Cava.qml
 singleton NotificationManager 1.0 NotificationManager.qml
 singleton Gamma 1.0 Gamma.qml
+singleton NiriState 1.0 NiriState.qml
+singleton MangoState 1.0 MangoState.qml
+singleton SwayState 1.0 SwayState.qml

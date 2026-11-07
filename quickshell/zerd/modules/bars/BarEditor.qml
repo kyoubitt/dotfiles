@@ -38,6 +38,7 @@ Scope {
 
     readonly property var info: ({
         left: { t: "Menu", i: "menu" },
+        workspaces: { t: "Workspaces", i: "grid_view" },
         media: { t: "Music", i: "music_note" },
         timedate: { t: "Clock and date", i: "schedule" },
         sysmon: { t: "System monitor", i: "monitoring" },
@@ -54,7 +55,7 @@ Scope {
     })
     // Out of the box. Reset puts exactly this back.
     readonly property var defaults: ({
-        left: ["left", "media"], middle: ["timedate"],
+        left: ["left", "workspaces", "media"], middle: ["timedate"],
         right: ["sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat"], hidden: ["focus", "vis"]
     })
     readonly property var zones: [

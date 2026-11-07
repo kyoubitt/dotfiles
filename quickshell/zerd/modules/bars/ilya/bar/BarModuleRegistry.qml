@@ -41,6 +41,35 @@ QtObject {
                 }
             }
         },
+        "workspaces": {
+            name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.name", "Workspaces") : "Workspaces",
+            icon: "󰮯",
+            defaultVariant: "pills",
+            face: "faces/workspaces/WorkspacesFace.qml",
+            variants: {
+                "pills": {
+                    id: "pills",
+                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.pills", "Pills") : "Pills",
+                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.pills", "Minimal pill indicators") : "Minimal pill indicators",
+                    icon: "󰮯",
+                    face: "faces/workspaces/PillsFace.qml"
+                },
+                "numbers": {
+                    id: "numbers",
+                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.numbers", "Numbers") : "Numbers",
+                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.numbers", "Numbered indices") : "Numbered indices",
+                    icon: "󰎦",
+                    face: "faces/workspaces/NumbersFace.qml"
+                },
+                "pacman": {
+                    id: "pacman",
+                    name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.pacman", "Pacman") : "Pacman",
+                    desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.pacman", "Animated arcade dots") : "Animated arcade dots",
+                    icon: "󰮯",
+                    face: "faces/workspaces/PacmanFace.qml"
+                }
+            }
+        },
         "focus": {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.focus", "Focus") : "Focus",
             icon: "󰈈",
@@ -226,6 +255,10 @@ QtObject {
         let norm = normalizeId(moduleId);
         let bs = (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) ? Config.rawSettings.bar : {};
 
+        if (norm === "workspaces") {
+            if (bs.workspacesStyle) return bs.workspacesStyle;
+            return "pills";
+        }
         if (norm === "timedate") {
             if (bs.timeStyle) return bs.timeStyle;
             return "classic";

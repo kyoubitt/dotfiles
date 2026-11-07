@@ -314,7 +314,7 @@ Singleton {
                     property bool showFocus: false
                     property bool showTools: true
                     // Which block sits in which box (Edit bar in Settings): left, middle, right or hidden.
-                    property list<string> layoutLeft: ["left", "media"]
+                    property list<string> layoutLeft: ["left", "workspaces", "media"]
                     property list<string> layoutMiddle: ["timedate"]
                     property list<string> layoutRight: ["sysmon", "cpuram", "info", "tray", "dnd", "wifi", "bt", "vol", "bat"]
                     property list<string> layoutHidden: ["focus", "vis"]
