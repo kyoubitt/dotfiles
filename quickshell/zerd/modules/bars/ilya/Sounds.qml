@@ -16,10 +16,10 @@ Item {
 
     property var _pendingQueue: []
 
-    // Settings > Sounds: bars.sounds.enable and bars.sounds.volume (0 to 100)
+    // Settings > Sounds: bars.sounds.enable and bars.sounds.volume (0 to 1)
     readonly property var cfg: Common.Config.options?.bars?.sounds ?? ({})
     readonly property bool isMuted: !(cfg.enable ?? true) || Svc.Notifications.silent
-    readonly property real masterVolume: Math.max(0.0, Math.min(1.0, (cfg.volume ?? 60) / 100.0))
+    readonly property real masterVolume: Math.max(0.0, Math.min(1.0, (cfg.volume ?? 0.5)))
 
     // one sound per file within 120 ms and any sound within 35 ms, so a fast run of clicks never stacks
     property var _lastByFile: ({})

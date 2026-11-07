@@ -306,11 +306,6 @@ Singleton {
                     // A focus (pomodoro) lap turns do not disturb on, and off again after.
                     property bool focusDnd: true
                 }
-                // UI sounds taken from serpantinum (popup open and close, buttons, toggles, notifications, volume)
-                property JsonObject sounds: JsonObject {
-                    property bool enable: true
-                    property int volume: 60
-                }
                 property JsonObject top: JsonObject {
                     property bool enable: false
                     property int height: 34
