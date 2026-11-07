@@ -11,13 +11,14 @@ QtObject {
     property string iconFont: "JetBrainsMono Nerd Font Mono"
     property int borderRadius: 14
     property int clampedBorderRadius: borderRadius
-    property real elementOpacity: 1.0
+    property real elementOpacity: 0.88
     property bool blurBackground: false
     property string blurStyle: "blur"
     readonly property bool glassActive: false
     readonly property bool liquidGlass: false
 
-    readonly property color base: c.colLayer1
+    // a soft tint of the accent over the surface, not flat black
+    readonly property color base: Qt.tint(Qt.tint(c.colLayer1, Qt.rgba(text.r, text.g, text.b, 0.05)), Qt.rgba(blue.r, blue.g, blue.b, 0.10))
     readonly property color mantle: c.colLayer0
     readonly property color crust: Qt.darker(c.colLayer0, 1.25)
     readonly property color text: c.colOnLayer1

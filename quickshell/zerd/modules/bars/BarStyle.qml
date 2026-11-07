@@ -12,6 +12,8 @@ Singleton {
     // accent from the wallpaper's palette or the one picked in Settings. Everything else reads these.
     readonly property var c: Appearance.colors
     readonly property color plate: c.colLayer1                    // bar capsules, panels
+    // the bar plates: the surface with a little text and accent in it, a touch see-through
+    readonly property color plateTint: Qt.alpha(Qt.tint(Qt.tint(c.colLayer1, Qt.rgba(text.r, text.g, text.b, 0.05)), Qt.rgba(accent.r, accent.g, accent.b, 0.10)), 0.88)
     readonly property color surface: c.colLayer1                  // popups, tooltips, anything over windows
     readonly property color card: c.colLayer2                     // a card on a panel
     readonly property color cardHigh: c.colLayer3                 // a card on a card, chips

@@ -145,7 +145,7 @@ Scope {
                         visible: run.grouped && !run.flat
                         anchors.fill: parent
                         radius: 14
-                        color: BarStyle.plate
+                        color: BarStyle.plateTint
                     }
                     Row {
                         id: runRow
@@ -225,7 +225,7 @@ Scope {
                     y: win.look === "strip" ? 0 : win.margin
                     width: parent.width - 2 * x; height: win.barHeight
                     radius: win.look === "strip" ? 0 : height / 2
-                    color: BarStyle.plate
+                    color: BarStyle.plateTint
                     border.width: win.look === "floating" ? 1 : 0
                     border.color: BarStyle.border
                     Rectangle { visible: win.look === "strip"; anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 1; color: BarStyle.border }
