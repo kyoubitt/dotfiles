@@ -88,3 +88,9 @@ SettingsWindow 1.0 SettingsWindow.qml
 singleton Profiles 1.0 Profiles.qml
 singleton NiriBinds 1.0 NiriBinds.qml
 NotifRuleSweep 1.0 NotifRuleSweep.qml
+EditorPlate 1.0 EditorPlate.qml
+EditorChip 1.0 EditorChip.qml
+PanelHeader 1.0 PanelHeader.qml
+PanelButton 1.0 PanelButton.qml
+QuickSlider 1.0 QuickSlider.qml
+QuickRing 1.0 QuickRing.qml
