@@ -386,7 +386,7 @@ PanelWindow {
                     }
                     return trayMenuWindow.alignBottom ? 3.0 : 1.0;
                 }
-                property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                property color color: ThemeBackend.card
                 fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
@@ -413,7 +413,7 @@ PanelWindow {
                     }
                     return trayMenuWindow.alignBottom ? 2.0 : 0.0;
                 }
-                property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                property color color: ThemeBackend.card
                 fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
@@ -428,7 +428,7 @@ PanelWindow {
             Rectangle {
                 id: menuBox
                 anchors.fill: parent
-                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                color: ThemeBackend.card
                 radius: trayMenuWindow.cornerRadius
                 readonly property bool flatCorners: trayMenuWindow.isSolid
                 topLeftRadius: (flatCorners && (trayMenuWindow.isSideBar ? !trayMenuWindow.alignRight : !trayMenuWindow.alignBottom)) ? 0 : trayMenuWindow.cornerRadius
@@ -777,7 +777,7 @@ PanelWindow {
                     height: submenuPopout.subCornerRadius
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 2.0 : 3.0
-                    property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                    property color color: ThemeBackend.card
                     fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
@@ -789,14 +789,14 @@ PanelWindow {
                     height: submenuPopout.subCornerRadius
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 0.0 : 1.0
-                    property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                    property color color: ThemeBackend.card
                     fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
                 Rectangle {
                     id: subMenuBox
                     anchors.fill: parent
-                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+                    color: ThemeBackend.card
                     radius: trayMenuWindow.cornerRadius
                     topLeftRadius: submenuPopout.expandRight ? 0 : trayMenuWindow.cornerRadius
                     bottomLeftRadius: submenuPopout.expandRight ? 0 : trayMenuWindow.cornerRadius

@@ -404,7 +404,7 @@ MusicEqualizerState {
             id: innerBg
             anchors.fill: parent
             anchors.margins: ThemeBackend.liquidGlass ? 0 : popupRoot.s(3)
-            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+            color: ThemeBackend.card
             radius: ThemeBackend.borderRadius
 
             WallpaperBlur {

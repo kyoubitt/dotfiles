@@ -9,7 +9,7 @@ QtObject {
     readonly property var c: Common.Appearance.colors
     property string fontFamily: Common.Appearance.font.family.expressive
     property string iconFont: "JetBrainsMono Nerd Font Mono"
-    property int borderRadius: 14
+    property int borderRadius: 16
     property int clampedBorderRadius: borderRadius
     property real elementOpacity: 0.88
     property bool blurBackground: false
@@ -19,6 +19,8 @@ QtObject {
 
     // a soft tint of the accent over the surface, not flat black
     readonly property color base: Qt.tint(Qt.tint(c.colLayer1, Qt.rgba(text.r, text.g, text.b, 0.05)), Qt.rgba(blue.r, blue.g, blue.b, 0.10))
+    // popups and menus: the same tint, nearly opaque, so text over a busy window stays crisp
+    readonly property color card: Qt.alpha(base, 0.97)
     readonly property color mantle: c.colLayer0
     readonly property color crust: Qt.darker(c.colLayer0, 1.25)
     readonly property color text: c.colOnLayer1
