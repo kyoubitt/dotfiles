@@ -16,19 +16,6 @@ Column {
     readonly property var order: root.stored.filter(n => root.defaults.includes(n)).concat(root.defaults.filter(n => !root.stored.includes(n)))
     readonly property var hidden: Config.options?.bars?.sidebars?.rightHidden ?? []
 
-    // One button; the cards themselves are added and moved on the board.
-    BarButton {
-        id: editBtn
-        tone: "tonal"
-        width: parent.width; height: 48; radius: height / 2
-        onTapped: BarState.openBoard()
-        Row {
-            anchors.centerIn: parent; spacing: 8
-            BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "widgets"; size: 18; fill: 1; color: BarStyle.accent }
-            BarText { anchors.verticalCenter: parent.verticalCenter; text: "Edit widgets"; font.weight: Font.DemiBold; color: editBtn.ink }
-        }
-    }
-
     // ---- Sections
     Component {
         id: cCalendar

@@ -223,12 +223,26 @@ Scope {
                 }
 
                 // tabs under the header: the panel, and the translator as its own page
+                BarButton {
+                    id: editBtn
+                    visible: win.onRight
+                    x: 20; y: 62
+                    tone: "tonal"
+                    width: parent.width - 40; height: 40; radius: 20
+                    onTapped: BarState.openBoard()
+                    Row {
+                        anchors.centerIn: parent; spacing: 8
+                        BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "widgets"; size: 18; fill: 1; color: BarStyle.accent }
+                        BarText { anchors.verticalCenter: parent.verticalCenter; text: "Edit widgets"; font.weight: Font.DemiBold; color: editBtn.ink }
+                    }
+                }
                 Row {
                     id: tabs
-                    x: 20; y: 62
+                    visible: win.onRight
+                    x: 20; y: 110
                     spacing: 6
                     Repeater {
-                        model: [{ k: "main", t: win.onRight ? "Sections" : "Quick panel", i: win.onRight ? "widgets" : "toggle_on" }, { k: "translate", t: "Translate", i: "translate" }]
+                        model: win.onRight ? [{ k: "main", t: "Sections", i: "widgets" }, { k: "translate", t: "Translate", i: "translate" }] : []
                         delegate: BarButton {
                             id: tb
                             required property var modelData
@@ -249,7 +263,7 @@ Scope {
                     visible: win.tab === "translate"
                     anchors.fill: parent
                     anchors.margins: 20
-                    anchors.topMargin: 108
+                    anchors.topMargin: 156
                     anchors.bottomMargin: 16
                 }
 
@@ -258,7 +272,7 @@ Scope {
                     visible: win.tab === "main"
                     anchors.fill: parent
                     anchors.margins: 20
-                    anchors.topMargin: 108
+                    anchors.topMargin: win.onRight ? 156 : 76
                     anchors.bottomMargin: 8
                     contentHeight: column.implicitHeight + 24
                     clip: true
