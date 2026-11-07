@@ -291,6 +291,8 @@ Singleton {
                     property bool enable: true
                     property real volume: 0.5
                 }
+                // frosted-glass popups and plates (off: solid cards)
+                property bool liquidGlass: false
                 property JsonObject clipboard: JsonObject {
                     // Text snippets kept at the top of the clipboard palette.
                     property list<string> pinned: []

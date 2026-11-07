@@ -444,6 +444,8 @@ PanelWindow {
                 bottomRightRadius: (flatCorners && (trayMenuWindow.isSideBar ? trayMenuWindow.alignRight : trayMenuWindow.alignBottom)) ? 0 : trayMenuWindow.cornerRadius
                 clip: true
 
+                GlassSheen {}
+
                 WallpaperBlur {
                     z: -1
                     anchors.fill: parent
@@ -803,6 +805,8 @@ PanelWindow {
                     topRightRadius: !submenuPopout.expandRight ? 0 : trayMenuWindow.cornerRadius
                     bottomRightRadius: !submenuPopout.expandRight ? 0 : trayMenuWindow.cornerRadius
                     clip: true
+
+                    GlassSheen {}
 
                     WallpaperBlur {
                         z: -1

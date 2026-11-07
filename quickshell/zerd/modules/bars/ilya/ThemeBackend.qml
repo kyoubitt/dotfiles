@@ -13,16 +13,17 @@ QtObject {
     property string iconFont: "JetBrainsMono Nerd Font Mono"
     property int borderRadius: 16
     property int clampedBorderRadius: borderRadius
-    property real elementOpacity: 0.88
+    property real elementOpacity: liquidGlass ? 0.55 : 0.88
     property bool blurBackground: false
     property string blurStyle: "blur"
     readonly property bool glassActive: false
-    readonly property bool liquidGlass: false
+    // bars.liquidGlass: frosted, see-through cards and plates; off: solid
+    readonly property bool liquidGlass: Common.Config.options?.bars?.liquidGlass ?? false
 
     // a soft tint of the accent over the surface, not flat black
     readonly property color base: Qt.tint(Qt.tint(bg, Qt.rgba(text.r, text.g, text.b, 0.07)), Qt.rgba(blue.r, blue.g, blue.b, 0.08))
     // popups and menus: the same tint, nearly opaque, so text over a busy window stays crisp
-    readonly property color card: Qt.alpha(base, 0.97)
+    readonly property color card: Qt.alpha(base, liquidGlass ? 0.55 : 0.97)
     readonly property color mantle: bg
     readonly property color crust: Qt.darker(bg, 1.4)
     readonly property color text: Svc.WallustTheme.textPrimary

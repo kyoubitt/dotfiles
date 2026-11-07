@@ -414,6 +414,8 @@ Item {
         clip: true
         opacity: root.introContent
 
+        GlassSheen {}
+
         WallpaperBlur {
             z: -1
             anchors.fill: parent

@@ -162,6 +162,8 @@ Item {
         transformOrigin: Item.Top
         clip: true
 
+        GlassSheen {}
+
         RowLayout {
             anchors.fill: parent
             anchors.margins: root.pad

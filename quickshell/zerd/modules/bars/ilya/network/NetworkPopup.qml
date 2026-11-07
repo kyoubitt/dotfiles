@@ -1534,6 +1534,8 @@ Item {
             color: ThemeBackend.card
             clip: true
 
+            GlassSheen {}
+
             WallpaperBlur {
                 z: -1
                 anchors.fill: parent

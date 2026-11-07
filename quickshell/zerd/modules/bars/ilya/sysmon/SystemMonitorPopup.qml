@@ -178,6 +178,8 @@ Item {
         transformOrigin: Item.TopRight
         clip: true
 
+        GlassSheen {}
+
         ColumnLayout {
             id: col
             anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
