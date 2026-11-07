@@ -9,7 +9,6 @@ QtObject {
 
     readonly property bool dataReady: true
     signal settingsLoaded()
-    signal rawSettingsChanged()
 
     readonly property var top: Common.Config.options?.bars?.top ?? ({})
     readonly property var rawSettings: ({
@@ -18,7 +17,6 @@ QtObject {
             hideEmptyWorkspaces: false
         }
     })
-    onRawSettingsChanged: {}
 
     function getSetting(key, fallback) {
         const v = root.rawSettings[key];
