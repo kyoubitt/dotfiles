@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -106,24 +107,30 @@ PanelWindow {
         return (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar && Config.rawSettings.bar.height) ? s(Config.rawSettings.bar.height) : s(40);
     }
 
-    property real cornerRadius: {
-        let dummy = configRevision;
-        let raw = (typeof ThemeBackend !== "undefined" && ThemeBackend.borderRadius !== undefined && ThemeBackend.borderRadius !== null)
-            ? ThemeBackend.borderRadius
-            : s(12);
-        let threshold = s(32);
-        let maxLimit = s(44);
-        if (raw <= threshold) {
-            return Math.max(0, raw);
-        }
-        let excess = raw - threshold;
-        let range = maxLimit - threshold;
-        return threshold + range * (1.0 - Math.exp(-excess / range));
-    }
+    property real cornerRadius: s(16)
 
     property real menuMargin: isSolid ? 0 : s(20)
 
     visible: isVisible || menuContainer.animProgress > 0.001
+
+
+    function isDanger(label) {
+        return /^(quit|exit|close|log ?out|sign ?out|shut ?down|power off)/i.test(String(label || "").replace(/^[^a-z]*/i, ""));
+    }
+
+    // a Material Symbol for entries that carry no icon of their own, picked from the label
+    function symbolFor(label) {
+        const l = String(label || "").toLowerCase();
+        const rules = [
+            [/quit|exit|close/, "logout"], [/store|shop/, "storefront"], [/librar/, "video_library"], [/communit/, "groups"],
+            [/friend/, "group"], [/big picture|fullscreen|full screen/, "tv"], [/setting|prefer|option/, "settings"],
+            [/update/, "system_update_alt"], [/open|show|launch|start/, "open_in_new"], [/game|play|steam/, "sports_esports"],
+            [/mute|volume|sound/, "volume_off"], [/message|chat/, "chat"], [/status|online|away|invisible/, "circle"],
+            [/new/, "add"], [/help|about/, "help"], [/pause/, "pause"], [/next/, "skip_next"], [/previous|prev/, "skip_previous"]
+        ];
+        for (const r of rules) if (r[0].test(l)) return r[1];
+        return "fiber_manual_record";
+    }
 
     function closeMenu() {
         clearSubmenus();
@@ -338,7 +345,7 @@ PanelWindow {
             }
 
             opacity: animProgress
-            scale: !trayMenuWindow.isSolid ? (0.92 + (0.08 * animProgress)) : 1.0
+            scale: !trayMenuWindow.isSolid ? (0.9 + (0.1 * animProgress)) : 1.0
 
             transformOrigin: {
                 if (trayMenuWindow.isSideBar) {
@@ -410,6 +417,14 @@ PanelWindow {
                 fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
+            RectangularShadow {
+                anchors.fill: menuBox
+                radius: menuBox.radius
+                blur: trayMenuWindow.s(28)
+                offset: Qt.vector2d(0, trayMenuWindow.s(8))
+                color: Qt.rgba(0, 0, 0, 0.38)
+            }
+
             Rectangle {
                 id: menuBox
                 anchors.fill: parent
@@ -461,6 +476,22 @@ PanelWindow {
                     interactive: contentHeight > height
                     property Item hoverItem: null
 
+                    Rectangle {
+                        id: menuListGlide
+                        z: -1
+                        radius: trayMenuWindow.s(10)
+                        x: menuList.hoverItem ? menuList.hoverItem.x : 0
+                        y: menuList.hoverItem ? menuList.hoverItem.y : 0
+                        width: menuList.hoverItem ? menuList.hoverItem.width : 0
+                        height: menuList.hoverItem ? menuList.hoverItem.height : 0
+                        opacity: menuList.hoverItem ? 1 : 0
+                        color: (menuList.hoverItem && menuList.hoverItem.danger) ? Qt.alpha(ThemeBackend.red, 0.22) : Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, 0.26))
+                        Behavior on y { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 110 } }
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+
                     GlassLens {
                         id: rootHoverLens
                         z: -1
@@ -477,10 +508,43 @@ PanelWindow {
                         press: menuList.hoverItem && menuList.hoverItem.pressed ? 0.8 : 0
                     }
 
+                    header: Item {
+                        width: menuList.width
+                        height: trayMenuWindow.activeItem ? trayMenuWindow.s(46) : 0
+                        visible: height > 0
+                        Row {
+                            x: trayMenuWindow.s(8)
+                            y: trayMenuWindow.s(6)
+                            spacing: trayMenuWindow.s(8)
+                            Image {
+                                width: trayMenuWindow.s(22); height: trayMenuWindow.s(22)
+                                sourceSize: Qt.size(trayMenuWindow.s(44), trayMenuWindow.s(44))
+                                fillMode: Image.PreserveAspectFit
+                                source: trayMenuWindow.activeItem ? (trayMenuWindow.activeItem.icon ?? "") : ""
+                                visible: status === Image.Ready
+                            }
+                            Text {
+                                renderType: Text.NativeRendering
+                                height: trayMenuWindow.s(22)
+                                verticalAlignment: Text.AlignVCenter
+                                text: trayMenuWindow.activeItem ? (trayMenuWindow.activeItem.title || trayMenuWindow.activeItem.tooltipTitle || trayMenuWindow.activeItem.id || "") : ""
+                                color: ThemeBackend.text
+                                font.family: ThemeBackend.fontFamily
+                                font.weight: Font.DemiBold
+                                font.pixelSize: trayMenuWindow.s(13)
+                            }
+                        }
+                        Rectangle {
+                            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: trayMenuWindow.s(6); rightMargin: trayMenuWindow.s(6); bottomMargin: trayMenuWindow.s(4) }
+                            height: 1
+                            color: ThemeBackend.surface1
+                        }
+                    }
+
                     delegate: Item {
                         id: rootItemDelegate
                         width: menuList.width
-                        height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(9) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
+                        height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(13) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
                         visible: height > 0
                         readonly property bool pressed: itemMouse.pressed
                         readonly property bool lensWanted: itemMouse.containsMouse
@@ -493,14 +557,16 @@ PanelWindow {
                             if (menuList.hoverItem === rootItemDelegate) menuList.hoverItem = null;
                         }
 
-                        property bool isSep: modelData ? modelData.isSeparator : false
+                        readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
+                        readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
+                            property bool isSep: modelData ? modelData.isSeparator : false
                         property bool hasChildren: modelData ? (modelData.hasChildren === true) : false
 
                         Rectangle {
                             anchors.fill: parent
                             visible: !rootItemDelegate.isSep
                             radius: trayMenuWindow.s(8)
-                            color: (rootHoverGlass.active || rootHoverLens.glassActive) ? "transparent" : (itemMouse.containsMouse ? ThemeBackend.surface0 : "transparent")
+                            color: "transparent"
                             opacity: (modelData && modelData.enabled) ? 1.0 : 0.4
 
                             GlassFill {
@@ -518,23 +584,37 @@ PanelWindow {
                                 anchors.left: parent.left
                                 anchors.leftMargin: trayMenuWindow.s(8)
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: source !== "" ? trayMenuWindow.s(16) : 0
-                                height: trayMenuWindow.s(16)
+                                width: trayMenuWindow.s(20)
+                                height: trayMenuWindow.s(20)
                                 source: modelData ? trayMenuWindow.resolveMenuIcon(modelData.icon) : ""
-                                sourceSize: Qt.size(trayMenuWindow.s(16), trayMenuWindow.s(16))
+                                sourceSize: Qt.size(trayMenuWindow.s(40), trayMenuWindow.s(40))
                                 fillMode: Image.PreserveAspectFit
-                                visible: width > 0 && status === Image.Ready
+                                visible: source !== "" && status === Image.Ready
                             }
 
                             Text {
                                 renderType: Text.NativeRendering
-                                anchors.left: itemIcon.visible ? itemIcon.right : parent.left
+                                anchors.left: parent.left
+                                anchors.leftMargin: trayMenuWindow.s(8)
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: trayMenuWindow.s(20)
+                                horizontalAlignment: Text.AlignHCenter
+                                visible: !itemIcon.visible && !rootItemDelegate.isSep
+                                text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: trayMenuWindow.s(18)
+                                color: (rootItemDelegate.danger && itemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
+                            }
+
+                            Text {
+                                renderType: Text.NativeRendering
+                                anchors.left: parent.left
                                 anchors.leftMargin: trayMenuWindow.s(8)
                                 anchors.right: arrowText.visible ? arrowText.left : parent.right
                                 anchors.rightMargin: trayMenuWindow.s(8)
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: (modelData && modelData.text) ? modelData.text : ""
-                                color: ThemeBackend.text
+                                color: (rootItemDelegate.danger && itemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.text
                                 font.family: ThemeBackend.fontFamily
                                 font.pixelSize: trayMenuWindow.s(13)
                                 elide: Text.ElideRight
@@ -548,10 +628,10 @@ PanelWindow {
                                 anchors.rightMargin: trayMenuWindow.s(8)
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: rootItemDelegate.hasChildren
-                                text: trayMenuWindow.rootExpandRight ? "›" : "‹"
+                                text: trayMenuWindow.rootExpandRight ? "chevron_right" : "chevron_left"
                                 color: ThemeBackend.subtext0
-                                font.family: ThemeBackend.fontFamily
-                                font.pixelSize: trayMenuWindow.s(13)
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: trayMenuWindow.s(18)
                             }
 
                             MouseArea {
@@ -586,9 +666,9 @@ PanelWindow {
                         }
 
                         Rectangle {
-                            width: parent.width - trayMenuWindow.s(16)
+                            width: parent.width - trayMenuWindow.s(28)
                             height: 1
-                            color: ThemeBackend.surface0
+                            color: ThemeBackend.surface1
                             anchors.centerIn: parent
                             visible: rootItemDelegate.isSep
                         }
@@ -764,7 +844,23 @@ PanelWindow {
                         interactive: contentHeight > height
                         property Item hoverItem: null
 
-                        GlassLens {
+                        Rectangle {
+                        id: subListViewGlide
+                        z: -1
+                        radius: trayMenuWindow.s(10)
+                        x: subListView.hoverItem ? subListView.hoverItem.x : 0
+                        y: subListView.hoverItem ? subListView.hoverItem.y : 0
+                        width: subListView.hoverItem ? subListView.hoverItem.width : 0
+                        height: subListView.hoverItem ? subListView.hoverItem.height : 0
+                        opacity: subListView.hoverItem ? 1 : 0
+                        color: (subListView.hoverItem && subListView.hoverItem.danger) ? Qt.alpha(ThemeBackend.red, 0.22) : Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.blue.r, ThemeBackend.blue.g, ThemeBackend.blue.b, 0.26))
+                        Behavior on y { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 110 } }
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+
+                    GlassLens {
                             id: subHoverLens
                             z: -1
                             targetX: subListView.hoverItem ? subListView.hoverItem.x : 0
@@ -783,7 +879,7 @@ PanelWindow {
                         delegate: Item {
                             id: subItemDelegate
                             width: subListView.width
-                            height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(9) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
+                            height: (modelData && modelData.isSeparator) ? trayMenuWindow.s(13) : ((modelData && modelData.text) ? trayMenuWindow.itemHeight : 0)
                             visible: height > 0
                             readonly property bool pressed: subItemMouse.pressed
                             readonly property bool lensWanted: subItemMouse.containsMouse
@@ -796,6 +892,8 @@ PanelWindow {
                                 if (subListView.hoverItem === subItemDelegate) subListView.hoverItem = null;
                             }
 
+                            readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
+                        readonly property bool danger: trayMenuWindow.isDanger(modelData ? modelData.text : "")
                             property bool isSep: modelData ? modelData.isSeparator : false
                             property bool hasChildren: modelData ? (modelData.hasChildren === true) : false
 
@@ -803,7 +901,7 @@ PanelWindow {
                                 anchors.fill: parent
                                 visible: !subItemDelegate.isSep
                                 radius: trayMenuWindow.s(4)
-                                color: (subHoverGlass.active || subHoverLens.glassActive) ? "transparent" : (subItemMouse.containsMouse ? ThemeBackend.surface0 : "transparent")
+                                color: "transparent"
                                 opacity: (modelData && modelData.enabled) ? 1.0 : 0.4
 
                                 GlassFill {
@@ -821,23 +919,37 @@ PanelWindow {
                                     anchors.left: parent.left
                                     anchors.leftMargin: trayMenuWindow.s(8)
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: source !== "" ? trayMenuWindow.s(16) : 0
-                                    height: trayMenuWindow.s(16)
+                                    width: trayMenuWindow.s(20)
+                                    height: trayMenuWindow.s(20)
                                     source: modelData ? trayMenuWindow.resolveMenuIcon(modelData.icon) : ""
-                                    sourceSize: Qt.size(trayMenuWindow.s(16), trayMenuWindow.s(16))
+                                    sourceSize: Qt.size(trayMenuWindow.s(40), trayMenuWindow.s(40))
                                     fillMode: Image.PreserveAspectFit
-                                    visible: width > 0 && status === Image.Ready
+                                    visible: source !== "" && status === Image.Ready
                                 }
+
+                            Text {
+                                renderType: Text.NativeRendering
+                                anchors.left: parent.left
+                                anchors.leftMargin: trayMenuWindow.s(8)
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: trayMenuWindow.s(20)
+                                horizontalAlignment: Text.AlignHCenter
+                                visible: !subItemIcon.visible && !subItemDelegate.isSep
+                                text: trayMenuWindow.symbolFor(modelData ? modelData.text : "")
+                                font.family: "Material Symbols Rounded"
+                                font.pixelSize: trayMenuWindow.s(18)
+                                color: (subItemDelegate.danger && subItemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.subtext0
+                            }
 
                                 Text {
                                     renderType: Text.NativeRendering
-                                    anchors.left: subItemIcon.visible ? subItemIcon.right : parent.left
+                                    anchors.left: parent.left
                                     anchors.leftMargin: trayMenuWindow.s(8)
                                     anchors.right: subArrowText.visible ? subArrowText.left : parent.right
                                     anchors.rightMargin: trayMenuWindow.s(8)
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: (modelData && modelData.text) ? modelData.text : ""
-                                    color: ThemeBackend.text
+                                    color: (subItemDelegate.danger && subItemMouse.containsMouse) ? ThemeBackend.red : ThemeBackend.text
                                     font.family: ThemeBackend.fontFamily
                                     font.pixelSize: trayMenuWindow.s(13)
                                     elide: Text.ElideRight
@@ -851,10 +963,10 @@ PanelWindow {
                                     anchors.rightMargin: trayMenuWindow.s(8)
                                     anchors.verticalCenter: parent.verticalCenter
                                     visible: subItemDelegate.hasChildren
-                                    text: submenuPopout.expandRight ? "›" : "‹"
+                                    text: submenuPopout.expandRight ? "chevron_right" : "chevron_left"
                                     color: ThemeBackend.subtext0
-                                    font.family: ThemeBackend.fontFamily
-                                    font.pixelSize: trayMenuWindow.s(13)
+                                    font.family: "Material Symbols Rounded"
+                                    font.pixelSize: trayMenuWindow.s(18)
                                 }
 
                                 MouseArea {
@@ -889,9 +1001,9 @@ PanelWindow {
                             }
 
                             Rectangle {
-                                width: parent.width - trayMenuWindow.s(16)
+                                width: parent.width - trayMenuWindow.s(28)
                                 height: 1
-                                color: ThemeBackend.surface0
+                                color: ThemeBackend.surface1
                                 anchors.centerIn: parent
                                 visible: subItemDelegate.isSep
                             }
