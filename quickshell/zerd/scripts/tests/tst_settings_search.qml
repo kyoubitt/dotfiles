@@ -31,6 +31,12 @@ Item {
             compare(Search.search(ix, "bar zzz").length, 0)
             compare(Search.search(ix, "   ").length, 0)
         }
+        function test_mark_bolds_matches_and_escapes() {
+            compare(Search.mark("Bar height", "bar", "#ff0000"), '<font color="#ff0000"><b>Bar</b></font> height')
+            compare(Search.mark("a < b", "b", "#000000"), 'a &lt; <font color="#000000"><b>b</b></font>')
+            compare(Search.mark("Dock dock", "dock do", "#111111"), '<font color="#111111"><b>Dock</b></font> <font color="#111111"><b>dock</b></font>')
+            compare(Search.mark("plain", "", "#111111"), "plain")
+        }
         function test_option_names_and_binds_are_found() {
             const ix = Search.buildIndex(pages, [{ name: "Screenshot", key: "Mod+Shift+S" }])
             compare(Search.search(ix, "floating")[0].label, "Bar style")

@@ -49,3 +49,26 @@ function search(index, query) {
     out.sort((a, b) => b.score - a.score)
     return out.slice(0, 40).map(x => x.entry)
 }
+
+// The text as StyledText with every word of the query in bold and the given colour (a "#rrggbb" string).
+function mark(text, query, color) {
+    const esc = x => x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    const low = String(text).toLowerCase()
+    const spans = []
+    for (const t of String(query ?? "").toLowerCase().split(/\s+/).filter(t => t.length > 0)) {
+        let at = low.indexOf(t)
+        while (at >= 0) { spans.push([at, at + t.length]); at = low.indexOf(t, at + t.length) }
+    }
+    spans.sort((a, b) => a[0] - b[0])
+    const merged = []
+    for (const s of spans) {
+        if (merged.length > 0 && s[0] <= merged[merged.length - 1][1]) merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], s[1])
+        else merged.push([s[0], s[1]])
+    }
+    let out = "", pos = 0
+    for (const m of merged) {
+        out += esc(text.slice(pos, m[0])) + '<font color="' + color + '"><b>' + esc(text.slice(m[0], m[1])) + "</b></font>"
+        pos = m[1]
+    }
+    return out + esc(text.slice(pos))
+}
