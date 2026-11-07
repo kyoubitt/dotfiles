@@ -460,7 +460,7 @@ MusicEqualizerState {
                     Layout.preferredHeight: popupRoot.s(2)
                     Layout.topMargin: popupRoot.s(16)
                     Layout.bottomMargin: popupRoot.s(16)
-                    color: "#1AFFFFFF"
+                    color: Qt.rgba(1, 1, 1, 0.102)
                     radius: popupRoot.s(1)
 
                     opacity: popupRoot.introSeparator

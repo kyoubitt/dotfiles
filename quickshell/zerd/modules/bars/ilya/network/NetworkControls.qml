@@ -28,7 +28,7 @@ Item {
         fontPixelSize: window.s(14)
         cornerRadius: ThemeBackend.borderRadius
         accentColor: window.activeColor
-        baseColor: "#1affffff"
+        baseColor: Qt.rgba(1, 1, 1, 0.102)
         textColor: ThemeBackend.text
         activeTextColor: ThemeBackend.crust
         switchSound: "network/switch.wav"

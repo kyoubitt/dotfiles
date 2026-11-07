@@ -13,7 +13,7 @@ Item {
     property int currentIndex: 0
 
     property color accentColor: ThemeBackend.blue
-    property color baseColor: "#1affffff"
+    property color baseColor: Qt.rgba(1, 1, 1, 0.102)
     property color textColor: ThemeBackend.text
     property color activeTextColor: ThemeBackend.crust
 
@@ -241,7 +241,7 @@ Item {
                         bottomLeftRadius: optionItem.index === 0 ? root.cornerRadius : root.smallRadius
                         topRightRadius: optionItem.index === root.options.length - 1 ? root.cornerRadius : root.smallRadius
                         bottomRightRadius: optionItem.index === root.options.length - 1 ? root.cornerRadius : root.smallRadius
-                        color: (root.currentIndex === optionItem.index || optionGlass.active) ? "transparent" : (optionMa.containsMouse ? "#1affffff" : "transparent")
+                        color: (root.currentIndex === optionItem.index || optionGlass.active) ? "transparent" : (optionMa.containsMouse ? Qt.rgba(1, 1, 1, 0.102) : "transparent")
                         Behavior on color { ColorAnimation { duration: 250 } }
 
                         GlassFill {
