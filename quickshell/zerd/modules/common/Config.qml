@@ -856,6 +856,17 @@ Singleton {
                 property JsonObject translator: JsonObject {
                     property bool enable: true
                 }
+                property JsonObject ai: JsonObject {
+                    property bool textFadeIn: false
+                }
+            }
+
+            property JsonObject interactions: JsonObject {
+                property JsonObject scrolling: JsonObject {
+                    property real mouseScrollFactor: 50
+                    property real touchpadScrollFactor: 100
+                    property real mouseScrollDeltaThreshold: 120
+                }
             }
 
             property JsonObject light: JsonObject {

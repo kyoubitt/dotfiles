@@ -33,6 +33,12 @@ Rectangle {
             "icon": "schedule",
             "widget": "PomodoroWidget.qml"
         },
+        {
+            "type": "media",
+            "name": Translation.tr("Media"),
+            "icon": "music_note",
+            "widget": "BottomMediaTab.qml"
+        },
     ]
 
     Behavior on implicitHeight {
