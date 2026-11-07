@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Services.Mpris
 import "."
 import qs.services as Svc
+import qs.modules.music as Music
 
 Singleton {
     id: root
@@ -24,6 +25,8 @@ Singleton {
 
     // what plays is decided by zerd's NowPlaying (Spotify/MPRIS or Orbit), not by his own picker
     readonly property var activePlayer: Svc.NowPlaying.player ?? null
+    // the current cover, through the shared on-disk cache so WebP covers load
+    readonly property string coverUrl: Music.CoverCache.src(Svc.NowPlaying.activeTrack?.artUrl ?? "")
     function togglePlaying() { Svc.NowPlaying.togglePlaying(); }
     function next() { Svc.NowPlaying.next(); }
     function previous() { Svc.NowPlaying.previous(); }

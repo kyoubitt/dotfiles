@@ -66,7 +66,7 @@ Item {
     readonly property bool showIcon: isVertical ? (readBool("mediaShowIcon", "mediaShowIcon") || !showControls) : readBool("mediaShowIcon", "mediaShowIcon")
 
     property var player: MprisController.activePlayer
-    readonly property bool hasArt: false
+    readonly property bool hasArt: !isPreview && isMediaActive && MprisController.coverUrl !== ""
 
     property var playerList: {
         if (!Mpris.players || !Mpris.players.values) return [];
@@ -198,9 +198,9 @@ Item {
                             Rectangle {
                                 id: mediaThumbBox
                                 visible: root.showIcon
-                                width: barWindow ? barWindow.cs(root.isCompact ? 26 : 28) : (root.isCompact ? 26 : 28)
-                                height: barWindow ? barWindow.cs(root.isCompact ? 26 : 28) : (root.isCompact ? 26 : 28)
-                                radius: barWindow ? barWindow.cs(root.isCompact ? 9 : 10) : (root.isCompact ? 9 : 10)
+                                width: 28
+                                height: 28
+                                radius: 8
                                 color: mediaThumbGlass.active ? "transparent" : (root.isCompact ? Qt.lighter(ThemeBackend.surface1, 1.1) : ThemeBackend.surface1)
                                 clip: !mediaThumbGlass.active
                                 anchors.verticalCenter: parent.verticalCenter
@@ -237,8 +237,10 @@ Item {
 
                                 BoundedImage {
                                     id: mediaArtImg
+                                    decodeEdge: 56
+                                    cache: false
                                     anchors.fill: parent
-                                    source: root.hasArt ? (MprisController.artUrl.startsWith("file://") || MprisController.artUrl.startsWith("http") ? MprisController.artUrl : "file://" + MprisController.artUrl) : ""
+                                    source: root.hasArt ? MprisController.coverUrl : ""
                                     fillMode: Image.PreserveAspectCrop
                                     visible: false
                                 }
