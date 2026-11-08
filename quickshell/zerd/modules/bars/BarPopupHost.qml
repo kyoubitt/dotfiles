@@ -79,7 +79,9 @@ Scope {
                     id: pl
                     anchors.fill: parent
                     active: false
-                    onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
+                    // TEMP DEBUG: what the loader and the stage look like on every open
+                    onStatusChanged: console.log("POPUPDBG loader", String(source).split("/").pop(), "status", status === Loader.Ready ? "ready" : (status === Loader.Error ? "ERROR" : (status === Loader.Loading ? "loading" : "null")))
+                    onLoaded: { console.log("POPUPDBG stage", root.popup?.kind, "x", stage.x, "y", stage.y, "w", stage.width, "h", stage.height, "win visible", win.visible, "win", win.width, "x", win.height, "screen", win.screen ? win.screen.name : "none", "item", item.width, "x", item.height); item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
             Connections {
