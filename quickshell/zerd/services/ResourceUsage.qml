@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 
 // Lean CPU / memory / disk / iGPU / CPU-temperature sampler for the iRiS
-// vitals card. Polls every 2s, and only while something has asked for it
+// vitals card. Polls every second, and only while something has asked for it
 // (keepAlive / releaseKeepAlive). The NVIDIA dGPU is deliberately never
 // polled; the GPU figure comes from the AMD iGPU's sysfs counter when present.
 Singleton {
@@ -31,7 +31,10 @@ Singleton {
     property real _prevIdle: -1
     property real _prevTotal: -1
 
-    function keepAlive(): void { _keepers += 1 }
+    function keepAlive(): void {
+        _keepers += 1
+        if (_keepers === 1) { _prevTotal = -1; firstGap.restart() }
+    }
     function releaseKeepAlive(): void { _keepers = Math.max(0, _keepers - 1) }
 
     function _push(list: var, value: real): var {
@@ -79,8 +82,10 @@ Singleton {
             }
         }
     }
+    // right after the first reading, take the second one quickly so the number shows at once
+    Timer { id: firstGap; interval: 400; onTriggered: if (!sampler.running) sampler.running = true }
     Timer {
-        interval: 2000
+        interval: 1000
         running: root._keepers > 0
         repeat: true
         triggeredOnStart: true

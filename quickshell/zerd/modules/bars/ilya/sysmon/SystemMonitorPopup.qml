@@ -130,7 +130,7 @@ Item {
     readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
     readonly property real memFrac: memTotal > 0 ? memUsed / memTotal : 0
     property real shownCpu: 0
-    Behavior on shownCpu { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
+    Behavior on shownCpu { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
     onCpuTotalChanged: shownCpu = cpuTotal
     Component.onCompleted: shownCpu = cpuTotal
     readonly property color tone: ThemeBackend.blue
