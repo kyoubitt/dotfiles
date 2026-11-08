@@ -12,7 +12,7 @@ BarFaceBase {
     readonly property int unread: Svc.Notifications.unread
 
     readonly property real btn: 28
-    property real targetLength: btn + 12
+    property real targetLength: btn + 6
     property bool isFaceVisible: true
 
     implicitWidth: targetLength
@@ -24,7 +24,7 @@ BarFaceBase {
         height: root.btn
         radius: root.btn / 2
         anchors.centerIn: parent
-        color: root.silent ? Qt.alpha(ThemeBackend.blue, 0.22) : (ma.containsMouse ? ThemeBackend.surface1 : ThemeBackend.surface0)
+        color: ma.containsMouse ? Qt.alpha(ThemeBackend.text, 0.10) : "transparent"
         Behavior on color { ColorAnimation { duration: 120 } }
 
         Text {
@@ -33,7 +33,7 @@ BarFaceBase {
             text: root.silent ? "notifications_off" : "notifications"
             font.family: "Material Symbols Rounded"
             font.variableAxes: ({ "wght": 600, "opsz": 20 })
-            font.pixelSize: 18
+            font.pixelSize: 19
             color: root.silent ? ThemeBackend.blue : ThemeBackend.text
         }
 

@@ -153,14 +153,25 @@ Scope {
                         spacing: run.grouped ? 2 : 0
                         Repeater {
                             model: run.modelData
-                            delegate: BarBlock {
+                            delegate: Row {
+                                id: cell
                                 required property string modelData
-                                blockId: modelData
-                                barHeight: win.barHeight
-                                screen: win.modelData
-                                revealed: win.shown
-                                flat: run.flat
-                                grouped: run.grouped
+                                spacing: 0
+                                // a thin divider between the clusters of the status plate: resources | connectivity | sound and power
+                                Item {
+                                    visible: run.grouped && (cell.modelData === "dnd" || cell.modelData === "vol")
+                                    width: visible ? 9 : 0
+                                    height: win.barHeight
+                                    Rectangle { anchors.centerIn: parent; width: 1; height: 16; radius: 0.5; color: Qt.rgba(BarStyle.text.r, BarStyle.text.g, BarStyle.text.b, 0.14) }
+                                }
+                                BarBlock {
+                                    blockId: cell.modelData
+                                    barHeight: win.barHeight
+                                    screen: win.modelData
+                                    revealed: win.shown
+                                    flat: run.flat
+                                    grouped: run.grouped
+                                }
                             }
                         }
                     }
