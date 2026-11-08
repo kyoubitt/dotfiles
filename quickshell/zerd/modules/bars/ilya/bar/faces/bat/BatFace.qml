@@ -57,8 +57,6 @@ BarFaceBase {
     readonly property bool effectiveShowPercent: root.isDesktop ? false : showPercent
     readonly property bool effectiveShowIcon: root.isDesktop ? true : showIcon
 
-    // starts the charge history as soon as the bar is up
-    readonly property int historyCount: BatteryHistory.points.length
     property bool isDesktop: isPreview ? false : (UPower.displayDevice.ready ? !UPower.displayDevice.isLaptopBattery : SystemInfo.isDesktop)
     readonly property int batCap: isPreview ? 82 : (UPower.displayDevice.ready ? Math.round(UPower.displayDevice.percentage * 100) : 0)
     readonly property string batPercent: batCap + "%"
@@ -192,7 +190,7 @@ BarFaceBase {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.batStyle === "text" && !root.isPreview
-        onClicked: Popups.toggle("battery", root)
+        onClicked: Popups.toggle("system", root)
     }
 
     AxisFlow {
@@ -266,7 +264,7 @@ BarFaceBase {
                 textFontSize: s(root.isCompact ? 11 : 12)
                 accentColor: Qt.lighter(ThemeBackend.surface0, root.isCompact && !root.lockLook ? 1.18 : 1.28)
                 textColor: root.lockLook ? root.lockBatColor : root.batDynamicColor
-                onClicked: if (!root.isPreview) Popups.toggle("battery", root)
+                onClicked: if (!root.isPreview) Popups.toggle("system", root)
             }
         }
     }
@@ -447,7 +445,7 @@ BarFaceBase {
                     hoverEnabled: true
                     enabled: !root.isPreview
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Popups.toggle("battery", root)
+                    onClicked: Popups.toggle("system", root)
                 }
             }
 
@@ -612,7 +610,7 @@ BarFaceBase {
                     hoverEnabled: true
                     enabled: !root.isPreview
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Popups.toggle("battery", root)
+                    onClicked: Popups.toggle("system", root)
                 }
             }
         }

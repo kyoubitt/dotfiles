@@ -339,10 +339,7 @@ Singleton {
                     property bool showVolume: true
                     property bool showNetwork: true
                     property bool showBell: true
-                    // numbers (default), dots or names
-                    property string workspaceStyle: "numbers"
-                    // classic or badge
-                    property string timeStyle: "classic"
+                    property string workspaceStyle: "pills"
                     property bool trayHidePinned: false
                     // Tray ids kept out of the bar (still listed in the tray popup) and how many icons show before the overflow button.
                     property list<string> trayHidden: []

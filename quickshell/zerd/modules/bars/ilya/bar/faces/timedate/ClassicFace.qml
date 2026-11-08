@@ -65,8 +65,7 @@ Item {
             id: plate
             readonly property real fullH: (widget && widget.barWindow) ? widget.barWindow.barHeight : 32
             readonly property bool wide: widget ? widget.hovered : false
-            // 150 px with the face's own 16 px on each side
-            implicitWidth: Math.max(118, widthProbe.implicitWidth + 48, dateText.implicitWidth + 8)
+            implicitWidth: Math.max(widthProbe.implicitWidth + 48, dateText.implicitWidth + 8)
             implicitHeight: fullH
 
             // the time plus room for the seconds, so the plate never changes size
@@ -76,7 +75,7 @@ Item {
                 renderType: Text.NativeRendering
                 text: "00:00"
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 22
+                font.pixelSize: 20
                 font.weight: Font.Bold
             }
 
@@ -92,14 +91,14 @@ Item {
                 renderType: Text.NativeRendering
                 id: timeText
                 x: Math.round((plate.width - implicitWidth) / 2)
-                y: 0
+                y: 1
                 textFormat: Text.StyledText
-                readonly property string colon: "<font color='" + Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.5)).toString() + "'>:</font>"
+                readonly property string colon: "<font color='" + ThemeBackend.blue.toString() + "'>:</font>"
                 text: classicFaceRoot.parsedTime.hours + colon + classicFaceRoot.parsedTime.minutes
                 font.family: ThemeBackend.fontFamily
-                font.pixelSize: 22
+                font.pixelSize: 20
                 lineHeightMode: Text.FixedHeight
-                lineHeight: 18
+                lineHeight: 17
                 font.weight: Font.Bold
                 font.features: { "tnum": 1 }
                 color: ThemeBackend.text
@@ -109,7 +108,7 @@ Item {
             Text {
                 renderType: Text.NativeRendering
                 x: timeText.x + timeText.implicitWidth + 1
-                y: 4
+                y: 5
                 text: ":" + classicFaceRoot.parsedTime.seconds
                 font.family: ThemeBackend.fontFamily
                 font.pixelSize: 12
