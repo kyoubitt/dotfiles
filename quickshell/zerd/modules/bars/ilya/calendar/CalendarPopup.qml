@@ -677,22 +677,37 @@ Item {
                     z: 0
                     scale: 0.98 + (0.02 * window.secondPulse)
 
+                    // the time stacked: hours, three dots, minutes (Caelestia's dashboard clock), in our colours
                     Text {
                         renderType: Text.NativeRendering
                         Layout.alignment: Qt.AlignHCenter
-                        text: DateTime.time
+                        Layout.bottomMargin: -window.s(14)
+                        text: Qt.formatTime(DateTime.now, "HH")
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Black
-                        font.pixelSize: {
-                            let baseSize = window.s(84);
-                            let len = (DateTime.time || "").length;
-                            if (len <= 5) return baseSize;
-                            let scaleFactor = Math.min(1.0, Math.pow(5 / len, 0.7));
-                            return Math.round(Math.max(window.s(36), baseSize * scaleFactor));
-                        }
+                        font.pixelSize: window.s(78)
+                        font.features: { "tnum": 1 }
                         color: window.text
-                        style: Text.Outline
-                        styleColor: Qt.alpha(window.crust, 0.4)
+                    }
+                    Text {
+                        renderType: Text.NativeRendering
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "\u2022 \u2022 \u2022"
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Bold
+                        font.pixelSize: window.s(18)
+                        color: window.textAccent
+                    }
+                    Text {
+                        renderType: Text.NativeRendering
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: -window.s(14)
+                        text: Qt.formatTime(DateTime.now, "mm")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Black
+                        font.pixelSize: window.s(78)
+                        font.features: { "tnum": 1 }
+                        color: window.text
                     }
 
                     Text {
