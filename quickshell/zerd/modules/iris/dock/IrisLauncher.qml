@@ -37,10 +37,10 @@ Scope {
             Item {
                 id: card
                 readonly property real d: IrisStyle.density
-                readonly property int rowHeight: Math.round(34 * d)
-                readonly property int headerHeight: Math.round(22 * d)
-                width: Math.round(320 * d)
-                height: Math.min(win.height - Math.round(200 * d), Math.round(400 * d))
+                readonly property int rowHeight: Math.round(42 * d)
+                readonly property int headerHeight: Math.round(28 * d)
+                width: Math.round(380 * d)
+                height: Math.min(win.height - Math.round(160 * d), Math.round(480 * d))
                 x: Math.round((win.width - width) / 2)
                 y: Math.round((win.height - height) / 2 - 40 * d)
 
@@ -89,6 +89,15 @@ Scope {
                     }
                     return out
                 }
+                function esc(t: string): string { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") }
+                // the name with the letters you typed in bold (a plain run of the query; fuzzy hits stay plain)
+                function marked(name: string, q: string): string {
+                    if (q.length === 0) return card.esc(name)
+                    const i = name.toLowerCase().indexOf(q.toLowerCase())
+                    if (i < 0) return card.esc(name)
+                    return card.esc(name.slice(0, i)) + "<b>" + card.esc(name.slice(i, i + q.length)) + "</b>" + card.esc(name.slice(i + q.length))
+                }
+                readonly property int resultCount: card.model.filter(r => r.entry || r.action).length
                 function calc(q: string): var {
                     if (!/^[0-9+\-*/().%\s^]+$/.test(q) || !/[0-9]/.test(q) || !/[+\-*/%^]/.test(q)) return null
                     try {
@@ -152,7 +161,7 @@ Scope {
                     x: Math.round(8 * card.d)
                     y: Math.round(8 * card.d)
                     width: parent.width - 2 * x
-                    height: Math.round(34 * card.d)
+                    height: Math.round(44 * card.d)
                     radius: height / 2
                     antialiasing: true
                     color: IrisStyle.surfaceHigh
@@ -163,20 +172,45 @@ Scope {
                         x: Math.round(12 * card.d)
                         anchors.verticalCenter: parent.verticalCenter
                         text: "search"
-                        iconSize: 16
+                        iconSize: 20
+                        color: input.activeFocus ? IrisStyle.accent : IrisStyle.muted
+                    }
+                    IrisText {
+                        visible: input.text.length === 0
+                        x: Math.round(44 * card.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Translation.tr("Search apps, files, commands")
                         color: IrisStyle.muted
+                        font.pixelSize: 14
+                    }
+                    // result count, then a clear button once something is typed
+                    IrisText {
+                        visible: input.text.length > 0
+                        anchors { right: parent.right; rightMargin: Math.round(44 * card.d); verticalCenter: parent.verticalCenter }
+                        text: card.resultCount === 1 ? "1 result" : card.resultCount + " results"
+                        color: IrisStyle.muted
+                        font.pixelSize: 12
+                    }
+                    MaterialSymbol {
+                        visible: input.text.length > 0
+                        anchors { right: parent.right; rightMargin: Math.round(14 * card.d); verticalCenter: parent.verticalCenter }
+                        text: "close"
+                        iconSize: 18
+                        color: clearHover.hovered ? IrisStyle.text : IrisStyle.muted
+                        HoverHandler { id: clearHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler { onTapped: { input.text = ""; input.forceActiveFocus() } }
                     }
                     TextInput {
                         id: input
-                        x: Math.round(36 * card.d)
-                        width: parent.width - Math.round(50 * card.d)
+                        x: Math.round(44 * card.d)
+                        width: parent.width - Math.round(44 * card.d) - Math.round(110 * card.d)
                         height: parent.height
                         verticalAlignment: TextInput.AlignVCenter
                         color: IrisStyle.text
                         selectionColor: IrisStyle.accent
-                        font.pixelSize: 13
+                        font.pixelSize: 14
                         renderType: Text.NativeRendering
-                        font.hintingPreference: Font.PreferNoHinting
+                        font.hintingPreference: Font.PreferFullHinting
                         clip: true
                         focus: true
                         Component.onCompleted: forceActiveFocus()
@@ -227,8 +261,10 @@ Scope {
                             anchors.bottomMargin: Math.round(4 * card.d)
                             text: row.modelData.header ?? ""
                             color: IrisStyle.subtext
-                            font.pixelSize: 11
-                            font.letterSpacing: 0.4
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: 0.6
+                            font.capitalization: Font.AllUppercase
                         }
 
                         Rectangle {
@@ -238,7 +274,7 @@ Scope {
                             anchors.bottomMargin: 1
                             radius: Math.round(10 * card.d)
                             antialiasing: true
-                            color: tap.pressed ? IrisStyle.fillHover : (row.current || hover.hovered) ? IrisStyle.fillQuiet : "transparent"
+                            color: tap.pressed ? IrisStyle.fillHover : row.current ? IrisStyle.tintFill(IrisStyle.accent) : hover.hovered ? IrisStyle.fillQuiet : "transparent"
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(100) } }
                         }
                         Row {
@@ -257,13 +293,24 @@ Scope {
                                 visible: !row.isAction
                                 anchors.verticalCenter: parent.verticalCenter
                                 icon: row.modelData.entry?.icon ?? ""
-                                iconSize: Math.round(22 * card.d)
+                                iconSize: Math.round(28 * card.d)
                             }
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: row.isAction ? row.modelData.action.title : (row.modelData.entry?.name ?? "")
-                                font.pixelSize: 13
+                                textFormat: Text.StyledText
+                                text: row.isAction ? card.esc(row.modelData.action.title) : card.marked(row.modelData.entry?.name ?? "", card.query)
+                                font.pixelSize: 14
                             }
+                        }
+                        IrisText {
+                            visible: row.current && !row.isHeader && !hover.hovered
+                            anchors.right: parent.right
+                            anchors.rightMargin: Math.round(14 * card.d)
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "\u21B5"
+                            color: IrisStyle.muted
+                            font.pixelSize: 14
+                            opacity: row.pinned ? 0 : 1
                         }
                         // Pin button: filled when pinned; otherwise shown only while hovering or selected.
                         MaterialSymbol {
