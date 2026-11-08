@@ -24,14 +24,14 @@ Item {
     readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
 
     // wear from the sysfs counters: UPower leaves health unset on this laptop
-    FileView { id: fFull; path: "/sys/class/power_supply/BAT1/energy_full"; blockLoading: true }
-    FileView { id: fDesign; path: "/sys/class/power_supply/BAT1/energy_full_design"; blockLoading: true }
+    FileView { id: fFull; path: "/sys/class/power_supply/BAT1/charge_full"; blockLoading: true }
+    FileView { id: fDesign; path: "/sys/class/power_supply/BAT1/charge_full_design"; blockLoading: true }
     FileView { id: fCycles; path: "/sys/class/power_supply/BAT1/cycle_count"; blockLoading: true }
     readonly property real wFull: parseFloat(fFull.text()) / 1e6
     readonly property real wDesign: parseFloat(fDesign.text()) / 1e6
     readonly property string healthText: root.dev.healthSupported ? Math.round(root.dev.healthPercentage) + "%"
         : (wDesign > 0 ? Math.round(wFull / wDesign * 100) + "%" : "–")
-    readonly property string capText: wDesign > 0 ? wFull.toFixed(0) + " / " + wDesign.toFixed(0) + " Wh" : (dev.energyCapacity > 0 ? dev.energyCapacity.toFixed(0) + " Wh" : "–")
+    readonly property string capText: dev.energyCapacity > 0 ? (wDesign > 0 && wFull > 0 ? dev.energyCapacity.toFixed(0) + " / " + (dev.energyCapacity * wDesign / wFull).toFixed(0) + " Wh" : dev.energyCapacity.toFixed(0) + " Wh") : "–"
     readonly property string cycleText: parseInt(fCycles.text()) > 0 ? parseInt(fCycles.text()) + "" : "–"
 
     function span(s) {
@@ -59,12 +59,74 @@ Item {
         width: parent.width - 36
         spacing: 12
 
-        PopupHeader {
-            glyph: root.charging ? "battery_charging_full" : (root.level > 0.95 ? "battery_full" : "battery_" + Math.min(6, Math.floor(root.level * 7)) + "_bar")
-            title: "Battery"
-            subtitle: root.status
-            value: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-            tone: root.tone
+        // the liquid tile from the volume popup: the battery as a tank that fills with the charge
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 18
+
+            Rectangle {
+                id: tank
+                Layout.preferredWidth: 132; Layout.preferredHeight: 132
+                radius: ThemeBackend.borderRadius
+                color: ThemeBackend.base
+                border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
+                clip: true
+
+                FluidWave {
+                    id: wave
+                    anchors.fill: parent
+                    property real wavePhase: 0
+                    NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
+                    radius: tank.radius
+                    fillLevel: root.level
+                    waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
+                    phase: wavePhase
+                    vertical: 1.0
+                    color1: Qt.lighter(root.tone, 1.15)
+                    color2: root.tone
+                    visible: root.level > 0.01
+                }
+                Text {
+                    anchors.centerIn: parent
+                    text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
+                    color: ThemeBackend.text
+                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 30
+                    renderType: Text.NativeRendering
+                }
+                Item {
+                    anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
+                    height: Math.min(parent.height, Math.max(0, parent.height * root.level - 0.375 * wave.waveAmp * (Math.sin(wave.wavePhase) - Math.cos(wave.wavePhase))))
+                    clip: true
+                    Text {
+                        x: 0; width: tank.width; height: tank.height
+                        y: -(tank.height - parent.height)
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
+                        color: ThemeBackend.crust
+                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 30
+                        renderType: Text.NativeRendering
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                Text {
+                    text: root.charging ? (root.full ? "Full" : "Charging") : "On battery"
+                    color: ThemeBackend.text
+                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 20
+                    renderType: Text.NativeRendering
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: root.status
+                    color: ThemeBackend.subtext0
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                    renderType: Text.NativeRendering
+                }
+            }
         }
 
         // three small facts
