@@ -307,7 +307,7 @@ Item {
                             required property int index
                             readonly property var st: root.stepFor(index)
                             readonly property bool current: root.dayOffset === 0 && DateTime.now.getHours() === index
-                            readonly property real size: current ? ring.big : ring.bubble
+                            property real size: current ? ring.big : ring.bubble
                             readonly property real ang: (index / 24) * 2 * Math.PI - Math.PI / 2
                             x: ring.width / 2 + ring.radius * Math.cos(ang) - size / 2
                             y: ring.height / 2 + ring.radius * Math.sin(ang) - size / 2
