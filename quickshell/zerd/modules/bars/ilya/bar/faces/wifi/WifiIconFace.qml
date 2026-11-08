@@ -15,7 +15,10 @@ BarFaceBase {
     Rectangle {
         anchors.centerIn: parent
         width: 30; height: 30; radius: 15
-        color: root.on ? Qt.alpha(ThemeBackend.blue, ma.containsMouse ? 0.32 : 0.22) : (ma.containsMouse ? ThemeBackend.surface1 : ThemeBackend.surface0)
+        color: ma.containsMouse ? Qt.alpha(ThemeBackend.text, 0.10) : "transparent"
+        border.width: root.on ? 1.5 : 0
+        border.color: Qt.alpha(ThemeBackend.blue, 0.85)
+        Behavior on border.width { NumberAnimation { duration: 140 } }
         Behavior on color { ColorAnimation { duration: 140 } }
         Text {
             anchors.centerIn: parent
