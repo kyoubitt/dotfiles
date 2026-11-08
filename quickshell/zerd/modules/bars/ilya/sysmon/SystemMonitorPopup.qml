@@ -132,12 +132,137 @@ Item {
     readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
     readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
 
+    readonly property color tone: cpuTotal >= 0.9 ? ThemeBackend.red : ThemeBackend.blue
+    property real orbit: 0
+    NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
+    property real drift: 0
+    NumberAnimation on drift { from: 0; to: Math.PI * 2; duration: 160000; loops: Animation.Infinite; running: root.visible }
+
     Rectangle {
+        id: card
         anchors.fill: parent
         radius: ThemeBackend.borderRadius
-        color: root.cardColor
-        border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.08)
+        color: ThemeBackend.card
+        clip: true
         opacity: root.intro
+
+        GlassSheen {}
+        WallpaperBlur {
+            z: -1
+            anchors.fill: parent
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
+            bottomRightRadius: parent.bottomRightRadius
+        }
+        Rectangle {
+            width: parent.width * 0.8; height: width; radius: width / 2
+            x: (parent.width / 2 - width / 2) + Math.cos(root.drift * 2) * 110
+            y: 150 - height / 2 + Math.sin(root.drift * 2) * 60
+            color: root.tone; opacity: 0.07
+        }
+        Rectangle {
+            width: parent.width * 0.9; height: width; radius: width / 2
+            x: (parent.width / 2 - width / 2) + Math.sin(root.drift * 1.5) * -110
+            y: 170 - height / 2 + Math.cos(root.drift * 1.5) * -60
+            color: ThemeBackend.surface2; opacity: 0.05
+        }
+
+        Item {
+            id: scene
+            x: 0; y: 0; width: parent.width; height: 318
+            readonly property real cx: width / 2
+            readonly property real cy: 160
+
+            Rectangle { x: scene.cx - 96; y: scene.cy - 96; width: 192; height: 192; radius: 96; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
+            Rectangle { x: scene.cx - 178; y: scene.cy - 148; width: 356; height: 296; radius: 148; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
+
+            Rectangle {
+                id: core
+                x: scene.cx - 70; y: scene.cy - 70
+                width: 140; height: 140; radius: 70
+                color: ThemeBackend.base
+                border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
+                clip: true
+                FluidWave {
+                    id: wave
+                    anchors.fill: parent
+                    property real wavePhase: 0
+                    NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
+                    radius: core.radius
+                    fillLevel: Math.max(0.02, Math.min(1, root.cpuTotal))
+                    waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
+                    phase: wavePhase
+                    vertical: 1.0
+                    color1: Qt.lighter(root.tone, 1.15)
+                    color2: root.tone
+                }
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 0
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Math.round(root.cpuTotal * 100) + "%"
+                        color: ThemeBackend.text
+                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32; font.features: { "tnum": 1 }
+                        renderType: Text.NativeRendering
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "CPU"
+                        color: ThemeBackend.subtext0
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold
+                        renderType: Text.NativeRendering
+                    }
+                }
+            }
+
+            Repeater {
+                model: [
+                    { k: "Memory", v: Math.round((root.memTotal > 0 ? root.memUsed / root.memTotal : 0) * 100) + "%", i: "developer_board", a: -2.2, hot: root.memTotal > 0 && root.memUsed / root.memTotal >= 0.9 },
+                    { k: root.gpuLoad >= 0 ? "GPU" : "Disk", v: Math.round((root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage) * 100) + "%", i: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive", a: -0.7, hot: false },
+                    { k: "Disk", v: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%", i: "hard_drive", a: 0.9, hot: false },
+                    { k: "Temp", v: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0", i: "thermostat", a: 2.4, hot: Svc.ResourceUsage.cpuTemp >= 85 }
+                ]
+                delegate: Item {
+                    id: sat
+                    required property var modelData
+                    width: 62; height: 62
+                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
+                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 148
+                    Rectangle {
+                        anchors.fill: parent; radius: width / 2
+                        color: Qt.alpha(ThemeBackend.surface0, 0.92)
+                        border.width: 1.5; border.color: Qt.alpha(sat.modelData.hot ? ThemeBackend.red : root.tone, 0.55)
+                        Column {
+                            anchors.centerIn: parent; spacing: 0
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: sat.modelData.i
+                                font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                                font.pixelSize: 15; color: sat.modelData.hot ? ThemeBackend.red : root.tone
+                                renderType: Text.NativeRendering
+                            }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: sat.modelData.v
+                                color: ThemeBackend.text
+                                font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                                renderType: Text.NativeRendering
+                            }
+                        }
+                    }
+                    Text {
+                        anchors.top: parent.bottom; anchors.topMargin: 3
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: sat.modelData.k
+                        color: ThemeBackend.subtext0
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 11
+                        renderType: Text.NativeRendering
+                    }
+                }
+            }
+        }
     }
 
     component Gauge: Item {
@@ -211,21 +336,7 @@ Item {
         spacing: 12
         opacity: root.intro
 
-        PopupHeader {
-            glyph: "monitoring"
-            title: "System"
-            subtitle: root.cores.length + " cores · " + root.memTotal.toFixed(1) + " GB memory"
-            value: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C"
-        }
-
-        // rings
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
-            Gauge { label: "CPU"; glyph: "memory"; fraction: root.cpuTotal; caption: root.cores.length + " cores" }
-            Gauge { label: "Memory"; glyph: "developer_board"; fraction: root.memTotal > 0 ? root.memUsed / root.memTotal : 0; caption: root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB" }
-            Gauge { label: root.gpuLoad >= 0 ? "GPU" : "Disk"; glyph: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive"; fraction: root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage; caption: root.gpuLoad >= 0 ? "integrated" : "root disk" }
-        }
+        Item { Layout.fillWidth: true; Layout.preferredHeight: 292 }
 
         // history: CPU and memory over the last minute
         Rectangle {
