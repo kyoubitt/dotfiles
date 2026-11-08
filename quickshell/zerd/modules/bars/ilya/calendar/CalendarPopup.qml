@@ -681,11 +681,11 @@ Item {
                     Text {
                         renderType: Text.NativeRendering
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.bottomMargin: -window.s(14)
+                        Layout.bottomMargin: -window.s(9)
                         text: Qt.formatTime(DateTime.now, "HH")
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Black
-                        font.pixelSize: window.s(78)
+                        font.pixelSize: window.s(56)
                         font.features: { "tnum": 1 }
                         color: window.text
                     }
@@ -695,17 +695,17 @@ Item {
                         text: "\u2022 \u2022 \u2022"
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Bold
-                        font.pixelSize: window.s(18)
+                        font.pixelSize: window.s(14)
                         color: window.textAccent
                     }
                     Text {
                         renderType: Text.NativeRendering
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: -window.s(14)
+                        Layout.topMargin: -window.s(9)
                         text: Qt.formatTime(DateTime.now, "mm")
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Black
-                        font.pixelSize: window.s(78)
+                        font.pixelSize: window.s(56)
                         font.features: { "tnum": 1 }
                         color: window.text
                     }
@@ -713,10 +713,11 @@ Item {
                     Text {
                         renderType: Text.NativeRendering
                         Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: window.s(4)
                         text: DateTime.fullDate
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Bold
-                        font.pixelSize: window.s(16)
+                        font.pixelSize: window.s(14)
                         color: window.subtext0
                         opacity: 0.9
                     }
