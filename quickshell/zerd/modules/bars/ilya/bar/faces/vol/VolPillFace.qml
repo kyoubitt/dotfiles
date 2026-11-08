@@ -14,13 +14,13 @@ BarFaceBase {
     readonly property string glyph: muted || vol === 0 ? "volume_off" : (vol < 50 ? "volume_down" : "volume_up")
 
     property bool isFaceVisible: true
-    implicitWidth: 76
+    implicitWidth: 70
     implicitHeight: parent ? parent.height : 0
 
     Item {
         id: box
         anchors.centerIn: parent
-        width: 66; height: 28
+        width: 62; height: 28
 
         Item {
             id: ringBox

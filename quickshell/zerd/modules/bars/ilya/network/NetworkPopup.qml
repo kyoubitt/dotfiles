@@ -945,7 +945,8 @@ Item {
         let src = (popupWindowRoot.currentConn && popupWindowRoot.showInfoView) ? infoListModel : (popupWindowRoot.activeMode === "wifi" ? wifiListModel : (popupWindowRoot.activeMode === "bt" ? btListModel : null));
         let arr = [];
         if (src) {
-            for (let i = 0; i < src.count; i++) arr.push(src.get(i));
+            // at most 12 around the ring (the strongest first): more than that shrinks every label to unreadable
+            for (let i = 0; i < src.count && i < 12; i++) arr.push(src.get(i));
         }
         popupWindowRoot.syncModel(orbitDisplayModel, arr);
     }

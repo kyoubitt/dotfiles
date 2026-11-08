@@ -25,7 +25,7 @@ BarFaceBase {
         height: 28
         width: parent.width
         radius: 14
-        color: ma.containsMouse ? ThemeBackend.surface1 : ThemeBackend.surface0
+        color: ma.containsMouse ? Qt.alpha(ThemeBackend.text, 0.10) : "transparent"
         Behavior on color { ColorAnimation { duration: 120 } }
 
         Row {

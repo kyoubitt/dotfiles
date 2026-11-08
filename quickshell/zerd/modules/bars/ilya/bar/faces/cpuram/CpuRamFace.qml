@@ -9,8 +9,8 @@ import "../../"
 BarFaceBase {
     id: root
 
-    readonly property real meterW: 64
-    readonly property real gapW: 12
+    readonly property real meterW: 60
+    readonly property real gapW: 8
     property real targetLength: 2 * meterW + gapW + 20
     property bool isFaceVisible: true
 

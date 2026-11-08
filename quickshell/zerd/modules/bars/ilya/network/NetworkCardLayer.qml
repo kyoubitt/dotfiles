@@ -92,7 +92,7 @@ Item {
             property real unifiedRatio: window.activeMode === "wifi" || window.activeMode === "eth" ? 0.0 : window.multiTransitionState
 
             property real activeCount: (unifiedRatio > 0.5 && myParentIdx !== -1) ? siblingsCount : window.orbitModel.count
-            property real dynamicScale: activeCount > 10 ? Math.max(0.6, 12.0 / activeCount) : (unifiedRatio > 0.5 ? (window.activeCoreCount > 2 ? 0.7 : 0.8) : 1.0)
+            property real dynamicScale: activeCount > 10 ? Math.max(0.9, 12.0 / activeCount) : (unifiedRatio > 0.5 ? (window.activeCoreCount > 2 ? 0.7 : 0.8) : 1.0)
 
             property real safeMultiShift: window.activeMode === "wifi" || window.activeMode === "eth" ? 0.0 : window.multiTransitionState
             property var pItem: (myParentIdx !== -1 && myParentIdx >= 0 && myParentIdx < coreRepeater.count) ? coreRepeater.itemAt(myParentIdx) : null
@@ -312,7 +312,7 @@ Item {
                 action_highlight: isHighlighted
                 contentAlignment: Qt.AlignLeft
                 horizontalPadding: window.s(10)
-                textFontSize: 13
+                textFontSize: 14
                 iconFontSize: window.s(18)
                 fillLevel: myFillLevel
                 onTriggered: floatCardDelegateContainer.handleTrigger()
