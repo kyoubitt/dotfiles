@@ -37,7 +37,7 @@ Scope {
         weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 },
         network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
         media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
-        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        battery: { src: Qt.resolvedUrl("ilya/battery/BatteryPopup.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         sysmon: { src: Qt.resolvedUrl("ilya/sysmon/SystemMonitorPopup.qml"), w: 520, h: 0, at: "right", m: 5, fit: true },

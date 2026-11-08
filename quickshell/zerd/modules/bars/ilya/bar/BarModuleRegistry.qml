@@ -224,14 +224,14 @@ QtObject {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.battery", "Battery") : "Battery",
             icon: "󰁹",
             defaultVariant: "classic",
-            face: "faces/bat/BatFace.qml",
+            face: "faces/bat/CellFace.qml",
             variants: {
                 "classic": {
                     id: "classic",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.bat.style.name.classic", "Classic") : "Classic",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.bat.style.classic", "Pill with gradient wave fill") : "Pill with gradient wave fill",
                     icon: "󰁹",
-                    face: "faces/bat/BatFace.qml"
+                    face: "faces/bat/CellFace.qml"
                 },
                 "minimal": {
                     id: "minimal",
