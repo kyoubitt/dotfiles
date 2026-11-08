@@ -102,7 +102,7 @@ Scope {
 
             Rectangle {
                 id: card
-                visible: root.spec === null
+                visible: root.spec === null && body.sourceComponent !== null
                 readonly property int pad: 14
                 width: Math.max(220, body.implicitWidth + 2 * pad)
                 height: body.implicitHeight + 2 * pad
