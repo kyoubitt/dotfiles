@@ -216,64 +216,19 @@ Item {
                     opacity: introHeader
                     transform: Translate { y: window.s(25) * (1.0 - introHeader) }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: window.s(14)
-
-                        Rectangle {
-                            Layout.preferredWidth: window.s(52); Layout.preferredHeight: window.s(52)
-                            radius: window.s(16)
-                            color: window.activeMute ? Qt.alpha(ThemeBackend.red, 0.18) : Qt.alpha(window.tabColor, muteMa.containsMouse ? 0.30 : 0.20)
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            Text {
-                                anchors.centerIn: parent
-                                text: window.activeMute || window.activeVol === 0 ? "volume_off" : (window.activeVol > 50 ? "volume_up" : "volume_down")
-                                font.family: "Material Symbols Rounded"
-                                font.variableAxes: ({ "wght": 600, "opsz": 24, "FILL": 1 })
-                                font.pixelSize: window.s(26)
-                                color: window.activeMute ? ThemeBackend.red : window.tabColor
-                                renderType: Text.NativeRendering
-                            }
-                            MouseArea {
-                                id: muteMa
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: if (window.activeNode) Audio.toggleMute(window.activeNode)
-                                onWheel: (wheel) => {
-                                    if (!window.activeNode) return;
-                                    const v = Math.max(0, Math.min(100, window.activeVol + (wheel.angleDelta.y > 0 ? 5 : -5)));
-                                    if (v > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
-                                    Audio.setVolume(window.activeNode, v);
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: window.s(2)
-                            Text {
-                                Layout.fillWidth: true; elide: Text.ElideRight
-                                font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(16)
-                                color: ThemeBackend.text
-                                text: window.activeName
-                                renderType: Text.NativeRendering
-                            }
-                            Text {
-                                Layout.fillWidth: true; elide: Text.ElideRight
-                                font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(12)
-                                color: ThemeBackend.subtext0
-                                text: window.activeDesc
-                                renderType: Text.NativeRendering
-                            }
-                        }
-
-                        Text {
-                            font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(26)
-                            font.features: { "tnum": 1 }
-                            color: window.activeMute ? ThemeBackend.red : ThemeBackend.text
-                            text: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
-                            renderType: Text.NativeRendering
+                    PopupHeader {
+                        glyph: window.activeMute || window.activeVol === 0 ? "volume_off" : (window.activeVol > 50 ? "volume_up" : "volume_down")
+                        title: window.activeName
+                        subtitle: window.activeDesc
+                        value: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
+                        tone: window.activeMute ? ThemeBackend.red : window.tabColor
+                        valueColor: window.activeMute ? ThemeBackend.red : ThemeBackend.text
+                        onTileClicked: if (window.activeNode) Audio.toggleMute(window.activeNode)
+                        onTileWheel: delta => {
+                            if (!window.activeNode) return;
+                            const v = Math.max(0, Math.min(100, window.activeVol + delta * 5));
+                            if (v > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
+                            Audio.setVolume(window.activeNode, v);
                         }
                     }
 

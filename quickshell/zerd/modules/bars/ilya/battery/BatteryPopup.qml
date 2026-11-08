@@ -57,62 +57,14 @@ Item {
         id: col
         x: 18; y: 18
         width: parent.width - 36
-        spacing: 16
+        spacing: 12
 
-        // the cell and the percentage
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 18
-
-            Item {
-                Layout.preferredWidth: 132; Layout.preferredHeight: 64
-                Rectangle {
-                    id: shell
-                    width: 122; height: 64; radius: 14
-                    color: Qt.alpha(ThemeBackend.text, 0.06)
-                    border.width: 3; border.color: Qt.alpha(root.tone, 0.9)
-                    clip: true
-                    Rectangle {
-                        x: 6; y: 6
-                        height: parent.height - 12
-                        width: Math.max(8, (parent.width - 12) * root.level)
-                        radius: 8
-                        color: root.tone
-                        Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-                    }
-                    Text {
-                        visible: root.charging
-                        anchors.centerIn: parent
-                        text: "bolt"
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: ({ "wght": 700, "opsz": 48, "FILL": 1 })
-                        font.pixelSize: 34
-                        color: ThemeBackend.crust
-                        renderType: Text.NativeRendering
-                    }
-                }
-                Rectangle { x: 124; y: 20; width: 7; height: 24; radius: 3; color: Qt.alpha(root.tone, 0.9) }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 2
-                Text {
-                    text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-                    color: ThemeBackend.text
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 40; font.weight: Font.Black
-                    font.features: { "tnum": 1 }
-                    renderType: Text.NativeRendering
-                }
-                Text {
-                    Layout.fillWidth: true
-                    text: root.status
-                    color: ThemeBackend.subtext0
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
-                    elide: Text.ElideRight
-                    renderType: Text.NativeRendering
-                }
-            }
+        PopupHeader {
+            glyph: root.charging ? "battery_charging_full" : (root.level > 0.95 ? "battery_full" : "battery_" + Math.min(6, Math.floor(root.level * 7)) + "_bar")
+            title: "Battery"
+            subtitle: root.status
+            value: root.ready ? Math.round(root.level * 100) + "%" : "AC"
+            tone: root.tone
         }
 
         // three small facts

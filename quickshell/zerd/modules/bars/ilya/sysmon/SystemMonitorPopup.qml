@@ -15,7 +15,7 @@ Item {
     property real intro: 0
     property var exitCallback: null
     // the host sizes the popup to this
-    readonly property real contentHeight: col.implicitHeight + 28
+    readonly property real contentHeight: col.implicitHeight + 36
 
     function startExit(onFinished) { exitCallback = onFinished; introAnim.stop(); outAnim.restart(); }
     function resetAndPlayIntro() { outAnim.stop(); intro = 0; introAnim.restart(); }
@@ -206,31 +206,16 @@ Item {
 
     ColumnLayout {
         id: col
-        x: 14; y: 14
-        width: parent.width - 28
+        x: 18; y: 18
+        width: parent.width - 36
         spacing: 12
         opacity: root.intro
 
-        // header
-        RowLayout {
-            Layout.fillWidth: true
-            Text {
-                text: "System"
-                color: ThemeBackend.text
-                font.family: ThemeBackend.fontFamily; font.pixelSize: 20; font.weight: Font.Black
-                renderType: Text.NativeRendering
-            }
-            Item { Layout.fillWidth: true }
-            Rectangle {
-                Layout.preferredHeight: 26; Layout.preferredWidth: tempRow.implicitWidth + 20; radius: 13
-                color: root.tile
-                Row {
-                    id: tempRow
-                    anchors.centerIn: parent; spacing: 5
-                    Text { text: "thermostat"; font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20 }); font.pixelSize: 15; color: ThemeBackend.blue; renderType: Text.NativeRendering }
-                    Text { text: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C"; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }; color: ThemeBackend.text; renderType: Text.NativeRendering }
-                }
-            }
+        PopupHeader {
+            glyph: "monitoring"
+            title: "System"
+            subtitle: root.cores.length + " cores · " + root.memTotal.toFixed(1) + " GB memory"
+            value: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C"
         }
 
         // rings
