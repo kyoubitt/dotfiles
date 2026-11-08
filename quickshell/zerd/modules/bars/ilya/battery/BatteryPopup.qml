@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Quickshell.Io
+import qs.services as Svc
 import "../"
 import "../reusables"
 
@@ -230,6 +231,104 @@ Item {
         x: 18; y: 318
         width: parent.width - 36
         spacing: 12
+
+        // the last twelve hours: charge as an area, charging stretches shaded green, power draw as a thin line
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 8
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "Last 12 hours"
+                    color: ThemeBackend.subtext0
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold
+                    font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
+                    renderType: Text.NativeRendering
+                }
+                Item { Layout.fillWidth: true }
+                Row {
+                    spacing: 12
+                    Row { spacing: 5; Rectangle { width: 8; height: 8; radius: 4; anchors.verticalCenter: parent.verticalCenter; color: root.tone } Text { text: "Charge"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
+                    Row { spacing: 5; Rectangle { width: 8; height: 3; radius: 1.5; anchors.verticalCenter: parent.verticalCenter; color: ThemeBackend.text; opacity: 0.7 } Text { text: "Power"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
+                }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 132
+                radius: 16
+                color: Qt.alpha(ThemeBackend.text, 0.05)
+                clip: true
+                Canvas {
+                    id: chart
+                    anchors { fill: parent; leftMargin: 12; rightMargin: 12; topMargin: 12; bottomMargin: 24 }
+                    renderTarget: Canvas.FramebufferObject
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.reset();
+                        const span = 12 * 3600 * 1000, now = Date.now(), t0 = now - span;
+                        const pts = Svc.BatteryHistory.points.filter(x => x.t >= t0);
+                        const X = t => (t - t0) / span * width;
+                        const Y = v => height - Math.max(0, Math.min(1, v)) * (height - 4) - 2;
+                        const tc = root.tone, tx = ThemeBackend.text, gr = Qt.color("#7bd88f");
+                        // faint grid
+                        ctx.lineWidth = 1; ctx.strokeStyle = Qt.rgba(tx.r, tx.g, tx.b, 0.07);
+                        for (const g of [0.25, 0.5, 0.75]) { ctx.beginPath(); ctx.moveTo(0, Y(g)); ctx.lineTo(width, Y(g)); ctx.stroke(); }
+                        if (pts.length < 2) {
+                            ctx.fillStyle = Qt.rgba(tx.r, tx.g, tx.b, 0.45);
+                            ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+                            ctx.fillText("Collecting data, a sample every 2 minutes", width / 2, height / 2);
+                            return;
+                        }
+                        // charging stretches
+                        ctx.fillStyle = Qt.rgba(gr.r, gr.g, gr.b, 0.13);
+                        let start = -1;
+                        for (let i = 0; i < pts.length; i++) {
+                            if (pts[i].c && start < 0) start = X(pts[i].t);
+                            if ((!pts[i].c || i === pts.length - 1) && start >= 0) { ctx.fillRect(start, 0, Math.max(2, X(pts[i].t) - start), height); start = -1; }
+                        }
+                        // charge area
+                        const grad = ctx.createLinearGradient(0, 0, 0, height);
+                        grad.addColorStop(0, Qt.rgba(tc.r, tc.g, tc.b, 0.45)); grad.addColorStop(1, Qt.rgba(tc.r, tc.g, tc.b, 0.03));
+                        ctx.beginPath(); ctx.moveTo(X(pts[0].t), height);
+                        for (const q of pts) ctx.lineTo(X(q.t), Y(q.p));
+                        ctx.lineTo(X(pts[pts.length - 1].t), height); ctx.closePath();
+                        ctx.fillStyle = grad; ctx.fill();
+                        ctx.beginPath();
+                        pts.forEach((q, i) => { if (i === 0) ctx.moveTo(X(q.t), Y(q.p)); else ctx.lineTo(X(q.t), Y(q.p)); });
+                        ctx.lineWidth = 2.2; ctx.lineJoin = "round"; ctx.strokeStyle = Qt.rgba(tc.r, tc.g, tc.b, 1); ctx.stroke();
+                        // power draw, scaled to its own peak
+                        const wmax = Math.max(5, ...pts.map(q => q.w));
+                        ctx.beginPath();
+                        pts.forEach((q, i) => { if (i === 0) ctx.moveTo(X(q.t), Y(q.w / wmax)); else ctx.lineTo(X(q.t), Y(q.w / wmax)); });
+                        ctx.lineWidth = 1.2; ctx.strokeStyle = Qt.rgba(tx.r, tx.g, tx.b, 0.55); ctx.stroke();
+                        // the latest point
+                        const last = pts[pts.length - 1];
+                        ctx.beginPath(); ctx.arc(X(last.t), Y(last.p), 4, 0, Math.PI * 2);
+                        ctx.fillStyle = Qt.rgba(tc.r, tc.g, tc.b, 1); ctx.fill();
+                    }
+                    Component.onCompleted: requestPaint()
+                    onWidthChanged: requestPaint()
+                    Connections { target: Svc.BatteryHistory; function onPointsChanged() { if (root.visible) chart.requestPaint() } }
+                    Connections { target: root; function onVisibleChanged() { if (root.visible) chart.requestPaint() } }
+                }
+                Row {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 12; rightMargin: 12; bottomMargin: 6 }
+                    Repeater {
+                        model: ["12 h ago", "9 h", "6 h", "3 h", "now"]
+                        delegate: Text {
+                            required property string modelData
+                            required property int index
+                            width: parent.width / 5
+                            horizontalAlignment: index === 0 ? Text.AlignLeft : (index === 4 ? Text.AlignRight : Text.AlignHCenter)
+                            text: modelData
+                            color: ThemeBackend.subtext0; opacity: 0.8
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: 11
+                            renderType: Text.NativeRendering
+                        }
+                    }
+                }
+            }
+        }
 
         // power profile: one segmented switch with a sliding highlight
         ColumnLayout {
