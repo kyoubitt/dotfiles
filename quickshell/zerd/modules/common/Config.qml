@@ -790,6 +790,7 @@ Singleton {
                 property JsonObject weather: JsonObject {
                     property bool enable: false
                     property bool useUSCS: false // Instead of metric (SI) units
+                    property string city: ""    // empty: found from the network address
                     property int fetchInterval: 10 // minutes
                 }
                 property JsonObject indicators: JsonObject {

@@ -81,7 +81,8 @@ Scope {
                   opts: ["ddd, dd/MM", "ddd, MM/dd", "ddd, dd/MM/yyyy", "ddd, MM/dd/yyyy", "dddd, d MMMM", "dddd, MMMM d", "dddd, MMMM d, yyyy", "ddd d MMM yyyy", "yyyy-MM-dd"].map(f => ({ v: f, l: Qt.formatDateTime(new Date(), f) })) } ] },
             { title: "Weather", rows: [
                 { t: "choice", icon: "thermostat", label: "Temperature", hint: "Weather in the bar, the weather popup and widgets (Fahrenheit also switches wind to mph)", path: "bar.weather.useUSCS", def: false,
-                  opts: [{ v: false, l: "Celsius (°C)" }, { v: true, l: "Fahrenheit (°F)" }] } ] },
+                  opts: [{ v: false, l: "Celsius (°C)" }, { v: true, l: "Fahrenheit (°F)" }] },
+                { t: "text", icon: "location_on", label: "Location", hint: "A city like Berlin or Austin. Press Enter. Empty finds it from your network address, which can be wrong", path: "bar.weather.city", def: "" } ] },
             { title: "Time zones", rows: [
                 { t: "list", icon: "public", label: "World clocks", hint: "Zones for the world clock widget, like Europe/London. Press Enter to add", path: "desktopWidgets.worldClock.timezones", keepCase: true },
                 { t: "info", icon: "language", label: "System time zone", hint: "Changing it needs admin rights: timedatectl set-timezone", key: "tzInfo" } ] } ] },
@@ -404,7 +405,7 @@ Scope {
                                                 readonly property real inner: width - 32
 
                                                 Loader {
-                                                    sourceComponent: ({ toggle: toggleC, slider: sliderC, choice: row.spec.art ? artC : (row.stacked ? wrapC : chipsC), step: stepC, actions: actionsC, info: infoC,
+                                                    sourceComponent: ({ text: textC, toggle: toggleC, slider: sliderC, choice: row.spec.art ? artC : (row.stacked ? wrapC : chipsC), step: stepC, actions: actionsC, info: infoC,
                                                         preview: previewC, user: userC, profiles: profilesC, binds: bindsC, cards: cardsC, swatches: swatchC, list: listC,
                                                         overview: overviewC, wallpaper: wallpaperC })[row.spec.t]
                                                 }
@@ -693,6 +694,25 @@ Scope {
                                                                 onAccepted: { const w = row.spec.keepCase ? text.trim() : text.trim().toLowerCase(); if (w.length > 0) Config.setNestedValue(row.spec.path, Config.getNestedValue(row.spec.path, []).concat([w])); text = "" }
                                                             }
                                                             BarText { x: 14; anchors.verticalCenter: parent.verticalCenter; visible: addIn.text.length === 0; text: "Add a name, then Enter"; color: BarStyle.subtext; font.pixelSize: 12 }
+                                                        }
+                                                    }
+                                                }
+
+                                                Component {
+                                                    id: textC
+                                                    Row {
+                                                        spacing: 8
+                                                        Rectangle {
+                                                            width: 220; height: 32; radius: 16; color: BarStyle.surface; border.width: 1; border.color: cityIn.activeFocus ? BarStyle.accent : BarStyle.border
+                                                            TextInput {
+                                                                id: cityIn
+                                                                x: 14; width: parent.width - 28; anchors.verticalCenter: parent.verticalCenter
+                                                                color: BarStyle.text; font.pixelSize: BarStyle.fontSize; clip: true
+                                                                font.family: Appearance.font.family.expressive
+                                                                text: String(row.value ?? "")
+                                                                onAccepted: { Config.setNestedValue(row.spec.path, text.trim()); focus = false }
+                                                            }
+                                                            BarText { x: 14; anchors.verticalCenter: parent.verticalCenter; visible: cityIn.text.length === 0 && !cityIn.activeFocus; text: "Network address"; color: BarStyle.subtext; font.pixelSize: 12 }
                                                         }
                                                     }
                                                 }

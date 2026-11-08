@@ -112,8 +112,34 @@ Singleton {
     }
 
     // Step 1: Get location from IP (primary method)
+    readonly property string cityOverride: (Config.options?.bar?.weather?.city ?? "").trim()
+    onCityOverrideChanged: { root.location = ({ valid: false, lat: 0, lon: 0, name: "" }); root.extraDays = []; root.getData() }
+    Process {
+        id: geocoder
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const r = JSON.parse(text).results?.[0];
+                    if (r) {
+                        root.location = { valid: true, lat: r.latitude, lon: r.longitude, name: r.name + (r.admin1 ? ", " + r.admin1 : "") };
+                        console.info("[Weather] Location (typed):", root.location.name);
+                        root.fetchWeather();
+                    } else {
+                        console.warn("[Weather] no place called", root.cityOverride, "; using the network address");
+                        ipLocator.running = true;
+                    }
+                } catch (e) { ipLocator.running = true; }
+            }
+        }
+    }
+
     function getLocation() {
-        if (ipLocator.running) return;
+        if (ipLocator.running || geocoder.running) return;
+        if (root.cityOverride.length > 0) {
+            geocoder.command = ["/usr/bin/curl", "-s", "--max-time", "10", "https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + encodeURIComponent(root.cityOverride.split(",")[0].trim())];
+            geocoder.running = true;
+            return;
+        }
         console.info("[Weather] Getting location...");
         ipLocator.running = true;
     }
@@ -147,7 +173,7 @@ Singleton {
         const unit = root.useUSCS ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "&wind_speed_unit=ms";
         extraFetcher.command = ["/usr/bin/curl", "-s", "--max-time", "15",
             "https://api.open-meteo.com/v1/forecast?latitude=" + root.location.lat + "&longitude=" + root.location.lon
-            + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=7&timezone=auto" + unit];
+            + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=16&timezone=auto" + unit];
         extraFetcher.running = true;
     }
     Process {
