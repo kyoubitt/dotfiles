@@ -11,6 +11,9 @@ Item {
     property real level: 0                    // 0..1
     property color tone: ThemeBackend.blue
     property bool lit: hover.containsMouse
+    property bool interactive: false          // press and drag up or down to set the level, wheel steps it
+    signal moved(real fraction)
+    signal stepped(int direction)
 
     implicitWidth: 112
     implicitHeight: 160
@@ -102,5 +105,13 @@ Item {
             }
         }
     }
-    MouseArea { id: hover; anchors.fill: parent; hoverEnabled: true }
+    MouseArea {
+        id: hover
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onPressed: m => { if (root.interactive) root.moved(Math.max(0, Math.min(1, 1 - m.y / height))) }
+        onPositionChanged: m => { if (root.interactive && pressed) root.moved(Math.max(0, Math.min(1, 1 - m.y / height))) }
+        onWheel: w => { if (root.interactive) root.stepped(w.angleDelta.y > 0 ? 1 : -1) }
+    }
 }

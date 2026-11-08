@@ -210,69 +210,76 @@ Item {
                 anchors.margins: window.s(18)
                 spacing: window.s(15)
 
-                ColumnLayout {
+                RowLayout {
                     Layout.fillWidth: true
-                    spacing: window.s(14)
+                    spacing: window.s(18)
                     opacity: introHeader
                     transform: Translate { y: window.s(25) * (1.0 - introHeader) }
 
-                    PopupHeader {
-                        glyph: window.activeMute || window.activeVol === 0 ? "volume_off" : (window.activeVol > 50 ? "volume_up" : "volume_down")
-                        title: window.activeName
-                        subtitle: window.activeDesc
+                    // the level as one of the power menu's capsules: press and drag up or down, or scroll
+                    PopupCapsule {
+                        Layout.preferredWidth: 112; Layout.preferredHeight: 168
+                        interactive: true
+                        icon: window.activeMute || window.activeVol === 0 ? "volume_off" : (window.activeVol > 50 ? "volume_up" : "volume_down")
                         value: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
+                        caption: "Volume"
+                        level: window.activeMute ? 0 : window.activeVol / 100
                         tone: window.activeMute ? ThemeBackend.red : window.tabColor
-                        valueColor: window.activeMute ? ThemeBackend.red : ThemeBackend.text
-                        onTileClicked: if (window.activeNode) Audio.toggleMute(window.activeNode)
-                        onTileWheel: delta => {
+                        onMoved: f => {
                             if (!window.activeNode) return;
-                            const v = Math.max(0, Math.min(100, window.activeVol + delta * 5));
+                            const pct = Math.round(f * 100);
+                            if (pct > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
+                            Audio.setVolume(window.activeNode, pct);
+                        }
+                        onStepped: d => {
+                            if (!window.activeNode) return;
+                            const v = Math.max(0, Math.min(100, window.activeVol + d * 5));
                             if (v > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
                             Audio.setVolume(window.activeNode, v);
                         }
                     }
 
-                    // thick rounded slider: drag or click anywhere on the track
-                    Item {
-                        id: track
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: window.s(30)
-                        readonly property real frac: Math.max(0, Math.min(1, window.activeVol / 100))
-                        Rectangle {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width; height: window.s(14); radius: height / 2
-                            color: ThemeBackend.surface1
-                            Rectangle {
-                                width: Math.max(parent.height, parent.width * track.frac); height: parent.height; radius: height / 2
-                                color: window.activeMute ? ThemeBackend.surface2 : window.tabColor
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: window.s(4)
+                        Text {
+                            Layout.fillWidth: true; elide: Text.ElideRight
+                            text: window.activeName
+                            color: ThemeBackend.text
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(19); font.weight: Font.Bold
+                            renderType: Text.NativeRendering
+                        }
+                        Text {
+                            Layout.fillWidth: true; elide: Text.ElideRight
+                            text: window.activeDesc
+                            color: ThemeBackend.subtext0
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(12)
+                            renderType: Text.NativeRendering
                         }
                         Rectangle {
-                            width: window.s(22); height: width; radius: width / 2
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: (track.width - width) * track.frac
-                            color: window.activeMute ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.25)
-                            border.width: window.s(3); border.color: ThemeBackend.card
-                            scale: trackMa.pressed ? 1.12 : 1
-                            Behavior on scale { NumberAnimation { duration: 120 } }
-                        }
-                        MouseArea {
-                            id: trackMa
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            function setFrom(mx) {
-                                if (!window.activeNode) return;
-                                const pct = Math.max(0, Math.min(100, Math.round(mx / width * 100)));
-                                if (pct > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
-                                Audio.setVolume(window.activeNode, pct);
+                            Layout.topMargin: window.s(10)
+                            Layout.preferredHeight: window.s(36); Layout.preferredWidth: muteRow.implicitWidth + window.s(28)
+                            radius: height / 2
+                            color: window.activeMute ? Qt.alpha(ThemeBackend.red, 0.20) : Qt.alpha(ThemeBackend.text, muteMa.containsMouse ? 0.12 : 0.07)
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Row {
+                                id: muteRow
+                                anchors.centerIn: parent; spacing: window.s(7)
+                                Text {
+                                    text: window.activeMute ? "volume_up" : "volume_off"
+                                    font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20 })
+                                    font.pixelSize: window.s(18); color: window.activeMute ? ThemeBackend.red : ThemeBackend.text
+                                    renderType: Text.NativeRendering
+                                }
+                                Text {
+                                    text: window.activeMute ? "Unmute" : "Mute"
+                                    font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(13); font.weight: Font.DemiBold
+                                    color: window.activeMute ? ThemeBackend.red : ThemeBackend.text
+                                    renderType: Text.NativeRendering
+                                }
                             }
-                            onPressed: (m) => setFrom(m.x)
-                            onPositionChanged: (m) => { if (pressed) setFrom(m.x) }
-                            onWheel: (wheel) => {
-                                if (!window.activeNode) return;
-                                Audio.setVolume(window.activeNode, Math.max(0, Math.min(100, window.activeVol + (wheel.angleDelta.y > 0 ? 5 : -5))));
-                            }
+                            MouseArea { id: muteMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (window.activeNode) Audio.toggleMute(window.activeNode) }
                         }
                     }
                 }
