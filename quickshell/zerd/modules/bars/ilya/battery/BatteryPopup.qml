@@ -94,7 +94,7 @@ Item {
         }
         PopupCapsule {
             readonly property real watts: root.ready ? Math.abs(root.dev.changeRate) : 0
-            readonly property bool onAc: root.ready && root.watts < 0.05 && root.dev.state !== UPowerDeviceState.Discharging
+            readonly property bool onAc: root.ready && watts < 0.05 && root.dev.state !== UPowerDeviceState.Discharging
             width: capsRow.w; height: 168
             icon: onAc ? "power" : "bolt"
             value: !root.ready ? "–" : (onAc ? "On AC" : watts.toFixed(1) + " W")
@@ -119,7 +119,7 @@ Item {
                 renderType: Text.NativeRendering
             }
             Text {
-                text: root.status.indexOf("\u00B7") >= 0 ? root.status.substring(root.status.indexOf("\u00B7") + 2) : (root.full ? "Plugged in" : "")
+                text: root.status.indexOf("\u00B7") >= 0 ? root.status.substring(root.status.indexOf("\u00B7") + 2) : (root.full ? "Nothing left to charge" : "")
                 visible: text !== ""
                 color: ThemeBackend.subtext0
                 font.family: ThemeBackend.fontFamily; font.pixelSize: 13

@@ -107,14 +107,16 @@ Item {
             if (f.length < 3) continue;
             const mp = Number(f[f.length - 1]), cp = Number(f[f.length - 2]);
             if (isNaN(mp) || isNaN(cp)) continue;
-            list.push({ name: f.slice(0, f.length - 2).join(" "), cpu: cp, mem: mp });
+            const nm = f.slice(0, f.length - 2).join(" ");
+            if (nm === "ps" || nm === "sh" || nm === "head") continue;
+            list.push({ name: nm, cpu: cp, mem: mp });
         }
         root.procs = list.slice(0, 5);
     }
 
     Process {
         id: sampler
-        command: ["sh", "-c", "grep '^cpu' /proc/stat; echo '---'; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo; echo '---'; awk 'NR>2 && $1 !~ /^lo:/ {rx+=$2; tx+=$10} END {print rx+0, tx+0}' /proc/net/dev; echo '---'; ps -eo comm=,pcpu=,pmem= --sort=-pcpu | head -5"]
+        command: ["sh", "-c", "grep '^cpu' /proc/stat; echo '---'; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo; echo '---'; awk 'NR>2 && $1 !~ /^lo:/ {rx+=$2; tx+=$10} END {print rx+0, tx+0}' /proc/net/dev; echo '---'; ps -eo comm=,pcpu=,pmem= --sort=-pcpu | head -8"]
         stdout: StdioCollector { onStreamFinished: root.parse(text) }
     }
     Timer {
