@@ -134,6 +134,9 @@ Item {
         if (visible) {
             forceActiveFocus();
             focusTimer.restart();
+            // always open on today's month, not on the month it was left on
+            window.monthOffset = 0;
+            window.targetMonthOffset = 0;
             window.gridDay = DateTime.now.getDate();
             updateCalendarGrid();
             Weather.refresh(false);
@@ -463,7 +466,8 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: ThemeBackend.borderRadius
-            color: ThemeBackend.card
+            // solid: nothing behind the popup may show through (liquid glass in Settings makes it frosted instead)
+            color: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
             clip: true
 
             WallpaperBlur {
@@ -773,7 +777,7 @@ Item {
                                         text: modelData ? modelData.time : ""
                                         font.family: ThemeBackend.fontFamily
                                         font.weight: Font.Bold
-                                        font.pixelSize: window.s(11.5)
+                                        font.pixelSize: window.s(12)
                                         color: (isHighlighted && !hourGlass.active) ? window.base : (hrMa.containsMouse || isHighlighted ? window.text : window.overlay1)
                                         Behavior on color { ColorAnimation { duration: 150 } }
                                     }
@@ -811,9 +815,14 @@ Item {
                 anchors.leftMargin: window.s(40)
                 width: window.s(310)
                 height: window.s(350)
-                color: calendarGlass.active ? "transparent" : Qt.alpha(window.surface0, 0.2)
+                color: calendarGlass.active ? "transparent" : (ThemeBackend.liquidGlass ? Qt.alpha(window.surface0, 0.2) : Qt.tint(window.base, Qt.rgba(window.text.r, window.text.g, window.text.b, 0.06)))
                 radius: ThemeBackend.borderRadius
                 z: 10
+                // the wheel over the calendar steps through the months
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => window.setMonthOffset(window.targetMonthOffset + (event.angleDelta.y > 0 ? -1 : 1))
+                }
 
                 GlassFill {
                     id: calendarGlass
@@ -877,11 +886,18 @@ Item {
                             font.pixelSize: window.s(14)
                             fontSizeMode: Text.Fit
                             minimumPixelSize: window.s(8)
-                            color: window.text
+                            color: window.textAccent
                             horizontalAlignment: Text.AlignHCenter
 
                             opacity: window.calendarContentOpacity
                             transform: Translate { x: window.calendarContentOffset }
+                            // the month name is also the way home: a click or a middle click jumps back to today
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: window.targetMonthOffset !== 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                                onClicked: { if (window.targetMonthOffset !== 0) window.setMonthOffset(0) }
+                            }
                         }
 
                         IconButton {
@@ -910,8 +926,8 @@ Item {
                                 text: modelData
                                 font.family: ThemeBackend.fontFamily
                                 font.weight: Font.Black
-                                font.pixelSize: window.s(11.5)
-                                color: window.overlay0
+                                font.pixelSize: window.s(12)
+                                color: window.overlay1
                                 horizontalAlignment: Text.AlignHCenter
                             }
                         }
@@ -977,7 +993,7 @@ Item {
                             buttonIcon: I18n.rtl ? "" : ""
                             iconFontSize: window.s(12)
                             accentColor: window.surface0
-                            textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay1
+                            textColor: isHoveredOrHighlighted ? window.textAccent : window.subtext0
                             onClicked: window.setWeatherView(window.targetWeatherView - 1)
                         }
 
@@ -1002,7 +1018,7 @@ Item {
                             buttonIcon: I18n.rtl ? "" : ""
                             iconFontSize: window.s(12)
                             accentColor: window.surface0
-                            textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay1
+                            textColor: isHoveredOrHighlighted ? window.textAccent : window.subtext0
                             onClicked: window.setWeatherView(window.targetWeatherView + 1)
                         }
                     }
@@ -1092,7 +1108,7 @@ Item {
                                 textFontSize: window.s(11.5)
 
                                 accentColor: window.surface0
-                                textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay0
+                                textColor: isHoveredOrHighlighted ? window.textAccent : window.subtext0
                             }
                         }
                     }
