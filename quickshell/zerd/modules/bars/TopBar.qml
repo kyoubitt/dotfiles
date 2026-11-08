@@ -120,7 +120,7 @@ Scope {
                 return win.layout[where].filter(id => win.blockOrder.includes(id))
             }
             // The status icons share one plate; every other block keeps its own.
-            readonly property var plateOf: ({ cpuram: "status", dnd: "status", wifi: "status", bt: "status", vol: "status", bat: "status", info: "status" })
+            readonly property var plateOf: ({ cpuram: "res", info: "res", dnd: "conn", wifi: "conn", bt: "conn", vol: "snd", bat: "snd" })
             function runs(where: string): var {
                 const out = []
                 let lastKey = ""
@@ -136,7 +136,8 @@ Scope {
                 Item {
                     id: run
                     required property var modelData
-                    readonly property bool grouped: modelData.length > 1
+                    // every status block sits on a plate like the ones on the left, even alone
+                    readonly property bool grouped: (win.plateOf[modelData[0]] ?? "") !== ""
                     readonly property bool flat: win.look !== "pills"
                     width: runRow.width > 0 ? runRow.width + (grouped ? 8 : 0) : 0
                     height: win.barHeight
@@ -159,7 +160,7 @@ Scope {
                                 spacing: 0
                                 // a thin divider between the clusters of the status plate: resources | connectivity | sound and power
                                 Item {
-                                    visible: run.grouped && (cell.modelData === "dnd" || cell.modelData === "vol")
+                                    visible: false
                                     width: visible ? 9 : 0
                                     height: win.barHeight
                                     Rectangle { anchors.centerIn: parent; width: 1; height: 16; radius: 0.5; color: Qt.rgba(BarStyle.text.r, BarStyle.text.g, BarStyle.text.b, 0.14) }

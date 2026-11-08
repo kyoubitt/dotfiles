@@ -343,19 +343,19 @@ Item {
                         width: procCol.width; height: 26
                         Rectangle {
                             height: parent.height; radius: 8
-                            width: Math.max(8, parent.width * Math.min(1, modelData.cpu / 100) )
+                            width: Math.max(8, parent.width * Math.min(1, modelData.cpu / 100))
                             color: Qt.alpha(ThemeBackend.blue, 0.20)
                         }
                         Text {
                             x: 10; anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 150
+                            width: parent.width - 190
                             text: modelData.name
                             elide: Text.ElideRight
                             font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
                             color: ThemeBackend.text; renderType: Text.NativeRendering
                         }
                         Text {
-                            anchors { right: parent.right; rightMargin: 78; verticalCenter: parent.verticalCenter }
+                            anchors { right: parent.right; rightMargin: 92; verticalCenter: parent.verticalCenter }
                             text: modelData.cpu.toFixed(1) + "%"
                             font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
                             color: ThemeBackend.text; renderType: Text.NativeRendering

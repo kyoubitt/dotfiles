@@ -33,38 +33,20 @@ BarFaceBase {
             anchors.centerIn: parent
             spacing: 7
 
-            // the cell
-            Item {
+            // a plain battery glyph for the level, with a bolt version while charging
+            Text {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 25; height: 12
-                Rectangle {
-                    id: shell
-                    width: 22; height: 12; radius: 3.5
-                    color: "transparent"
-                    border.width: 1.5; border.color: Qt.alpha(root.tone, 0.85)
-                    Rectangle {
-                        x: 2.5; y: 2.5
-                        height: parent.height - 5
-                        width: Math.max(2, (parent.width - 5) * root.level)
-                        radius: 1.5
-                        color: root.tone
-                        Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-                    }
-                    Text {
-                        visible: root.charging
-                        anchors.centerIn: parent
-                        text: "bolt"
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: ({ "wght": 700, "opsz": 20, "FILL": 1 })
-                        font.pixelSize: 11
-                        color: ThemeBackend.crust
-                        renderType: Text.NativeRendering
-                    }
+                text: {
+                    if (!root.ready) return "power"
+                    if (root.charging) return "battery_charging_full"
+                    const n = Math.min(6, Math.floor(root.level * 7))
+                    return root.level > 0.95 ? "battery_full" : "battery_" + n + "_bar"
                 }
-                Rectangle {
-                    x: 22.5; y: 3.5; width: 2.5; height: 5; radius: 1
-                    color: Qt.alpha(root.tone, 0.85)
-                }
+                font.family: "Material Symbols Rounded"
+                font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                font.pixelSize: 20
+                color: root.tone
+                renderType: Text.NativeRendering
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
