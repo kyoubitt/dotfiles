@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Io
 import qs.services as Svc
 import "../"
+import "../reusables"
 
 // The system monitor: CPU with one bar per core and the temperature, memory and swap, GPU, disk, network speed
 // and the five busiest processes. It only polls while it is open.

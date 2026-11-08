@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../"
+import "../reusables"
 
 // Calendar, clock and weather in one opaque card.
 // Left: the month (arrows change the month, a day can be picked, "Today" comes back).
