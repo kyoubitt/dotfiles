@@ -75,6 +75,7 @@ Scope {
                 { t: "preview", icon: "schedule", label: "Right now" },
                 { t: "choice", icon: "schedule", label: "Clock", hint: "Bar, lock screen, clock widgets", path: "time.format", def: "hh:mm",
                   opts: [{ v: "hh:mm", l: "24-hour" }, { v: "hh:mm:ss", l: "24-hour, seconds" }, { v: "h:mm AP", l: "12-hour" }, { v: "h:mm:ss AP", l: "12-hour, seconds" }] },
+                { t: "choice", icon: "schedule", label: "Bar clock", hint: "The plate in the middle of the bar", path: "bars.top.timeStyle", opts: [{ v: "classic", l: "Classic" }, { v: "badge", l: "Badge" }], def: "classic" },
                 { t: "choice", icon: "calendar_month", label: "Short date", hint: "Next to the clock in the bar. d = day, M = month, y = year", path: "time.shortDateFormat", def: "dd/MM",
                   opts: ["dd/MM", "MM/dd", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "yyyy-MM-dd", "d MMM", "MMM d", "ddd d"].map(f => ({ v: f, l: Qt.formatDateTime(new Date(), f) })) },
                 { t: "choice", icon: "event", label: "Long date", hint: "Calendar, widgets and the lock screen", path: "time.dateFormat", def: "ddd, dd/MM",
@@ -91,6 +92,7 @@ Scope {
                 { t: "toggle", icon: "fullscreen", label: "Slide away next to a fullscreen window", hint: "Only when a fullscreen and a normal window share the screen", path: "bars.top.smartHide", def: true } ] },
             { title: "Look", rows: [
                 { t: "choice", art: "barlook", icon: "view_carousel", label: "Bar style", hint: "Pills: a capsule per group. Strip: one full-width bar. Floating: one rounded bar", path: "bars.top.look", opts: [{ v: "pills", l: "Pills" }, { v: "strip", l: "Strip" }, { v: "floating", l: "Floating" }], def: "pills" },
+                { t: "choice", icon: "grid_view", label: "Workspaces", hint: "Numbers: a square per workspace. Dots: small pills. Names: the app icon or the name", path: "bars.top.workspaceStyle", opts: [{ v: "numbers", l: "Numbers" }, { v: "dots", l: "Dots" }, { v: "names", l: "Names" }], def: "numbers" },
                 { t: "step", icon: "apps", label: "Tray icons before \"more\"", path: "bars.top.trayMax", min: 2, max: 12, by: 1, def: 6 },
                 { t: "step", icon: "height", label: "Bar height", path: "bars.top.height", min: 28, max: 44, by: 2, def: 34 } ] },
             { title: "Layout", rows: [

@@ -10,7 +10,7 @@ Item {
 
     readonly property bool isVertical: widget ? widget.orientation === "vertical" : false
 
-    property real pillSize: widget ? widget.s(widget.isCompact ? 20 : 24) : 24
+    property real pillSize: 26
     property real pillRadius: widget ? widget.s(widget.isCompact ? 6 : 7) : 7
     property real layoutSpacing: widget ? widget.s(widget.isCompact ? 5 : 6) : 6
 
@@ -145,7 +145,7 @@ Item {
                     radius: numbersFaceRoot.pillRadius
                     color: numbersHoverGlass.active ? "transparent" : wsPill.isHovered
                         ? Qt.alpha(ThemeBackend.text, 0.1)
-                        : (wsPill.isActive ? "transparent" : (wsPill.isOccupied ? Qt.alpha(ThemeBackend.text, 0.15) : "transparent"))
+                        : (wsPill.isActive ? "transparent" : (wsPill.isOccupied ? Qt.alpha(ThemeBackend.text, 0.22) : "transparent"))
 
                     Behavior on color { ColorAnimation { duration: 250 } }
 
@@ -193,7 +193,8 @@ Item {
                     renderType: Text.NativeRendering
                     anchors.centerIn: parent
                     text: (wsPill.index + 1).toString()
-                    font.family: "JetBrains Mono"
+                    font.family: ThemeBackend.fontFamily
+                    font.features: { "tnum": 1 }
                     font.pixelSize: widget ? widget.s(widget.isCompact ? 12 : 14) : 14
                     font.weight: wsPill.isActive ? Font.Black : (wsPill.isOccupied ? Font.Bold : Font.Medium)
 
