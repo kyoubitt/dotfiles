@@ -163,7 +163,12 @@ Item {
             // click a line to jump the song to it (hand cursor, brightens on hover)
             HoverHandler { id: lnHover; cursorShape: root.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
             Rectangle { anchors.fill: parent; radius: 18; color: "#10ffffff"; opacity: root.synced && lnHover.hovered && !ln.cur ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 100 } } z: -1 }
-            TapHandler { enabled: root.synced; onTapped: root.seekTo(ln.modelData.t) }
+            // a tapped line answers at once: it dips under the finger, flashes in the accent colour and eases back
+            Rectangle { id: tapFlash; anchors.fill: parent; radius: 18; color: "#ffffff"; opacity: 0; z: -1 }
+            NumberAnimation { id: tapAnim; target: tapFlash; property: "opacity"; from: 0.30; to: 0; duration: 520; easing.type: Easing.OutCubic }
+            scale: lnTap.pressed ? 0.975 : 1
+            Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+            TapHandler { id: lnTap; enabled: root.synced; onTapped: { tapAnim.restart(); root.seekTo(ln.modelData.t) } }
         }
     }
 

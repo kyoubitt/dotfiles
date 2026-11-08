@@ -104,6 +104,27 @@ Singleton {
     Timer { id: bridgeStart; interval: 1200
         onTriggered: { bridge.command = ["python3", "-I", Quickshell.shellPath("scripts/music/wsbridge.py"), root.dir + "/ws.port"]; bridge.running = true } }
 
+    // After sleep Soloist has lost its Spotify session and the bridge sits on a dead connection: when the clock jumps,
+    // the daemon and the bridge are restarted, so Orbit plays again without a click on anything.
+    Timer {
+        id: wakeWatch
+        interval: 4000; repeat: true
+        running: root.wanted && (daemon.running || bridge.running)
+        property double last: Date.now()
+        onTriggered: {
+            const now = Date.now()
+            if (now - last > 20000) root.recover()
+            last = now
+        }
+    }
+    function recover(): void {
+        root.note = ""
+        root.connected = false; root.loggedIn = false
+        root.stop()
+        recoverStart.restart()
+    }
+    Timer { id: recoverStart; interval: 1800; onTriggered: if (root.wanted) root.start() }
+
     function send(obj: var): void { if (bridge.running) bridge.write(JSON.stringify(Object.assign({ type: "command" }, obj)) + "\n") }
 
     function onMessage(line: string): void {
