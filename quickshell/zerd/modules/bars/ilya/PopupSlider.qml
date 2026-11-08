@@ -17,7 +17,7 @@ Item {
     property real shown: value
     Behavior on shown { enabled: !root.active; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
     readonly property real frac: Math.max(0, Math.min(1, shown / 100))
-    readonly property real thick: root.trackHeight + (root.active ? 4 : (ma.containsMouse ? 2 : 0))
+    property real thick: root.trackHeight + (root.active ? 4 : (ma.containsMouse ? 2 : 0))
     Behavior on thick { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
     Rectangle {
