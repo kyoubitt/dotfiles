@@ -38,7 +38,7 @@ Item {
 
     // ---- data
     property var cores: []           // per-core load 0..1
-    property real cpuTotal: 0
+    readonly property real cpuTotal: Svc.ResourceUsage.cpuUsage
     property real memUsed: 0         // GB
     property real memTotal: 0
     property real swapUsed: 0
@@ -75,8 +75,7 @@ Item {
             next[name] = { idle: idle, total: total };
             const p = prev[name];
             const load = p && total > p.total ? 1 - (idle - p.idle) / (total - p.total) : 0;
-            if (name === "cpu") root.cpuTotal = Math.max(0, Math.min(1, load));
-            else loads.push(Math.max(0, Math.min(1, load)));
+            if (name !== "cpu") loads.push(Math.max(0, Math.min(1, load)));
         }
         root._prevCpu = next;
         root.cores = loads;
@@ -133,6 +132,7 @@ Item {
     property real shownCpu: 0
     Behavior on shownCpu { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
     onCpuTotalChanged: shownCpu = cpuTotal
+    Component.onCompleted: shownCpu = cpuTotal
     readonly property color tone: ThemeBackend.blue
     function hotTone(f) { return f >= 0.9 ? ThemeBackend.red : tone }
 

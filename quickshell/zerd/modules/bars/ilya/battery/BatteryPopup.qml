@@ -93,12 +93,14 @@ Item {
             tone: ThemeBackend.blue
         }
         PopupCapsule {
+            readonly property real watts: root.ready ? Math.abs(root.dev.changeRate) : 0
+            readonly property bool onAc: root.ready && root.watts < 0.05 && root.dev.state !== UPowerDeviceState.Discharging
             width: capsRow.w; height: 168
-            icon: "bolt"
-            value: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–"
-            caption: "Power"
-            level: root.ready ? Math.min(1, Math.abs(root.dev.changeRate) / 40) : 0
-            tone: ThemeBackend.blue
+            icon: onAc ? "power" : "bolt"
+            value: !root.ready ? "–" : (onAc ? "On AC" : watts.toFixed(1) + " W")
+            caption: root.charging && !onAc ? "Charging" : (onAc ? "Plugged in" : "Draw")
+            level: onAc ? 1 : Math.min(1, watts / 30)
+            tone: onAc ? "#7bd88f" : ThemeBackend.blue
         }
     }
 
