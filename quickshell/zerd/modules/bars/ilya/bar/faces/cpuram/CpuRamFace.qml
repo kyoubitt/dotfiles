@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import "../../../reusables"
 import "../../../"
 import "../../"
@@ -8,7 +9,7 @@ import "../../"
 BarFaceBase {
     id: root
 
-    readonly property real meterW: 58
+    readonly property real meterW: 56
     readonly property real gapW: 12
     property real targetLength: 2 * meterW + gapW + 20
     property bool isFaceVisible: true
@@ -19,63 +20,70 @@ BarFaceBase {
     Component.onCompleted: SysData.subscribe()
     Component.onDestruction: SysData.unsubscribe()
 
+    // one resource, drawn after iNiR's bar resources: a thin ring that fills with the load, a glyph inside it, the number beside it
     component Meter: Item {
         id: meter
         property string label
+        property string glyph
         property int value
         readonly property bool hot: value >= 85
+        readonly property color tone: hot ? ThemeBackend.red : ThemeBackend.text
         width: root.meterW
-        height: 26
+        height: 28
 
-        Text {
-            renderType: Text.NativeRendering
-            x: 0
-            y: 1
-            text: meter.label
-            font.family: ThemeBackend.fontFamily
-            font.pixelSize: 10
-            font.weight: Font.DemiBold
-            font.letterSpacing: 0.5
-            color: ThemeBackend.subtext0
+        Item {
+            id: ringBox
+            width: 22; height: 22
+            anchors.verticalCenter: parent.verticalCenter
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.16)
+                    strokeWidth: 2.2; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc { centerX: 11; centerY: 11; radiusX: 9.4; radiusY: 9.4; startAngle: 0; sweepAngle: 360 }
+                }
+                ShapePath {
+                    strokeColor: meter.hot ? ThemeBackend.red : ThemeBackend.blue
+                    strokeWidth: 2.2; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc {
+                        centerX: 11; centerY: 11; radiusX: 9.4; radiusY: 9.4; startAngle: -90
+                        sweepAngle: 360 * Math.max(0.02, Math.min(100, meter.value)) / 100
+                        Behavior on sweepAngle { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+                    }
+                }
+            }
+            Text {
+                anchors.centerIn: parent
+                text: meter.glyph
+                font.family: "Material Symbols Rounded"
+                font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                font.pixelSize: 12
+                color: meter.tone
+                renderType: Text.NativeRendering
+            }
         }
-        // fixed room for "100%" so the number never moves its label
+        // fixed room for three digits so the ring never moves
         Text {
-            renderType: Text.NativeRendering
-            x: meter.width - 34
-            width: 34
-            y: 0
-            horizontalAlignment: Text.AlignRight
-            text: meter.value + "%"
+            x: ringBox.width + 5
+            width: 24
+            anchors.verticalCenter: parent.verticalCenter
+            text: meter.value
             font.family: ThemeBackend.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: 13
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
-            color: meter.hot ? ThemeBackend.red : ThemeBackend.text
+            color: meter.tone
+            renderType: Text.NativeRendering
             Behavior on color { ColorAnimation { duration: 150 } }
-        }
-        Rectangle {
-            x: 0
-            y: meter.height - 4
-            width: meter.width
-            height: 3
-            radius: 1.5
-            color: Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.12)
-            Rectangle {
-                height: parent.height
-                radius: parent.radius
-                width: parent.width * Math.max(0, Math.min(100, meter.value)) / 100
-                color: meter.hot ? ThemeBackend.red : ThemeBackend.blue
-                Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                Behavior on color { ColorAnimation { duration: 150 } }
-            }
         }
     }
 
     Row {
         anchors.centerIn: parent
         spacing: root.gapW
-        Meter { label: "CPU"; value: SysData.cpu }
-        Meter { label: "RAM"; value: SysData.ramPercent }
+        Meter { label: "CPU"; glyph: "memory"; value: SysData.cpu }
+        Meter { label: "RAM"; glyph: "developer_board"; value: SysData.ramPercent }
     }
 
     MouseArea {
