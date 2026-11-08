@@ -5,6 +5,7 @@ qs_ensure_cache "music"
 
 STATE_FILE="$QS_RUN_MUSIC/eq_state.json"
 SINK_NAME="serpantinum_sink"
+AUDIO_BIN="$(dirname "${BASH_SOURCE[0]}")/serpantinum-audio"
 DAEMON_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/serpantinum/audio.state"
 TEST_FILE="$QS_RUN_MUSIC/channel_test.wav"
 TEST_PID_FILE="$QS_RUN_MUSIC/channel_test.pid"
@@ -70,10 +71,10 @@ elif ! jq -e 'has("balance") and has("mono") and has("swap") and has("dynamics")
 fi
 
 audio_ctl() {
-    command -v serpantinum-audio >/dev/null 2>&1 || return 1
-    serpantinum-audio ctl "$@" >/dev/null 2>&1 && return 0
-    serpantinum-audio start >/dev/null 2>&1 || return 1
-    serpantinum-audio ctl "$@" >/dev/null 2>&1
+    [ -x "$AUDIO_BIN" ] || return 1
+    "$AUDIO_BIN" ctl "$@" >/dev/null 2>&1 && return 0
+    "$AUDIO_BIN" start >/dev/null 2>&1 || return 1
+    "$AUDIO_BIN" ctl "$@" >/dev/null 2>&1
 }
 
 apply_eq() {
@@ -171,7 +172,7 @@ with wave.open(path, 'wb') as out:
 PY
     fi
 
-    command -v serpantinum-audio >/dev/null 2>&1 && serpantinum-audio start >/dev/null 2>&1
+    [ -x "$AUDIO_BIN" ] && "$AUDIO_BIN" start >/dev/null 2>&1
     target=()
     if command -v pw-dump >/dev/null 2>&1 &&
        pw-dump 2>/dev/null | jq -e --arg n "$SINK_NAME" 'any(.[]; .info.props["node.name"] == $n)' >/dev/null 2>&1; then

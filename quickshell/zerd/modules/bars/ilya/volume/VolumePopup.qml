@@ -279,7 +279,7 @@ Item {
                                     renderType: Text.NativeRendering
                                 }
                             }
-                            MouseArea { id: muteMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (window.activeNode) Audio.toggleMute(window.activeNode) }
+                            MouseArea { id: muteMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { Sounds.playSfx("reusables/toggle/sfx.wav", 0.7); if (window.activeNode) Audio.toggleMute(window.activeNode) } }
                         }
                     }
                 }

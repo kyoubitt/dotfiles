@@ -169,6 +169,7 @@ Item {
                 Connections { target: PowerProfiles; function onProfileChanged() { seg.pending = "" } }
                 Process { id: setter }
                 function choose(name, p) {
+                    Sounds.playSfx("reusables/switch/sfx.wav", 0.7)
                     pending = name
                     PowerProfiles.profile = p
                     setter.command = ["powerprofilesctl", "set", name]
