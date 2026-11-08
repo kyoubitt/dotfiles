@@ -714,7 +714,8 @@ Item {
                         renderType: Text.NativeRendering
                         Layout.alignment: Qt.AlignHCenter
                         Layout.topMargin: window.s(4)
-                        text: DateTime.fullDate
+                        // follows the day the weather column is showing
+                        text: Qt.formatDate(new Date(DateTime.now.getTime() + window.weatherView * 86400000), "dddd, MMMM dd")
                         font.family: ThemeBackend.fontFamily
                         font.weight: Font.Bold
                         font.pixelSize: window.s(14)

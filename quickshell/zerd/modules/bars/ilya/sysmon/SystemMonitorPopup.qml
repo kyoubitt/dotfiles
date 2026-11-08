@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell.Io
 import qs.services as Svc
 import "../"
@@ -126,206 +127,248 @@ Item {
         onTriggered: if (!sampler.running) sampler.running = true
     }
 
-    component Meter: ColumnLayout {
-        id: m
-        property string label
-        property string value
-        property real fraction: 0
-        property color tone: ThemeBackend.blue
-        Layout.fillWidth: true
-        spacing: 5
-        RowLayout {
-            Layout.fillWidth: true
-            Text { renderType: Text.NativeRendering; text: m.label; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; color: ThemeBackend.subtext0 }
-            Item { Layout.fillWidth: true }
-            Text { renderType: Text.NativeRendering; text: m.value; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }; color: ThemeBackend.text }
-        }
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 6
-            radius: 3
-            color: ThemeBackend.surface2
-            Rectangle {
-                height: parent.height; radius: 3
-                width: parent.width * Math.max(0, Math.min(1, m.fraction))
-                color: m.fraction >= 0.85 ? ThemeBackend.red : m.tone
-                Behavior on width { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
-            }
-        }
-    }
-
-    component Section: Rectangle {
-        default property alias content: inner.data
-        property string title: ""
-        Layout.fillWidth: true
-        implicitHeight: inner.implicitHeight + 28
-        radius: ThemeBackend.borderRadius - 4
-        color: ThemeBackend.surface0
-        ColumnLayout {
-            id: inner
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-        }
-    }
+    // ---- look: three rings, a history chart, one bar per core, the busiest processes
+    readonly property color cardColor: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
+    readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
+    readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
 
     Rectangle {
-        id: card
         anchors.fill: parent
         radius: ThemeBackend.borderRadius
-        color: ThemeBackend.base
+        color: root.cardColor
+        border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.08)
         opacity: root.intro
-        scale: 0.96 + 0.04 * root.intro
-        transformOrigin: Item.TopRight
-        clip: true
+    }
 
-        GlassSheen {}
-
-        ColumnLayout {
-            id: col
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
-            spacing: 10
-
-            Text {
-                renderType: Text.NativeRendering
-                text: "System monitor"
-                font.family: ThemeBackend.fontFamily
-                font.pixelSize: 17
-                font.weight: Font.DemiBold
-                color: ThemeBackend.text
-            }
-
-            // CPU
-            Section {
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text { renderType: Text.NativeRendering; text: "CPU"; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; color: ThemeBackend.subtext0 }
-                    Item { Layout.fillWidth: true }
-                    Text {
-                        renderType: Text.NativeRendering
-                        visible: Svc.ResourceUsage.cpuTemp > 0
-                        text: Math.round(Svc.ResourceUsage.cpuTemp) + "°C"
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.features: { "tnum": 1 }
-                        color: Svc.ResourceUsage.cpuTemp >= 85 ? ThemeBackend.red : ThemeBackend.subtext0
-                    }
-                    Text {
-                        renderType: Text.NativeRendering
-                        Layout.leftMargin: 12
-                        text: Math.round(root.cpuTotal * 100) + "%"
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 22; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                        color: root.cpuTotal >= 0.85 ? ThemeBackend.red : ThemeBackend.text
+    component Gauge: Item {
+        id: g
+        property string label
+        property real fraction: 0
+        property string caption
+        property string glyph
+        readonly property bool hot: fraction >= 0.85
+        Layout.fillWidth: true
+        Layout.preferredHeight: 128
+        Rectangle { anchors.fill: parent; radius: 16; color: root.tile }
+        Item {
+            id: ring
+            width: 78; height: 78
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 12
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: Qt.alpha(ThemeBackend.text, 0.12); strokeWidth: 7; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc { centerX: 39; centerY: 39; radiusX: 34; radiusY: 34; startAngle: 0; sweepAngle: 360 }
+                }
+                ShapePath {
+                    strokeColor: g.hot ? ThemeBackend.red : ThemeBackend.blue; strokeWidth: 7; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc {
+                        centerX: 39; centerY: 39; radiusX: 34; radiusY: 34; startAngle: -90
+                        sweepAngle: 360 * Math.max(0.015, Math.min(1, g.fraction))
+                        Behavior on sweepAngle { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
                     }
                 }
-                // one bar per core
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 56
-                    readonly property int n: Math.max(1, root.cores.length)
-                    readonly property real gap: 4
-                    readonly property real bw: Math.max(4, (width - (n - 1) * gap) / n)
-                    Repeater {
-                        model: root.cores
-                        delegate: Item {
-                            required property int index
-                            required property real modelData
-                            x: index * (parent.bw + parent.gap)
-                            width: parent.bw
-                            height: parent.height
-                            Rectangle { anchors.fill: parent; radius: Math.min(4, width / 2); color: ThemeBackend.surface2 }
-                            Rectangle {
-                                anchors.bottom: parent.bottom
-                                width: parent.width
-                                height: Math.max(width, parent.height * modelData)
-                                radius: Math.min(4, width / 2)
-                                color: modelData >= 0.85 ? ThemeBackend.red : ThemeBackend.blue
-                                Behavior on height { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
-                            }
+            }
+            Column {
+                anchors.centerIn: parent
+                spacing: -1
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: g.glyph
+                    font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 }); font.pixelSize: 15
+                    color: g.hot ? ThemeBackend.red : ThemeBackend.subtext0; renderType: Text.NativeRendering
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Math.round(g.fraction * 100) + "%"
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 17; font.weight: Font.Black; font.features: { "tnum": 1 }
+                    color: g.hot ? ThemeBackend.red : ThemeBackend.text; renderType: Text.NativeRendering
+                }
+            }
+        }
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 94
+            text: g.label
+            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold
+            color: ThemeBackend.text; renderType: Text.NativeRendering
+        }
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 111
+            text: g.caption
+            font.family: ThemeBackend.fontFamily; font.pixelSize: 12
+            color: ThemeBackend.subtext0; renderType: Text.NativeRendering
+        }
+    }
+
+    ColumnLayout {
+        id: col
+        x: 14; y: 14
+        width: parent.width - 28
+        spacing: 12
+        opacity: root.intro
+
+        // header
+        RowLayout {
+            Layout.fillWidth: true
+            Text {
+                text: "System"
+                color: ThemeBackend.text
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 20; font.weight: Font.Black
+                renderType: Text.NativeRendering
+            }
+            Item { Layout.fillWidth: true }
+            Rectangle {
+                Layout.preferredHeight: 26; Layout.preferredWidth: tempRow.implicitWidth + 20; radius: 13
+                color: root.tile
+                Row {
+                    id: tempRow
+                    anchors.centerIn: parent; spacing: 5
+                    Text { text: "thermostat"; font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20 }); font.pixelSize: 15; color: ThemeBackend.blue; renderType: Text.NativeRendering }
+                    Text { text: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C"; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }; color: ThemeBackend.text; renderType: Text.NativeRendering }
+                }
+            }
+        }
+
+        // rings
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            Gauge { label: "CPU"; glyph: "memory"; fraction: root.cpuTotal; caption: root.cores.length + " cores" }
+            Gauge { label: "Memory"; glyph: "developer_board"; fraction: root.memTotal > 0 ? root.memUsed / root.memTotal : 0; caption: root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB" }
+            Gauge { label: root.gpuLoad >= 0 ? "GPU" : "Disk"; glyph: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive"; fraction: root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage; caption: root.gpuLoad >= 0 ? "graphics" : "root disk" }
+        }
+
+        // history: CPU and memory over the last minute
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 104
+            radius: 16
+            color: root.tile
+            clip: true
+            Canvas {
+                id: chart
+                anchors { fill: parent; margins: 12 }
+                renderTarget: Canvas.FramebufferObject
+                onPaint: {
+                    const ctx = getContext("2d");
+                    ctx.reset();
+                    const draw = (arr, col, fill) => {
+                        const n = arr.length;
+                        if (n < 2) return;
+                        const step = width / Math.max(1, n - 1);
+                        ctx.beginPath();
+                        ctx.moveTo(0, height);
+                        for (let i = 0; i < n; i++) ctx.lineTo(i * step, height - Math.max(0, Math.min(1, arr[i])) * (height - 4) - 2);
+                        ctx.lineTo(width, height);
+                        ctx.closePath();
+                        ctx.fillStyle = fill; ctx.fill();
+                        ctx.beginPath();
+                        for (let i = 0; i < n; i++) {
+                            const y = height - Math.max(0, Math.min(1, arr[i])) * (height - 4) - 2;
+                            if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
+                        }
+                        ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
+                    };
+                    const b = ThemeBackend.blue, t = ThemeBackend.subtext0;
+                    draw(Svc.ResourceUsage.memoryUsageHistory, Qt.rgba(t.r, t.g, t.b, 0.8), Qt.rgba(t.r, t.g, t.b, 0.10));
+                    draw(Svc.ResourceUsage.cpuUsageHistory, Qt.rgba(b.r, b.g, b.b, 1), Qt.rgba(b.r, b.g, b.b, 0.22));
+                }
+                Connections { target: Svc.ResourceUsage; function onCpuUsageHistoryChanged() { chart.requestPaint() } }
+            }
+            Row {
+                anchors { right: parent.right; top: parent.top; margins: 10 }
+                spacing: 12
+                Row { spacing: 5; Rectangle { width: 8; height: 8; radius: 4; anchors.verticalCenter: parent.verticalCenter; color: ThemeBackend.blue } Text { text: "CPU"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
+                Row { spacing: 5; Rectangle { width: 8; height: 8; radius: 4; anchors.verticalCenter: parent.verticalCenter; color: ThemeBackend.subtext0 } Text { text: "Memory"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
+            }
+        }
+
+        // one bar per core
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 86
+            radius: 16
+            color: root.tile
+            Text {
+                x: 14; y: 10
+                text: "Cores"
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold; font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
+                color: ThemeBackend.subtext0; renderType: Text.NativeRendering
+            }
+            Row {
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 14 }
+                height: 46
+                spacing: 6
+                Repeater {
+                    model: root.cores
+                    delegate: Item {
+                        required property real modelData
+                        width: (parent.width - 6 * (root.cores.length - 1)) / Math.max(1, root.cores.length); height: parent.height
+                        Rectangle { anchors.fill: parent; radius: 5; color: Qt.alpha(ThemeBackend.text, 0.10) }
+                        Rectangle {
+                            anchors.bottom: parent.bottom; width: parent.width; radius: 5
+                            height: Math.max(4, parent.height * modelData)
+                            color: modelData >= 0.85 ? ThemeBackend.red : ThemeBackend.blue
+                            Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
                         }
                     }
                 }
             }
+        }
 
-            // memory
-            Section {
-                Meter {
-                    label: "Memory"
-                    value: root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB"
-                    fraction: root.memTotal > 0 ? root.memUsed / root.memTotal : 0
+        // the busiest processes
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: procCol.implicitHeight + 28
+            radius: 16
+            color: root.tile
+            Column {
+                id: procCol
+                x: 14; y: 12
+                width: parent.width - 28
+                spacing: 8
+                Text {
+                    text: "Busiest"
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold; font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
+                    color: ThemeBackend.subtext0; renderType: Text.NativeRendering
                 }
-                Meter {
-                    visible: root.swapTotal > 0
-                    label: "Swap"
-                    value: root.swapUsed.toFixed(1) + " / " + root.swapTotal.toFixed(1) + " GB"
-                    fraction: root.swapTotal > 0 ? root.swapUsed / root.swapTotal : 0
-                }
-            }
-
-            // GPU, disk, network
-            Section {
-                Meter {
-                    visible: Svc.ResourceUsage.gpuAvailable
-                    label: "GPU"
-                    value: Math.round(Svc.ResourceUsage.gpuUsage * 100) + "%"
-                    fraction: Svc.ResourceUsage.gpuUsage
-                }
-                Meter {
-                    label: "Disk (/)"
-                    value: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%"
-                    fraction: Svc.ResourceUsage.diskUsedPercentage
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text { renderType: Text.NativeRendering; text: "Network"; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; color: ThemeBackend.subtext0 }
-                    Item { Layout.fillWidth: true }
-                    Text {
-                        renderType: Text.NativeRendering
-                        text: "down " + root.fmtSpeed(root.rxSpeed) + "    up " + root.fmtSpeed(root.txSpeed)
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }
-                        color: ThemeBackend.text
-                    }
-                }
-            }
-
-            // processes
-            Section {
-                Text { renderType: Text.NativeRendering; text: "Busiest processes"; font.family: ThemeBackend.fontFamily; font.pixelSize: 13; color: ThemeBackend.subtext0 }
                 Repeater {
                     model: root.procs
-                    delegate: RowLayout {
+                    delegate: Item {
                         required property var modelData
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 26
-                        spacing: 8
+                        width: procCol.width; height: 26
+                        Rectangle {
+                            height: parent.height; radius: 8
+                            width: Math.max(8, parent.width * Math.min(1, modelData.cpu / 100) )
+                            color: Qt.alpha(ThemeBackend.blue, 0.20)
+                        }
                         Text {
-                            renderType: Text.NativeRendering
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
+                            x: 10; anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 150
                             text: modelData.name
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13
-                            color: ThemeBackend.text
+                            elide: Text.ElideRight
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
+                            color: ThemeBackend.text; renderType: Text.NativeRendering
                         }
                         Text {
-                            renderType: Text.NativeRendering
-                            Layout.preferredWidth: 56
-                            horizontalAlignment: Text.AlignRight
+                            anchors { right: parent.right; rightMargin: 78; verticalCenter: parent.verticalCenter }
                             text: modelData.cpu.toFixed(1) + "%"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }
-                            color: modelData.cpu >= 50 ? ThemeBackend.red : ThemeBackend.text
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                            color: ThemeBackend.text; renderType: Text.NativeRendering
                         }
                         Text {
-                            renderType: Text.NativeRendering
-                            Layout.preferredWidth: 56
-                            horizontalAlignment: Text.AlignRight
-                            text: modelData.mem.toFixed(1) + "%"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.features: { "tnum": 1 }
-                            color: ThemeBackend.subtext0
+                            anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
+                            text: modelData.mem.toFixed(1) + "% mem"
+                            font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.features: { "tnum": 1 }
+                            color: ThemeBackend.subtext0; renderType: Text.NativeRendering
                         }
                     }
                 }
             }
         }
     }
-
-    // TEMP DEBUG
-    onCoresChanged: console.log("SYSMONDBG cores", cores.length, "cpu", Math.round(cpuTotal * 100), "mem", memUsed.toFixed(1), "/", memTotal.toFixed(1), "procs", procs.length)
 }
