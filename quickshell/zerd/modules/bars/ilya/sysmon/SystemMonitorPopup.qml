@@ -132,7 +132,12 @@ Item {
     readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
     readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
 
-    readonly property color tone: cpuTotal >= 0.9 ? ThemeBackend.red : ThemeBackend.blue
+    property color tone: cpuTotal >= 0.9 ? ThemeBackend.red : ThemeBackend.blue
+    Behavior on tone { ColorAnimation { duration: 400 } }
+    // the readings jump between samples; the picture glides to them
+    property real shownCpu: 0
+    Behavior on shownCpu { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
+    onCpuTotalChanged: shownCpu = cpuTotal
     property real orbit: 0
     NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
     property real drift: 0
@@ -190,7 +195,7 @@ Item {
                     property real wavePhase: 0
                     NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
                     radius: core.radius
-                    fillLevel: Math.max(0.02, Math.min(1, root.cpuTotal))
+                    fillLevel: Math.max(0.02, Math.min(1, root.shownCpu))
                     waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
                     phase: wavePhase
                     vertical: 1.0
@@ -202,7 +207,7 @@ Item {
                     spacing: 0
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: Math.round(root.cpuTotal * 100) + "%"
+                        text: Math.round(root.shownCpu * 100) + "%"
                         color: ThemeBackend.text
                         font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32; font.features: { "tnum": 1 }
                         renderType: Text.NativeRendering
@@ -228,6 +233,18 @@ Item {
                     id: sat
                     required property var modelData
                     width: 62; height: 62
+                    required property int index
+                    property real appear: 0
+                    opacity: appear
+                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.08 : 1)
+                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    SequentialAnimation on appear {
+                        running: root.visible
+                        PropertyAction { value: 0 }
+                        PauseAnimation { duration: 120 + sat.index * 90 }
+                        NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
+                    }
+                    MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
                     x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
                     y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 148
                     Rectangle {

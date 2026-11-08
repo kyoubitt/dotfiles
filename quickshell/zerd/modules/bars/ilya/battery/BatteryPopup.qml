@@ -20,7 +20,7 @@ Item {
     readonly property real level: ready ? Math.max(0, Math.min(1, dev.percentage)) : 0
     readonly property bool charging: ready && (dev.state === UPowerDeviceState.Charging || dev.state === UPowerDeviceState.FullyCharged)
     readonly property bool full: ready && dev.state === UPowerDeviceState.FullyCharged
-    readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
+    property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
 
     // wear from the sysfs counters: UPower leaves health unset on this laptop
     FileView { id: fFull; path: "/sys/class/power_supply/BAT1/charge_full"; blockLoading: true }
@@ -32,6 +32,12 @@ Item {
         : (wDesign > 0 ? Math.round(wFull / wDesign * 100) + "%" : "–")
     readonly property string capText: dev.energyCapacity > 0 ? (wDesign > 0 && wFull > 0 ? dev.energyCapacity.toFixed(0) + " / " + (dev.energyCapacity * wDesign / wFull).toFixed(0) + " Wh" : dev.energyCapacity.toFixed(0) + " Wh") : "–"
     readonly property string cycleText: parseInt(fCycles.text()) > 0 ? parseInt(fCycles.text()) + "" : "–"
+
+    Behavior on tone { ColorAnimation { duration: 400 } }
+    property real shownLevel: 0
+    Behavior on shownLevel { NumberAnimation { duration: 900; easing.type: Easing.OutCubic } }
+    onLevelChanged: shownLevel = level
+    onVisibleChanged: if (visible) { shownLevel = 0; shownLevel = level }
 
     function span(s) {
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
@@ -115,13 +121,13 @@ Item {
                     property real wavePhase: 0
                     NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
                     radius: core.radius
-                    fillLevel: root.level
+                    fillLevel: root.shownLevel
                     waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
                     phase: wavePhase
                     vertical: 1.0
                     color1: Qt.lighter(root.tone, 1.15)
                     color2: root.tone
-                    visible: root.level > 0.01
+                    visible: root.shownLevel > 0.01
                 }
                 Text {
                     anchors.centerIn: parent
@@ -132,7 +138,7 @@ Item {
                 }
                 Item {
                     anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
-                    height: Math.min(parent.height, Math.max(0, parent.height * root.level - 0.375 * wave.waveAmp * (Math.sin(wave.wavePhase) - Math.cos(wave.wavePhase))))
+                    height: Math.min(parent.height, Math.max(0, parent.height * root.shownLevel - 0.375 * wave.waveAmp * (Math.sin(wave.wavePhase) - Math.cos(wave.wavePhase))))
                     clip: true
                     Text {
                         width: core.width; height: core.height
@@ -157,6 +163,18 @@ Item {
                     id: sat
                     required property var modelData
                     width: 66; height: 66
+                    required property int index
+                    property real appear: 0
+                    opacity: appear
+                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.08 : 1)
+                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    SequentialAnimation on appear {
+                        running: root.visible
+                        PropertyAction { value: 0 }
+                        PauseAnimation { duration: 120 + sat.index * 90 }
+                        NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
+                    }
+                    MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
                     x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 142
                     y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 142 * 0.78
                     Rectangle {
