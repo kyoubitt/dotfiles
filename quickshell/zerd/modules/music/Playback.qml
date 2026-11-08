@@ -31,7 +31,7 @@ Singleton {
         function next(): void { root.next() }
         function previous(): void { root.previous() }
         property real fed: 0      // the last position we set ourselves: the window also emits positionChanged() just to refresh, which is not a seek
-        onPositionChanged: if (!feeding && Math.abs(position - fed) > 0.8) { fed = position; seekTimer.target = position; seekTimer.restart() }
+        onPositionChanged: if (!feeding && Math.abs(position - fed) > 0.8) { fed = position; seekTimer.target = length > 4 ? Math.min(position, length - 3) : position; seekTimer.restart() }
     }
     // a seek by the user: wait a beat so a drag is one request
     Timer { id: seekTimer; interval: 120; property real target: 0
