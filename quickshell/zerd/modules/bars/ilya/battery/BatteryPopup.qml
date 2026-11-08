@@ -11,7 +11,6 @@ Item {
     id: root
     visible: false
     width: 440
-    readonly property real contentHeight: col.implicitHeight + 36
     implicitWidth: 440
     implicitHeight: contentHeight
     function startExit(done) { if (done) done() }
@@ -46,28 +45,66 @@ Item {
         return dev.timeToEmpty > 0 ? "On battery · " + span(dev.timeToEmpty) + " left" : "On battery";
     }
 
+    readonly property real contentHeight: 318 + col.implicitHeight + 18
+    property real orbit: 0
+    NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
+    property real drift: 0
+    NumberAnimation on drift { from: 0; to: Math.PI * 2; duration: 160000; loops: Animation.Infinite; running: root.visible }
+
     Rectangle {
+        id: card
         anchors.fill: parent
         radius: ThemeBackend.borderRadius
-        color: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
-        border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.08)
-    }
+        color: ThemeBackend.card
+        clip: true
 
-    ColumnLayout {
-        id: col
-        x: 18; y: 18
-        width: parent.width - 36
-        spacing: 12
+        GlassSheen {}
+        WallpaperBlur {
+            z: -1
+            anchors.fill: parent
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
+            bottomRightRadius: parent.bottomRightRadius
+        }
 
-        // the liquid tile from the volume popup: the battery as a tank that fills with the charge
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 18
+        // slow drifting colour behind everything
+        Rectangle {
+            width: parent.width * 0.8; height: width; radius: width / 2
+            x: (parent.width / 2 - width / 2) + Math.cos(root.drift * 2) * 110
+            y: 130 - height / 2 + Math.sin(root.drift * 2) * 60
+            color: root.tone; opacity: 0.07
+        }
+        Rectangle {
+            width: parent.width * 0.9; height: width; radius: width / 2
+            x: (parent.width / 2 - width / 2) + Math.sin(root.drift * 1.5) * -110
+            y: 150 - height / 2 + Math.cos(root.drift * 1.5) * -60
+            color: ThemeBackend.surface2; opacity: 0.05
+        }
+
+        // the scene: two orbit rings, the core, three satellites
+        Item {
+            id: scene
+            x: 0; y: 0; width: parent.width; height: 318
+            readonly property real cx: width / 2
+            readonly property real cy: 154
+
+            Rectangle { x: scene.cx - 92; y: scene.cy - 92; width: 184; height: 184; radius: 92; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
+            Rectangle { x: scene.cx - 142; y: scene.cy - 142; width: 284; height: 284; radius: 142; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
+
+            // breathing halo while charging
+            Rectangle {
+                id: halo
+                anchors.centerIn: core
+                width: core.width + 22; height: width; radius: width / 2
+                color: "transparent"; border.width: 1.5; border.color: root.tone
+                opacity: 0.12 + (root.charging ? 0.10 * Math.sin(root.orbit * 900) : 0)
+            }
 
             Rectangle {
-                id: tank
-                Layout.preferredWidth: 132; Layout.preferredHeight: 132
-                radius: ThemeBackend.borderRadius
+                id: core
+                x: scene.cx - 68; y: scene.cy - 68
+                width: 136; height: 136; radius: 68
                 color: ThemeBackend.base
                 border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
                 clip: true
@@ -77,7 +114,7 @@ Item {
                     anchors.fill: parent
                     property real wavePhase: 0
                     NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
-                    radius: tank.radius
+                    radius: core.radius
                     fillLevel: root.level
                     waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
                     phase: wavePhase
@@ -90,7 +127,7 @@ Item {
                     anchors.centerIn: parent
                     text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
                     color: ThemeBackend.text
-                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 30
+                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32
                     renderType: Text.NativeRendering
                 }
                 Item {
@@ -98,86 +135,83 @@ Item {
                     height: Math.min(parent.height, Math.max(0, parent.height * root.level - 0.375 * wave.waveAmp * (Math.sin(wave.wavePhase) - Math.cos(wave.wavePhase))))
                     clip: true
                     Text {
-                        x: 0; width: tank.width; height: tank.height
-                        y: -(tank.height - parent.height)
+                        width: core.width; height: core.height
+                        y: -(core.height - parent.height)
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                         text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
                         color: ThemeBackend.crust
-                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 30
+                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32
                         renderType: Text.NativeRendering
                     }
                 }
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 4
-                Text {
-                    text: root.charging ? (root.full ? "Full" : "Charging") : "On battery"
-                    color: ThemeBackend.text
-                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 20
-                    renderType: Text.NativeRendering
-                }
-                Text {
-                    Layout.fillWidth: true
-                    text: root.status
-                    color: ThemeBackend.subtext0
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12
-                    wrapMode: Text.WordWrap
-                    renderType: Text.NativeRendering
-                }
-            }
-        }
-
-        // three small facts
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
+            // satellites drift slowly round the outer ring
             Repeater {
                 model: [
-                    { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt" },
-                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite" },
-                    { k: "Capacity", v: root.ready ? root.capText : "–", i: "battery_full" }
+                    { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt", a: -2.1 },
+                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite", a: 0.0 },
+                    { k: "Capacity", v: root.ready ? root.capText : "–", i: "battery_full", a: 2.1 }
                 ]
-                delegate: Rectangle {
+                delegate: Item {
+                    id: sat
                     required property var modelData
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 62
-                    radius: 14
-                    color: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 3
-                        Row {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 5
+                    width: 66; height: 66
+                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 142
+                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 142 * 0.78
+                    Rectangle {
+                        anchors.fill: parent; radius: width / 2
+                        color: Qt.alpha(ThemeBackend.surface0, 0.92)
+                        border.width: 1.5; border.color: Qt.alpha(root.tone, 0.55)
+                        Column {
+                            anchors.centerIn: parent; spacing: 0
                             Text {
-                                text: modelData.i
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: sat.modelData.i
                                 font.family: "Material Symbols Rounded"
-                                font.variableAxes: ({ "wght": 600, "opsz": 20 })
-                                font.pixelSize: 15
-                                color: ThemeBackend.blue
+                                font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                                font.pixelSize: 16; color: root.tone
                                 renderType: Text.NativeRendering
                             }
                             Text {
-                                text: modelData.v
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: sat.modelData.v
                                 color: ThemeBackend.text
-                                font.family: ThemeBackend.fontFamily; font.pixelSize: 14; font.weight: Font.Bold
+                                font.family: ThemeBackend.fontFamily; font.pixelSize: sat.modelData.v.length > 6 ? 10 : 12; font.weight: Font.Bold
                                 font.features: { "tnum": 1 }
                                 renderType: Text.NativeRendering
                             }
                         }
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.k
-                            color: ThemeBackend.subtext0
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 12
-                            renderType: Text.NativeRendering
-                        }
+                    }
+                    Text {
+                        anchors.top: parent.bottom; anchors.topMargin: 3
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: sat.modelData.k
+                        color: ThemeBackend.subtext0
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 11
+                        renderType: Text.NativeRendering
                     }
                 }
             }
         }
+
+        // status line under the scene
+        Text {
+            x: 18; y: 280; width: parent.width - 36
+            horizontalAlignment: Text.AlignHCenter
+            text: root.status
+            color: ThemeBackend.subtext0
+            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
+            elide: Text.ElideRight
+            renderType: Text.NativeRendering
+        }
+    }
+
+    ColumnLayout {
+        id: col
+        x: 18; y: 318
+        width: parent.width - 36
+        spacing: 12
 
         // power profile: one segmented switch with a sliding highlight
         ColumnLayout {
