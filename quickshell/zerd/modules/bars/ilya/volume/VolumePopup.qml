@@ -210,283 +210,113 @@ Item {
                 anchors.margins: window.s(18)
                 spacing: window.s(15)
 
-                RowLayout {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: window.s(18)
+                    spacing: window.s(14)
                     opacity: introHeader
                     transform: Translate { y: window.s(25) * (1.0 - introHeader) }
 
-                    Item {
-                        Layout.preferredWidth: window.s(140)
-                        Layout.preferredHeight: window.s(140)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: window.s(14)
 
                         Rectangle {
-                            anchors.centerIn: parent
-                            width: parent.width + window.s(6)
-                            height: width
-                            radius: ThemeBackend.borderRadius
-                            color: "transparent"
-                            border.color: window.activeMute ? ThemeBackend.red : window.tabColor
-                            border.width: window.s(1.5)
-                            z: -2
-
-                            property real pulseOp: 0.0
-                            property real pulseSc: 1.0
-                            opacity: window.activeMute ? 0.0 : pulseOp
-                            scale: pulseSc
-
-                            Timer {
-                                interval: 45
-                                running: window.visible && (parent.opacity > 0.01 || !window.activeMute)
-                                repeat: true
-                                onTriggered: {
-                                    var time = Date.now() / 1000;
-                                    parent.pulseOp = 0.12 + Math.sin(time * 2.5) * 0.05;
-                                    parent.pulseSc = 1.008 + Math.cos(time * 3.0) * 0.005;
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: parent.width + window.s(10)
-                            height: width
-                            radius: ThemeBackend.borderRadius
-                            color: window.activeMute ? ThemeBackend.red : window.tabColor
-                            opacity: coreGlass.active ? 0.0 : (window.activeMute ? 0.15 : 0.06)
-                            z: -1
-                            Behavior on color { ColorAnimation { duration: 250 } }
-
-                            SequentialAnimation on scale {
-                                loops: Animation.Infinite; running: window.visible
-                                NumberAnimation { to: 1.015; duration: 2000; easing.type: Easing.InOutSine }
-                                NumberAnimation { to: 1.0; duration: 2000; easing.type: Easing.InOutSine }
-                            }
-                        }
-
-                        MultiEffect {
-                            source: centralCore
-                            anchors.fill: centralCore
-                            visible: !coreGlass.active
-                            shadowEnabled: true
-                            shadowColor: "#000000"
-                            shadowOpacity: 0.5
-                            shadowBlur: 1.2
-                            shadowVerticalOffset: window.s(5)
-                            z: -1
-                        }
-
-                        Rectangle {
-                            id: centralCore
-                            anchors.fill: parent
-                            radius: ThemeBackend.borderRadius
-                            color: coreGlass.active ? "transparent" : ThemeBackend.base
-                            border.color: window.activeMute ? ThemeBackend.red : Qt.lighter(window.tabColor, 1.1)
-                            border.width: coreGlass.active ? 0 : 2
-                            clip: !coreGlass.active
-                            Behavior on border.color { ColorAnimation { duration: 250 } }
-
-                            GlassFill {
-                                id: coreGlass
-                                anchors.fill: parent
-                                radius: parent.radius
-                                tintColor: ThemeBackend.surface0
-                                tintAmount: 0.3
-                                shadow: 1
-                                press: coreMa.containsMouse ? 0.25 : 0
-                                Behavior on press { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-                            }
-
-                            FluidWave {
-                                id: orbWave
-                                anchors.fill: parent
-
-                                property real wavePhase: 0.8
-                                NumberAnimation {
-                                    id: orbWaveAnim
-                                    target: orbWave
-                                    property: "wavePhase"
-                                    running: window.visible && coreMa.containsMouse && window.activeVol > 0 && window.activeVol < 100
-                                    loops: Animation.Infinite
-                                    from: 0
-                                    to: Math.PI * 2
-                                    duration: 1200
-                                }
-
-                                radius: ThemeBackend.borderRadius
-                                fillLevel: Math.max(0.0, Math.min(1.0, window.activeVol / 100.0))
-                                waveAmp: fillLevel < 0.99 ? (window.s(6) * Math.sin(fillLevel * Math.PI)) : 0
-                                phase: wavePhase
-                                vertical: 1.0
-                                color1: window.activeMute ? Qt.lighter(ThemeBackend.red, 1.15) : Qt.lighter(window.tabColor, 1.15)
-                                color2: window.activeMute ? ThemeBackend.red : window.tabColor
-                                visible: window.activeVol > 0 && !coreGlass.active
-                            }
-
-                            LiquidFill {
-                                anchors.centerIn: parent
-                                width: parent.height
-                                height: parent.width
-                                rotation: -90
-                                radius: centralCore.radius
-                                fillLevel: orbWave.fillLevel
-                                waveAmp: orbWave.waveAmp
-                                phase: orbWave.wavePhase
-                                color1: orbWave.color1
-                                color2: orbWave.color2
-                                bodyAlpha: 0.4
-                                visible: coreGlass.active && window.activeVol > 0
-                                property real lift: (orbWave.fillLevel > 0.001 && orbWave.fillLevel < 0.999) ? 1.0 : 0.0
-                                Behavior on lift { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-                                scale: 1.0 + 0.07 * lift
-                            }
-
+                            Layout.preferredWidth: window.s(52); Layout.preferredHeight: window.s(52)
+                            radius: window.s(16)
+                            color: window.activeMute ? Qt.alpha(ThemeBackend.red, 0.18) : Qt.alpha(window.tabColor, muteMa.containsMouse ? 0.30 : 0.20)
+                            Behavior on color { ColorAnimation { duration: 150 } }
                             Text {
-                                renderType: Text.NativeRendering
                                 anchors.centerIn: parent
-                                width: parent.width * 0.85
-                                height: parent.height * 0.4
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                                fontSizeMode: Text.Fit
-                                minimumPixelSize: window.s(8)
-                                font.family: ThemeBackend.fontFamily
-                                font.weight: Font.Black
+                                text: window.activeMute || window.activeVol === 0 ? "volume_off" : (window.activeVol > 50 ? "volume_up" : "volume_down")
+                                font.family: "Material Symbols Rounded"
+                                font.variableAxes: ({ "wght": 600, "opsz": 24, "FILL": 1 })
                                 font.pixelSize: window.s(26)
-                                color: window.activeMute ? ThemeBackend.red : ThemeBackend.text
-                                text: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
-                                Behavior on color { ColorAnimation { duration: 250 } }
+                                color: window.activeMute ? ThemeBackend.red : window.tabColor
+                                renderType: Text.NativeRendering
                             }
-
-                            Item {
-                                id: waveClipItem
-                                anchors.bottom: parent.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-
-                                property real fillRatio: window.activeVol / 100.0
-                                property real waveAmp: fillRatio < 0.99 ? window.s(6) * Math.sin(fillRatio * Math.PI) : 0
-                                property real waveCenterOffset: 0.375 * waveAmp * (Math.sin(orbWave.wavePhase) - Math.cos(orbWave.wavePhase))
-                                property real baseClipHeight: parent.height * fillRatio
-
-                                height: Math.min(parent.height, Math.max(0, baseClipHeight - waveCenterOffset))
-                                clip: true
-                                visible: window.activeVol > 0
-
-                                Text {
-                                    renderType: Text.NativeRendering
-                                    width: centralCore.width * 0.85
-                                    height: centralCore.height * 0.4
-                                    x: (centralCore.width - width) / 2
-                                    y: (centralCore.height - height) / 2 - (centralCore.height - waveClipItem.height)
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
-                                    fontSizeMode: Text.Fit
-                                    minimumPixelSize: window.s(8)
-                                    font.family: ThemeBackend.fontFamily
-                                    font.weight: Font.Black
-                                    font.pixelSize: window.s(26)
-                                    color: coreGlass.active ? ThemeBackend.text : ThemeBackend.crust
-                                    text: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
-                                }
-                            }
-
                             MouseArea {
-                                id: coreMa
+                                id: muteMa
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (window.activeNode) {
-                                        Audio.toggleMute(window.activeNode);
-                                    }
-                                }
+                                onClicked: if (window.activeNode) Audio.toggleMute(window.activeNode)
                                 onWheel: (wheel) => {
                                     if (!window.activeNode) return;
-                                    let delta = wheel.angleDelta.y > 0 ? 5 : -5;
-                                    let newVol = Math.max(0, Math.min(100, window.activeVol + delta));
-                                    if (newVol > 0 && window.activeMute) {
-                                        Audio.toggleMute(window.activeNode);
-                                    }
-                                    Audio.setVolume(window.activeNode, newVol);
+                                    const v = Math.max(0, Math.min(100, window.activeVol + (wheel.angleDelta.y > 0 ? 5 : -5)));
+                                    if (v > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
+                                    Audio.setVolume(window.activeNode, v);
                                 }
                             }
                         }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: window.s(10)
 
                         ColumnLayout {
+                            Layout.fillWidth: true
                             spacing: window.s(2)
                             Text {
-                                renderType: Text.NativeRendering
                                 Layout.fillWidth: true; elide: Text.ElideRight
-                                font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: window.s(17)
+                                font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(16)
                                 color: ThemeBackend.text
                                 text: window.activeName
+                                renderType: Text.NativeRendering
                             }
                             Text {
-                                renderType: Text.NativeRendering
                                 Layout.fillWidth: true; elide: Text.ElideRight
                                 font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(12)
                                 color: ThemeBackend.subtext0
                                 text: window.activeDesc
+                                renderType: Text.NativeRendering
                             }
                         }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: window.s(20)
-                            spacing: window.s(10)
+                        Text {
+                            font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(26)
+                            font.features: { "tnum": 1 }
+                            color: window.activeMute ? ThemeBackend.red : ThemeBackend.text
+                            text: window.activeMute ? I18n.t("volumepopup.mute") : window.activeVol + "%"
+                            renderType: Text.NativeRendering
+                        }
+                    }
 
-                            IconButton {
-                                Layout.alignment: Qt.AlignVCenter
-                                size: window.s(26)
-                                cornerRadius: window.s(8)
-                                buttonIcon: window.activeMute || window.activeVol === 0 ? "󰖁" : (window.activeVol > 50 ? "󰕾" : "󰖀")
-                                iconFontSize: window.s(15)
-                                accentColor: ThemeBackend.surface1
-                                textColor: isHoveredOrHighlighted ? ThemeBackend.text : (window.activeMute ? ThemeBackend.overlay0 : ThemeBackend.subtext0)
-                                onClicked: Audio.toggleMute(window.activeNode)
+                    // thick rounded slider: drag or click anywhere on the track
+                    Item {
+                        id: track
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: window.s(30)
+                        readonly property real frac: Math.max(0, Math.min(1, window.activeVol / 100))
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width; height: window.s(14); radius: height / 2
+                            color: ThemeBackend.surface1
+                            Rectangle {
+                                width: Math.max(parent.height, parent.width * track.frac); height: parent.height; radius: height / 2
+                                color: window.activeMute ? ThemeBackend.surface2 : window.tabColor
+                                Behavior on color { ColorAnimation { duration: 150 } }
                             }
-
-                            Draggable {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: window.s(16)
-                                Layout.alignment: Qt.AlignVCenter
-                                from: 0.0
-                                to: 100.0
-                                value: window.activeVol
-                                backgroundColor: ThemeBackend.surface1
-                                accentColor: window.activeMute ? ThemeBackend.surface2 : window.tabColor
-                                gradColor1: window.activeMute ? ThemeBackend.surface2 : window.tabColor
-                                gradColor2: window.activeMute ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.05)
-                                gradColor3: window.activeMute ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.10)
-                                cornerRadius: window.s(5)
-                                handleSize: window.s(18)
-
-                                handleColor: window.activeMute ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.15)
-                                handleHoverColor: window.activeMute ? ThemeBackend.subtext0 : Qt.lighter(window.tabColor, 1.5)
-                                handleDragColor: window.activeMute ? ThemeBackend.text : Qt.lighter(window.tabColor, 1.45)
-                                handleBorderColor: Qt.rgba(0, 0, 0, 0.2)
-
-                                onMoved: (val) => {
-                                    let pct = Math.max(0, Math.min(100, Math.round(val)));
-                                    if (pct > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
-                                    Audio.setVolume(window.activeNode, pct);
-                                }
+                        }
+                        Rectangle {
+                            width: window.s(22); height: width; radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: (track.width - width) * track.frac
+                            color: window.activeMute ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.25)
+                            border.width: window.s(3); border.color: ThemeBackend.card
+                            scale: trackMa.pressed ? 1.12 : 1
+                            Behavior on scale { NumberAnimation { duration: 120 } }
+                        }
+                        MouseArea {
+                            id: trackMa
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            function setFrom(mx) {
+                                if (!window.activeNode) return;
+                                const pct = Math.max(0, Math.min(100, Math.round(mx / width * 100)));
+                                if (pct > 0 && window.activeMute) Audio.toggleMute(window.activeNode);
+                                Audio.setVolume(window.activeNode, pct);
                             }
-
-                            Text {
-                                renderType: Text.NativeRendering
-                                Layout.preferredWidth: window.s(32)
-                                Layout.alignment: Qt.AlignVCenter
-                                font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(11)
-                                color: ThemeBackend.subtext0
-                                text: window.activeVol + "%"
-                                horizontalAlignment: Text.AlignRight
+                            onPressed: (m) => setFrom(m.x)
+                            onPositionChanged: (m) => { if (pressed) setFrom(m.x) }
+                            onWheel: (wheel) => {
+                                if (!window.activeNode) return;
+                                Audio.setVolume(window.activeNode, Math.max(0, Math.min(100, window.activeVol + (wheel.angleDelta.y > 0 ? 5 : -5))));
                             }
                         }
                     }

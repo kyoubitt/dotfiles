@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import Quickshell.Services.UPower
 import "../../../reusables"
 import "../../../"
@@ -12,50 +13,56 @@ BarFaceBase {
     readonly property bool ready: UPower.displayDevice.ready && UPower.displayDevice.isLaptopBattery
     readonly property real level: ready ? Math.max(0, Math.min(1, UPower.displayDevice.percentage)) : 0
     readonly property bool charging: ready && (UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-    readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.text))
+    readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
 
     property bool isFaceVisible: true
-    property real targetLength: row.implicitWidth + 24
-    implicitWidth: targetLength
+    property real targetLength: 70
+    implicitWidth: 70
     implicitHeight: parent ? parent.height : 0
 
-    Rectangle {
-        id: plate
+    Item {
+        id: box
         anchors.centerIn: parent
-        height: 28
-        width: parent.width
-        radius: 14
-        color: ma.containsMouse ? Qt.alpha(ThemeBackend.text, 0.10) : "transparent"
-        Behavior on color { ColorAnimation { duration: 120 } }
+        width: 62; height: 28
 
-        Row {
-            id: row
-            anchors.centerIn: parent
-            spacing: 7
-
-            // a plain battery glyph for the level, with a bolt version while charging
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: {
-                    if (!root.ready) return "power"
-                    if (root.charging) return "battery_charging_full"
-                    const n = Math.min(6, Math.floor(root.level * 7))
-                    return root.level > 0.95 ? "battery_full" : "battery_" + n + "_bar"
+        Item {
+            id: ringBox
+            width: 22; height: 22
+            anchors.verticalCenter: parent.verticalCenter
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: Qt.alpha(ThemeBackend.text, 0.16); strokeWidth: 2.2; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc { centerX: 11; centerY: 11; radiusX: 9.4; radiusY: 9.4; startAngle: 0; sweepAngle: 360 }
                 }
+                ShapePath {
+                    strokeColor: root.tone; strokeWidth: 2.2; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc {
+                        centerX: 11; centerY: 11; radiusX: 9.4; radiusY: 9.4; startAngle: -90
+                        sweepAngle: 360 * Math.max(0.02, root.ready ? root.level : 1)
+                        Behavior on sweepAngle { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                    }
+                }
+            }
+            Text {
+                anchors.centerIn: parent
+                text: root.charging ? "bolt" : "battery_android_full"
                 font.family: "Material Symbols Rounded"
                 font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
-                font.pixelSize: 20
-                color: root.tone
+                font.pixelSize: 12
+                color: root.charging ? root.tone : ThemeBackend.text
                 renderType: Text.NativeRendering
             }
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-                color: root.tone
-                font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold
-                font.features: { "tnum": 1 }
-                renderType: Text.NativeRendering
-            }
+        }
+        Text {
+            x: ringBox.width + 5
+            width: 34
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.ready ? Math.round(root.level * 100) : "AC"
+            color: root.tone
+            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; font.features: { "tnum": 1 }
+            renderType: Text.NativeRendering
         }
     }
 
