@@ -675,7 +675,7 @@ Item {
                     anchors.centerIn: parent
                     spacing: 0
                     z: 0
-                    scale: 0.98 + (0.02 * window.secondPulse)
+                    scale: 1   // no per-second pulse: a scale between 0.98 and 1.0 re-draws the digits blurred
 
                     // the time stacked: hours, three dots, minutes (Caelestia's dashboard clock), in our colours
                     Text {
@@ -942,8 +942,8 @@ Item {
                                 text: modelData
                                 font.family: ThemeBackend.fontFamily
                                 font.weight: Font.Black
-                                font.pixelSize: window.s(12)
-                                color: window.overlay1
+                                font.pixelSize: window.s(12.5)
+                                color: window.subtext0
                                 horizontalAlignment: Text.AlignHCenter
                             }
                         }
@@ -967,7 +967,7 @@ Item {
                                 Layout.fillHeight: true
                                 enabled: false
                                 buttonText: dayNum
-                                textFontSize: window.s(11.5)
+                                textFontSize: window.s(12.5)
                                 cornerRadius: window.s(5)
                                 horizontalPadding: 0
                                 accentColor: isToday ? window.textAccent : ((ThemeBackend.liquidGlass && !isCurrentMonth) ? window.surface0 : "transparent")
@@ -1121,7 +1121,7 @@ Item {
                                 subText: index === 0 ? I18n.t("calendar.weather.wind") : index === 1 ? I18n.t("calendar.weather.humid") : index === 2 ? I18n.t("calendar.weather.rain") : I18n.t("calendar.weather.feels")
 
                                 iconFontSize: window.s(14)
-                                textFontSize: window.s(11.5)
+                                textFontSize: window.s(12.5)
 
                                 accentColor: window.surface0
                                 textColor: isHoveredOrHighlighted ? window.textAccent : window.subtext0
