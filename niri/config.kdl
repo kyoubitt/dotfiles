@@ -34,7 +34,7 @@ hotkey-overlay {
 
 cursor {
     xcursor-theme "Future-cursors-Black"
-    xcursor-size 24
+    xcursor-size 16
     hide-when-typing
     hide-after-inactive-ms 5000
 }
@@ -190,8 +190,8 @@ layout {
 
     focus-ring {
         width 2
-        active-color "#91BFF4bb"
-        inactive-color "#91BFF4bb"
+        active-color "#D5C1FAbb"
+        inactive-color "#D5C1FAbb"
     }
 
 

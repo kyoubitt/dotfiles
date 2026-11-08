@@ -130,7 +130,7 @@ Item {
     // ---- look: three rings, a history chart, one bar per core, the busiest processes
     readonly property color cardColor: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
     readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
-    readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
+    readonly property real gpuLoad: -1
 
     Rectangle {
         anchors.fill: parent
