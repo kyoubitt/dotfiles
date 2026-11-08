@@ -51,7 +51,7 @@ Item {
         return dev.timeToEmpty > 0 ? "On battery · " + span(dev.timeToEmpty) + " left" : "On battery";
     }
 
-    readonly property real contentHeight: 334 + col.implicitHeight + 18
+    readonly property real contentHeight: 338 + col.implicitHeight + 18
     property real orbit: 0
     NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
     property real drift: 0
@@ -88,33 +88,30 @@ Item {
             color: ThemeBackend.surface2; opacity: 0.05
         }
 
-        // the scene: two orbit rings, the core, three satellites
+        // the scene: two orbit rings, a plain liquid orb, three small icons drifting round it
         Item {
             id: scene
-            x: 0; y: 0; width: parent.width; height: 334
+            x: 0; y: 0; width: parent.width; height: 270
             readonly property real cx: width / 2
-            readonly property real cy: 154
+            readonly property real cy: 128
 
             Rectangle { x: scene.cx - 92; y: scene.cy - 92; width: 184; height: 184; radius: 92; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
-            Rectangle { x: scene.cx - 142; y: scene.cy - 104; width: 284; height: 208; radius: 104; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
+            Rectangle { x: scene.cx - 150; y: scene.cy - 86; width: 300; height: 172; radius: 86; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
 
-            // breathing halo while charging
             Rectangle {
-                id: halo
                 anchors.centerIn: core
-                width: core.width + 22; height: width; radius: width / 2
+                width: core.width + 20; height: width; radius: width / 2
                 color: "transparent"; border.width: 1.5; border.color: root.tone
                 opacity: 0.12 + (root.charging ? 0.10 * Math.sin(root.orbit * 900) : 0)
             }
 
             Rectangle {
                 id: core
-                x: scene.cx - 68; y: scene.cy - 68
-                width: 136; height: 136; radius: 68
+                x: scene.cx - 66; y: scene.cy - 66
+                width: 132; height: 132; radius: 66
                 color: ThemeBackend.base
                 border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
                 clip: true
-
                 FluidWave {
                     id: wave
                     anchors.fill: parent
@@ -129,44 +126,24 @@ Item {
                     color2: root.tone
                     visible: root.shownLevel > 0.01
                 }
-                Text {
-                    anchors.centerIn: parent
-                    text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-                    color: ThemeBackend.text
-                    font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32
-                    renderType: Text.NativeRendering
-                }
-                Item {
-                    anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
-                    height: Math.min(parent.height, Math.max(0, parent.height * root.shownLevel - 0.375 * wave.waveAmp * (Math.sin(wave.wavePhase) - Math.cos(wave.wavePhase))))
-                    clip: true
-                    Text {
-                        width: core.width; height: core.height
-                        y: -(core.height - parent.height)
-                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-                        color: ThemeBackend.crust
-                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32
-                        renderType: Text.NativeRendering
-                    }
-                }
             }
 
-            // satellites drift slowly round the outer ring
             Repeater {
                 model: [
-                    { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt", a: -2.1 },
-                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite", a: 0.0 },
+                    { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt", a: -2.3 },
+                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite", a: -0.1 },
                     { k: "Capacity", v: root.ready ? root.capText : "–", i: "battery_full", a: 2.1 }
                 ]
                 delegate: Item {
                     id: sat
                     required property var modelData
-                    width: 66; height: 66
                     required property int index
+                    width: 96; height: 80
+                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 150
+                    y: scene.cy - 22 + Math.sin(modelData.a + root.orbit * 6) * 86
                     property real appear: 0
                     opacity: appear
-                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.08 : 1)
+                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.06 : 1)
                     Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                     SequentialAnimation on appear {
                         running: root.visible
@@ -175,35 +152,28 @@ Item {
                         NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
                     }
                     MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
-                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 142
-                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 104
                     Rectangle {
-                        anchors.fill: parent; radius: width / 2
+                        width: 44; height: 44; radius: 22
+                        anchors.horizontalCenter: parent.horizontalCenter
                         color: Qt.alpha(ThemeBackend.surface0, 0.92)
                         border.width: 1.5; border.color: Qt.alpha(root.tone, 0.55)
-                        Column {
-                            anchors.centerIn: parent; spacing: 0
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: sat.modelData.i
-                                font.family: "Material Symbols Rounded"
-                                font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
-                                font.pixelSize: 16; color: root.tone
-                                renderType: Text.NativeRendering
-                            }
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: sat.modelData.v
-                                color: ThemeBackend.text
-                                font.family: ThemeBackend.fontFamily; font.pixelSize: sat.modelData.v.length > 6 ? 10 : 12; font.weight: Font.Bold
-                                font.features: { "tnum": 1 }
-                                renderType: Text.NativeRendering
-                            }
+                        Text {
+                            anchors.centerIn: parent
+                            text: sat.modelData.i
+                            font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                            font.pixelSize: 20; color: root.tone
+                            renderType: Text.NativeRendering
                         }
                     }
                     Text {
-                        anchors.top: parent.bottom; anchors.topMargin: 3
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        y: 47; width: parent.width; horizontalAlignment: Text.AlignHCenter
+                        text: sat.modelData.v
+                        color: ThemeBackend.text
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                        renderType: Text.NativeRendering
+                    }
+                    Text {
+                        y: 64; width: parent.width; horizontalAlignment: Text.AlignHCenter
                         text: sat.modelData.k
                         color: ThemeBackend.subtext0
                         font.family: ThemeBackend.fontFamily; font.pixelSize: 11
@@ -213,21 +183,39 @@ Item {
             }
         }
 
-        // status line under the scene
-        Text {
-            x: 18; y: 306; width: parent.width - 36
-            horizontalAlignment: Text.AlignHCenter
-            text: root.status
-            color: ThemeBackend.subtext0
-            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
-            elide: Text.ElideRight
-            renderType: Text.NativeRendering
+        // the number and the state, set in plain type under the scene
+        Row {
+            x: 22; y: 276
+            spacing: 14
+            Text {
+                text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
+                color: ThemeBackend.text
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 44; font.weight: Font.Black; font.features: { "tnum": 1 }
+                renderType: Text.NativeRendering
+            }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 1
+                Text {
+                    text: root.charging ? (root.full ? "Fully charged" : "Charging") : "On battery"
+                    color: root.tone
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold
+                    renderType: Text.NativeRendering
+                }
+                Text {
+                    text: root.status.indexOf("·") >= 0 ? root.status.substring(root.status.indexOf("·") + 2) : ""
+                    visible: text !== ""
+                    color: ThemeBackend.subtext0
+                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12
+                    renderType: Text.NativeRendering
+                }
+            }
         }
     }
 
     ColumnLayout {
         id: col
-        x: 18; y: 334
+        x: 18; y: 338
         width: parent.width - 36
         spacing: 12
 

@@ -175,17 +175,17 @@ Item {
 
         Item {
             id: scene
-            x: 0; y: 0; width: parent.width; height: 318
+            x: 0; y: 0; width: parent.width; height: 270
             readonly property real cx: width / 2
-            readonly property real cy: 152
+            readonly property real cy: 128
 
-            Rectangle { x: scene.cx - 96; y: scene.cy - 96; width: 192; height: 192; radius: 96; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
-            Rectangle { x: scene.cx - 178; y: scene.cy - 112; width: 356; height: 224; radius: 112; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
+            Rectangle { x: scene.cx - 92; y: scene.cy - 92; width: 184; height: 184; radius: 92; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
+            Rectangle { x: scene.cx - 178; y: scene.cy - 86; width: 356; height: 172; radius: 86; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
 
             Rectangle {
                 id: core
-                x: scene.cx - 70; y: scene.cy - 70
-                width: 140; height: 140; radius: 70
+                x: scene.cx - 66; y: scene.cy - 66
+                width: 132; height: 132; radius: 66
                 color: ThemeBackend.base
                 border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
                 clip: true
@@ -202,41 +202,25 @@ Item {
                     color1: Qt.lighter(root.tone, 1.15)
                     color2: root.tone
                 }
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 0
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: Math.round(root.shownCpu * 100) + "%"
-                        color: ThemeBackend.text
-                        font.family: ThemeBackend.fontFamily; font.weight: Font.Black; font.pixelSize: 32; font.features: { "tnum": 1 }
-                        renderType: Text.NativeRendering
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "CPU"
-                        color: ThemeBackend.subtext0
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold
-                        renderType: Text.NativeRendering
-                    }
-                }
             }
 
             Repeater {
                 model: [
-                    { k: "Memory", v: Math.round((root.memTotal > 0 ? root.memUsed / root.memTotal : 0) * 100) + "%", i: "developer_board", a: -2.2, hot: root.memTotal > 0 && root.memUsed / root.memTotal >= 0.9 },
-                    { k: root.gpuLoad >= 0 ? "GPU" : "Disk", v: Math.round((root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage) * 100) + "%", i: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive", a: -0.7, hot: false },
-                    { k: "Disk", v: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%", i: "hard_drive", a: 0.9, hot: false },
-                    { k: "Temp", v: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0", i: "thermostat", a: 2.4, hot: Svc.ResourceUsage.cpuTemp >= 85 }
+                    { k: "Memory", v: Math.round((root.memTotal > 0 ? root.memUsed / root.memTotal : 0) * 100) + "%", i: "developer_board", a: -2.3, hot: root.memTotal > 0 && root.memUsed / root.memTotal >= 0.9 },
+                    { k: "GPU", v: Math.round((root.gpuLoad >= 0 ? root.gpuLoad : 0) * 100) + "%", i: "videogame_asset", a: -0.75, hot: false },
+                    { k: "Disk", v: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%", i: "hard_drive", a: 0.8, hot: false },
+                    { k: "Temp", v: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C", i: "thermostat", a: 2.35, hot: Svc.ResourceUsage.cpuTemp >= 85 }
                 ]
                 delegate: Item {
                     id: sat
                     required property var modelData
-                    width: 62; height: 62
                     required property int index
+                    width: 80; height: 80
+                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
+                    y: scene.cy - 22 + Math.sin(modelData.a + root.orbit * 6) * 86
                     property real appear: 0
                     opacity: appear
-                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.08 : 1)
+                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.06 : 1)
                     Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                     SequentialAnimation on appear {
                         running: root.visible
@@ -245,39 +229,51 @@ Item {
                         NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
                     }
                     MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
-                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
-                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 112
                     Rectangle {
-                        anchors.fill: parent; radius: width / 2
+                        width: 44; height: 44; radius: 22
+                        anchors.horizontalCenter: parent.horizontalCenter
                         color: Qt.alpha(ThemeBackend.surface0, 0.92)
                         border.width: 1.5; border.color: Qt.alpha(sat.modelData.hot ? ThemeBackend.red : root.tone, 0.55)
-                        Column {
-                            anchors.centerIn: parent; spacing: 0
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: sat.modelData.i
-                                font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
-                                font.pixelSize: 15; color: sat.modelData.hot ? ThemeBackend.red : root.tone
-                                renderType: Text.NativeRendering
-                            }
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: sat.modelData.v
-                                color: ThemeBackend.text
-                                font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                                renderType: Text.NativeRendering
-                            }
+                        Text {
+                            anchors.centerIn: parent
+                            text: sat.modelData.i
+                            font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                            font.pixelSize: 20; color: sat.modelData.hot ? ThemeBackend.red : root.tone
+                            renderType: Text.NativeRendering
                         }
                     }
                     Text {
-                        anchors.top: parent.bottom; anchors.topMargin: 3
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        y: 47; width: parent.width; horizontalAlignment: Text.AlignHCenter
+                        text: sat.modelData.v
+                        color: ThemeBackend.text
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                        renderType: Text.NativeRendering
+                    }
+                    Text {
+                        y: 64; width: parent.width; horizontalAlignment: Text.AlignHCenter
                         text: sat.modelData.k
                         color: ThemeBackend.subtext0
                         font.family: ThemeBackend.fontFamily; font.pixelSize: 11
                         renderType: Text.NativeRendering
                     }
                 }
+            }
+        }
+
+        Row {
+            x: 22; y: 276
+            spacing: 14
+            Text {
+                text: Math.round(root.shownCpu * 100) + "%"
+                color: ThemeBackend.text
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 44; font.weight: Font.Black; font.features: { "tnum": 1 }
+                renderType: Text.NativeRendering
+            }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 1
+                Text { text: "Processor"; color: root.tone; font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold; renderType: Text.NativeRendering }
+                Text { text: root.cores.length + " cores · " + root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB memory"; color: ThemeBackend.subtext0; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; renderType: Text.NativeRendering }
             }
         }
     }
@@ -353,7 +349,7 @@ Item {
         spacing: 12
         opacity: root.intro
 
-        Item { Layout.fillWidth: true; Layout.preferredHeight: 292 }
+        Item { Layout.fillWidth: true; Layout.preferredHeight: 332 }
 
         // history: CPU and memory over the last minute
         Rectangle {
@@ -417,9 +413,10 @@ Item {
                 height: 46
                 spacing: 6
                 Repeater {
-                    model: root.cores
+                    model: root.cores.length
                     delegate: Item {
-                        required property real modelData
+                        required property int index
+                        readonly property real modelData: root.cores[index] ?? 0
                         width: (parent.width - 6 * (root.cores.length - 1)) / Math.max(1, root.cores.length); height: parent.height
                         Rectangle { anchors.fill: parent; radius: 5; color: Qt.alpha(ThemeBackend.text, 0.10) }
                         Rectangle {
@@ -450,14 +447,17 @@ Item {
                     color: ThemeBackend.subtext0; renderType: Text.NativeRendering
                 }
                 Repeater {
-                    model: root.procs
+                    model: 5
                     delegate: Item {
-                        required property var modelData
+                        required property int index
+                        readonly property var modelData: root.procs[index] ?? ({ name: "", cpu: 0, mem: 0 })
                         width: procCol.width; height: 26
+                        opacity: root.procs[index] ? 1 : 0
                         Rectangle {
                             height: parent.height; radius: 8
                             width: Math.max(8, parent.width * Math.min(1, modelData.cpu / 100))
                             color: Qt.alpha(ThemeBackend.blue, 0.20)
+                            Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
                         }
                         Text {
                             x: 10; anchors.verticalCenter: parent.verticalCenter
