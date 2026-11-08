@@ -61,8 +61,8 @@ $links                    { output = "eqL_10:Out" input = "balL:In" }
             }
             audio.channels = 2
             audio.position = [ FL FR ]
-            capture.props = { node.name = "$SINK" media.class = Audio/Sink node.description = "Equalizer" }
-            playback.props = { node.name = "${SINK}_out" node.passive = true node.target = "$target" }
+            capture.props = { node.name = "$SINK" media.class = Audio/Sink node.description = "Equalizer" node.group = "serpantinum-audio" }
+            playback.props = { node.name = "${SINK}_out" node.passive = true node.group = "serpantinum-audio" node.target = "$target" }
         }
     }
 ]

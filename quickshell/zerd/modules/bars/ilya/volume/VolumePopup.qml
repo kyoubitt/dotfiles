@@ -321,7 +321,7 @@ Item {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         // outputs: the devices take what they need and the apps sit right under them; the other tabs fill the area
-                        height: window.activeTab === "outputs" && Audio.apps.length > 0 ? Math.min(contentHeight, Math.max(window.s(100), parent.height * 0.5)) : parent.height
+                        height: window.activeTab === "outputs" && Audio.apps.length > 0 ? Math.min(contentHeight, Math.max(window.s(100), parent.height - window.s(120))) : parent.height
                         spacing: window.s(10)
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds

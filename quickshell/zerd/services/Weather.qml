@@ -108,6 +108,7 @@ Singleton {
         root.data = result;
         cacheFile.setText(JSON.stringify(result));      // kept for the next start, so the popup never opens on "Loading"
         console.info("[Weather] Updated:", result.temp, result.city);
+        root.fetchExtra();
     }
 
     // Step 1: Get location from IP (primary method)
@@ -125,6 +126,45 @@ Singleton {
         const cmd = `curl -s --max-time 15 'wttr.in/${city}?format=j1' | jq '{current: .current_condition[0], astronomy: .weather[0].astronomy[0], today: .weather[0] | {maxtempC, mintempC, maxtempF, mintempF}, days: [.weather[] | {date, maxtempC, mintempC, maxtempF, mintempF, hourly: [.hourly[] | {time, tempC, tempF, weatherCode, chanceofrain}]}]}'`;
         fetcher.command = ["/usr/bin/bash", "-c", cmd];
         fetcher.running = true;
+    }
+
+    // days four to seven, which wttr.in does not give: Open-Meteo, mapped onto the same weather codes
+    property var extraDays: []
+    function wmoToWttr(c) {
+        if (c === 0) return "113";
+        if (c === 1 || c === 2) return "116";
+        if (c === 3) return "122";
+        if (c === 45 || c === 48) return "248";
+        if (c >= 51 && c <= 57) return "266";
+        if (c >= 61 && c <= 67) return "296";
+        if ((c >= 71 && c <= 77) || c === 85 || c === 86) return "338";
+        if (c >= 80 && c <= 82) return "302";
+        if (c >= 95) return "389";
+        return "119";
+    }
+    function fetchExtra() {
+        if (!root.location.valid || extraFetcher.running) return;
+        const unit = root.useUSCS ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "&wind_speed_unit=ms";
+        extraFetcher.command = ["/usr/bin/curl", "-s", "--max-time", "15",
+            "https://api.open-meteo.com/v1/forecast?latitude=" + root.location.lat + "&longitude=" + root.location.lon
+            + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=7&timezone=auto" + unit];
+        extraFetcher.running = true;
+    }
+    Process {
+        id: extraFetcher
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const d = JSON.parse(text).daily;
+                    const have = (root.data.daily ?? []).length;
+                    const out = [];
+                    for (let i = have; i < d.time.length; i++)
+                        out.push({ date: d.time[i], high: Math.round(d.temperature_2m_max[i]), low: Math.round(d.temperature_2m_min[i]),
+                                   code: root.wmoToWttr(d.weather_code[i]), pop: d.precipitation_probability_max[i] ?? 0, wind: Math.round(d.wind_speed_10m_max[i] ?? 0) });
+                    root.extraDays = out;
+                } catch (e) { console.warn("[Weather] extra days failed:", e); }
+            }
+        }
     }
 
     function getData() {

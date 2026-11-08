@@ -52,7 +52,7 @@ QtObject {
     // The shape his calendar reads: today first, then the days after, each with its three-hour steps.
     readonly property var data: {
         const r = root.raw;
-        const days = r.daily ?? [];
+        const days = (r.daily ?? []).concat(Svc.Weather.extraDays ?? []);
         const steps = r.steps ?? [];
         const forecast = days.map((d, i) => {
             const code = parseInt(d.code);
@@ -65,9 +65,9 @@ QtObject {
                 max: Number(d.high),
                 min: Number(d.low),
                 desc: root.textFor(code),
-                wind: parseInt(r.wind) || 0,
-                humidity: parseInt(r.humidity) || 0,
-                pop: steps.filter(s => s.day === d.date).reduce((a, s) => Math.max(a, s.rain), 0),
+                wind: d.wind !== undefined ? d.wind : (parseInt(r.wind) || 0),
+                humidity: d.pop !== undefined ? "--" : (parseInt(r.humidity) || 0),
+                pop: d.pop !== undefined ? d.pop : steps.filter(s => s.day === d.date).reduce((a, s) => Math.max(a, s.rain), 0),
                 feels_like: i === 0 ? (parseInt(r.tempFeelsLike) || 0) : Number(d.high),
                 hourly: own.map(s => ({
                     hour: s.hour,

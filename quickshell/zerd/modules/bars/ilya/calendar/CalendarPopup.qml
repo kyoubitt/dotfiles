@@ -326,7 +326,7 @@ Item {
     }
 
     function setWeatherView(idx) {
-        if (idx < 0 || idx > 4 || !window.weatherData) return;
+        if (idx < 0 || !window.weatherData || idx >= Math.max(1, (window.weatherData.forecast ?? []).length)) return;
         if (idx === window.targetWeatherView) return;
 
         if (weatherTransitionAnim.running) {
