@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
+import Quickshell.Io
 import "../"
 import "../reusables"
 
@@ -21,6 +22,17 @@ Item {
     readonly property bool charging: ready && (dev.state === UPowerDeviceState.Charging || dev.state === UPowerDeviceState.FullyCharged)
     readonly property bool full: ready && dev.state === UPowerDeviceState.FullyCharged
     readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
+
+    // wear from the sysfs counters: UPower leaves health unset on this laptop
+    FileView { id: fFull; path: "/sys/class/power_supply/BAT1/energy_full"; blockLoading: true }
+    FileView { id: fDesign; path: "/sys/class/power_supply/BAT1/energy_full_design"; blockLoading: true }
+    FileView { id: fCycles; path: "/sys/class/power_supply/BAT1/cycle_count"; blockLoading: true }
+    readonly property real wFull: parseFloat(fFull.text()) / 1e6
+    readonly property real wDesign: parseFloat(fDesign.text()) / 1e6
+    readonly property string healthText: root.dev.healthSupported ? Math.round(root.dev.healthPercentage) + "%"
+        : (wDesign > 0 ? Math.round(wFull / wDesign * 100) + "%" : "–")
+    readonly property string capText: wDesign > 0 ? wFull.toFixed(0) + " / " + wDesign.toFixed(0) + " Wh" : (dev.energyCapacity > 0 ? dev.energyCapacity.toFixed(0) + " Wh" : "–")
+    readonly property string cycleText: parseInt(fCycles.text()) > 0 ? parseInt(fCycles.text()) + "" : "–"
 
     function span(s) {
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
@@ -110,8 +122,8 @@ Item {
             Repeater {
                 model: [
                     { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt" },
-                    { k: "Health", v: root.ready && root.dev.healthSupported ? Math.round(root.dev.healthPercentage) + "%" : "–", i: "favorite" },
-                    { k: "Capacity", v: root.ready && root.dev.energyCapacity > 0 ? root.dev.energyCapacity.toFixed(0) + " Wh" : "–", i: "battery_full" }
+                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite" },
+                    { k: "Capacity", v: root.ready ? root.capText : "–", i: "battery_full" }
                 ]
                 delegate: Rectangle {
                     required property var modelData

@@ -130,7 +130,7 @@ Item {
     // ---- look: three rings, a history chart, one bar per core, the busiest processes
     readonly property color cardColor: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
     readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
-    readonly property real gpuLoad: -1
+    readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
 
     Rectangle {
         anchors.fill: parent
@@ -239,7 +239,7 @@ Item {
             spacing: 10
             Gauge { label: "CPU"; glyph: "memory"; fraction: root.cpuTotal; caption: root.cores.length + " cores" }
             Gauge { label: "Memory"; glyph: "developer_board"; fraction: root.memTotal > 0 ? root.memUsed / root.memTotal : 0; caption: root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB" }
-            Gauge { label: root.gpuLoad >= 0 ? "GPU" : "Disk"; glyph: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive"; fraction: root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage; caption: root.gpuLoad >= 0 ? "graphics" : "root disk" }
+            Gauge { label: root.gpuLoad >= 0 ? "GPU" : "Disk"; glyph: root.gpuLoad >= 0 ? "videogame_asset" : "hard_drive"; fraction: root.gpuLoad >= 0 ? root.gpuLoad : Svc.ResourceUsage.diskUsedPercentage; caption: root.gpuLoad >= 0 ? "integrated" : "root disk" }
         }
 
         // history: CPU and memory over the last minute
