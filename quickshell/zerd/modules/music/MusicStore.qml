@@ -214,6 +214,11 @@ Singleton {
     }
     Connections { target: SoloistPlayer; function onShapeChanged() { if (EchoPlayer.engine === "soloist") root.refreshPlayer() } }
     Timer { interval: 4000; repeat: true; running: root.active && MusicApi.signedIn && !MusicApi.limited && EchoPlayer.engine !== "soloist"; onTriggered: root.refreshPlayer() }
+    function addCurrentToPlaylist(): void {
+        const it = root.player?.item
+        if (!it || !it.uri) { root.tell("Nothing playing to add"); return }
+        root.pickTrack = it
+    }
     function toggleLike(): void {
         if (root.itemId === "") return
         root.liked = !root.liked

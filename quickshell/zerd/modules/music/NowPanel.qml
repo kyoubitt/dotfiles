@@ -60,11 +60,15 @@ Rectangle {
             Row {
                 width: parent.width
                 Column {
-                    width: parent.width - 44; spacing: 3
+                    width: parent.width - 92; spacing: 3
                     EText { width: parent.width; elide: Text.ElideRight; text: root.p?.trackTitle ?? "Nothing playing"; font.pixelSize: 24; font.weight: Font.Bold }
                     EText { width: parent.width; elide: Text.ElideRight; text: root.p?.trackArtist ?? ""; color: BarStyle.subtext
                         TapHandler { onTapped: { if (root.item?.artists?.[0]) MusicStore.go("artist", root.item.artists[0]) } } }
                 }
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 20; color: ah.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    BarIcon { anchors.centerIn: parent; name: "playlist_add"; size: 26; color: BarStyle.text }
+                    HoverHandler { id: ah }
+                    TapHandler { onTapped: MusicStore.addCurrentToPlaylist() } }
                 Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 20; color: hh.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                     BarIcon { anchors.centerIn: parent; name: "favorite"; fill: MusicStore.liked ? 1 : 0; size: 26; color: MusicStore.liked ? MusicStore.accent : BarStyle.text }
                     HoverHandler { id: hh }

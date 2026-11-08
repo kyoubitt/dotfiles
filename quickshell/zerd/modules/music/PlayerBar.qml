@@ -65,12 +65,13 @@ Item {
                 TapHandler { onTapped: MusicStore.nowOpen = !MusicStore.nowOpen }
             }
             Column {
-                x: 82; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 82 - 52; spacing: 3
+                x: 82; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 82 - 96; spacing: 3
                 BarMarquee { width: parent.width; height: 22; text: root.p?.trackTitle ?? "Nothing playing"; weight: Font.DemiBold; pixelSize: 15 }
                 BarMarquee { width: parent.width; height: 18; text: root.p?.trackArtist ?? ""; pixelSize: 13; weight: Font.Normal; color: BarStyle.subtext }
                 EText { visible: (MusicStore.ctx?.name ?? "").length > 0; width: parent.width; elide: Text.ElideRight; text: "Playing from " + (MusicStore.ctx?.name ?? ""); font.pixelSize: 11; color: MusicStore.accent
                     TapHandler { onTapped: MusicStore.openContext() } }
             }
+            Tool { anchors { right: parent.right; rightMargin: 44; verticalCenter: parent.verticalCenter } icon: "playlist_add"; onTapped: MusicStore.addCurrentToPlaylist() }
             Tool { anchors { right: parent.right; verticalCenter: parent.verticalCenter } icon: "favorite"; on: MusicStore.liked; onTapped: MusicStore.toggleLike() }
         }
 
