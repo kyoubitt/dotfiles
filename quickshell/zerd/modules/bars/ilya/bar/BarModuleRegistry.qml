@@ -97,9 +97,16 @@ QtObject {
         "timedate": {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.timedate.name", "Time & Date") : "Time & Date",
             icon: "󰃰",
-            defaultVariant: "classic",
+            defaultVariant: "caelestia",
             face: "faces/timedate/TimeDateFace.qml",
             variants: {
+                "caelestia": {
+                    id: "caelestia",
+                    name: "Date tile",
+                    desc: "A date tile beside a large time",
+                    icon: "󰃰",
+                    face: "faces/timedate/CaelestiaFace.qml"
+                },
                 "classic": {
                     id: "classic",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.timedate.style.name.classic", "Classic") : "Classic",
