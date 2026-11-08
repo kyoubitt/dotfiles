@@ -9,7 +9,7 @@ import "../../"
 BarFaceBase {
     id: root
 
-    readonly property real meterW: 56
+    readonly property real meterW: 64
     readonly property real gapW: 12
     property real targetLength: 2 * meterW + gapW + 20
     property bool isFaceVisible: true
@@ -66,9 +66,9 @@ BarFaceBase {
         // fixed room for three digits so the ring never moves
         Text {
             x: ringBox.width + 5
-            width: 24
+            width: 30
             anchors.verticalCenter: parent.verticalCenter
-            text: meter.value
+            text: meter.value + "%"
             font.family: ThemeBackend.fontFamily
             font.pixelSize: 13
             font.weight: Font.DemiBold

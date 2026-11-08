@@ -158,21 +158,21 @@ QtObject {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.network", "Network") : "Network",
             icon: "󰤨",
             defaultVariant: "button",
-            face: "faces/wifi/WifiFace.qml",
+            face: "faces/wifi/WifiIconFace.qml",
             variants: {
                 "button": {
                     id: "button",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.wifi.style.name.button", "Button") : "Button",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.wifi.style.button", "Interactive button pill with background") : "Interactive button pill with background",
                     icon: "󰤨",
-                    face: "faces/wifi/WifiFace.qml"
+                    face: "faces/wifi/WifiIconFace.qml"
                 },
                 "text": {
                     id: "text",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.wifi.style.name.text", "Text") : "Text",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.wifi.style.text", "Clean text and icon without background") : "Clean text and icon without background",
                     icon: "󰤨",
-                    face: "faces/wifi/WifiFace.qml"
+                    face: "faces/wifi/WifiIconFace.qml"
                 }
             }
         },
@@ -180,21 +180,21 @@ QtObject {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.bluetooth", "Bluetooth") : "Bluetooth",
             icon: "󰂲",
             defaultVariant: "button",
-            face: "faces/bt/BtFace.qml",
+            face: "faces/bt/BtIconFace.qml",
             variants: {
                 "button": {
                     id: "button",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.bt.style.name.button", "Button") : "Button",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.bt.style.button", "Interactive button pill with background") : "Interactive button pill with background",
                     icon: "󰂲",
-                    face: "faces/bt/BtFace.qml"
+                    face: "faces/bt/BtIconFace.qml"
                 },
                 "text": {
                     id: "text",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.bt.style.name.text", "Text") : "Text",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.bt.style.text", "Clean text and icon without background") : "Clean text and icon without background",
                     icon: "󰂲",
-                    face: "faces/bt/BtFace.qml"
+                    face: "faces/bt/BtIconFace.qml"
                 }
             }
         },
@@ -202,21 +202,21 @@ QtObject {
             name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.volume", "Volume") : "Volume",
             icon: "󰕾",
             defaultVariant: "button",
-            face: "faces/vol/VolFace.qml",
+            face: "faces/vol/VolPillFace.qml",
             variants: {
                 "button": {
                     id: "button",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.vol.style.name.button", "Button") : "Button",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.vol.style.button", "Interactive button pill with background") : "Interactive button pill with background",
                     icon: "󰕾",
-                    face: "faces/vol/VolFace.qml"
+                    face: "faces/vol/VolPillFace.qml"
                 },
                 "text": {
                     id: "text",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.vol.style.name.text", "Text") : "Text",
                     desc: typeof I18n !== "undefined" ? I18n.t("guide.bar.vol.style.text", "Clean text and icon without background") : "Clean text and icon without background",
                     icon: "󰕾",
-                    face: "faces/vol/VolFace.qml"
+                    face: "faces/vol/VolPillFace.qml"
                 }
             }
         },

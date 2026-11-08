@@ -16,6 +16,18 @@ Singleton {
 
     property var location: ({ valid: false, lat: 0, lon: 0, name: "" })
 
+    // the last answer, read at start until the first fresh one arrives
+    FileView {
+        id: cacheFile
+        path: Quickshell.env("HOME") + "/.cache/zerd-weather.json"
+        onLoaded: {
+            try {
+                const d = JSON.parse(cacheFile.text());
+                if (d && d.temp && root.lastUpdated === 0) root.data = d;
+            } catch (e) {}
+        }
+    }
+
     property var data: ({
         uv: "0",
         humidity: "0%",
@@ -94,6 +106,7 @@ Singleton {
 
         root.lastUpdated = Date.now();
         root.data = result;
+        cacheFile.setText(JSON.stringify(result));      // kept for the next start, so the popup never opens on "Loading"
         console.info("[Weather] Updated:", result.temp, result.city);
     }
 
