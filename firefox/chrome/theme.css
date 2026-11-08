@@ -1,0 +1,16 @@
+@import url("colors-ff.css");
+/* fixed palette, same as the zerda-shell dock (SMColors). not synced to the wallpaper. */
+:root {
+  --bg: color-mix(in srgb, var(--ff-bg, #07080C) 45%, #000);
+  --fg: color-mix(in srgb, var(--ff-fg, #AEAFB3) 78%, #7d8088);
+  --accent: var(--ff-accent, #9DBFE4);
+  --zr-surface: color-mix(in srgb, var(--bg) 88%, var(--fg));
+  --zr-fill: color-mix(in srgb, var(--fg) 14%, transparent);
+  --zr-line: color-mix(in srgb, var(--fg) 35%, transparent);
+  --zr-line-soft: color-mix(in srgb, var(--fg) 20%, transparent);
+  --zr-hover: color-mix(in srgb, var(--fg) 12%, transparent);
+  --zr-active: color-mix(in srgb, var(--accent) 35%, transparent);
+  --zr-glow: color-mix(in srgb, var(--accent) 28%, transparent);
+  --zr-shadow: 0 6px 22px rgba(0,0,0,.5);
+  --zr-ease: 160ms ease;
+}

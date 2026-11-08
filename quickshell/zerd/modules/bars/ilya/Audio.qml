@@ -55,14 +55,14 @@ Singleton {
         return false;
     }
 
-    function isSerpantinumStream(node) {
+    function isZerdStream(node) {
         if (!node || !node.properties) return false;
         let p = node.properties;
         let appId = p["application.id"] || "";
         let appName = p["application.name"] || "";
-        if (appId === "serpantinum-sfx" || appId === "serpantinum" || appId === "org.serpantinum.sfx") return true;
-        if (appName === "serpantinum-sfx" || appName === "serpantinum") return true;
-        if (p["node.group"] === "serpantinum-audio" || p["node.link-group"] === "serpantinum-audio") return true;
+        if (appId === "zerd-sfx" || appId === "zerd" || appId === "org.zerd.sfx") return true;
+        if (appName === "zerd-sfx" || appName === "zerd") return true;
+        if (p["node.group"] === "zerd-audio" || p["node.link-group"] === "zerd-audio") return true;
         let mediaFile = p["media.filename"] || p["media.name"] || "";
         if (mediaFile.indexOf("assets/sounds/") !== -1) return true;
         return false;
@@ -93,7 +93,7 @@ Singleton {
         for (const n of root.pipewireNodes()) {
             if (n.isStream && n.audio
                 && n.properties?.["application.id"] !== "org.PulseAudio.pavucontrol"
-                && !isSerpantinumStream(n)
+                && !isZerdStream(n)
                 && !isHelperStream(n)) {
                 arr.push(n);
             }

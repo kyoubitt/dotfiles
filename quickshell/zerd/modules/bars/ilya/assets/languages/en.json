@@ -1,7 +1,7 @@
 {
   "guide": {
     "about": {
-      "title": "Serpantinum",
+      "title": "Zerd",
       "loading": "Loading...",
       "unknown": "Unknown",
       "version_by": "v{version} • by {author}",
@@ -662,7 +662,7 @@
     "theme": {
       "font": {
         "title": "Font",
-        "desc": "Choose the default used by serpantinum",
+        "desc": "Choose the default used by zerd",
         "select": "Select..."
       },
       "radius": {
@@ -762,16 +762,16 @@
           "failed": "Couldn't update the config: {line}"
         },
         "hint": {
-          "select_in_app": "Pick the Serpantinum theme in the app's settings",
+          "select_in_app": "Pick the Zerd theme in the app's settings",
           "restart": "Restart open windows to see new colors",
-          "neovim": "Run :colorscheme serpantinum to use it",
+          "neovim": "Run :colorscheme zerd to use it",
           "helix": "Run :config-reload in open editors to see new colors",
-          "fastfetch": "Run fastfetch -c serpantinum to use it",
-          "spicetify": "Run spicetify config current_theme Serpantinum, then spicetify apply",
-          "discord": "Enable Serpantinum in the client's theme settings",
-          "emacs": "Run M-x load-theme serpantinum to use it",
+          "fastfetch": "Run fastfetch -c zerd to use it",
+          "spicetify": "Run spicetify config current_theme Zerd, then spicetify apply",
+          "discord": "Enable Zerd in the client's theme settings",
+          "emacs": "Run M-x load-theme zerd to use it",
           "steam": "Install Material-Theme with Millennium, then pick Matugen in its color settings",
-          "heroic": "Set Heroic's custom themes path to its themes folder, then pick serpantinum",
+          "heroic": "Set Heroic's custom themes path to its themes folder, then pick zerd",
           "telegram": "Load the theme file from Telegram's chat settings"
         },
         "list": {
@@ -1505,7 +1505,7 @@
     }
   },
   "start": {
-    "title": "Serpantinum",
+    "title": "Zerd",
     "made_by": "Made by @{author}",
     "welcome": "Welcome",
     "tagline": "A desktop shell built for",
@@ -1641,7 +1641,7 @@
     },
     "guide": {
       "name": "Settings",
-      "desc": "Serpantinum settings"
+      "desc": "Zerd settings"
     },
     "calendar": {
       "name": "Calendar & clock",
@@ -1760,7 +1760,7 @@
     }
   },
   "cli": {
-    "usage": "Usage: serpantinum [command] [options...]",
+    "usage": "Usage: zerd [command] [options...]",
     "description": "A desktop shell for wayland compositors.",
     "commands": "Commands:",
     "script_commands": "Script commands:",
@@ -1774,23 +1774,23 @@
     "version_desc": "Display version information and exit",
     "help_desc": "Show this help message and exit",
     "examples": "Examples:",
-    "daemon_stopped": "Serpantinum daemon stopped.",
-    "daemon_restarted": "Serpantinum daemon restarted.",
-    "starting_daemon": "Daemon not running. Starting serpantinumd in the background...",
+    "daemon_stopped": "Zerd daemon stopped.",
+    "daemon_restarted": "Zerd daemon restarted.",
+    "starting_daemon": "Daemon not running. Starting zerdd in the background...",
     "error_missing_qml": "Error: missing target to launch.",
-    "launch_usage": "Usage: serpantinum launch <start> [args...]",
+    "launch_usage": "Usage: zerd launch <start> [args...]",
     "error_qml_not_found": "Error: could not resolve {NAME}.qml in {DIR}",
     "error_shell_qml_not_found": "Error: could not resolve path to shell.qml in {DIR}",
     "error_unknown_command": "Error: unknown command '{CMD}'.",
     "error_unknown_target": "Error: unknown target '{TARGET}'.",
     "launch_help": {
-      "usage": "Usage: serpantinum launch <start> [arguments...]",
+      "usage": "Usage: zerd launch <start> [arguments...]",
       "description": "Launch standalone components directly in runner mode.",
       "available_targets": "Available targets:",
       "target_start": "Launch the start setup interface"
     },
     "msg_help": {
-      "usage": "Usage: serpantinum msg <command|workspace> [arguments...]",
+      "usage": "Usage: zerd msg <command|workspace> [arguments...]",
       "description": "Send layout, workspace, and window management messages directly.",
       "available_commands": "Available messages:",
       "cmd_workspace": "Switch to workspace <num> (append 'move' to send active window)",
@@ -1799,7 +1799,7 @@
       "cmd_close": "Close any active shell overlay"
     },
     "ipc_help": {
-      "usage": "Usage: serpantinum ipc call <target> <method> [arguments...]",
+      "usage": "Usage: zerd ipc call <target> <method> [arguments...]",
       "description": "Send an IPC call directly to the running quickshell instance."
     },
     "scripts": {
@@ -1825,7 +1825,7 @@
     "config_desc": "Read and change settings (get, set, dump, path, edit)",
     "error_unknown_language": "Error: unknown language '{CODE}'.",
     "update_available": "Update available: {LOCAL} -> {REMOTE}",
-    "up_to_date": "Serpantinum is up to date ({VERSION}).",
+    "up_to_date": "Zerd is up to date ({VERSION}).",
     "state_on": "on",
     "state_off": "off",
     "error_unknown_theme": "Error: unknown theme '{NAME}'.",
@@ -1839,11 +1839,11 @@
   },
   "daemon": {
     "already_running": "Daemon is already running. Exiting...",
-    "shutting_down": "Shutting down serpantinum daemon...",
-    "launching": "Launching serpantinum daemon...",
+    "shutting_down": "Shutting down zerd daemon...",
+    "launching": "Launching zerd daemon...",
     "cli": {
-      "usage": "Usage: serpantinumd <command> [options...]",
-      "description": "Background service daemon for serpantinum desktop shell.",
+      "usage": "Usage: zerdd <command> [options...]",
+      "description": "Background service daemon for zerd desktop shell.",
       "commands": "Commands:",
       "cmd_start": "Start the daemon service and launch background workers",
       "cmd_stop": "Stop the running daemon service",
@@ -1852,15 +1852,15 @@
       "opt_verbose": "Enable verbose output logging",
       "opt_version": "Show version information and exit",
       "opt_help": "Show this help message and exit",
-      "stopped": "Serpantinum daemon stopped.",
-      "status_running": "Serpantinum daemon is running (PID: {PID}).",
-      "status_stopped": "Serpantinum daemon is not running.",
+      "stopped": "Zerd daemon stopped.",
+      "status_running": "Zerd daemon is running (PID: {PID}).",
+      "status_stopped": "Zerd daemon is not running.",
       "unknown_arg": "Unknown argument: {ARG}"
     },
-    "app_name": "Serpantinum",
+    "app_name": "Zerd",
     "easyeffects": {
       "title": "EasyEffects is still enabled",
-      "body": "Serpantinum now has its own audio engine, and EasyEffects can interfere with it. If you only used EasyEffects for Serpantinum, stop it from starting at login."
+      "body": "Zerd now has its own audio engine, and EasyEffects can interfere with it. If you only used EasyEffects for Zerd, stop it from starting at login."
     }
   },
   "installer": {
@@ -1874,7 +1874,7 @@
     },
     "os": {
       "error_root": "Error: Do not run this script directly with root/sudo. Run as normal user.",
-      "error_unsupported": "Unsupported OS ({os}). Serpantinum strictly supports arch linux and derivatives.",
+      "error_unsupported": "Unsupported OS ({os}). Zerd strictly supports arch linux and derivatives.",
       "error_not_found": "Cannot detect OS. /etc/os-release not found.",
       "unknown_cpu": "Unknown CPU",
       "unknown_gpu": "Unknown / virtual machine",
@@ -1930,9 +1930,9 @@
       "tagline": "A desktop shell built for you",
       "support_creator": "Support the creator:",
       "buy_coffee": "If you enjoy this project, consider buying me a coffee!",
-      "installed_success": "✔ Serpantinum {ver} ({commit}) installed successfully.",
+      "installed_success": "✔ Zerd {ver} ({commit}) installed successfully.",
       "failed_packages": "The following packages encountered errors during installation:",
-      "restart_prompt": "Restart your compositor or run 'serpantinumd start' to begin.",
+      "restart_prompt": "Restart your compositor or run 'zerdd start' to begin.",
       "ask_reboot": "Do you want to restart? [y/n] "
     },
     "deps": {
@@ -1959,12 +1959,12 @@
       "unsupported_arch": "Prebuilt Ski packages exist only for x86_64, skipping."
     },
     "audio": {
-      "installing": "Installing the Serpantinum audio engine...",
-      "up_to_date": "-> Serpantinum audio engine {version} is already installed.",
-      "installed": "Installed the Serpantinum audio engine {version}",
+      "installing": "Installing the Zerd audio engine...",
+      "up_to_date": "-> Zerd audio engine {version} is already installed.",
+      "installed": "Installed the Zerd audio engine {version}",
       "building": "No prebuilt audio engine for this system, building it from source...",
-      "install_failed": "Failed to install the Serpantinum audio engine. The equalizer will not work until it is installed from github.com/ilyamiro/serpantinum-audio.",
-      "download_failed": "Could not download the Serpantinum audio engine, skipping. You can install it later from github.com/ilyamiro/serpantinum-audio.",
+      "install_failed": "Failed to install the audio engine. The equalizer will not work until it is installed from github.com/ilyamiro/serpantinum-audio.",
+      "download_failed": "Could not download the audio engine, skipping. You can install it later from github.com/ilyamiro/serpantinum-audio.",
       "checksum_failed": "The audio engine download failed its checksum check, skipping."
     },
     "deploy": {
@@ -1977,20 +1977,20 @@
       "sddm_skipped": "Skipping SDDM setup: no usable display server or greeter compositor found. The current display manager is left unchanged."
     },
     "gamma": {
-      "installing": "Installing the Serpantinum blue light filter...",
-      "up_to_date": "-> Serpantinum blue light filter {version} is already installed.",
-      "installed": "Installed the Serpantinum blue light filter {version}",
-      "install_failed": "Failed to install the Serpantinum blue light filter. It will not work until it is installed from github.com/ilyamiro/serpantinum-gamma.",
-      "download_failed": "Could not download the Serpantinum blue light filter, skipping. You can install it later from github.com/ilyamiro/serpantinum-gamma.",
+      "installing": "Installing the Zerd blue light filter...",
+      "up_to_date": "-> Zerd blue light filter {version} is already installed.",
+      "installed": "Installed the Zerd blue light filter {version}",
+      "install_failed": "Failed to install the blue light filter. It will not work until it is installed from github.com/ilyamiro/serpantinum-gamma.",
+      "download_failed": "Could not download the blue light filter, skipping. You can install it later from github.com/ilyamiro/serpantinum-gamma.",
       "checksum_failed": "The blue light filter download failed its checksum check, skipping.",
       "unsupported_arch": "Prebuilt blue light filter packages exist only for x86_64, skipping."
     },
     "core": {
-      "installing": "Installing the Serpantinum core services...",
-      "up_to_date": "-> Serpantinum core services {version} are already installed.",
-      "installed": "Installed the Serpantinum core services {version}",
-      "install_failed": "Failed to install the Serpantinum core services. System usage, keyboard lock indicators and the clipboard will not work until they are installed from github.com/ilyamiro/serpantinum-core.",
-      "download_failed": "Could not download the Serpantinum core services, skipping. You can install them later from github.com/ilyamiro/serpantinum-core.",
+      "installing": "Installing the Zerd core services...",
+      "up_to_date": "-> Zerd core services {version} are already installed.",
+      "installed": "Installed the Zerd core services {version}",
+      "install_failed": "Failed to install the core services. System usage, keyboard lock indicators and the clipboard will not work until they are installed from github.com/ilyamiro/serpantinum-core.",
+      "download_failed": "Could not download the core services, skipping. You can install them later from github.com/ilyamiro/serpantinum-core.",
       "checksum_failed": "The core services download failed its checksum check, skipping.",
       "unsupported_arch": "Prebuilt core services packages exist only for x86_64, skipping."
     }

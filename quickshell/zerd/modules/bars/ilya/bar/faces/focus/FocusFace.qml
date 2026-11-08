@@ -57,7 +57,7 @@ Item {
             bgOpacity: root.barOpacity
             textColor: isHoveredOrHighlighted ? ThemeBackend.text : (root.isCompact ? ThemeBackend.subtext0 : ThemeBackend.overlay2)
             onClicked: {
-                if (Caching.serpantinumDir) {
+                if (Caching.zerdDir) {
                     Popups.toggle("applauncher", root)
                 }
             }
@@ -122,7 +122,7 @@ Item {
         cursorShape: Qt.PointingHandCursor
         z: -1
         onClicked: {
-            if (Caching.serpantinumDir) {
+            if (Caching.zerdDir) {
                 Popups.toggle("applauncher", root)
             }
         }

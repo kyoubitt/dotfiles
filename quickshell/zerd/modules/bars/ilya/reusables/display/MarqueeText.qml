@@ -106,7 +106,7 @@ Item {
         property vector2d srcSize: Qt.vector2d(textRow.width, textRow.height)
         property real offset: -root.scrollX
 
-        fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/marquee_scroll.frag.qsb"
+        fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/marquee_scroll.frag.qsb"
     }
 
     SequentialAnimation {

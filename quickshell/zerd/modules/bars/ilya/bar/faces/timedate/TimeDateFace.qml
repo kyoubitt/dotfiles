@@ -95,7 +95,7 @@ Item {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            if (Caching.serpantinumDir) {
+            if (Caching.zerdDir) {
                 Popups.toggle("calendar", root);
             }
         }

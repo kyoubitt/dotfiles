@@ -261,7 +261,7 @@ Item {
                         property vector2d origin: Qt.vector2d(root.engine ? root.engine.transitionOriginX : 0.5, root.engine ? root.engine.transitionOriginY : 0.5)
                         property vector4d params: Qt.vector4d(root.engine && root.engine.wipeIsVertical ? 1.0 : 0.0, root.engine ? root.engine.swipeDirection : 0, 0.0, 0.0)
 
-                        fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/transitions/wallpaper_blend.frag.qsb"
+                        fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/transitions/wallpaper_blend.frag.qsb"
                     }
 
                     Rectangle {
@@ -313,7 +313,7 @@ Item {
                         property vector2d itemSize: Qt.vector2d(width, height)
                         property vector4d radii: Qt.vector4d(root.topLeftRadius, root.topRightRadius, root.bottomRightRadius, root.bottomLeftRadius)
                         property real fillAlpha: Math.min(0.98, ThemeBackend.elementOpacity)
-                        fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/rounded_mask.frag.qsb"
+                        fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/rounded_mask.frag.qsb"
                     }
 
                     LiquidGlass {

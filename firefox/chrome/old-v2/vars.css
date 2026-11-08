@@ -1,0 +1,15 @@
+:root {
+  --zr-gap: 10px;
+  --zr-radius: 16px;
+  --zr-pill: 999px;
+  --zr-ease: 180ms cubic-bezier(.2,.8,.2,1);
+  --zr-surface: color-mix(in srgb, var(--bg, #1f1f1f) 94%, var(--fg, #b4aeae));
+  --zr-overlay: color-mix(in srgb, var(--bg, #1f1f1f) 82%, var(--fg, #b4aeae));
+  --zr-line: color-mix(in srgb, var(--fg, #b4aeae) 22%, transparent);
+  --zr-line-strong: color-mix(in srgb, var(--fg, #b4aeae) 38%, transparent);
+  --zr-hover: color-mix(in srgb, var(--fg, #b4aeae) 12%, transparent);
+  --zr-fill: color-mix(in srgb, var(--fg, #b4aeae) 14%, transparent);
+  --zr-active: color-mix(in srgb, var(--accent, #5e95b2) 35%, transparent);
+  --zr-glow: color-mix(in srgb, var(--accent, #5e95b2) 30%, transparent);
+  --zr-shadow: 0 10px 30px rgba(0,0,0,.45);
+}

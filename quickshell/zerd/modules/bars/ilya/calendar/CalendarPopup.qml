@@ -659,7 +659,7 @@ Item {
                     property real lineWidth: Math.max(1, window.s(2))
                     property color color: Qt.alpha(window.textAccent, 0.45)
 
-                    fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/dashed_ellipse.frag.qsb"
+                    fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/dashed_ellipse.frag.qsb"
 
                     SequentialAnimation on scale {
                         loops: Animation.Infinite

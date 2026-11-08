@@ -1,0 +1,64 @@
+/* nav bar hides into the top edge; slides out as a floating pill on hover / Ctrl+L */
+#navigator-toolbox {
+  position: relative !important;
+  z-index: 100 !important;
+  height: 8px !important; min-height: 8px !important;
+  background: transparent !important;
+  border: none !important; box-shadow: none !important;
+  overflow: visible !important;
+}
+#nav-bar {
+  position: absolute !important;
+  top: -70px; left: 0; right: 0;
+  margin-inline: auto;
+  width: min(760px, calc(100vw - 120px)) !important;
+  opacity: 0; pointer-events: none;
+  padding: 5px 8px !important;
+  border: 1px solid var(--zr-line-strong) !important;
+  border-radius: var(--zr-pill) !important;
+  background: color-mix(in srgb, var(--bg, #1f1f1f) 88%, transparent) !important;
+  box-shadow: var(--zr-shadow) !important;
+  transition: top var(--zr-ease), opacity var(--zr-ease);
+}
+#navigator-toolbox:hover > #nav-bar,
+#navigator-toolbox:focus-within > #nav-bar,
+#navigator-toolbox:has(#urlbar[open]) > #nav-bar {
+  top: 4px;
+  opacity: 1; pointer-events: auto;
+}
+#urlbar-container { --urlbar-container-height: 36px; padding: 0 !important; margin: 0 4px !important; }
+#urlbar-background {
+  background: var(--zr-fill) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--zr-pill) !important;
+  box-shadow: none !important;
+  transition: border-color var(--zr-ease), box-shadow var(--zr-ease);
+}
+#urlbar[focused] > #urlbar-background, #urlbar[open] > #urlbar-background {
+  border-color: var(--accent, #5e95b2) !important;
+  box-shadow: 0 0 0 3px var(--zr-glow) !important;
+}
+#urlbar-input { text-align: center; }
+#urlbar[focused] #urlbar-input { text-align: start; }
+#urlbar[breakout][breakout-extend] { border-radius: var(--zr-radius) !important; }
+#urlbar[breakout][breakout-extend] > #urlbar-background {
+  border-radius: 22px !important;
+  background: var(--zr-overlay) !important;
+  box-shadow: var(--zr-shadow), 0 0 0 3px var(--zr-glow) !important;
+}
+.urlbarView { margin-inline: 6px !important; }
+.urlbarView-row { border-radius: 12px !important; }
+.urlbarView-row[selected] { background: var(--zr-active) !important; }
+.urlbarView-row:hover { background: var(--zr-hover) !important; }
+#urlbar-search-mode-indicator, #tracking-protection-icon-container, #pageActionButton,
+#identity-permission-box:not([hasPermissions]), #star-button-box:not([starred]) { display: none !important; }
+
+/* results dropdown: palette surface instead of default brown */
+:root {
+  --urlbarView-separator-color: var(--zr-line);
+  --urlbarView-hover-background: var(--zr-hover);
+  --urlbarView-highlight-background: var(--zr-active);
+  --urlbarView-results-padding: 6px;
+}
+#urlbar-results, .urlbarView, .urlbarView-body-inner { background: transparent !important; }
+#urlbar[breakout][breakout-extend] { margin-top: 0 !important; }

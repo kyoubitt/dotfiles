@@ -1,0 +1,18 @@
+:root {
+  --arrowpanel-background: var(--zr-overlay) !important;
+  --arrowpanel-border-color: var(--zr-line-strong) !important;
+  --arrowpanel-border-radius: 18px !important;
+  --panel-border-radius: 18px !important;
+  --arrowpanel-menuitem-border-radius: 12px !important;
+  --arrowpanel-menuitem-hover-background-color: var(--zr-hover) !important;
+}
+menupopup, panel { --panel-border-radius: 18px; }
+menupopup {
+  border-radius: 18px !important; padding: 6px !important;
+  border: 1px solid var(--zr-line-strong) !important;
+  box-shadow: var(--zr-shadow) !important;
+}
+menupopup > menuitem, menupopup > menu { border-radius: 10px !important; margin-inline: 2px !important; padding-block: 6px !important; }
+menupopup > menuitem[_moz-menuactive], menupopup > menu[_moz-menuactive] { background: var(--zr-active) !important; }
+.panel-arrowcontent { border-radius: 18px !important; box-shadow: var(--zr-shadow) !important; }
+tooltip { border-radius: 10px !important; border: 1px solid var(--zr-line-strong) !important; background: var(--zr-overlay) !important; color: var(--fg, #b4aeae) !important; }

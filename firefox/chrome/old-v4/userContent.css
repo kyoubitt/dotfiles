@@ -1,0 +1,56 @@
+@import url("colors.css");
+
+/* thin accent scrollbars on every page */
+:root, * { scrollbar-width: none !important; }
+
+/* themed internal pages */
+@-moz-document url-prefix("about:preferences"), url-prefix("about:addons"), url-prefix("about:config"), url-prefix("about:debugging"), url-prefix("about:blank") {
+  :root {
+    --in-content-page-background: var(--bg, #1f1f1f) !important;
+    --in-content-page-color: var(--fg, #b4aeae) !important;
+    --in-content-primary-button-background: var(--accent, #5e95b2) !important;
+    --in-content-primary-button-background-hover: var(--accent2, #bcf2ff) !important;
+    --in-content-primary-button-text-color: var(--bg, #1f1f1f) !important;
+    --in-content-border-color: color-mix(in srgb, var(--fg, #b4aeae) 25%, transparent) !important;
+    --in-content-box-background: color-mix(in srgb, var(--fg, #b4aeae) 8%, var(--bg, #1f1f1f)) !important;
+    --in-content-accent-color: var(--accent, #5e95b2) !important;
+    --in-content-item-selected: color-mix(in srgb, var(--accent, #5e95b2) 35%, transparent) !important;
+    --in-content-button-border-radius: 8px !important;
+  }
+  * { font-family: "Maple Mono NF CN", monospace !important; }
+  button, input, select, .card, groupbox { border-radius: 12px !important; }
+}
+
+/* new tab */
+@-moz-document url("about:newtab"), url("about:home") {
+  body.activity-stream {
+    background-image: linear-gradient(rgba(10,14,22,.45), rgba(10,14,22,.6)), url("wallpaper.png") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+  }
+  .logo-and-wordmark, .wordmark, .logo, .top-sites,
+  .personalize-button, .customize-button, #customize-button,
+  button[title*="ersonalize" i], button[aria-label*="ersonalize" i],
+  button[title*="ustomize" i], button[aria-label*="ustomize" i] { display: none !important; }
+
+  .outer-wrapper { display: flex !important; align-items: center !important; justify-content: center !important; min-height: 100vh !important; }
+  .search-wrapper { margin-top: 0 !important; }
+  .search-wrapper .search-inner-wrapper {
+    background-color: color-mix(in srgb, var(--bg, #1f1f1f) 45%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--fg, #b4aeae) 35%, transparent) !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(14px) !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
+    max-width: 760px !important;
+    min-height: 64px !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .search-wrapper .search-inner-wrapper:focus-within {
+    border-color: var(--accent, #5e95b2) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #5e95b2) 28%, transparent), 0 6px 24px rgba(0,0,0,.4) !important;
+  }
+  #newtab-search-text { color: var(--fg, #e8e8e8) !important; font-size: 22px !important; }
+  .search-wrapper .searchbox-icon, .search-wrapper .search-button { fill: var(--accent, #5e95b2) !important; transform: scale(1.3); }
+}

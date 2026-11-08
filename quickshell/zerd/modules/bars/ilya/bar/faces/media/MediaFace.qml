@@ -498,7 +498,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (Caching.serpantinumDir) {
+                            if (Caching.zerdDir) {
                                 Popups.toggle("music", root);
                             }
                         }

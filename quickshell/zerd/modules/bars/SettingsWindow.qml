@@ -13,7 +13,7 @@ import qs.services
 import "../settings/SettingsSearch.js" as Search
 
 // The shell's settings: pages down the left under group headings, big page headers, and cards of rows on the right. Every
-// row reads and writes one config path, so changes show at once. Layout after ilyamiro's settings window (serpantinum,
+// row reads and writes one config path, so changes show at once. Layout after ilyamiro's settings window (zerd,
 // AGPL-3.0: sidebar, grouped rows, search that jumps to the row) and iNiR's (page header, search scoring).
 // `ipc call settings toggle|open|close|page <name>`.
 Scope {

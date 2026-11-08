@@ -13,5 +13,5 @@ ShaderEffect {
     property color color1: ThemeBackend.primary
     property color color2: color1
 
-    fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/fluid/liquid_fill.frag.qsb"
+    fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/fluid/liquid_fill.frag.qsb"
 }

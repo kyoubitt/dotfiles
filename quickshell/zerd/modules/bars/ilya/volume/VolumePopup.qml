@@ -486,28 +486,14 @@ Item {
                                         onClicked: Audio.toggleMute(delegateRoot.node)
                                     }
 
-                                    Draggable {
+                                    PopupSlider {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: window.s(16)
+                                        Layout.preferredHeight: window.s(28)
                                         Layout.alignment: Qt.AlignVCenter
-                                        from: 0.0
-                                        to: 100.0
                                         value: delegateRoot.nodeVol
-                                        backgroundColor: ThemeBackend.surface1
-                                        accentColor: delegateRoot.nodeMute ? ThemeBackend.surface2 : window.tabColor
-                                        gradColor1: delegateRoot.nodeMute ? ThemeBackend.surface2 : window.tabColor
-                                        gradColor2: delegateRoot.nodeMute ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.05)
-                                        gradColor3: delegateRoot.nodeMute ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.10)
-                                        cornerRadius: window.s(5)
-                                        handleSize: window.s(18)
-
-                                        handleColor: delegateRoot.nodeMute ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.15)
-                                        handleHoverColor: delegateRoot.nodeMute ? ThemeBackend.subtext0 : Qt.lighter(window.tabColor, 1.5)
-                                        handleDragColor: delegateRoot.nodeMute ? ThemeBackend.text : Qt.lighter(window.tabColor, 1.45)
-                                        handleBorderColor: Qt.rgba(0, 0, 0, 0.2)
-
-                                        onMoved: (val) => {
-                                            let pct = Math.max(0, Math.min(100, Math.round(val)));
+                                        muted: delegateRoot.nodeMute
+                                        tone: window.tabColor
+                                        onMoved: pct => {
                                             if (pct > 0 && delegateRoot.nodeMute) Audio.toggleMute(delegateRoot.node);
                                             Audio.setVolume(delegateRoot.node, pct);
                                         }
@@ -583,30 +569,19 @@ Item {
                                         font.weight: Font.Medium
                                         color: appRow.muted ? ThemeBackend.subtext0 : ThemeBackend.text
                                     }
-                                    Draggable {
+                                    PopupSlider {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: window.s(16)
+                                        Layout.preferredHeight: window.s(28)
                                         Layout.alignment: Qt.AlignVCenter
-                                        from: 0.0
-                                        to: 100.0
                                         value: appRow.vol
-                                        backgroundColor: ThemeBackend.surface1
-                                        accentColor: appRow.muted ? ThemeBackend.surface2 : window.tabColor
-                                        gradColor1: appRow.muted ? ThemeBackend.surface2 : window.tabColor
-                                        gradColor2: appRow.muted ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.05)
-                                        gradColor3: appRow.muted ? ThemeBackend.surface2 : Qt.lighter(window.tabColor, 1.10)
-                                        cornerRadius: window.s(5)
-                                        handleSize: window.s(18)
-                                        handleColor: appRow.muted ? ThemeBackend.overlay0 : Qt.lighter(window.tabColor, 1.15)
-                                        handleHoverColor: Qt.lighter(window.tabColor, 1.5)
-                                        handleDragColor: Qt.lighter(window.tabColor, 1.45)
-                                        handleBorderColor: Qt.rgba(0, 0, 0, 0.2)
-                                        onMoved: val => {
-                                            const pct = Math.max(0, Math.min(100, Math.round(val)));
+                                        muted: appRow.muted
+                                        tone: window.tabColor
+                                        onMoved: pct => {
                                             if (pct > 0 && appRow.muted) Audio.toggleMute(appRow.modelData);
                                             Audio.setVolume(appRow.modelData, pct);
                                         }
                                     }
+
                                     Text {
                                         renderType: Text.NativeRendering
                                         Layout.preferredWidth: window.s(34)

@@ -1,0 +1,11 @@
+/* mono palette icons, accent on hover */
+.toolbarbutton-1, .sidebar-panel-button, #sidebar-main toolbarbutton, #sidebar-main moz-button {
+  -moz-context-properties: fill, fill-opacity, stroke !important;
+  fill: var(--fg, #b4aeae) !important;
+}
+.toolbarbutton-1:hover > .toolbarbutton-icon { fill: var(--accent2, #bcf2ff) !important; }
+.toolbarbutton-1:not([disabled]):hover > .toolbarbutton-icon,
+.toolbarbutton-1:not([disabled]):hover > .toolbarbutton-badge-stack {
+  background: var(--zr-hover) !important; border-radius: var(--zr-pill) !important;
+}
+#nav-bar .toolbarbutton-1 { transition: background var(--zr-ease); }

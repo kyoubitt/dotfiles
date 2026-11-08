@@ -8,8 +8,8 @@ Item {
     id: root
 
     readonly property string i18nDir: {
-        if (typeof Caching !== "undefined" && Caching.serpantinumDir && Caching.serpantinumDir.length > 0) {
-            return Caching.serpantinumDir + "/assets/languages";
+        if (typeof Caching !== "undefined" && Caching.zerdDir && Caching.zerdDir.length > 0) {
+            return Caching.zerdDir + "/assets/languages";
         }
         return Qt.resolvedUrl("../../../assets/languages").toString().replace(/^file:\/\//, "");
     }

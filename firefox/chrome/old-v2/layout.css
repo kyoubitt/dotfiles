@@ -1,0 +1,32 @@
+/* window: palette-colored backdrop, page becomes a floating rounded card */
+:root {
+  --lwt-accent-color: var(--bg, #1f1f1f) !important;
+  --toolbar-bgcolor: transparent !important;
+  --toolbarbutton-icon-fill: var(--fg, #b4aeae) !important;
+  --toolbarbutton-hover-background: var(--zr-hover) !important;
+  --toolbarbutton-active-background: var(--zr-active) !important;
+  --toolbarbutton-border-radius: var(--zr-pill) !important;
+}
+* { font-family: "Maple Mono NF CN", monospace !important; }
+#main-window, #browser, #appcontent, #sidebar-main, #sidebar-box, #sidebar-splitter {
+  background: var(--bg, #1f1f1f) !important;
+}
+#sidebar-splitter, #sidebar-box + splitter { display: none !important; }
+
+#tabbrowser-tabbox { margin: 0 var(--zr-gap) var(--zr-gap) 2px !important; }
+#tabbrowser-tabpanels {
+  border-radius: var(--zr-radius) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--zr-line) !important;
+  box-shadow: var(--zr-shadow) !important;
+  background: var(--zr-surface) !important;
+}
+.browserContainer, .browserStack, browser[type="content"] { border-radius: var(--zr-radius) !important; }
+
+/* window buttons not needed on niri */
+.titlebar-buttonbox-container, .titlebar-spacer { display: none !important; }
+#TabsToolbar { visibility: collapse !important; }
+#titlebar { background: transparent !important; }
+
+findbar { background: var(--zr-overlay) !important; border: none !important; border-radius: var(--zr-radius) var(--zr-radius) 0 0 !important; }
+* { scrollbar-width: thin; scrollbar-color: var(--zr-line-strong) transparent; }

@@ -4,9 +4,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/../scripts/caching.sh"
 qs_ensure_cache "music"
 
 STATE_FILE="$QS_RUN_MUSIC/eq_state.json"
-SINK_NAME="serpantinum_sink"
-AUDIO_BIN="$(dirname "${BASH_SOURCE[0]}")/serpantinum-audio"
-DAEMON_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/serpantinum/audio.state"
+SINK_NAME="zerd_equalizer"
+AUDIO_BIN="$(dirname "${BASH_SOURCE[0]}")/zerd-audio"
+DAEMON_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/zerd/audio.state"
 TEST_FILE="$QS_RUN_MUSIC/channel_test.wav"
 TEST_PID_FILE="$QS_RUN_MUSIC/channel_test.pid"
 
@@ -189,7 +189,7 @@ PY
         }
         trap cleanup_test EXIT TERM INT
         pw-play "${target[@]}" \
-            -P '{"application.id":"serpantinum-audio-test","application.name":"Serpantinum audio test","media.role":"music"}' \
+            -P '{"application.id":"zerd-audio-test","application.name":"Zerd audio test","media.role":"music"}' \
             "$TEST_FILE" >/dev/null 2>&1 &
         player_pid=$!
         wait "$player_pid"

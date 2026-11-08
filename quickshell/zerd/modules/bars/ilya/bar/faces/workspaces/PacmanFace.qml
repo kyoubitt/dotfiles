@@ -276,7 +276,7 @@ Item {
                 : pacmanFaceRoot.pacmanColor
             property color eyeColor: (ThemeBackend && ThemeBackend.crust) ? ThemeBackend.crust : "#11111b"
 
-            fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/widgets/pacman.frag.qsb"
+            fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/widgets/pacman.frag.qsb"
         }
     }
 }

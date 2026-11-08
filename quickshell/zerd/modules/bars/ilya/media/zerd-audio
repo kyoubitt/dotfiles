@@ -5,8 +5,8 @@ set -u
 RUN="${XDG_RUNTIME_DIR:-/tmp}/zerd-eq"
 CONF="$RUN/filter-chain.conf"
 PIDF="$RUN/pid"
-SINK="serpantinum_sink"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/serpantinum"
+SINK="zerd_equalizer"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/zerd"
 PREV="$STATE_DIR/previous-sink"
 mkdir -p "$RUN" "$STATE_DIR"
 
@@ -61,8 +61,8 @@ $links                    { output = "eqL_10:Out" input = "balL:In" }
             }
             audio.channels = 2
             audio.position = [ FL FR ]
-            capture.props = { node.name = "$SINK" media.class = Audio/Sink node.description = "Equalizer" node.group = "serpantinum-audio" }
-            playback.props = { node.name = "${SINK}_out" node.passive = true node.group = "serpantinum-audio" node.target = "$target" }
+            capture.props = { node.name = "$SINK" media.class = Audio/Sink node.description = "Equalizer" node.group = "zerd-audio" }
+            playback.props = { node.name = "${SINK}_out" node.passive = true node.group = "zerd-audio" node.target = "$target" }
         }
     }
 ]
@@ -125,5 +125,5 @@ case "${1:-}" in
             *) exit 1 ;;
         esac
         ;;
-    *) echo "usage: serpantinum-audio start|stop|ctl set ..." >&2; exit 1 ;;
+    *) echo "usage: zerd-audio start|stop|ctl set ..." >&2; exit 1 ;;
 esac

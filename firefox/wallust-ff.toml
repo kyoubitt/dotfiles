@@ -1,0 +1,7 @@
+# isolated wallust config for Firefox only: one template, no sequences/hooks
+backend = "fastresize"
+color_space = "lab"
+palette = "dark"
+check_contrast = true
+[templates]
+firefox = { src = "ff-colors.css", dst = "/home/zerda/.dotfiles-zerda/firefox/chrome/colors-ff.css" }

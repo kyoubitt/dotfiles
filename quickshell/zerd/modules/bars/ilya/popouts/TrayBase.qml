@@ -394,7 +394,7 @@ PanelWindow {
                     return trayMenuWindow.alignBottom ? 3.0 : 1.0;
                 }
                 property color color: ThemeBackend.card
-                fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
+                fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
             ShaderEffect {
@@ -421,7 +421,7 @@ PanelWindow {
                     return trayMenuWindow.alignBottom ? 2.0 : 0.0;
                 }
                 property color color: ThemeBackend.card
-                fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
+                fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
             RectangularShadow {
@@ -780,7 +780,7 @@ PanelWindow {
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 2.0 : 3.0
                     property color color: ThemeBackend.card
-                    fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
+                    fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
                 ShaderEffect {
@@ -792,7 +792,7 @@ PanelWindow {
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 0.0 : 1.0
                     property color color: ThemeBackend.card
-                    fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
+                    fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
                 Rectangle {

@@ -45,5 +45,5 @@ ShaderEffect {
     property vector4d sampleBounds: Qt.vector4d(validRect.x, validRect.y, validRect.x + validRect.width, validRect.y + validRect.height)
     property vector4d box:boxRect.width > 0 ? Qt.vector4d(boxRect.x + boxRect.width * 0.5 - width * 0.5, boxRect.y + boxRect.height * 0.5 - height * 0.5, boxRect.width * 0.5, boxRect.height * 0.5) : Qt.vector4d(0, 0, 0, 0)
 
-    fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/effects/liquid_glass.frag.qsb"
+    fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/effects/liquid_glass.frag.qsb"
 }

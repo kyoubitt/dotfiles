@@ -68,7 +68,7 @@ WallpaperBlur {
                 property vector2d itemSize: Qt.vector2d(width, height)
                 property real cornerIndex: root.earIndex(index)
                 property color color: "black"
-                fragmentShader: "file://" + Caching.serpantinumDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
+                fragmentShader: "file://" + Caching.zerdDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
         }
     }
