@@ -177,10 +177,10 @@ Item {
             id: scene
             x: 0; y: 0; width: parent.width; height: 318
             readonly property real cx: width / 2
-            readonly property real cy: 160
+            readonly property real cy: 152
 
             Rectangle { x: scene.cx - 96; y: scene.cy - 96; width: 192; height: 192; radius: 96; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
-            Rectangle { x: scene.cx - 178; y: scene.cy - 148; width: 356; height: 296; radius: 148; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
+            Rectangle { x: scene.cx - 178; y: scene.cy - 112; width: 356; height: 224; radius: 112; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
 
             Rectangle {
                 id: core
@@ -246,7 +246,7 @@ Item {
                     }
                     MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
                     x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
-                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 148
+                    y: scene.cy - height / 2 + Math.sin(modelData.a + root.orbit * 6) * 112
                     Rectangle {
                         anchors.fill: parent; radius: width / 2
                         color: Qt.alpha(ThemeBackend.surface0, 0.92)

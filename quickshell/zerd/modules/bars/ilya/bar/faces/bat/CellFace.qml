@@ -4,7 +4,6 @@ import Quickshell.Services.UPower
 import "../../../reusables"
 import "../../../"
 import "../../"
-import qs.services as Svc
 
 // The battery on the bar, our own: a drawn cell that fills with the charge (amber under 30 %, red under 15 %, a bolt while charging)
 // beside the percentage. The look of the idea is Caelestia's battery in the status icons; the code is ours. Click opens the battery popup.
@@ -17,8 +16,6 @@ BarFaceBase {
     readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
 
     property bool isFaceVisible: true
-    // keeps the history sampler alive from shell start
-    readonly property int historySize: Svc.BatteryHistory.points.length
     property real targetLength: 70
     implicitWidth: 70
     implicitHeight: parent ? parent.height : 0
