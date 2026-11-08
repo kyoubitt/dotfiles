@@ -14,7 +14,8 @@ QtObject {
     readonly property var top: Common.Config.options?.bars?.top ?? ({})
     readonly property var rawSettings: ({
         bar: {
-            workspacesStyle: root.top.workspaceStyle === "numbers" ? "numbers" : "pills",
+            workspacesStyle: ({ dots: "pills", pills: "pills", names: "names", icons: "names" })[root.top.workspaceStyle] ?? "numbers",
+            timeStyle: root.top.timeStyle === "badge" ? "badge" : "classic",
             hideEmptyWorkspaces: false,
             // only the workspaces niri really has: the face grows to the highest existing one
             workspaceCount: 2

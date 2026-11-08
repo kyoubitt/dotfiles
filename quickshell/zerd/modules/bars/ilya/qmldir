@@ -30,3 +30,4 @@ singleton Gamma 1.0 Gamma.qml
 singleton NiriState 1.0 NiriState.qml
 singleton MangoState 1.0 MangoState.qml
 singleton SwayState 1.0 SwayState.qml
+singleton BatteryHistory 1.0 BatteryHistory.qml

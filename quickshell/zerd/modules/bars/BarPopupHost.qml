@@ -37,7 +37,7 @@ Scope {
         weather: { src: Qt.resolvedUrl("ilya/calendar/CalendarPopup.qml"), w: 1320, h: 470, at: "center", m: 0 },
         network: { src: Qt.resolvedUrl("ilya/network/NetworkPopup.qml"), w: 720, h: 600, at: "right", m: 4 },
         media: { src: Qt.resolvedUrl("ilya/media/MusicPopup.qml"), w: 625, h: 565, at: "left", m: 5 },
-        battery: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
+        battery: { src: Qt.resolvedUrl("ilya/battery/BatteryPopup.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         system: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         brightness: { src: Qt.resolvedUrl("ilya/syspanel/SystemPanel.qml"), w: 440, h: 0, at: "right", m: 5, fit: true },
         sysmon: { src: Qt.resolvedUrl("ilya/sysmon/SystemMonitorPopup.qml"), w: 520, h: 0, at: "right", m: 5, fit: true },
@@ -79,7 +79,9 @@ Scope {
                     id: pl
                     anchors.fill: parent
                     active: false
-                    onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
+                    // TEMP DEBUG: what the loader and the stage look like on every open
+                    onStatusChanged: console.log("POPUPDBG loader", String(source).split("/").pop(), "status", status === Loader.Ready ? "ready" : (status === Loader.Error ? "ERROR" : (status === Loader.Loading ? "loading" : "null")))
+                    onLoaded: { console.log("POPUPDBG stage", root.popup?.kind, "x", stage.x, "y", stage.y, "w", stage.width, "h", stage.height, "win visible", win.visible, "win", win.width, "x", win.height, "screen", win.screen ? win.screen.name : "none", "item", item.width, "x", item.height); item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
             Connections {

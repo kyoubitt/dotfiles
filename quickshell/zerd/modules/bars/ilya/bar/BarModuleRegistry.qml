@@ -61,6 +61,13 @@ QtObject {
                     icon: "󰎦",
                     face: "faces/workspaces/NumbersFace.qml"
                 },
+                "names": {
+                    id: "names",
+                    name: "Names",
+                    desc: "App icon or name of each workspace",
+                    icon: "󰮯",
+                    face: "faces/workspaces/NamesFace.qml"
+                },
                 "pacman": {
                     id: "pacman",
                     name: typeof I18n !== "undefined" ? I18n.t("guide.bar.modules.workspaces.style.name.pacman", "Pacman") : "Pacman",
