@@ -46,7 +46,7 @@ Item {
     property real swapTotal: 0
     property real rxSpeed: 0         // bytes per second
     property real txSpeed: 0
-    property var procs: []
+    property real uptime: 0          // seconds
     property var _prevCpu: ({})
     property double _prevNet: 0
     property double _prevRx: 0
@@ -101,23 +101,12 @@ Item {
             }
         }
         root._prevT = now; root._prevRx = net[0] || 0; root._prevTx = net[1] || 0;
-        // processes
-        const list = [];
-        for (const line of (parts[3] ?? "").trim().split("\n")) {
-            const f = line.trim().split(/\s+/);
-            if (f.length < 3) continue;
-            const mp = Number(f[f.length - 1]), cp = Number(f[f.length - 2]);
-            if (isNaN(mp) || isNaN(cp)) continue;
-            const nm = f.slice(0, f.length - 2).join(" ");
-            if (nm === "ps" || nm === "sh" || nm === "head") continue;
-            list.push({ name: nm, cpu: cp, mem: mp });
-        }
-        root.procs = list.slice(0, 5);
+        root.uptime = Number((parts[3] ?? "0").trim()) || 0;
     }
 
     Process {
         id: sampler
-        command: ["sh", "-c", "grep '^cpu' /proc/stat; echo '---'; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo; echo '---'; awk 'NR>2 && $1 !~ /^lo:/ {rx+=$2; tx+=$10} END {print rx+0, tx+0}' /proc/net/dev; echo '---'; ps -eo comm=,pcpu=,pmem= --sort=-pcpu | head -8"]
+        command: ["sh", "-c", "grep '^cpu' /proc/stat; echo '---'; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo; echo '---'; awk 'NR>2 && $1 !~ /^lo:/ {rx+=$2; tx+=$10} END {print rx+0, tx+0}' /proc/net/dev; echo '---'; cut -d' ' -f1 /proc/uptime"]
         stdout: StdioCollector { onStreamFinished: root.parse(text) }
     }
     Timer {
@@ -184,90 +173,49 @@ Item {
             renderType: Text.NativeRendering
         }
 
-        Column {
-            id: procCol
+        // network and uptime, set plain under the capsules
+        Row {
+            id: facts
             Layout.fillWidth: true
-            Layout.leftMargin: 0; Layout.rightMargin: 0
-            spacing: 2
-            Text {
-                text: "Busiest"
-                font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold; font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
-                color: ThemeBackend.subtext0; renderType: Text.NativeRendering
+            Layout.topMargin: 2
+            readonly property real w: width / 3
+            function up(sec) {
+                const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60);
+                return d > 0 ? d + "d " + h + "h" : (h > 0 ? h + "h " + m + "m" : m + "m");
             }
             Repeater {
-                model: 5
+                model: [
+                    { i: "arrow_downward", v: root.fmtSpeed(root.rxSpeed), k: "Download" },
+                    { i: "arrow_upward", v: root.fmtSpeed(root.txSpeed), k: "Upload" },
+                    { i: "schedule", v: facts.up(root.uptime), k: "Uptime" }
+                ]
                 delegate: Item {
-                    id: row
-                    required property int index
-                    readonly property var modelData: root.procs[index] ?? ({ name: "", cpu: 0, mem: 0 })
-                    readonly property real share: Math.min(1, modelData.cpu / 100)
-                    readonly property bool hot: modelData.cpu >= 50
-                    readonly property var nice: ({ "qs": "Quickshell", "niri": "Niri", "electron": "Electron app", "cava": "Cava", "spotify": "Spotify" })
-                    readonly property string label: nice[modelData.name] ?? (modelData.name.charAt(0).toUpperCase() + modelData.name.slice(1))
-                    readonly property string iconSrc: modelData.name !== "" ? Quickshell.iconPath(modelData.name === "qs" ? "quickshell" : modelData.name, true) : ""
-                    width: procCol.width; height: 46
-                    opacity: root.procs[index] ? 1 : 0
-                    Rectangle {
-                        anchors.fill: parent; radius: 14
-                        color: rowMa.containsMouse ? Qt.alpha(ThemeBackend.text, 0.06) : "transparent"
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                    }
-                    MouseArea { id: rowMa; anchors.fill: parent; hoverEnabled: true }
-                    Rectangle {
-                        id: tile
-                        x: 6; anchors.verticalCenter: parent.verticalCenter
-                        width: 32; height: 32; radius: 10
-                        color: Qt.alpha(row.hot ? ThemeBackend.red : root.tone, 0.18)
-                        Image {
-                            id: ic
-                            anchors.centerIn: parent
-                            width: 20; height: 20
-                            sourceSize: Qt.size(40, 40)
-                            source: row.iconSrc
-                            visible: status === Image.Ready
-                        }
+                    required property var modelData
+                    width: facts.w; height: 56
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
                         Text {
-                            anchors.centerIn: parent
-                            visible: !ic.visible
-                            text: row.modelData.name.charAt(0).toUpperCase()
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold
-                            color: row.hot ? ThemeBackend.red : root.tone
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.i
+                            font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 24 })
+                            font.pixelSize: 22; color: root.tone
                             renderType: Text.NativeRendering
                         }
-                    }
-                    Column {
-                        anchors { left: tile.right; leftMargin: 12; right: pct.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
-                        spacing: 1
-                        Text {
-                            width: parent.width
-                            text: row.label
-                            elide: Text.ElideRight
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 14; font.weight: Font.Medium
-                            color: ThemeBackend.text; renderType: Text.NativeRendering
-                        }
-                        Text {
-                            text: row.modelData.mem.toFixed(1) + "% of memory"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 12
-                            color: ThemeBackend.subtext0; renderType: Text.NativeRendering
-                        }
-                    }
-                    Column {
-                        id: pct
-                        anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-                        spacing: 5
-                        Text {
-                            anchors.right: parent.right
-                            text: row.modelData.cpu.toFixed(1) + "%"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 14; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                            color: row.hot ? ThemeBackend.red : ThemeBackend.text; renderType: Text.NativeRendering
-                        }
-                        Rectangle {
-                            width: 64; height: 4; radius: 2
-                            color: Qt.alpha(ThemeBackend.text, 0.08)
-                            Rectangle {
-                                width: Math.max(4, parent.width * row.share); height: parent.height; radius: 2
-                                color: row.hot ? ThemeBackend.red : root.tone
-                                Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 1
+                            Text {
+                                text: modelData.v
+                                color: ThemeBackend.text
+                                font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                                renderType: Text.NativeRendering
+                            }
+                            Text {
+                                text: modelData.k
+                                color: ThemeBackend.subtext0
+                                font.family: ThemeBackend.fontFamily; font.pixelSize: 12
+                                renderType: Text.NativeRendering
                             }
                         }
                     }
