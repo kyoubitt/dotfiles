@@ -178,13 +178,21 @@ Item {
             }
             Rectangle {
                 id: seg
+                property string pending: ""
+                Process { id: setter }
+                function choose(name, p) {
+                    pending = name
+                    PowerProfiles.profile = p
+                    setter.command = ["powerprofilesctl", "set", name]
+                    setter.running = true
+                }
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
                 radius: 21
                 color: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
                 readonly property var items: PowerProfiles.hasPerformanceProfile
-                    ? [{ p: PowerProfile.PowerSaver, t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, t: "Balanced", i: "balance" }, { p: PowerProfile.Performance, t: "Performance", i: "speed" }]
-                    : [{ p: PowerProfile.PowerSaver, t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, t: "Balanced", i: "balance" }]
+                    ? [{ p: PowerProfile.PowerSaver, n: "power-saver", t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, n: "balanced", t: "Balanced", i: "balance" }, { p: PowerProfile.Performance, n: "performance", t: "Performance", i: "speed" }]
+                    : [{ p: PowerProfile.PowerSaver, n: "power-saver", t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, n: "balanced", t: "Balanced", i: "balance" }]
                 readonly property int idx: Math.max(0, items.findIndex(x => x.p === PowerProfiles.profile))
                 Rectangle {
                     y: 4; height: parent.height - 8; radius: height / 2
@@ -219,7 +227,7 @@ Item {
                                 renderType: Text.NativeRendering
                             }
                         }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: PowerProfiles.profile = modelData.p }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: seg.choose(modelData.n, modelData.p) }
                     }
                 }
             }

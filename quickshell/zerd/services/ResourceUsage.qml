@@ -65,7 +65,7 @@ Singleton {
                     root.gpuAvailable = !isNaN(gpu)
                     if (root.gpuAvailable) {
                         const g = Math.max(0, Math.min(1, gpu / 100))
-                        root.gpuUsage = root.gpuUsageHistory.length ? root.gpuUsage * 0.7 + g * 0.3 : g
+                        root.gpuUsage = root.gpuUsageHistory.length ? root.gpuUsage * 0.88 + g * 0.12 : g
                         root.gpuUsageHistory = root._push(root.gpuUsageHistory, root.gpuUsage)
                     }
                     const temp = parseFloat((lines.find(l => l.startsWith("TEMP:")) ?? "TEMP:").slice(5))
