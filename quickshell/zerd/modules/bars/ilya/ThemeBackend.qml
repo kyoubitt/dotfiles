@@ -52,6 +52,15 @@ QtObject {
 
     // Nerd Font glyph -> Material Symbol, so every bar icon is one font at one size
     readonly property var symbols: ({
+        "F04C3": "speaker",
+        "F04DB": "stop",
+        "F02CB": "headphones",
+        "F0214": "description",
+        "F0450": "refresh",
+        "F075A": "album",
+        "F0156": "close",
+        "F009A": "notifications",
+        "F009B": "notifications_off",
         "F0079": "battery_full",
         "F0083": "battery_alert",
         "F0084": "battery_charging_full",

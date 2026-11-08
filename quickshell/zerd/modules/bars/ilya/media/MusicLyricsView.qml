@@ -41,9 +41,10 @@ Item {
         Text {
             renderType: Text.NativeRendering
             Layout.alignment: Qt.AlignHCenter
-            text: "󰎈"
-            font.family: ThemeBackend.iconFont
-            font.pixelSize: root.s(28)
+            text: "lyrics"
+            font.family: ThemeBackend.symbolFont
+            font.variableAxes: ({ "wght": 500, "opsz": 40, "FILL": 0 })
+            font.pixelSize: root.s(32)
             color: root.dynamicTextColor
             opacity: 0.75
         }

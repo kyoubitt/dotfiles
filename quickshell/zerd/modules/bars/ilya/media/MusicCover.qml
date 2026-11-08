@@ -247,7 +247,9 @@ Item {
                         Text {
                             renderType: Text.NativeRendering
                             anchors.centerIn: parent
-                            text: "󰝚"
+                            text: "album"
+                            font.family: ThemeBackend.symbolFont
+                            font.variableAxes: ({ "wght": 400, "opsz": 48, "FILL": 0 })
                             font.pixelSize: parent.width * 0.26
                             color: ThemeBackend.overlay1 || "#7f849c"
                         }

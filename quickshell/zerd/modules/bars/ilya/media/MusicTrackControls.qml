@@ -59,7 +59,9 @@ ColumnLayout {
                 Layout.preferredHeight: root.s(22)
                 cornerRadius: ThemeBackend.borderRadius
                 horizontalPadding: root.s(10)
-                buttonText: (root.activeDeviceIcon || "󰓃") + " " + (root.activeDeviceName || I18n.t("music.speaker"))
+                buttonIcon: root.activeDeviceIcon || "󰓃"
+                buttonText: root.activeDeviceName || I18n.t("music.speaker")
+                iconFontSize: root.s(12)
                 textFontSize: root.s(11.5)
                 accentColor: ThemeBackend.surface0 || "#313244"
                 bgOpacity: ThemeBackend.elementOpacity

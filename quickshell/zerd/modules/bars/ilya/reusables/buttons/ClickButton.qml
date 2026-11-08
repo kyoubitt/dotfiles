@@ -115,9 +115,10 @@ Item {
                 renderType: Text.NativeRendering
                 id: iconLabel
                 visible: root.buttonIcon !== ""
-                text: root.buttonIcon
-                font.family: root.iconFont
-                font.pixelSize: root.iconFontSize
+                text: ThemeBackend.symOf(root.buttonIcon) || root.buttonIcon
+                font.family: ThemeBackend.symOf(root.buttonIcon) !== "" ? ThemeBackend.symbolFont : root.iconFont
+                font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
+                font.pixelSize: ThemeBackend.symOf(root.buttonIcon) !== "" ? root.iconFontSize + 3 : root.iconFontSize
                 color: root.displayTextColor
                 Layout.alignment: Qt.AlignVCenter
             }

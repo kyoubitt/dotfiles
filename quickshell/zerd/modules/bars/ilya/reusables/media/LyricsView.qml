@@ -275,7 +275,10 @@ Item {
                         wrapMode: Text.WordWrap
                         font.family: root.fontFamily
                         font.weight: root.fontWeight
-                        font.pixelSize: root.baseActiveFont
+                        // sizes step by whole pixels instead of scaling the text, so every line stays sharp
+                        font.pixelSize: index === Lyrics.currentIndex ? root.baseActiveFont : Math.round(root.baseActiveFont * (Math.abs(index - Lyrics.currentIndex) === 1 ? 0.88 : 0.80))
+                        font.hintingPreference: Font.PreferFullHinting
+                        Behavior on font.pixelSize { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
                         color: (index === Lyrics.currentIndex && (!modelData.words || modelData.words.length === 0)) ? root.activeLineColor : root.inactiveLineColor
                         opacity: {
                             if (!lineDelegate.isWithinRange) return 0.0;
@@ -284,12 +287,6 @@ Item {
                             return (typeof Lyrics !== "undefined" && typeof Lyrics.getLineOpacity === "function") ? Lyrics.getLineOpacity(index, Lyrics.currentIndex) : 0.4;
                         }
                         visible: opacity > 0.0
-                        scale: {
-                            if (index === Lyrics.currentIndex) return 1.0;
-                            let d = Math.abs(index - Lyrics.currentIndex);
-                            if (d === 1) return 0.88;
-                            return 0.80;
-                        }
                         transformOrigin: root.effectiveTransformOrigin
 
                         textFormat: (index === Lyrics.currentIndex && modelData.words && modelData.words.length > 0) ? Text.StyledText : Text.PlainText
@@ -309,13 +306,6 @@ Item {
                         }
 
                         Behavior on opacity {
-                            NumberAnimation {
-                                duration: 650
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-
-                        Behavior on scale {
                             NumberAnimation {
                                 duration: 650
                                 easing.type: Easing.OutCubic
