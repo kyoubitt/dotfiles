@@ -31,3 +31,4 @@ singleton NiriState 1.0 NiriState.qml
 singleton MangoState 1.0 MangoState.qml
 singleton SwayState 1.0 SwayState.qml
 PopupHeader 1.0 PopupHeader.qml
+PopupCapsule 1.0 PopupCapsule.qml

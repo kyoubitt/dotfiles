@@ -127,30 +127,21 @@ Item {
         onTriggered: if (!sampler.running) sampler.running = true
     }
 
-    // ---- look: three rings, a history chart, one bar per core, the busiest processes
-    readonly property color cardColor: ThemeBackend.liquidGlass ? ThemeBackend.card : Qt.rgba(ThemeBackend.base.r, ThemeBackend.base.g, ThemeBackend.base.b, 1)
-    readonly property color tile: Qt.tint(ThemeBackend.base, Qt.rgba(ThemeBackend.text.r, ThemeBackend.text.g, ThemeBackend.text.b, 0.07))
+    // ---- look: the power menu's capsules for the four loads, one line of facts, the busiest processes in plain rows
     readonly property real gpuLoad: Svc.ResourceUsage.gpuAvailable ? Svc.ResourceUsage.gpuUsage : -1
-
-    property color tone: cpuTotal >= 0.9 ? ThemeBackend.red : ThemeBackend.blue
-    Behavior on tone { ColorAnimation { duration: 400 } }
-    // the readings jump between samples; the picture glides to them
+    readonly property real memFrac: memTotal > 0 ? memUsed / memTotal : 0
     property real shownCpu: 0
     Behavior on shownCpu { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
     onCpuTotalChanged: shownCpu = cpuTotal
-    property real orbit: 0
-    NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
-    property real drift: 0
-    NumberAnimation on drift { from: 0; to: Math.PI * 2; duration: 160000; loops: Animation.Infinite; running: root.visible }
+    readonly property color tone: ThemeBackend.blue
+    function hotTone(f) { return f >= 0.9 ? ThemeBackend.red : tone }
 
     Rectangle {
-        id: card
         anchors.fill: parent
         radius: ThemeBackend.borderRadius
         color: ThemeBackend.card
         clip: true
         opacity: root.intro
-
         GlassSheen {}
         WallpaperBlur {
             z: -1
@@ -160,324 +151,76 @@ Item {
             bottomLeftRadius: parent.bottomLeftRadius
             bottomRightRadius: parent.bottomRightRadius
         }
-        Rectangle {
-            width: parent.width * 0.8; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.cos(root.drift * 2) * 110
-            y: 150 - height / 2 + Math.sin(root.drift * 2) * 60
-            color: root.tone; opacity: 0.07
-        }
-        Rectangle {
-            width: parent.width * 0.9; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.sin(root.drift * 1.5) * -110
-            y: 170 - height / 2 + Math.cos(root.drift * 1.5) * -60
-            color: ThemeBackend.surface2; opacity: 0.05
-        }
-
-        Item {
-            id: scene
-            x: 0; y: 0; width: parent.width; height: 270
-            readonly property real cx: width / 2
-            readonly property real cy: 128
-
-            Rectangle { x: scene.cx - 92; y: scene.cy - 92; width: 184; height: 184; radius: 92; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
-            Rectangle { x: scene.cx - 178; y: scene.cy - 86; width: 356; height: 172; radius: 86; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
-
-            Rectangle {
-                id: core
-                x: scene.cx - 66; y: scene.cy - 66
-                width: 132; height: 132; radius: 66
-                color: ThemeBackend.base
-                border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
-                clip: true
-                FluidWave {
-                    id: wave
-                    anchors.fill: parent
-                    property real wavePhase: 0
-                    NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
-                    radius: core.radius
-                    fillLevel: Math.max(0.02, Math.min(1, root.shownCpu))
-                    waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
-                    phase: wavePhase
-                    vertical: 1.0
-                    color1: Qt.lighter(root.tone, 1.15)
-                    color2: root.tone
-                }
-            }
-
-            Repeater {
-                model: [
-                    { k: "Memory", v: Math.round((root.memTotal > 0 ? root.memUsed / root.memTotal : 0) * 100) + "%", i: "developer_board", a: -2.3, hot: root.memTotal > 0 && root.memUsed / root.memTotal >= 0.9 },
-                    { k: "GPU", v: Math.round((root.gpuLoad >= 0 ? root.gpuLoad : 0) * 100) + "%", i: "videogame_asset", a: -0.75, hot: false },
-                    { k: "Disk", v: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%", i: "hard_drive", a: 0.8, hot: false },
-                    { k: "Temp", v: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C", i: "thermostat", a: 2.35, hot: Svc.ResourceUsage.cpuTemp >= 85 }
-                ]
-                delegate: Item {
-                    id: sat
-                    required property var modelData
-                    required property int index
-                    width: 80; height: 80
-                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 178
-                    y: scene.cy - 22 + Math.sin(modelData.a + root.orbit * 6) * 86
-                    property real appear: 0
-                    opacity: appear
-                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.06 : 1)
-                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                    SequentialAnimation on appear {
-                        running: root.visible
-                        PropertyAction { value: 0 }
-                        PauseAnimation { duration: 120 + sat.index * 90 }
-                        NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
-                    }
-                    MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
-                    Rectangle {
-                        width: 44; height: 44; radius: 22
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        color: Qt.alpha(ThemeBackend.surface0, 0.92)
-                        border.width: 1.5; border.color: Qt.alpha(sat.modelData.hot ? ThemeBackend.red : root.tone, 0.55)
-                        Text {
-                            anchors.centerIn: parent
-                            text: sat.modelData.i
-                            font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
-                            font.pixelSize: 20; color: sat.modelData.hot ? ThemeBackend.red : root.tone
-                            renderType: Text.NativeRendering
-                        }
-                    }
-                    Text {
-                        y: 47; width: parent.width; horizontalAlignment: Text.AlignHCenter
-                        text: sat.modelData.v
-                        color: ThemeBackend.text
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                        renderType: Text.NativeRendering
-                    }
-                    Text {
-                        y: 64; width: parent.width; horizontalAlignment: Text.AlignHCenter
-                        text: sat.modelData.k
-                        color: ThemeBackend.subtext0
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 11
-                        renderType: Text.NativeRendering
-                    }
-                }
-            }
-        }
-
-        Row {
-            x: 22; y: 276
-            spacing: 14
-            Text {
-                text: Math.round(root.shownCpu * 100) + "%"
-                color: ThemeBackend.text
-                font.family: ThemeBackend.fontFamily; font.pixelSize: 44; font.weight: Font.Black; font.features: { "tnum": 1 }
-                renderType: Text.NativeRendering
-            }
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 1
-                Text { text: "Processor"; color: root.tone; font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold; renderType: Text.NativeRendering }
-                Text { text: root.cores.length + " cores · " + root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB memory"; color: ThemeBackend.subtext0; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; renderType: Text.NativeRendering }
-            }
-        }
-    }
-
-    component Gauge: Item {
-        id: g
-        property string label
-        property real fraction: 0
-        property string caption
-        property string glyph
-        readonly property bool hot: fraction >= 0.85
-        Layout.fillWidth: true
-        Layout.preferredHeight: 128
-        Rectangle { anchors.fill: parent; radius: 16; color: root.tile }
-        Item {
-            id: ring
-            width: 78; height: 78
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: 12
-            Shape {
-                anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-                ShapePath {
-                    strokeColor: Qt.alpha(ThemeBackend.text, 0.12); strokeWidth: 7; fillColor: "transparent"; capStyle: ShapePath.RoundCap
-                    PathAngleArc { centerX: 39; centerY: 39; radiusX: 34; radiusY: 34; startAngle: 0; sweepAngle: 360 }
-                }
-                ShapePath {
-                    strokeColor: g.hot ? ThemeBackend.red : ThemeBackend.blue; strokeWidth: 7; fillColor: "transparent"; capStyle: ShapePath.RoundCap
-                    PathAngleArc {
-                        centerX: 39; centerY: 39; radiusX: 34; radiusY: 34; startAngle: -90
-                        sweepAngle: 360 * Math.max(0.015, Math.min(1, g.fraction))
-                        Behavior on sweepAngle { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-                    }
-                }
-            }
-            Column {
-                anchors.centerIn: parent
-                spacing: -1
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: g.glyph
-                    font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 }); font.pixelSize: 15
-                    color: g.hot ? ThemeBackend.red : ThemeBackend.subtext0; renderType: Text.NativeRendering
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Math.round(g.fraction * 100) + "%"
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 17; font.weight: Font.Black; font.features: { "tnum": 1 }
-                    color: g.hot ? ThemeBackend.red : ThemeBackend.text; renderType: Text.NativeRendering
-                }
-            }
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: 94
-            text: g.label
-            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold
-            color: ThemeBackend.text; renderType: Text.NativeRendering
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: 111
-            text: g.caption
-            font.family: ThemeBackend.fontFamily; font.pixelSize: 12
-            color: ThemeBackend.subtext0; renderType: Text.NativeRendering
-        }
     }
 
     ColumnLayout {
         id: col
         x: 18; y: 18
         width: parent.width - 36
-        spacing: 12
+        spacing: 14
         opacity: root.intro
 
-        Item { Layout.fillWidth: true; Layout.preferredHeight: 332 }
-
-        // history: CPU and memory over the last minute
-        Rectangle {
+        Row {
+            id: caps
             Layout.fillWidth: true
-            Layout.preferredHeight: 104
-            radius: 16
-            color: root.tile
-            clip: true
-            Canvas {
-                id: chart
-                anchors { fill: parent; margins: 12 }
-                renderTarget: Canvas.FramebufferObject
-                onPaint: {
-                    const ctx = getContext("2d");
-                    ctx.reset();
-                    const draw = (arr, col, fill) => {
-                        const n = arr.length;
-                        if (n < 2) return;
-                        const step = width / Math.max(1, n - 1);
-                        ctx.beginPath();
-                        ctx.moveTo(0, height);
-                        for (let i = 0; i < n; i++) ctx.lineTo(i * step, height - Math.max(0, Math.min(1, arr[i])) * (height - 4) - 2);
-                        ctx.lineTo(width, height);
-                        ctx.closePath();
-                        ctx.fillStyle = fill; ctx.fill();
-                        ctx.beginPath();
-                        for (let i = 0; i < n; i++) {
-                            const y = height - Math.max(0, Math.min(1, arr[i])) * (height - 4) - 2;
-                            if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
-                        }
-                        ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
-                    };
-                    const b = ThemeBackend.blue, t = ThemeBackend.subtext0;
-                    draw(Svc.ResourceUsage.memoryUsageHistory, Qt.rgba(t.r, t.g, t.b, 0.8), Qt.rgba(t.r, t.g, t.b, 0.10));
-                    draw(Svc.ResourceUsage.cpuUsageHistory, Qt.rgba(b.r, b.g, b.b, 1), Qt.rgba(b.r, b.g, b.b, 0.22));
-                }
-                Connections { target: Svc.ResourceUsage; function onCpuUsageHistoryChanged() { chart.requestPaint() } }
-            }
-            Row {
-                anchors { right: parent.right; top: parent.top; margins: 10 }
-                spacing: 12
-                Row { spacing: 5; Rectangle { width: 8; height: 8; radius: 4; anchors.verticalCenter: parent.verticalCenter; color: ThemeBackend.blue } Text { text: "CPU"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
-                Row { spacing: 5; Rectangle { width: 8; height: 8; radius: 4; anchors.verticalCenter: parent.verticalCenter; color: ThemeBackend.subtext0 } Text { text: "Memory"; font.family: ThemeBackend.fontFamily; font.pixelSize: 12; color: ThemeBackend.subtext0; renderType: Text.NativeRendering } }
-            }
+            spacing: 12
+            readonly property real w: (width - 36) / 4
+            PopupCapsule { width: caps.w; height: 168; icon: "memory"; value: Math.round(root.shownCpu * 100) + "%"; caption: "CPU"; level: root.shownCpu; tone: root.hotTone(root.cpuTotal) }
+            PopupCapsule { width: caps.w; height: 168; icon: "developer_board"; value: Math.round(root.memFrac * 100) + "%"; caption: root.memUsed.toFixed(1) + " GB"; level: root.memFrac; tone: root.hotTone(root.memFrac) }
+            PopupCapsule { width: caps.w; height: 168; icon: "videogame_asset"; value: root.gpuLoad >= 0 ? Math.round(root.gpuLoad * 100) + "%" : "–"; caption: "GPU"; level: Math.max(0, root.gpuLoad); tone: root.tone }
+            PopupCapsule { width: caps.w; height: 168; icon: "hard_drive"; value: Math.round(Svc.ResourceUsage.diskUsedPercentage * 100) + "%"; caption: "Disk"; level: Svc.ResourceUsage.diskUsedPercentage; tone: root.tone }
         }
 
-        // one bar per core
-        Rectangle {
+        Text {
+            Layout.leftMargin: 4
             Layout.fillWidth: true
-            Layout.preferredHeight: 86
-            radius: 16
-            color: root.tile
+            text: Math.round(Svc.ResourceUsage.cpuTemp) + "\u00B0C  \u00B7  " + root.cores.length + " cores  \u00B7  " + root.memUsed.toFixed(1) + " / " + root.memTotal.toFixed(1) + " GB memory"
+            color: ThemeBackend.subtext0
+            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
+            elide: Text.ElideRight
+            renderType: Text.NativeRendering
+        }
+
+        Column {
+            id: procCol
+            Layout.fillWidth: true
+            Layout.leftMargin: 4; Layout.rightMargin: 4
+            spacing: 9
             Text {
-                x: 14; y: 10
-                text: "Cores"
+                text: "Busiest"
                 font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold; font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
                 color: ThemeBackend.subtext0; renderType: Text.NativeRendering
             }
-            Row {
-                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 14 }
-                height: 46
-                spacing: 6
-                Repeater {
-                    model: root.cores.length
-                    delegate: Item {
-                        required property int index
-                        readonly property real modelData: root.cores[index] ?? 0
-                        width: (parent.width - 6 * (root.cores.length - 1)) / Math.max(1, root.cores.length); height: parent.height
-                        Rectangle { anchors.fill: parent; radius: 5; color: Qt.alpha(ThemeBackend.text, 0.10) }
-                        Rectangle {
-                            anchors.bottom: parent.bottom; width: parent.width; radius: 5
-                            height: Math.max(4, parent.height * modelData)
-                            color: modelData >= 0.85 ? ThemeBackend.red : ThemeBackend.blue
-                            Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                        }
+            Repeater {
+                model: 5
+                delegate: Item {
+                    required property int index
+                    readonly property var modelData: root.procs[index] ?? ({ name: "", cpu: 0, mem: 0 })
+                    readonly property real share: Math.min(1, modelData.cpu / 100)
+                    width: procCol.width; height: 34
+                    opacity: root.procs[index] ? 1 : 0
+                    Text {
+                        y: 0
+                        width: parent.width - 150
+                        text: modelData.name
+                        elide: Text.ElideRight
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 14; font.weight: Font.Medium
+                        color: ThemeBackend.text; renderType: Text.NativeRendering
                     }
-                }
-            }
-        }
-
-        // the busiest processes
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: procCol.implicitHeight + 28
-            radius: 16
-            color: root.tile
-            Column {
-                id: procCol
-                x: 14; y: 12
-                width: parent.width - 28
-                spacing: 8
-                Text {
-                    text: "Busiest"
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold; font.letterSpacing: 0.6; font.capitalization: Font.AllUppercase
-                    color: ThemeBackend.subtext0; renderType: Text.NativeRendering
-                }
-                Repeater {
-                    model: 5
-                    delegate: Item {
-                        required property int index
-                        readonly property var modelData: root.procs[index] ?? ({ name: "", cpu: 0, mem: 0 })
-                        width: procCol.width; height: 26
-                        opacity: root.procs[index] ? 1 : 0
+                    Text {
+                        y: 1
+                        anchors.right: parent.right
+                        text: modelData.cpu.toFixed(1) + "%"
+                        font.family: ThemeBackend.fontFamily; font.pixelSize: 14; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                        color: modelData.cpu >= 50 ? ThemeBackend.red : ThemeBackend.text; renderType: Text.NativeRendering
+                    }
+                    Rectangle {
+                        y: 26; width: parent.width; height: 4; radius: 2
+                        color: Qt.alpha(ThemeBackend.text, 0.08)
                         Rectangle {
-                            height: parent.height; radius: 8
-                            width: Math.max(8, parent.width * Math.min(1, modelData.cpu / 100))
-                            color: Qt.alpha(ThemeBackend.blue, 0.20)
+                            width: Math.max(4, parent.width * share); height: parent.height; radius: 2
+                            color: modelData.cpu >= 50 ? ThemeBackend.red : root.tone
                             Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-                        }
-                        Text {
-                            x: 10; anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 190
-                            text: modelData.name
-                            elide: Text.ElideRight
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Medium
-                            color: ThemeBackend.text; renderType: Text.NativeRendering
-                        }
-                        Text {
-                            anchors { right: parent.right; rightMargin: 92; verticalCenter: parent.verticalCenter }
-                            text: modelData.cpu.toFixed(1) + "%"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                            color: ThemeBackend.text; renderType: Text.NativeRendering
-                        }
-                        Text {
-                            anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
-                            text: modelData.mem.toFixed(1) + "% mem"
-                            font.family: ThemeBackend.fontFamily; font.pixelSize: 12; font.features: { "tnum": 1 }
-                            color: ThemeBackend.subtext0; renderType: Text.NativeRendering
                         }
                     }
                 }

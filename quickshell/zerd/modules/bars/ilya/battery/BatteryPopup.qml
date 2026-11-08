@@ -51,11 +51,7 @@ Item {
         return dev.timeToEmpty > 0 ? "On battery · " + span(dev.timeToEmpty) + " left" : "On battery";
     }
 
-    readonly property real contentHeight: 338 + col.implicitHeight + 18
-    property real orbit: 0
-    NumberAnimation on orbit { from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: root.visible }
-    property real drift: 0
-    NumberAnimation on drift { from: 0; to: Math.PI * 2; duration: 160000; loops: Animation.Infinite; running: root.visible }
+    readonly property real contentHeight: 18 + capsRow.height + 14 + info.height + 14 + col.implicitHeight + 18
 
     Rectangle {
         id: card
@@ -63,7 +59,6 @@ Item {
         radius: ThemeBackend.borderRadius
         color: ThemeBackend.card
         clip: true
-
         GlassSheen {}
         WallpaperBlur {
             z: -1
@@ -73,149 +68,85 @@ Item {
             bottomLeftRadius: parent.bottomLeftRadius
             bottomRightRadius: parent.bottomRightRadius
         }
+    }
 
-        // slow drifting colour behind everything
-        Rectangle {
-            width: parent.width * 0.8; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.cos(root.drift * 2) * 110
-            y: 130 - height / 2 + Math.sin(root.drift * 2) * 60
-            color: root.tone; opacity: 0.07
+    // the power menu's capsules: charge, battery health, power draw
+    Row {
+        id: capsRow
+        x: 18; y: 18
+        spacing: 12
+        readonly property real w: (root.width - 36 - 24) / 3
+        PopupCapsule {
+            width: capsRow.w; height: 168
+            icon: root.charging ? "battery_charging_full" : "battery_full"
+            value: root.ready ? Math.round(root.level * 100) + "%" : "AC"
+            caption: "Charge"
+            level: root.level
+            tone: root.tone
         }
-        Rectangle {
-            width: parent.width * 0.9; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.sin(root.drift * 1.5) * -110
-            y: 150 - height / 2 + Math.cos(root.drift * 1.5) * -60
-            color: ThemeBackend.surface2; opacity: 0.05
+        PopupCapsule {
+            width: capsRow.w; height: 168
+            icon: "favorite"
+            value: root.ready ? root.healthText : "–"
+            caption: "Health"
+            level: root.ready ? (parseFloat(root.healthText) || 0) / 100 : 0
+            tone: ThemeBackend.blue
         }
-
-        // the scene: two orbit rings, a plain liquid orb, three small icons drifting round it
-        Item {
-            id: scene
-            x: 0; y: 0; width: parent.width; height: 270
-            readonly property real cx: width / 2
-            readonly property real cy: 128
-
-            Rectangle { x: scene.cx - 92; y: scene.cy - 92; width: 184; height: 184; radius: 92; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.07) }
-            Rectangle { x: scene.cx - 150; y: scene.cy - 86; width: 300; height: 172; radius: 86; color: "transparent"; border.width: 1; border.color: Qt.alpha(ThemeBackend.text, 0.05) }
-
-            Rectangle {
-                anchors.centerIn: core
-                width: core.width + 20; height: width; radius: width / 2
-                color: "transparent"; border.width: 1.5; border.color: root.tone
-                opacity: 0.12 + (root.charging ? 0.10 * Math.sin(root.orbit * 900) : 0)
-            }
-
-            Rectangle {
-                id: core
-                x: scene.cx - 66; y: scene.cy - 66
-                width: 132; height: 132; radius: 66
-                color: ThemeBackend.base
-                border.width: 2; border.color: Qt.lighter(root.tone, 1.1)
-                clip: true
-                FluidWave {
-                    id: wave
-                    anchors.fill: parent
-                    property real wavePhase: 0
-                    NumberAnimation on wavePhase { running: root.visible; loops: Animation.Infinite; from: 0; to: Math.PI * 2; duration: 2600 }
-                    radius: core.radius
-                    fillLevel: root.shownLevel
-                    waveAmp: fillLevel < 0.99 ? 5 * Math.sin(fillLevel * Math.PI) : 0
-                    phase: wavePhase
-                    vertical: 1.0
-                    color1: Qt.lighter(root.tone, 1.15)
-                    color2: root.tone
-                    visible: root.shownLevel > 0.01
-                }
-            }
-
-            Repeater {
-                model: [
-                    { k: "Power", v: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–", i: "bolt", a: -2.3 },
-                    { k: "Health", v: root.ready ? root.healthText : "–", i: "favorite", a: -0.1 },
-                    { k: "Capacity", v: root.ready ? root.capText : "–", i: "battery_full", a: 2.1 }
-                ]
-                delegate: Item {
-                    id: sat
-                    required property var modelData
-                    required property int index
-                    width: 96; height: 80
-                    x: scene.cx - width / 2 + Math.cos(modelData.a + root.orbit * 6) * 150
-                    y: scene.cy - 22 + Math.sin(modelData.a + root.orbit * 6) * 86
-                    property real appear: 0
-                    opacity: appear
-                    scale: (0.6 + 0.4 * appear) * (satMa.containsMouse ? 1.06 : 1)
-                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                    SequentialAnimation on appear {
-                        running: root.visible
-                        PropertyAction { value: 0 }
-                        PauseAnimation { duration: 120 + sat.index * 90 }
-                        NumberAnimation { to: 1; duration: 520; easing.type: Easing.OutBack }
-                    }
-                    MouseArea { id: satMa; anchors.fill: parent; hoverEnabled: true }
-                    Rectangle {
-                        width: 44; height: 44; radius: 22
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        color: Qt.alpha(ThemeBackend.surface0, 0.92)
-                        border.width: 1.5; border.color: Qt.alpha(root.tone, 0.55)
-                        Text {
-                            anchors.centerIn: parent
-                            text: sat.modelData.i
-                            font.family: "Material Symbols Rounded"; font.variableAxes: ({ "wght": 600, "opsz": 20, "FILL": 1 })
-                            font.pixelSize: 20; color: root.tone
-                            renderType: Text.NativeRendering
-                        }
-                    }
-                    Text {
-                        y: 47; width: parent.width; horizontalAlignment: Text.AlignHCenter
-                        text: sat.modelData.v
-                        color: ThemeBackend.text
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 13; font.weight: Font.Bold; font.features: { "tnum": 1 }
-                        renderType: Text.NativeRendering
-                    }
-                    Text {
-                        y: 64; width: parent.width; horizontalAlignment: Text.AlignHCenter
-                        text: sat.modelData.k
-                        color: ThemeBackend.subtext0
-                        font.family: ThemeBackend.fontFamily; font.pixelSize: 11
-                        renderType: Text.NativeRendering
-                    }
-                }
-            }
+        PopupCapsule {
+            width: capsRow.w; height: 168
+            icon: "bolt"
+            value: root.ready ? Math.abs(root.dev.changeRate).toFixed(1) + " W" : "–"
+            caption: "Power"
+            level: root.ready ? Math.min(1, Math.abs(root.dev.changeRate) / 40) : 0
+            tone: ThemeBackend.blue
         }
+    }
 
-        // the number and the state, set in plain type under the scene
-        Row {
-            x: 22; y: 276
-            spacing: 14
+    Item {
+        id: info
+        x: 22; y: 18 + 168 + 14
+        width: parent.width - 44
+        height: 44
+        Column {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 2
             Text {
-                text: root.ready ? Math.round(root.level * 100) + "%" : "AC"
-                color: ThemeBackend.text
-                font.family: ThemeBackend.fontFamily; font.pixelSize: 44; font.weight: Font.Black; font.features: { "tnum": 1 }
+                text: !root.ready ? "No battery" : (root.full ? "Fully charged" : (root.charging ? "Charging" : "On battery"))
+                color: root.tone
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 18; font.weight: Font.Bold
                 renderType: Text.NativeRendering
             }
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 1
-                Text {
-                    text: root.charging ? (root.full ? "Fully charged" : "Charging") : "On battery"
-                    color: root.tone
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold
-                    renderType: Text.NativeRendering
-                }
-                Text {
-                    text: root.status.indexOf("·") >= 0 ? root.status.substring(root.status.indexOf("·") + 2) : ""
-                    visible: text !== ""
-                    color: ThemeBackend.subtext0
-                    font.family: ThemeBackend.fontFamily; font.pixelSize: 12
-                    renderType: Text.NativeRendering
-                }
+            Text {
+                text: root.status.indexOf("\u00B7") >= 0 ? root.status.substring(root.status.indexOf("\u00B7") + 2) : (root.full ? "Plugged in" : "")
+                visible: text !== ""
+                color: ThemeBackend.subtext0
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 13
+                renderType: Text.NativeRendering
+            }
+        }
+        Column {
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            spacing: 2
+            Text {
+                anchors.right: parent.right
+                text: root.capText
+                color: ThemeBackend.text
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 15; font.weight: Font.Bold; font.features: { "tnum": 1 }
+                renderType: Text.NativeRendering
+            }
+            Text {
+                anchors.right: parent.right
+                text: "capacity"
+                color: ThemeBackend.subtext0
+                font.family: ThemeBackend.fontFamily; font.pixelSize: 12
+                renderType: Text.NativeRendering
             }
         }
     }
 
     ColumnLayout {
         id: col
-        x: 18; y: 338
+        x: 18; y: 18 + 168 + 14 + info.height + 14
         width: parent.width - 36
         spacing: 12
 
@@ -233,6 +164,7 @@ Item {
             Rectangle {
                 id: seg
                 property string pending: ""
+                Connections { target: PowerProfiles; function onProfileChanged() { seg.pending = "" } }
                 Process { id: setter }
                 function choose(name, p) {
                     pending = name
@@ -247,7 +179,7 @@ Item {
                 readonly property var items: PowerProfiles.hasPerformanceProfile
                     ? [{ p: PowerProfile.PowerSaver, n: "power-saver", t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, n: "balanced", t: "Balanced", i: "balance" }, { p: PowerProfile.Performance, n: "performance", t: "Performance", i: "speed" }]
                     : [{ p: PowerProfile.PowerSaver, n: "power-saver", t: "Saver", i: "eco" }, { p: PowerProfile.Balanced, n: "balanced", t: "Balanced", i: "balance" }]
-                readonly property int idx: Math.max(0, items.findIndex(x => x.p === PowerProfiles.profile))
+                readonly property int idx: Math.max(0, items.findIndex(x => pending !== "" ? x.n === pending : x.p === PowerProfiles.profile))
                 Rectangle {
                     y: 4; height: parent.height - 8; radius: height / 2
                     width: (parent.width - 8) / seg.items.length
@@ -262,7 +194,7 @@ Item {
                         required property int index
                         x: 4 + index * (seg.width - 8) / seg.items.length; y: 4
                         width: (seg.width - 8) / seg.items.length; height: seg.height - 8
-                        readonly property bool on: PowerProfiles.profile === modelData.p
+                        readonly property bool on: seg.pending !== "" ? seg.pending === modelData.n : PowerProfiles.profile === modelData.p
                         Row {
                             anchors.centerIn: parent
                             spacing: 6
