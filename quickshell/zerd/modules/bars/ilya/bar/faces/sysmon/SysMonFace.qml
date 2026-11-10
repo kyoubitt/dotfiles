@@ -163,7 +163,7 @@ Item {
         Text {
             renderType: Text.NativeRendering
             anchors.centerIn: parent
-            text: circleRoot.showText ? circleRoot.textVal : circleRoot.icon
+            text: ThemeBackend.symOf(circleRoot.showText ? circleRoot.textVal : circleRoot.icon) || (circleRoot.showText ? circleRoot.textVal : circleRoot.icon)
             font.pixelSize: Math.round(circleRoot.showText
                 ? (barWindow ? barWindow.cs(root.isCompact ? 7.5 : 9) : (root.isCompact ? 7.5 : 9))
                 : (barWindow ? barWindow.cs(root.isCompact ? 9 : 11) : (root.isCompact ? 9 : 11)))

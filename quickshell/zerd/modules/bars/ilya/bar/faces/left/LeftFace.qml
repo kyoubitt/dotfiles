@@ -183,8 +183,8 @@ Item {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: menuBtn.glyphYOffset
             visible: root.iconOnly
-            text: menuBtn.glyph
-            font.family: ThemeBackend.iconFont
+            text: ThemeBackend.symOf(menuBtn.glyph) || (menuBtn.glyph)
+            font.family: ThemeBackend.symOf(menuBtn.glyph) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
             font.pixelSize: root.s(root.isCompact ? 15 : 16)
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

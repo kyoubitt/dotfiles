@@ -228,8 +228,8 @@ Item {
                                 Text {
                                     renderType: Text.NativeRendering
                                     anchors.centerIn: parent
-                                    text: "󰎈"
-                                    font.family: ThemeBackend.iconFont
+                                    text: ThemeBackend.symOf("󰎈") || ("󰎈")
+                                    font.family: ThemeBackend.symOf("󰎈") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                     font.pixelSize: barWindow ? barWindow.cs(root.isCompact ? 13 : 14) : (root.isCompact ? 13 : 14)
                                     color: root.isCompact ? ThemeBackend.text : ThemeBackend.subtext0
                                     visible: !root.hasArt && !appIcon.visible

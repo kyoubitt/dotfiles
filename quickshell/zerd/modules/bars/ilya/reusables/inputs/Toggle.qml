@@ -67,8 +67,8 @@ Item {
             renderType: Text.NativeRendering
             id: iconLabel
             visible: root.buttonIcon !== ""
-            text: root.buttonIcon
-            font.family: ThemeBackend.iconFont
+            text: ThemeBackend.symOf(root.buttonIcon) || (root.buttonIcon)
+            font.family: ThemeBackend.symOf(root.buttonIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
             font.pixelSize: root.iconFontSize
             color: root.textColor
             Layout.alignment: Qt.AlignVCenter

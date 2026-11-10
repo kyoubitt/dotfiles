@@ -108,8 +108,8 @@ PanelWindow {
                             Text {
                                 renderType: Text.NativeRendering
                                 anchors.centerIn: parent
-                                text: "󰈔"
-                                font.family: ThemeBackend.iconFont
+                                text: ThemeBackend.symOf("󰈔") || ("󰈔")
+                                font.family: ThemeBackend.symOf("󰈔") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                 font.pixelSize: Scaler.s(36)
                                 color: filePicker.selectedFilePath !== "" ? ThemeBackend.mauve : ThemeBackend.subtext0
                             }

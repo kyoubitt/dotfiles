@@ -264,8 +264,8 @@ Item {
                         renderType: Text.NativeRendering
                         anchors.centerIn: parent
                         visible: !root.showEmptyGraphic
-                        text: "󰂚"
-                        font.family: ThemeBackend.iconFont
+                        text: ThemeBackend.symOf("󰂚") || ("󰂚")
+                        font.family: ThemeBackend.symOf("󰂚") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                         font.pixelSize: root.s(40)
                         color: ThemeBackend.surface2
                     }
@@ -712,8 +712,8 @@ Item {
                                                     renderType: Text.NativeRendering
                                                     anchors.centerIn: parent
                                                     visible: groupWrapper.customType === "screenshot"
-                                                    text: "󰄀"
-                                                    font.family: ThemeBackend.iconFont
+                                                    text: ThemeBackend.symOf("󰄀") || ("󰄀")
+                                                    font.family: ThemeBackend.symOf("󰄀") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                                     font.pixelSize: root.s(22)
                                                     color: ThemeBackend.mauve
                                                 }
@@ -722,8 +722,8 @@ Item {
                                                     renderType: Text.NativeRendering
                                                     anchors.centerIn: parent
                                                     visible: groupWrapper.customType === "weather"
-                                                    text: "󰖕"
-                                                    font.family: ThemeBackend.iconFont
+                                                    text: ThemeBackend.symOf("󰖕") || ("󰖕")
+                                                    font.family: ThemeBackend.symOf("󰖕") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                                     font.pixelSize: root.s(22)
                                                     color: ThemeBackend.peach
                                                 }

@@ -351,8 +351,8 @@ Popup {
                                             Text {
                                                 renderType: Text.NativeRendering
                                                 anchors.centerIn: parent
-                                                text: modelData.icon
-                                                font.family: ThemeBackend.iconFont
+                                                text: ThemeBackend.symOf(modelData.icon) || (modelData.icon)
+                                                font.family: ThemeBackend.symOf(modelData.icon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                                 font.pixelSize: Scaler.s(16)
                                                 color: parent.parent.parent.isActive ? ThemeBackend.crust : (placeMa.containsMouse ? ThemeBackend.text : ThemeBackend.subtext0)
 
@@ -481,9 +481,9 @@ Popup {
 
                                         Text {
                                             renderType: Text.NativeRendering
-                                            text: "󰅂"
+                                            text: ThemeBackend.symOf("󰅂") || ("󰅂")
                                             color: ThemeBackend.surface2
-                                            font.family: ThemeBackend.iconFont
+                                            font.family: ThemeBackend.symOf("󰅂") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                             font.pixelSize: Scaler.s(14)
                                             visible: index > 0
                                             anchors.verticalCenter: parent.verticalCenter
@@ -641,8 +641,8 @@ Popup {
 
                                 Text {
                                     renderType: Text.NativeRendering
-                                    text: fileIsDir ? "󰉋" : "󰋩"
-                                    font.family: ThemeBackend.iconFont
+                                    text: ThemeBackend.symOf(fileIsDir ? "󰉋" : "󰋩") || (fileIsDir ? "󰉋" : "󰋩")
+                                    font.family: ThemeBackend.symOf(fileIsDir ? "󰉋" : "󰋩") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                     font.pixelSize: Scaler.s(16)
                                     color: fileIsDir ? ThemeBackend.blue : ThemeBackend.text
                                 }

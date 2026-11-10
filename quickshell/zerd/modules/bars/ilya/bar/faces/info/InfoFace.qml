@@ -135,8 +135,8 @@ Item {
 
                         Text {
                             renderType: Text.NativeRendering
-                            text: timerItem.modelData.icon
-                            font.family: ThemeBackend.iconFont
+                            text: ThemeBackend.symOf(timerItem.modelData.icon) || (timerItem.modelData.icon)
+                            font.family: ThemeBackend.symOf(timerItem.modelData.icon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                             font.pixelSize: root.isVertical ? (barWindow ? barWindow.cs(root.isCompact ? 10 : 11) : (root.isCompact ? 10 : 11)) : (barWindow ? barWindow.cs(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12))
                             color: root.isCompact ? Qt.lighter(timerItem.entryColor, 1.08) : timerItem.entryColor
                             Behavior on color { ColorAnimation { duration: 250 } }

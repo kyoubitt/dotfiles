@@ -354,8 +354,8 @@ Item {
                             renderType: Text.NativeRendering
                             id: overlayIcon
                             visible: myButtonIcon !== ""
-                            text: myButtonIcon
-                            font.family: ThemeBackend.iconFont
+                            text: ThemeBackend.symOf(myButtonIcon) || (myButtonIcon)
+                            font.family: ThemeBackend.symOf(myButtonIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                             font.pixelSize: window.s(18)
                             color: dynamicTextColor
                             anchors.verticalCenter: parent.verticalCenter
@@ -429,8 +429,8 @@ Item {
                                 Text {
                                     renderType: Text.NativeRendering
                                     visible: myButtonIcon !== ""
-                                    text: myButtonIcon
-                                    font.family: ThemeBackend.iconFont
+                                    text: ThemeBackend.symOf(myButtonIcon) || (myButtonIcon)
+                                    font.family: ThemeBackend.symOf(myButtonIcon) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                     font.pixelSize: window.s(18)
                                     color: floatCardDelegateContainer.filledContentColor
                                     anchors.verticalCenter: parent.verticalCenter

@@ -349,10 +349,10 @@ Item {
 
             Text {
                 renderType: Text.NativeRendering
-                font.family: ThemeBackend.iconFont
+                font.family: ThemeBackend.symOf(root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃")) !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                 font.pixelSize: root.s(32)
                 color: bRoot.iconColor
-                text: root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃")
+                text: ThemeBackend.symOf(root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃")) || (root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃"))
                 Behavior on color {
                     enabled: root.visible
                     ColorAnimation { duration: 400 }
@@ -471,8 +471,8 @@ Item {
                             Text {
                                 renderType: Text.NativeRendering
                                 anchors.centerIn: parent
-                                text: ""
-                                font.family: ThemeBackend.iconFont
+                                text: ThemeBackend.symOf("") || ("")
+                                font.family: ThemeBackend.symOf("") !== "" ? ThemeBackend.symbolFont : ThemeBackend.iconFont
                                 font.pixelSize: root.s(18)
                                 color: ThemeBackend.text
                                 visible: SystemInfo.avatarPath === ""
