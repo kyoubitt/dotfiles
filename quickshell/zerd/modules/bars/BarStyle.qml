@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.modules.common
 import qs.services
+import qs.modules.iris.style
 
 // Sizes and colours shared by the bars. Colours come straight from the
 // wallust palette, so a wallpaper change re-tints every bar.
@@ -11,20 +12,25 @@ Singleton {
     // The shell's one set of colours: iNiR's Material 3 layers and text (Appearance.colors, from the wallpaper), with the
     // accent from the wallpaper's palette or the one picked in Settings. Everything else reads these.
     readonly property var c: Appearance.colors
-    readonly property color plate: c.colLayer1                    // bar capsules, panels
+    // The scheme picked on the Colours page: Dark, Ink or Light take the surfaces, text and accent from the solved palette
+    // (the same one the dock and launcher use); Auto keeps the wallpaper's Material layers.
+    readonly property bool schemed: ["dark", "ink", "light"].includes(String(Config.options?.iris?.appearance?.scheme ?? "auto"))
+    readonly property color plate: schemed ? IrisStyle.surfaceHighOpaque : c.colLayer1                    // bar capsules, panels
     // the bar plates: the surface with a little text and accent in it, a touch see-through
-    readonly property color plateTint: Qt.alpha(Qt.tint(Qt.tint(WallustTheme.rawBackground, Qt.rgba(WallustTheme.textPrimary.r, WallustTheme.textPrimary.g, WallustTheme.textPrimary.b, 0.07)), Qt.rgba(accent.r, accent.g, accent.b, 0.08)), 0.88)
-    readonly property color surface: c.colLayer1                  // popups, tooltips, anything over windows
-    readonly property color card: c.colLayer2                     // a card on a panel
-    readonly property color cardHigh: c.colLayer3                 // a card on a card, chips
-    readonly property color text: c.colOnLayer1
-    readonly property color subtext: c.colSubtext
-    readonly property color border: c.colOutlineVariant
-    readonly property color accent: WallustTheme.accent
-    readonly property color onAccent: WallustTheme.textOnAccent
+    readonly property color plateTint: schemed
+        ? Qt.alpha(Qt.tint(Qt.tint(IrisStyle.surfaceOpaque, Qt.rgba(text.r, text.g, text.b, 0.07)), Qt.rgba(accent.r, accent.g, accent.b, 0.08)), 0.9)
+        : Qt.alpha(Qt.tint(Qt.tint(WallustTheme.rawBackground, Qt.rgba(WallustTheme.textPrimary.r, WallustTheme.textPrimary.g, WallustTheme.textPrimary.b, 0.07)), Qt.rgba(accent.r, accent.g, accent.b, 0.08)), 0.88)
+    readonly property color surface: schemed ? IrisStyle.surfaceOpaque : c.colLayer1                  // popups, tooltips, anything over windows
+    readonly property color card: schemed ? IrisStyle.surfaceHighOpaque : c.colLayer2                     // a card on a panel
+    readonly property color cardHigh: schemed ? IrisStyle.surfaceHighestOpaque : c.colLayer3                 // a card on a card, chips
+    readonly property color text: schemed ? IrisStyle.text : c.colOnLayer1
+    readonly property color subtext: schemed ? IrisStyle.subtext : c.colSubtext
+    readonly property color border: schemed ? Qt.rgba(text.r, text.g, text.b, 0.16) : c.colOutlineVariant
+    readonly property color accent: schemed ? IrisStyle.accent : WallustTheme.accent
+    readonly property color onAccent: schemed ? IrisStyle.inkOnAccent : WallustTheme.textOnAccent
     // tonal accent: the accent faintly over the surface, for selected chips, tonal buttons, icon tiles
-    readonly property color accentContainer: Qt.tint(c.colLayer2, Qt.rgba(accent.r, accent.g, accent.b, 0.26))
-    readonly property color onAccentContainer: Qt.tint(c.colOnLayer1, Qt.rgba(accent.r, accent.g, accent.b, 0.35))
+    readonly property color accentContainer: Qt.tint(card, Qt.rgba(accent.r, accent.g, accent.b, 0.26))
+    readonly property color onAccentContainer: Qt.tint(text, Qt.rgba(accent.r, accent.g, accent.b, 0.35))
     // state layers: the text colour faintly over a surface (hover 8 %, press 12 %)
     readonly property color plateHover: Qt.tint(plate, Qt.rgba(text.r, text.g, text.b, 0.08))
     readonly property color plateActive: Qt.tint(plate, Qt.rgba(text.r, text.g, text.b, 0.12))

@@ -360,6 +360,11 @@ Singleton {
             // Floating dock (modules/iris/dock). Off by default; the side dock
             // is untouched and has its own pins.
             property JsonObject iris: JsonObject {
+                // Settings > Colours: the scheme (auto, dark, ink, light) and whether the palette follows the wallpaper.
+                property JsonObject appearance: JsonObject {
+                    property string scheme: "auto"
+                }
+                property bool wallust: true
                 // Apps the launcher leaves out of its list (substrings of the entry id or name, any case). They are
                 // still found by typing their name, and pinned ones always show.
                 property JsonObject launcher: JsonObject {

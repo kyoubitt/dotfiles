@@ -461,7 +461,9 @@ QtObject {
     readonly property bool animeHighlightOn: Boolean(root.animeLayer?.highlight ?? false)
     // The accent: actions, selection, links, live marks. 4.5:1 on every ground, and on paper a fill under white ink.
     // Modified for this shell: with wallust on, the accent is the wallpaper's own accent colour.
-    readonly property color baseAccent: IrisWashi.useWallust ? root.role("accent", "#a8c7fa") : root.accentFrom(root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue ?? 212)
+    // A colour picked on the Colours page (colours.accent) wins over everything else.
+    readonly property string pickedAccent: String(Config.options?.colours?.accent ?? "")
+    readonly property color baseAccent: root.pickedAccent !== "" ? Qt.color(root.pickedAccent) : IrisWashi.useWallust ? root.role("accent", "#a8c7fa") : root.accentFrom(root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue ?? 212)
     readonly property color accent: root.animeEnabled
         ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.baseAccent
     readonly property color inkOnAccent: root.animeEnabled ? root.onTintFor(root.accent) : root.role("onAccent", "#101318")

@@ -102,7 +102,28 @@ Singleton {
             widgets: { wallpaper: [accent, green, cyan], system: [accent, green, cyan], spectrum: [red, green, blue], mono: [text, gray, gray] },
             accents: {}, highlights: {}
         }
-        return { version: root.version, request: "wallust", schemes: { dark: scheme, ink: scheme, light: scheme } }
+        // Ink is the black scheme (OLED); Light turns the palette over: pale paper from the wallpaper's own hue, dark ink,
+        // and the accent darkened so it reads on paper. Dark is the wallpaper palette itself.
+        const black = Qt.color("#000000"), white = Qt.color("#ffffff")
+        const ink = Object.assign({}, scheme, {
+            surface: black, surfaceHigh: ColorUtils.mix(black, text, 0.95), surfaceHighest: ColorUtils.mix(black, text, 0.9),
+            accentContainer: ColorUtils.mix(black, accent, 0.72), onDanger: black,
+            materials: { black: black, graphite: ColorUtils.mix(black, text, 0.9), midnight: ColorUtils.mix(black, text, 0.95), theme: black, wallpaper: black }
+        })
+        const paper = ColorUtils.mix(white, base, 0.95)
+        const sumi = ColorUtils.mix(base, black, 0.7)
+        const lAccent = ColorUtils.mix(accent, black, 0.72)
+        const lHigh = ColorUtils.mix(paper, sumi, 0.94), lHighest = ColorUtils.mix(paper, sumi, 0.88)
+        const light = Object.assign({}, scheme, {
+            surface: paper, surfaceHigh: lHigh, surfaceHighest: lHighest,
+            text: sumi, fillInk: sumi,
+            accent: lAccent, accentContainer: ColorUtils.mix(paper, lAccent, 0.82), onAccent: white, onAccentContainer: sumi,
+            danger: ColorUtils.mix(red, black, 0.75), dangerFill: ColorUtils.mix(paper, red, 0.8), onDanger: white, onDangerFill: sumi,
+            success: ColorUtils.mix(green, black, 0.7), warning: ColorUtils.mix(yellow, black, 0.6),
+            materials: { black: paper, graphite: lHighest, midnight: lHigh, theme: paper, wallpaper: paper },
+            widgets: { wallpaper: [lAccent, green, cyan], system: [lAccent, green, cyan], spectrum: [red, green, blue], mono: [sumi, gray, gray] }
+        })
+        return { version: root.version, request: "wallust", schemes: { dark: scheme, ink: ink, light: light } }
     }
 
     // The last answer, or a fresh install's palette until the first one lands.
