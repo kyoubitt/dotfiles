@@ -9,6 +9,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.bars
 
 // Every installed app in one grid under a search capsule. Typing filters,
 // arrows move, Enter launches, Escape closes. Right-click an app to pin or
@@ -148,11 +149,11 @@ Scope {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Math.round(18 * card.d)
+                    radius: Math.round(BarStyle.radiusLarge * card.d)
                     antialiasing: true
-                    color: IrisStyle.bodySurface
+                    color: BarStyle.surface
                     border.width: 1
-                    border.color: IrisStyle.hairline
+                    border.color: BarStyle.edge
                 }
                 MouseArea { anchors.fill: parent }
 
@@ -164,9 +165,9 @@ Scope {
                     height: Math.round(44 * card.d)
                     radius: height / 2
                     antialiasing: true
-                    color: IrisStyle.surfaceHigh
+                    color: BarStyle.card
                     border.width: 1
-                    border.color: input.activeFocus ? IrisStyle.hairlineStrong : IrisStyle.hairline
+                    border.color: input.activeFocus ? BarStyle.accent : BarStyle.edge
 
                     MaterialSymbol {
                         x: Math.round(12 * card.d)
@@ -272,9 +273,9 @@ Scope {
                             anchors.fill: parent
                             anchors.topMargin: 1
                             anchors.bottomMargin: 1
-                            radius: Math.round(10 * card.d)
+                            radius: Math.round(BarStyle.radiusSmall * card.d)
                             antialiasing: true
-                            color: tap.pressed ? IrisStyle.fillHover : row.current ? IrisStyle.tintFill(IrisStyle.accent) : hover.hovered ? IrisStyle.fillQuiet : "transparent"
+                            color: tap.pressed ? BarStyle.pressFill : row.current ? BarStyle.accentContainer : hover.hovered ? BarStyle.hoverFill : "transparent"
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(100) } }
                         }
                         Row {

@@ -63,7 +63,7 @@ Item {
         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08)
         Behavior on color { ColorAnimation { duration: 600 } }
         // it stretches a little while it moves to the next line, then settles
-        Behavior on height { SpringAnimation { spring: 5; damping: 0.38; mass: 0.8 } }
+        Behavior on height { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
     }
 
     ListView {
@@ -90,8 +90,6 @@ Item {
             Connections {
                 target: root
                 function onStepped(d) {
-                    ln.lag = d * 22
-                    ripple.restart()
                 }
             }
             SequentialAnimation {
@@ -116,7 +114,7 @@ Item {
                 scale: !root.synced ? 1 : (ln.cur ? 1.06 : Math.max(0.88, 0.94 - ln.dist * 0.01))
                 transformOrigin: Item.Left
                 Behavior on opacity { NumberAnimation { duration: 260 } }
-                Behavior on scale { SpringAnimation { spring: 4; damping: 0.42 } }
+                Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
                 // the sung line glows, lines two or more away fall out of focus
                 property real soft: root.synced && !ln.cur && ln.dist >= 2 ? Math.min(0.6, (ln.dist - 1) * 0.15) : 0
                 Behavior on soft { NumberAnimation { duration: 260 } }

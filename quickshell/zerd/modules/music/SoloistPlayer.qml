@@ -185,7 +185,13 @@ Singleton {
     function pause(): void { root.send({ command: "pause" }) }
     function next(): void { root.wake(); root.send({ command: "skip_next" }) }
     function previous(): void { root.wake(); root.send({ command: "skip_prev" }) }
-    function seek(ms: real): void { root.send({ command: "seek", position_ms: Math.round(ms) }) }
+    // the clock moves to the new place at once, so the lyrics and the bar follow the click instead of bouncing back to the
+    // old position until Soloist answers
+    function seek(ms: real): void {
+        root.posMs = Math.round(ms); root.posAt = Date.now()
+        root.rebuild()
+        root.send({ command: "seek", position_ms: Math.round(ms) })
+    }
     function setVolume(p: int): void { root.volume = p; root.send({ command: "set_volume", volume: p }) }
     function setShuffle(on: bool): void { root.send({ command: "set_shuffle", enabled: on }) }
     function setRepeat(mode: string): void {
