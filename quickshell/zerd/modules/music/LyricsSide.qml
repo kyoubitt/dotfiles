@@ -38,6 +38,6 @@ Rectangle {
         x: 10; y: 112; width: parent.width - 20; height: parent.height - 124
         size: 20; tools: false
         position: root.pos
-        onSeekTo: t => { const p = Playback.player; if (p && !(p.length > 0 && t >= p.length - 3)) p.position = t }
+        onSeekTo: t => { const p = Playback.player; if (p && LyricsStore.key === LyricsStore.keyOf(p.trackTitle, p.trackArtist) && !(p.length > 0 && t >= p.length - 3)) p.position = t }
     }
 }

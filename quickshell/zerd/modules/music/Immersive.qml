@@ -185,7 +185,7 @@ Item {
         x: root.pad + root.half + 30; width: root.half - 30; y: 110; height: parent.height - 300
         visible: !root.showQueue
         position: root.pos
-        onSeekTo: t => { if (root.p && !(root.p.length > 0 && t >= root.p.length - 3)) root.p.position = t }
+        onSeekTo: t => { if (root.p && LyricsStore.key === LyricsStore.keyOf(root.p.trackTitle, root.p.trackArtist) && !(root.p.length > 0 && t >= root.p.length - 3)) root.p.position = t }
     }
     Item {
         x: right.x; y: 80; width: right.width; height: right.height; visible: root.showQueue
