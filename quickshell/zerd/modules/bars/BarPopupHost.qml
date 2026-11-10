@@ -62,7 +62,18 @@ Scope {
 
             // The bar strip stays clickable, so another bar item can be pressed while a popup is open.
             mask: Region { item: backdrop }
-            MouseArea { id: backdrop; y: 50; width: parent.width; height: parent.height - 50; onClicked: root.close() }
+            MouseArea {
+                id: backdrop; y: 50; width: parent.width; height: parent.height - 50
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                // a right-click elsewhere while the desktop menu is open moves it there; any other click just closes
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton && root.popup?.kind === "desktopmenu") {
+                        const x = Math.round(mouse.x), y = Math.round(mouse.y + 50)
+                        GlobalStates.barPopup = null
+                        Qt.callLater(() => { GlobalStates.barPopup = { kind: "desktopmenu", x: x, y: y, tab: "" } })
+                    } else root.close()
+                }
+            }
             Item { focus: true; Keys.onEscapePressed: root.close() }
 
             Shortcut { sequence: "Escape"; enabled: root.popup !== null; onActivated: root.close() }
