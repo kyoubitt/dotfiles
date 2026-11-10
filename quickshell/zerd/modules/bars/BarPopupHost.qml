@@ -82,6 +82,8 @@ Scope {
                     onLoaded: { item.visible = true; if (root.popup?.tab && item.gotoTab) item.gotoTab(root.popup.tab) }
                 }
             }
+            // A popup whose leave animation was interrupted never reports back; the window must not stay up over the screen
+            Timer { id: exitGuard; interval: 700; onTriggered: if (!root.popup) pl.active = false }
             Connections {
                 target: root
                 function onPopupChanged() {
@@ -93,7 +95,7 @@ Scope {
                         pl.active = true
                         if (pl.item) { pl.item.visible = true; if (root.popup.tab && pl.item.gotoTab) pl.item.gotoTab(root.popup.tab) }
                     } else if (pl.active) {
-                        if (pl.item && pl.item.startExit) pl.item.startExit(() => { if (!root.popup || !root.spec) pl.active = false })
+                        if (pl.item && pl.item.startExit) { pl.item.startExit(() => { if (!root.popup || !root.spec) pl.active = false }); exitGuard.restart() }
                         else pl.active = false
                     }
                 }

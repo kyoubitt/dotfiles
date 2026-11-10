@@ -25,6 +25,9 @@ import Quickshell.Io
 import qs.services
 
 ShellRoot {
+    // Frees the JavaScript garbage the popups and widgets leave behind, so the shell does not sit on it.
+    Timer { interval: 90000; repeat: true; running: true; onTriggered: gc() }
+
     id: root
 
     function _log(msg: string): void {

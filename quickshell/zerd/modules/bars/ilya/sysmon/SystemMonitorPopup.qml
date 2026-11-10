@@ -28,6 +28,7 @@ Item {
         } else {
             Svc.ResourceUsage.releaseKeepAlive();
             introAnim.stop(); outAnim.stop(); intro = 0;
+            if (root.exitCallback) { const cb = root.exitCallback; root.exitCallback = null; cb(); }
         }
     }
     NumberAnimation { id: introAnim; target: root; property: "intro"; to: 1; duration: 240; easing.type: Easing.OutCubic }
