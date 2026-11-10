@@ -230,6 +230,12 @@ Scope {
                 Behavior on y { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                 Behavior on opacity { NumberAnimation { duration: 110 } }
 
+                // right-click anywhere on the bar that a block does not take itself: the bar menu
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: point => { BarState.sidebar = ""; GlobalStates.barPopup = { kind: "barmenu", x: Math.round(point.scenePosition.x), tab: "" } }
+                }
+
                 // the one plate behind everything in the strip and floating looks
                 Rectangle {
                     visible: win.look !== "pills"
