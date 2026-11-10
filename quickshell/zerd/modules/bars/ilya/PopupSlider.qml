@@ -14,6 +14,7 @@ Item {
     BarSlider {
         anchors.fill: parent
         trackHeight: 28
+        showValue: false
         step: 0.03
         tone: root.tone
         muted: root.muted

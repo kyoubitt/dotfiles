@@ -133,7 +133,8 @@ Item {
                     TapHandler { onTapped: MusicStore.setVolume(MusicStore.volume === 0 ? 50 : 0) } }
                 BarSlider {
                     x: 32; width: 108; anchors.verticalCenter: parent.verticalCenter
-                    trackHeight: 18
+                    trackHeight: 16
+                    showValue: false
                     step: 0.05
                     tone: MusicStore.accent
                     value: MusicStore.volume / 100

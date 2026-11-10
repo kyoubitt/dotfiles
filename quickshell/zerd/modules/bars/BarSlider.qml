@@ -15,6 +15,7 @@ Item {
     property int trackHeight: 36
     property color tone: BarStyle.accent        // the fill; the volume popup passes its tab colour
     property bool muted: false
+    property bool showValue: true               // the number on the right; off for thin sliders
     signal moved(real v)
 
     implicitWidth: 260
@@ -67,11 +68,13 @@ Item {
     }
     HoverHandler { id: hov }
     BarIcon {
+        visible: root.icon.length > 0
         x: 10; anchors.verticalCenter: parent.verticalCenter
         name: root.icon; fill: 1
         color: BarStyle.onAccent
     }
     BarText {
+        visible: root.showValue
         anchors.right: parent.right; anchors.rightMargin: 14
         anchors.verticalCenter: parent.verticalCenter
         text: root.label.length > 0 ? root.label : Math.round(root.shown * 100) + "%"
