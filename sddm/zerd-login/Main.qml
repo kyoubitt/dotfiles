@@ -270,7 +270,7 @@ Rectangle {
     }
 
     readonly property real s: Screen.height / 768
-    readonly property real radius: 10 * s
+    readonly property real radius: 16 * s
     property bool isQuickshell: typeof sddm === "undefined" || sddm.hostName === undefined
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0

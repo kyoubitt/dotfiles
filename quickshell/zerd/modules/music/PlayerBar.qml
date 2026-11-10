@@ -131,14 +131,13 @@ Item {
                 width: 150; height: 40
                 BarIcon { x: 0; anchors.verticalCenter: parent.verticalCenter; name: MusicStore.volume === 0 ? "volume_off" : (MusicStore.volume < 50 ? "volume_down" : "volume_up"); size: 22; color: BarStyle.subtext
                     TapHandler { onTapped: MusicStore.setVolume(MusicStore.volume === 0 ? 50 : 0) } }
-                Item {
-                    x: 32; width: 108; height: 40
-                    Rectangle { y: 18; width: parent.width; height: 4; radius: 2; color: Qt.rgba(1, 1, 1, 0.2) }
-                    Rectangle { y: 18; width: parent.width * MusicStore.volume / 100; height: 4; radius: 2; color: MusicStore.accent }
-                    Rectangle { x: parent.width * MusicStore.volume / 100 - 7; y: 13; width: 14; height: 14; radius: 7; color: "#ffffff"; scale: vm.pressed || vm.containsMouse ? 1.25 : 1; Behavior on scale { NumberAnimation { duration: 90 } } }
-                    MouseArea { id: vm; anchors.fill: parent; hoverEnabled: true
-                        onPressed: m => MusicStore.setVolume(Math.round(100 * Math.max(0, Math.min(1, m.x / width))))
-                        onPositionChanged: m => { if (pressed) MusicStore.setVolume(Math.round(100 * Math.max(0, Math.min(1, m.x / width)))) } }
+                BarSlider {
+                    x: 32; width: 108; anchors.verticalCenter: parent.verticalCenter
+                    trackHeight: 18
+                    step: 0.05
+                    tone: MusicStore.accent
+                    value: MusicStore.volume / 100
+                    onMoved: v => MusicStore.setVolume(Math.round(v * 100))
                 }
             }
             Tool { visible: !MusicStore.narrow; icon: "dock_to_left"; on: MusicStore.nowOpen; onTapped: MusicStore.nowOpen = !MusicStore.nowOpen }
