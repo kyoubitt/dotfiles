@@ -333,13 +333,13 @@ Scope {
                 height: Math.min(win.height - 260, listView.contentHeight + 24 + 56)
                 x: Math.round((win.width - width) / 2)
                 y: Math.round((win.height - height) / 2 - 40)
-                radius: 22
+                radius: 23
                 color: BarStyle.surface
                 border.width: 1; border.color: BarStyle.border
                 MouseArea { anchors.fill: parent }
                 Rectangle {
                     anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
-                    height: 40; radius: 20
+                    height: 40; radius: 23
                     color: openArea.pressed ? BarStyle.border : BarStyle.accent
                     BarText { anchors.centerIn: parent; text: "Open in editor"; font.weight: Font.DemiBold; color: BarStyle.onAccent }
                     MouseArea { id: openArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.run("edit") }
@@ -356,7 +356,7 @@ Scope {
                         required property var modelData
                         width: listView.width
                         height: 44
-                        radius: 14
+                        radius: 17
                         readonly property bool picked: root.windowId === modelData.id
                         color: picked ? BarStyle.plateHover : (wHover.hovered ? Qt.rgba(BarStyle.plateHover.r, BarStyle.plateHover.g, BarStyle.plateHover.b, 0.5) : "transparent")
                         border.width: picked ? 1 : 0; border.color: BarStyle.accent
@@ -421,7 +421,7 @@ Scope {
                 readonly property real inner: Math.max(toolsRow.implicitWidth + 24 + actions.implicitWidth, styleRow.implicitWidth)
                 width: inner + 28
                 height: toolsRow.implicitHeight + 46 + 28
-                radius: 22
+                radius: 23
                 color: BarStyle.surface
                 border.width: 1; border.color: BarStyle.border
                 layer.enabled: true
@@ -448,7 +448,7 @@ Scope {
                         anchors.right: parent.right
                         spacing: 8
                         Rectangle {
-                            width: copyRow.implicitWidth + 28; height: 36; radius: 18
+                            width: copyRow.implicitWidth + 28; height: 36; radius: 23
                             color: copyArea.pressed ? BarStyle.border : BarStyle.plateHover
                             border.width: 1; border.color: BarStyle.border
                             scale: copyArea.pressed ? 0.97 : 1
@@ -463,7 +463,7 @@ Scope {
                             HoverHandler { id: copyHover }
                         }
                         Rectangle {
-                            width: saveRow.implicitWidth + 28; height: 36; radius: 18
+                            width: saveRow.implicitWidth + 28; height: 36; radius: 23
                             color: saveArea.pressed ? BarStyle.border : BarStyle.accent
                             scale: saveArea.pressed ? 0.97 : 1
                             Behavior on scale { NumberAnimation { duration: 70 } }
@@ -486,7 +486,7 @@ Scope {
                 visible: opacity > 0.01
                 opacity: root.mode === "region" && !root.hasRegion && area.kind === "" ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 120 } }
-                width: hintText.implicitWidth + 36; height: 40; radius: 20
+                width: hintText.implicitWidth + 36; height: 40; radius: 23
                 x: Math.round((win.width - width) / 2); y: win.height - height - 96
                 color: BarStyle.surface
                 border.width: 1; border.color: BarStyle.border

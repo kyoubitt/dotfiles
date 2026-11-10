@@ -36,7 +36,7 @@ Item {
         property bool on: false
         property int size: 22
         signal tapped()
-        width: 40; height: 40; radius: 20
+        width: 40; height: 40; radius: 23
         color: th.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
         Behavior on color { ColorAnimation { duration: 90 } }
         scale: tt.pressed ? 0.88 : 1
@@ -49,7 +49,7 @@ Item {
     Rectangle {
         id: panel
         anchors { fill: parent; leftMargin: 8; rightMargin: 8; topMargin: 4; bottomMargin: 8 }
-        radius: 28
+        radius: 30
         color: Qt.rgba(0, 0, 0, 0.42)
         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.07)
 
@@ -60,7 +60,7 @@ Item {
                 id: art
                 SequentialAnimation { id: pop; NumberAnimation { target: art; property: "scale"; to: 0.82; duration: 70 } NumberAnimation { target: art; property: "scale"; to: 1; duration: 320; easing.type: Easing.OutBack } }
                 Connections { target: MusicStore; function onTrackKeyChanged() { pop.restart() } }
-                anchors.verticalCenter: parent.verticalCenter; width: 68; height: 68; radius: 14; color: BarStyle.plate
+                anchors.verticalCenter: parent.verticalCenter; width: 68; height: 68; radius: 17; color: BarStyle.plate
                 Image { anchors.fill: parent; source: CoverCache.src(root.p?.trackArtUrl ?? ""); sourceSize: Qt.size(150, 150); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
                 TapHandler { onTapped: MusicStore.nowOpen = !MusicStore.nowOpen }
             }

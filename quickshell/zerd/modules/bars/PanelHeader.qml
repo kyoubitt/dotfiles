@@ -42,7 +42,7 @@ Item {
 
     ClippingRectangle {
         id: tile
-        width: 44; height: 44; radius: 22
+        width: 44; height: 44; radius: 23
         anchors.verticalCenter: parent.verticalCenter
         color: root.avatar ? BarStyle.cardHigh : BarStyle.accentContainer
         border.width: root.avatar ? 2 : 0

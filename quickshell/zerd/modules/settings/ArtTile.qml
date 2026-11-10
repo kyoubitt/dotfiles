@@ -51,7 +51,7 @@ Item {
             Repeater { model: 4; Rectangle { required property int index; x: 8 + index * 14; anchors.verticalCenter: parent.verticalCenter; width: Math.round(tile.iconPx * 0.3); height: width; radius: width / 2; color: BarStyle.cardHigh } } }
 
         // spectrum
-        Rectangle { visible: tile.art === "spectrum" && tile.val === "wave"; x: -10; y: 40; width: 124; height: 40; radius: 20; color: BarStyle.accent; opacity: 0.55 }
+        Rectangle { visible: tile.art === "spectrum" && tile.val === "wave"; x: -10; y: 40; width: 124; height: 40; radius: 23; color: BarStyle.accent; opacity: 0.55 }
         Rectangle { visible: tile.art === "spectrum" && tile.val === "inside"; x: 22; y: 38; width: 60; height: 16; radius: 5; color: tile.inkColor
             Repeater { model: 7; Rectangle { required property int index; x: 5 + index * 8; width: 4; height: 4 + (index % 3) * 3; y: 12 - height; radius: 2; color: BarStyle.accent } } }
 

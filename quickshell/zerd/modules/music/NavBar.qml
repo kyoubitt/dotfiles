@@ -12,7 +12,7 @@ Item {
         property string icon
         property bool enabled_: true
         signal tapped()
-        width: 40; height: 40; radius: 20
+        width: 40; height: 40; radius: 23
         color: hv.hovered && enabled_ ? BarStyle.plateHover : BarStyle.plate
         opacity: enabled_ ? 1 : 0.35
         Behavior on color { ColorAnimation { duration: 90 } }
@@ -28,7 +28,7 @@ Item {
         Round { icon: "chevron_right"; enabled_: MusicStore.canForward; onTapped: MusicStore.forward() }
     }
     Rectangle {
-        anchors.centerIn: parent; width: Math.min(480, parent.width - 260); height: 44; radius: 22
+        anchors.centerIn: parent; width: Math.min(480, parent.width - 260); height: 44; radius: 23
         color: BarStyle.plate; border.width: 1; border.color: box.activeFocus ? MusicStore.accent : BarStyle.border
         Behavior on border.color { ColorAnimation { duration: 100 } }
         BarIcon { x: 16; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 22; color: BarStyle.subtext }
@@ -42,7 +42,7 @@ Item {
             Keys.onEscapePressed: { text = ""; focus = false }
         }
         EText { x: 50; anchors.verticalCenter: parent.verticalCenter; visible: box.text.length === 0; text: "What do you want to play?"; color: BarStyle.subtext }
-        Rectangle { visible: box.text.length > 0; anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter } width: 26; height: 26; radius: 13; color: xHov.hovered ? BarStyle.border : "transparent"
+        Rectangle { visible: box.text.length > 0; anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter } width: 26; height: 26; radius: 17; color: xHov.hovered ? BarStyle.border : "transparent"
             BarIcon { anchors.centerIn: parent; name: "close"; size: 16; color: BarStyle.subtext }
             HoverHandler { id: xHov }
             TapHandler { onTapped: box.text = "" } }
@@ -52,7 +52,7 @@ Item {
         scale: avTap.pressed ? 0.92 : (avHov.hovered ? 1.06 : 1)
         Behavior on scale { SpringAnimation { spring: 6; damping: 0.45 } }
         ClippingRectangle {
-            anchors.fill: parent; radius: 22; color: MusicStore.accent
+            anchors.fill: parent; radius: 23; color: MusicStore.accent
             Image { anchors.fill: parent; source: CoverCache.src((MusicStore.me?.images ?? [])[0]?.url ?? ""); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true; visible: status === Image.Ready }
             EText { anchors.centerIn: parent; visible: !(MusicStore.me?.images ?? []).length; text: (MusicStore.name || "?").charAt(0).toUpperCase(); font.weight: Font.Bold; color: MusicStore.onAccent }
         }

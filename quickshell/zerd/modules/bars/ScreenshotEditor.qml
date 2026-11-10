@@ -194,7 +194,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 8
                     Rectangle {
-                        width: 270; height: 40; radius: 20
+                        width: 270; height: 40; radius: 23
                         anchors.verticalCenter: parent.verticalCenter
                         color: BarStyle.plateHover
                         border.width: 1; border.color: nameIn.activeFocus ? BarStyle.accent : BarStyle.border
@@ -216,7 +216,7 @@ Scope {
                         HoverHandler { id: nameHover }
                     }
                     Rectangle {
-                        width: saveRow.implicitWidth + 32; height: 40; radius: 20
+                        width: saveRow.implicitWidth + 32; height: 40; radius: 23
                         anchors.verticalCenter: parent.verticalCenter
                         color: saveArea.pressed ? BarStyle.border : BarStyle.accent
                         scale: saveArea.pressed ? 0.97 : 1
@@ -229,7 +229,7 @@ Scope {
                         MouseArea { id: saveArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: win.saveDefault() }
                     }
                     Rectangle {
-                        width: copyRow.implicitWidth + 32; height: 40; radius: 20
+                        width: copyRow.implicitWidth + 32; height: 40; radius: 23
                         anchors.verticalCenter: parent.verticalCenter
                         color: copyArea.pressed ? BarStyle.border : BarStyle.plateHover
                         border.width: 1; border.color: BarStyle.border

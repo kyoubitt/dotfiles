@@ -75,7 +75,7 @@ Scope {
                     EText { width: parent.width; wrapMode: Text.Wrap; color: BarStyle.subtext
                         text: "A QML client for Spotify. Search, playlists and your stats, driving your own Spotify (Premium). Make a free Spotify app once:\n1. developer.spotify.com/dashboard > Create app\n2. Redirect URI: http://127.0.0.1:8898/callback\n3. Tick Web API, then paste its Client ID below." }
                     Rectangle {
-                        width: parent.width; height: 44; radius: 22; color: BarStyle.plate; border.width: 1; border.color: idIn.activeFocus ? MusicStore.accent : BarStyle.border
+                        width: parent.width; height: 44; radius: 23; color: BarStyle.plate; border.width: 1; border.color: idIn.activeFocus ? MusicStore.accent : BarStyle.border
                         TextInput {
                             id: idIn
                             x: 18; width: parent.width - 36; anchors.verticalCenter: parent.verticalCenter
@@ -118,7 +118,7 @@ Scope {
                             id: pk
                             required property var modelData
                             width: pickList.width; height: 48
-                            Rectangle { anchors.fill: parent; radius: 16; color: pkHov.hovered ? BarStyle.plateHover : "transparent" }
+                            Rectangle { anchors.fill: parent; radius: 17; color: pkHov.hovered ? BarStyle.plateHover : "transparent" }
                             EText { x: 16; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 32; elide: Text.ElideRight; text: pk.modelData.name; font.weight: Font.Medium }
                             HoverHandler { id: pkHov }
                             TapHandler { onTapped: {
@@ -133,7 +133,7 @@ Scope {
             // ---- a short message
             Rectangle {
                 anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 112 }
-                width: noteText.implicitWidth + 44; height: 44; radius: 22
+                width: noteText.implicitWidth + 44; height: 44; radius: 23
                 color: MusicStore.accent; opacity: MusicStore.note.length > 0 ? 1 : 0; visible: opacity > 0.01
                 scale: MusicStore.note.length > 0 ? 1 : 0.9
                 Behavior on opacity { NumberAnimation { duration: 140 } }

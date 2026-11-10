@@ -36,7 +36,7 @@ Item {
         id: stage
         x: side.width + 2; y: top.height; width: parent.width - side.width - 10 - (MusicStore.nowShown ? now.width + 8 : (MusicStore.narrow ? lyricsSide.width + 8 : 0)); height: parent.height - top.height - bar.height + 2
         Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-        radius: 26; color: Qt.rgba(0, 0, 0, 0.30)
+        radius: 30; color: Qt.rgba(0, 0, 0, 0.30)
         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
         Component { id: cHome; HomeView {} }
         Component { id: cSearch; SearchView {} }

@@ -8,7 +8,7 @@ import qs.modules.bars
 Rectangle {
     id: root
     width: 390
-    radius: 26
+    radius: 30
     color: Qt.rgba(0, 0, 0, 0.30)
     border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
     clip: true
@@ -53,7 +53,7 @@ Rectangle {
                     TapHandler { onTapped: MusicStore.nowOpen = false } }
             }
             ClippingRectangle {
-                width: parent.width; height: width; radius: 18; color: BarStyle.plate
+                width: parent.width; height: width; radius: 23; color: BarStyle.plate
                 Image { anchors.fill: parent; source: CoverCache.src(root.p?.trackArtUrl ?? ""); sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
                 TapHandler { onTapped: MusicStore.immersive = true }
             }
@@ -65,11 +65,11 @@ Rectangle {
                     EText { width: parent.width; elide: Text.ElideRight; text: root.p?.trackArtist ?? ""; color: BarStyle.subtext
                         TapHandler { onTapped: { if (root.item?.artists?.[0]) MusicStore.go("artist", root.item.artists[0]) } } }
                 }
-                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 20; color: ah.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 23; color: ah.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                     BarIcon { anchors.centerIn: parent; name: "playlist_add"; size: 26; color: BarStyle.text }
                     HoverHandler { id: ah }
                     TapHandler { onTapped: MusicStore.addCurrentToPlaylist() } }
-                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 20; color: hh.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 40; height: 40; radius: 23; color: hh.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                     BarIcon { anchors.centerIn: parent; name: "favorite"; fill: MusicStore.liked ? 1 : 0; size: 26; color: MusicStore.liked ? MusicStore.accent : BarStyle.text }
                     HoverHandler { id: hh }
                     TapHandler { onTapped: MusicStore.toggleLike() } }
@@ -77,7 +77,7 @@ Rectangle {
 
             // lyrics card
             Rectangle {
-                width: parent.width; height: lyr.implicitHeight + 70; radius: 20
+                width: parent.width; height: lyr.implicitHeight + 70; radius: 23
                 color: Qt.rgba(MusicStore.accent.r, MusicStore.accent.g, MusicStore.accent.b, 0.22)
                 Row { x: 16; y: 14; spacing: 10
                     BarIcon { anchors.verticalCenter: parent.verticalCenter; name: "lyrics"; size: 20; color: BarStyle.text }
@@ -134,7 +134,7 @@ Rectangle {
                 width: parent.width; spacing: 6; visible: root.queue.length > 0
                 Row { width: parent.width
                     EText { width: parent.width - 100; anchors.verticalCenter: parent.verticalCenter; text: "Next in queue"; font.weight: Font.Bold; font.pixelSize: 16 }
-                    Rectangle { width: oq.implicitWidth + 20; height: 26; radius: 13; color: oqh.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    Rectangle { width: oq.implicitWidth + 20; height: 26; radius: 17; color: oqh.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                         Behavior on color { ColorAnimation { duration: 90 } }
                         EText { id: oq; anchors.centerIn: parent; text: "Open queue"; font.pixelSize: 12; color: BarStyle.subtext }
                         HoverHandler { id: oqh; cursorShape: Qt.PointingHandCursor }
@@ -145,7 +145,7 @@ Rectangle {
                         id: qi
                         required property var modelData
                         width: parent.width; height: 56
-                        Rectangle { anchors.fill: parent; radius: 14; color: qh.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent" }
+                        Rectangle { anchors.fill: parent; radius: 17; color: qh.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent" }
                         ClippingRectangle { x: 6; anchors.verticalCenter: parent.verticalCenter; width: 42; height: 42; radius: 8; color: BarStyle.plate
                             Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(qi.modelData, false)); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true } }
                         Column { x: 58; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 70
@@ -159,7 +159,7 @@ Rectangle {
             // about the artist
             ClippingRectangle {
                 visible: root.artist !== null
-                width: parent.width; height: 240; radius: 20; color: BarStyle.plate
+                width: parent.width; height: 240; radius: 23; color: BarStyle.plate
                 Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(root.artist, true)); sourceSize: Qt.size(640, 640); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true }
                 Rectangle { anchors.fill: parent; gradient: Gradient { GradientStop { position: 0.3; color: "#00000000" } GradientStop { position: 1; color: "#dd000000" } } }
                 EText { x: 16; y: 14; text: "About the artist"; font.weight: Font.Bold; color: "#ffffff" }

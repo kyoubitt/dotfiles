@@ -188,7 +188,7 @@ Scope {
                         readonly property bool picked: root.filter === key
                         height: 36
                         width: chipContent.implicitWidth + 26
-                        radius: 18
+                        radius: 23
                         color: picked ? BarStyle.accent : (chipHover.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.45))
                         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
                         Behavior on color { ColorAnimation { duration: 100 } }
@@ -220,7 +220,7 @@ Scope {
             }
             Rectangle {
                 x: kindChip.x - width - 8; y: Math.round(win.height * 0.07)
-                width: sortRow.implicitWidth + 28; height: 36; radius: 18
+                width: sortRow.implicitWidth + 28; height: 36; radius: 23
                 color: sortHover.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.45)
                 Behavior on color { ColorAnimation { duration: 90 } }
                 Row {
@@ -235,7 +235,7 @@ Scope {
             Rectangle {
                 id: kindChip
                 x: win.width - width - Math.round(win.width * 0.03); y: Math.round(win.height * 0.07)
-                width: kindRow.implicitWidth + 28; height: 36; radius: 18
+                width: kindRow.implicitWidth + 28; height: 36; radius: 23
                 color: kindHover.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.45)
                 border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.14)
                 opacity: win.shown
@@ -346,7 +346,7 @@ Scope {
                                     Rectangle {
                                         visible: sl.focused
                                         x: parent.width - win.skew - 56; y: parent.height - 70
-                                        width: 40; height: 40; radius: 20
+                                        width: 40; height: 40; radius: 23
                                         color: starArea.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(0, 0, 0, 0.4)
                                         BarIcon { anchors.centerIn: parent; name: "star"; size: 22; fill: sl.fav ? 1 : 0; color: sl.fav ? "#ffd166" : "white" }
                                         MouseArea { id: starArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: WallpaperState.toggleFavourite(sl.modelData.path) }

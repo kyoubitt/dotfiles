@@ -97,7 +97,7 @@ Column {
         }
         // "18:30 dinner" or just "dentist" (all day)
         Rectangle {
-            width: parent.width; height: 32; radius: 16
+            width: parent.width; height: 32; radius: 17
             color: BarStyle.cardHigh
             border.width: 1; border.color: addInput.activeFocus ? BarStyle.accent : BarStyle.border
             BarText { x: 14; anchors.verticalCenter: parent.verticalCenter; visible: addInput.text.length === 0; text: "Add event  (e.g. 18:30 dinner)"; color: BarStyle.subtext; font.pixelSize: 12 }

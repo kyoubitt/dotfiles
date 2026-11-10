@@ -33,7 +33,7 @@ Column {
         property string label
         property bool on: false
         signal tapped()
-        width: chipText.implicitWidth + 18; height: 26; radius: 13
+        width: chipText.implicitWidth + 18; height: 26; radius: 17
         color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.cardHigh)
         Behavior on color { ColorAnimation { duration: 100 } }
         BarText { id: chipText; anchors.centerIn: parent; text: chip.label; font.pixelSize: 12; color: chip.on ? BarStyle.onAccent : BarStyle.text }
@@ -54,7 +54,7 @@ Column {
     }
 
     Rectangle {
-        width: parent.width; height: 40; radius: 20
+        width: parent.width; height: 40; radius: 23
         color: BarStyle.cardHigh
         border.width: 1; border.color: input.activeFocus ? BarStyle.accent : BarStyle.border
         TextInput {
@@ -91,7 +91,7 @@ Column {
     }
 
     Rectangle {
-        width: parent.width; height: 48; radius: 24
+        width: parent.width; height: 48; radius: 30
         color: resultArea.pressed ? BarStyle.border : BarStyle.cardHigh
         Behavior on color { ColorAnimation { duration: 100 } }
         BarText {

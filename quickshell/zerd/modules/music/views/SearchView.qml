@@ -31,7 +31,7 @@ Flickable {
                     id: ch
                     required property var modelData
                     readonly property bool on: root.chip === modelData.v
-                    width: chText.implicitWidth + 30; height: 36; radius: 18
+                    width: chText.implicitWidth + 30; height: 36; radius: 23
                     color: on ? MusicStore.accent : (chHov.hovered ? BarStyle.plateHover : "transparent"); border.width: on ? 0 : 1; border.color: BarStyle.border
                     Behavior on color { ColorAnimation { duration: 90 } }
                     EText { id: chText; anchors.centerIn: parent; text: ch.modelData.l; font.weight: Font.Medium; color: ch.on ? MusicStore.onAccent : BarStyle.text }
@@ -49,7 +49,7 @@ Flickable {
                 delegate: Rectangle {
                     id: hc
                     required property string modelData
-                    width: hcText.implicitWidth + 36; height: 36; radius: 18
+                    width: hcText.implicitWidth + 36; height: 36; radius: 23
                     color: hch.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
                     Behavior on color { ColorAnimation { duration: 90 } }
                     Row { anchors.centerIn: parent; spacing: 8
@@ -64,7 +64,7 @@ Flickable {
         // the best match
         Rectangle {
             visible: root.chip === "all" && root.tracks.length > 0
-            width: Math.min(420, parent.width); height: 130; radius: 26; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
+            width: Math.min(420, parent.width); height: 130; radius: 30; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
             EText { x: 22; y: 16; text: "Top result"; font.pixelSize: 12; color: BarStyle.subtext }
             EText { x: 22; y: 44; width: parent.width - 44; elide: Text.ElideRight; text: root.tracks[0]?.name ?? ""; font.pixelSize: 22; font.weight: Font.Bold }
             EText { x: 22; y: 76; width: parent.width - 44; elide: Text.ElideRight; text: MusicStore.artistsOf(root.tracks[0]); color: BarStyle.subtext }

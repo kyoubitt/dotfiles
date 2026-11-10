@@ -98,7 +98,7 @@ Column {
 
     // ---- Search and filters
     Rectangle {
-        width: parent.width; height: 36; radius: 18
+        width: parent.width; height: 36; radius: 23
         color: BarStyle.cardHigh
         border.width: 1; border.color: input.activeFocus ? BarStyle.accent : BarStyle.border
         BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 16; color: BarStyle.subtext }
@@ -132,7 +132,7 @@ Column {
                 delegate: Rectangle {
                     required property var modelData
                     readonly property bool on: root.tab === modelData.id
-                    width: chipLabel.implicitWidth + 22; height: 26; radius: 13
+                    width: chipLabel.implicitWidth + 22; height: 26; radius: 17
                     color: on ? BarStyle.accent : (chipArea.pressed ? BarStyle.border : BarStyle.cardHigh)
                     Behavior on color { ColorAnimation { duration: 100 } }
                     BarText { id: chipLabel; anchors.centerIn: parent; text: parent.modelData.label; font.pixelSize: 12; color: parent.on ? BarStyle.onAccent : BarStyle.text }
@@ -220,7 +220,7 @@ Column {
                     property string icon
                     property bool lit: false
                     signal tapped()
-                    width: 28; height: 28; radius: 14
+                    width: 28; height: 28; radius: 17
                     color: actArea.pressed ? BarStyle.border : "transparent"
                     BarIcon { anchors.centerIn: parent; name: act.icon; size: 16; fill: act.lit ? 1 : 0; color: act.lit ? BarStyle.accent : BarStyle.subtext }
                     MouseArea { id: actArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: act.tapped() }

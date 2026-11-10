@@ -58,7 +58,7 @@ Item {
         x: 0; width: parent.width
         y: cur ? cur.y - list.contentY - 6 : 0
         height: cur ? cur.height + 12 : 0
-        radius: 24
+        radius: 30
         color: Qt.rgba(root.glow.r, root.glow.g, root.glow.b, 0.16)
         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08)
         Behavior on color { ColorAnimation { duration: 600 } }
@@ -162,9 +162,9 @@ Item {
             readonly property real nextT: ln.index + 1 < root.lines.length ? root.lines[ln.index + 1].t : ln.modelData.t + 5
             // click a line to jump the song to it (hand cursor, brightens on hover)
             HoverHandler { id: lnHover; cursorShape: root.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
-            Rectangle { anchors.fill: parent; radius: 18; color: "#10ffffff"; opacity: root.synced && lnHover.hovered && !ln.cur ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 100 } } z: -1 }
+            Rectangle { anchors.fill: parent; radius: 23; color: "#10ffffff"; opacity: root.synced && lnHover.hovered && !ln.cur ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 100 } } z: -1 }
             // a tapped line answers at once: it dips under the finger, flashes in the accent colour and eases back
-            Rectangle { id: tapFlash; anchors.fill: parent; radius: 18; color: "#ffffff"; opacity: 0; z: -1 }
+            Rectangle { id: tapFlash; anchors.fill: parent; radius: 23; color: "#ffffff"; opacity: 0; z: -1 }
             NumberAnimation { id: tapAnim; target: tapFlash; property: "opacity"; from: 0.30; to: 0; duration: 520; easing.type: Easing.OutCubic }
             scale: lnTap.pressed ? 0.975 : 1
             Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
@@ -192,7 +192,7 @@ Item {
                 id: cb
                 required property var modelData
                 visible: !modelData.sy || root.synced
-                width: cbText.implicitWidth + 16; height: 26; radius: 13; color: cbHov.hovered ? "#44ffffff" : "#22ffffff"
+                width: cbText.implicitWidth + 16; height: 26; radius: 17; color: cbHov.hovered ? "#44ffffff" : "#22ffffff"
                 EText { id: cbText; anchors.centerIn: parent; text: cb.modelData.t; font.pixelSize: 11; color: "#ffffff" }
                 HoverHandler { id: cbHov }
                 TapHandler { onTapped: {

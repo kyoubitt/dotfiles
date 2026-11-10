@@ -49,7 +49,7 @@ Flickable {
                     id: en
                     required property var modelData
                     readonly property bool on: EchoPlayer.engine === modelData.v
-                    width: Math.floor((col.width - 12) / 2); height: 92; radius: 26
+                    width: Math.floor((col.width - 12) / 2); height: 92; radius: 30
                     color: on ? Qt.rgba(MusicStore.accent.r, MusicStore.accent.g, MusicStore.accent.b, 0.22) : (enHov.hovered ? BarStyle.plateHover : BarStyle.plate)
                     border.width: 1; border.color: on ? MusicStore.accent : BarStyle.border
                     Behavior on color { ColorAnimation { duration: 90 } }
@@ -74,7 +74,7 @@ Flickable {
                 delegate: Rectangle {
                     id: dv
                     required property var modelData
-                    width: 260; height: 76; radius: 24
+                    width: 260; height: 76; radius: 30
                     color: modelData.is_active ? Qt.rgba(MusicStore.accent.r, MusicStore.accent.g, MusicStore.accent.b, 0.22) : (dvHov.hovered ? BarStyle.plateHover : BarStyle.plate)
                     border.width: 1; border.color: modelData.is_active ? MusicStore.accent : BarStyle.border
                     Behavior on color { ColorAnimation { duration: 90 } }

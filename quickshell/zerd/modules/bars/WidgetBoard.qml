@@ -309,7 +309,7 @@ Scope {
                     scale: dragging ? 1.04 : 1
                     Behavior on scale { SpringAnimation { spring: 6; damping: 0.5; epsilon: 0.002 } }
                     Rectangle { z: -2; visible: frame.dragging; anchors { fill: parent; leftMargin: -10; rightMargin: -10; topMargin: -2; bottomMargin: -18 } radius: 32; color: "#000000"; opacity: 0.16 }
-                    Rectangle { z: -1; visible: frame.dragging; anchors { fill: parent; leftMargin: -4; rightMargin: -4; topMargin: 2; bottomMargin: -10 } radius: 26; color: "#000000"; opacity: 0.22 }
+                    Rectangle { z: -1; visible: frame.dragging; anchors { fill: parent; leftMargin: -4; rightMargin: -4; topMargin: 2; bottomMargin: -10 } radius: 30; color: "#000000"; opacity: 0.22 }
                     Binding on x { when: !frame.dragging; value: frame.target.x }
                     Binding on y { when: !frame.dragging; value: frame.target.y }
                     Behavior on x { enabled: !frame.dragging; SpringAnimation { spring: 5; damping: 0.55; epsilon: 0.25 } }
@@ -335,7 +335,7 @@ Scope {
                     Rectangle {
                         visible: frame.selected || dragHover.hovered
                         anchors { left: parent.left; bottom: parent.top; bottomMargin: 6 }
-                        height: 26; width: tagText.implicitWidth + 20; radius: 13
+                        height: 26; width: tagText.implicitWidth + 20; radius: 17
                         color: BarStyle.surface; border.width: 1; border.color: BarStyle.edge
                         BarText { id: tagText; anchors.centerIn: parent; text: frame.modelData.title + (frame.selected ? "  ·  " + frame.width + " × " + frame.height : ""); font.pixelSize: 11 }
                     }
@@ -385,7 +385,7 @@ Scope {
                                 id: sz
                                 required property var modelData
                                 readonly property bool on: Math.abs(WidgetRegistry.scaleOf(frame.modelData.name) - modelData.v) < 0.01
-                                width: sz.modelData.l.length > 1 ? 38 : 32; height: 28; radius: 14
+                                width: sz.modelData.l.length > 1 ? 38 : 32; height: 28; radius: 17
                                 tone: on ? "filled" : "outlined"
                                 BarText { anchors.centerIn: parent; text: sz.modelData.l; font.pixelSize: 11; font.weight: Font.DemiBold; color: sz.ink }
                                 onTapped: root.setCardScale(frame.modelData.name, sz.modelData.v)
@@ -417,7 +417,7 @@ Scope {
                     BarButton {
                         id: closeBtn
                         anchors { top: parent.top; right: parent.right; margins: 8 }
-                        width: 26; height: 26; radius: 13
+                        width: 26; height: 26; radius: 17
                         BarIcon { anchors.centerIn: parent; name: "close"; size: 14; color: closeBtn.ink }
                         onTapped: root.removeCard(frame.modelData.name)
                     }
@@ -438,7 +438,7 @@ Scope {
                 hint: WidgetRegistry.cards.filter(c => DesktopWidgets.enabled(c.name)).length + " of " + WidgetRegistry.cards.length + " on the desktop"
                 Rectangle {
                     id: searchBox
-                    width: parent.width; height: 38; radius: 19
+                    width: parent.width; height: 38; radius: 23
                     color: BarStyle.card
                     border.width: 1; border.color: search.activeFocus ? BarStyle.accent : BarStyle.edge
                     BarIcon { x: 13; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 17; color: BarStyle.subtext }
@@ -524,7 +524,7 @@ Scope {
                             id: al
                             required property var modelData
                             tone: "plain"
-                            width: 36; height: 36; radius: 18
+                            width: 36; height: 36; radius: 23
                             BarIcon { anchors.centerIn: parent; name: al.modelData.i; size: 18; color: al.ink }
                             onTapped: root.alignTo(win.selected, al.modelData.m, win.width, win.height)
                             BarTip { text: "Align " + al.modelData.m }

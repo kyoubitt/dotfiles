@@ -26,7 +26,7 @@ Item {
     height: 56
 
     readonly property bool current: (Playback.player?.trackTitle ?? "") === (track?.name ?? "#") && Playback.isPlaying
-    Rectangle { anchors.fill: parent; radius: 16; color: hov.hovered ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 90 } } }
+    Rectangle { anchors.fill: parent; radius: 17; color: hov.hovered ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 90 } } }
 
     Item {
         x: 10; width: 40; height: parent.height

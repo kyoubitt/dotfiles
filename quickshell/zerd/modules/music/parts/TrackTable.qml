@@ -43,7 +43,7 @@ Column {
         width: parent.width; height: 58
         Rectangle {
             anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
-            width: filterBox.activeFocus || root.filter.length > 0 ? 280 : 44; height: 40; radius: 20
+            width: filterBox.activeFocus || root.filter.length > 0 ? 280 : 44; height: 40; radius: 23
             color: Qt.rgba(1, 1, 1, 0.09); border.width: 1; border.color: filterBox.activeFocus ? MusicStore.accent : "transparent"
             Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
             BarIcon { x: 11; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 20; color: BarStyle.subtext }

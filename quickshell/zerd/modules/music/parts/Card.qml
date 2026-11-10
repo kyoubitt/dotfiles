@@ -15,7 +15,7 @@ Item {
     signal opened()
 
     readonly property bool hot: hov.hovered
-    Rectangle { anchors.fill: parent; radius: 22; color: root.hot ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 90 } } }
+    Rectangle { anchors.fill: parent; radius: 23; color: root.hot ? BarStyle.plateHover : "transparent"; Behavior on color { ColorAnimation { duration: 90 } } }
     ClippingRectangle {
         id: art
         x: 10; y: 10; width: root.artSize; height: root.artSize

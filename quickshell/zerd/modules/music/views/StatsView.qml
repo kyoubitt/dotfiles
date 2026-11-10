@@ -27,7 +27,7 @@ Flickable {
                     required property var modelData
                     readonly property bool on: root.range === modelData.v
                     anchors.verticalCenter: parent.verticalCenter
-                    width: rgText.implicitWidth + 30; height: 36; radius: 18
+                    width: rgText.implicitWidth + 30; height: 36; radius: 23
                     color: on ? MusicStore.accent : (rgHov.hovered ? BarStyle.plateHover : "transparent"); border.width: on ? 0 : 1; border.color: BarStyle.border
                     Behavior on color { ColorAnimation { duration: 90 } }
                     EText { id: rgText; anchors.centerIn: parent; text: rg.modelData.l; font.weight: Font.Medium; color: rg.on ? MusicStore.onAccent : BarStyle.text }
@@ -43,7 +43,7 @@ Flickable {
                 delegate: Rectangle {
                     id: hd
                     required property var modelData
-                    width: Math.floor((col.width - 24) / 3); height: 112; radius: 28; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
+                    width: Math.floor((col.width - 24) / 3); height: 112; radius: 30; color: BarStyle.plate; border.width: 1; border.color: BarStyle.border
                     Cookie { x: 18; y: 16; width: 44; height: 44; color: Qt.rgba(MusicStore.accent.r, MusicStore.accent.g, MusicStore.accent.b, 0.25); lobes: 8; amp: 0.08 }
                     BarIcon { x: 29; y: 27; name: hd.modelData.i; size: 22; color: MusicStore.accent }
                     EText { x: 18; y: 68; text: hd.modelData.t; font.pixelSize: 12; color: BarStyle.subtext }

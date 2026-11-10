@@ -24,7 +24,7 @@ Column {
             delegate: Rectangle {
                 required property var modelData
                 readonly property bool on: root.tab === modelData.id
-                width: (root.width - 12) / 3; height: 30; radius: 15
+                width: (root.width - 12) / 3; height: 30; radius: 17
                 color: on ? BarStyle.accent : BarStyle.cardHigh
                 Behavior on color { ColorAnimation { duration: 100 } }
                 BarText { anchors.centerIn: parent; text: modelData.label; font.pixelSize: 12; color: parent.on ? BarStyle.onAccent : BarStyle.text }

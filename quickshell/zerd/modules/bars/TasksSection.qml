@@ -30,7 +30,7 @@ Column {
         }
     }
     Rectangle {
-        width: root.width; height: 32; radius: 16
+        width: root.width; height: 32; radius: 17
         color: BarStyle.cardHigh
         border.width: 1; border.color: addInput.activeFocus ? BarStyle.accent : BarStyle.border
         BarText { x: 14; anchors.verticalCenter: parent.verticalCenter; visible: addInput.text.length === 0; text: "Add a task"; color: BarStyle.subtext; font.pixelSize: 12 }

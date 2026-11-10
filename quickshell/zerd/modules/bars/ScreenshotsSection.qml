@@ -47,7 +47,7 @@ Column {
                 Rectangle {
                     visible: cellHover.hovered || editArea.containsMouse
                     x: parent.width - width - 6; y: 6
-                    width: 26; height: 26; radius: 13
+                    width: 26; height: 26; radius: 17
                     color: editArea.containsMouse ? BarStyle.accent : BarStyle.surface
                     BarIcon { anchors.centerIn: parent; name: "draw"; size: 15; color: editArea.containsMouse ? BarStyle.onAccent : BarStyle.text }
                     MouseArea { id: editArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "screenshot", "edit", cell.modelData]) }

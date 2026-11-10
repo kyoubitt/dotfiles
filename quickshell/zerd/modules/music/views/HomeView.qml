@@ -27,7 +27,7 @@ Flickable {
                 layer.enabled: true; layer.effect: MultiEffect { blurEnabled: true; blur: 1.0; blurMax: 48; saturation: 0.25; brightness: -0.18 } }
             Rectangle { anchors.fill: parent; gradient: Gradient { orientation: Gradient.Horizontal; GradientStop { position: 0; color: "#d9000000" } GradientStop { position: 1; color: "#80000000" } } }
             ClippingRectangle {
-                x: 24; anchors.verticalCenter: parent.verticalCenter; width: 152; height: 152; radius: 22; color: BarStyle.plate
+                x: 24; anchors.verticalCenter: parent.verticalCenter; width: 152; height: 152; radius: 23; color: BarStyle.plate
                 Image { anchors.fill: parent; source: CoverCache.src(root.p?.trackArtUrl ?? ""); sourceSize: Qt.size(300, 300); fillMode: Image.PreserveAspectCrop; asynchronous: true; smooth: true; cache: true }
             }
             Column {
@@ -63,13 +63,13 @@ Flickable {
                     id: qt
                     required property var modelData
                     readonly property bool playing: MusicStore.ctx?.id === modelData.item.id
-                    width: root.width < 760 ? Math.floor((col.width - 10) / 2) : Math.floor((col.width - 30) / 4); height: 64; radius: 16
+                    width: root.width < 760 ? Math.floor((col.width - 10) / 2) : Math.floor((col.width - 30) / 4); height: 64; radius: 17
                     color: qtH.hovered ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
                     Behavior on color { ColorAnimation { duration: 90 } }
                     scale: qtT.pressed ? 0.97 : 1
                     Behavior on scale { SpringAnimation { spring: 6; damping: 0.45 } }
                     ClippingRectangle {
-                        width: 64; height: 64; radius: 16; color: qt.modelData.kind === "liked" ? MusicStore.accent : BarStyle.plate
+                        width: 64; height: 64; radius: 17; color: qt.modelData.kind === "liked" ? MusicStore.accent : BarStyle.plate
                         Image { visible: qt.modelData.kind !== "liked"; anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(qt.modelData.item, false)); sourceSize: Qt.size(128, 128); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true }
                         BarIcon { visible: qt.modelData.kind === "liked"; anchors.centerIn: parent; name: "favorite"; fill: 1; size: 28; color: MusicStore.onAccent }
                     }

@@ -19,7 +19,7 @@ Item {
     Rectangle {
         id: navCard
         x: 8; y: 8; width: parent.width - 8; height: navCol.implicitHeight + 28
-        radius: 24; color: Qt.rgba(0, 0, 0, 0.36); border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
+        radius: 30; color: Qt.rgba(0, 0, 0, 0.36); border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
         Column {
             id: navCol
             x: 8; y: 14; width: parent.width - 16; spacing: 2
@@ -58,7 +58,7 @@ Item {
     Rectangle {
         id: lib
         x: 8; y: navCard.y + navCard.height + 8; width: parent.width - 8; height: parent.height - y - 8
-        radius: 24; color: Qt.rgba(0, 0, 0, 0.36); border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
+        radius: 30; color: Qt.rgba(0, 0, 0, 0.36); border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
         clip: true
 
         // header
@@ -74,7 +74,7 @@ Item {
             Row {
                 anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter } spacing: 2
                 visible: MusicStore.libShown
-                Rectangle { width: 38; height: 38; radius: 19; color: addH.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                Rectangle { width: 38; height: 38; radius: 23; color: addH.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
                     BarIcon { anchors.centerIn: parent; name: "add"; size: 24; color: BarStyle.text }
                     HoverHandler { id: addH }
                     TapHandler { onTapped: MusicApi.newPlaylist("New playlist", p => { if (p) { MusicStore.tell("Made \"New playlist\""); MusicStore.load(); MusicStore.go("playlist", p) } }) } }
@@ -82,7 +82,7 @@ Item {
             Rectangle {
                 anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                 anchors.rightMargin: MusicStore.libShown ? 10 : Math.round((parent.width - 38) / 2)
-                width: 38; height: 38; radius: 19; color: colH.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                width: 38; height: 38; radius: 23; color: colH.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
                 visible: true
                 BarIcon { anchors.centerIn: parent; name: MusicStore.libShown ? "keyboard_double_arrow_left" : "keyboard_double_arrow_right"; size: 22; color: BarStyle.text }
                 HoverHandler { id: colH }
@@ -115,7 +115,7 @@ Item {
             visible: MusicStore.libShown
             x: 8; y: head.height + 44; width: parent.width - 16; height: 42
             Rectangle {
-                x: 0; width: parent.width - 160; height: 36; radius: 18; anchors.verticalCenter: parent.verticalCenter
+                x: 0; width: parent.width - 160; height: 36; radius: 23; anchors.verticalCenter: parent.verticalCenter
                 color: Qt.rgba(1, 1, 1, 0.08); border.width: 1; border.color: lq.activeFocus ? MusicStore.accent : "transparent"
                 BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 19; color: BarStyle.subtext }
                 TextInput { id: lq; x: 38; width: parent.width - 48; anchors.verticalCenter: parent.verticalCenter; color: BarStyle.text; font.pixelSize: 13; clip: true; selectByMouse: true
@@ -123,7 +123,7 @@ Item {
                 EText { x: 38; anchors.verticalCenter: parent.verticalCenter; visible: lq.text.length === 0; text: "Search in your library"; font.pixelSize: 13; color: BarStyle.subtext }
             }
             Rectangle {
-                anchors { right: parent.right; verticalCenter: parent.verticalCenter } width: 150; height: 36; radius: 18
+                anchors { right: parent.right; verticalCenter: parent.verticalCenter } width: 150; height: 36; radius: 23
                 color: sortH.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                 Row { anchors.centerIn: parent; spacing: 8
                     EText { anchors.verticalCenter: parent.verticalCenter; font.pixelSize: 13; color: BarStyle.subtext
@@ -151,7 +151,7 @@ Item {
                 width: ListView.view.width; height: MusicStore.libShown ? 66 : 72
                 readonly property bool playing: MusicStore.ctx?.uri === item.uri
                 readonly property bool on: MusicStore.page === modelData.kind && MusicStore.arg?.id === item.id
-                Rectangle { anchors.fill: parent; radius: 16
+                Rectangle { anchors.fill: parent; radius: 17
                     color: it.on ? Qt.rgba(1, 1, 1, 0.1) : (itH.hovered ? Qt.rgba(1, 1, 1, 0.06) : "transparent"); Behavior on color { ColorAnimation { duration: 90 } } }
                 ClippingRectangle {
                     x: MusicStore.libShown ? 8 : (parent.width - 54) / 2; anchors.verticalCenter: parent.verticalCenter; width: 54; height: 54
@@ -169,7 +169,7 @@ Item {
                 Rectangle {
                     id: pb
                     visible: MusicStore.libShown
-                    width: 36; height: 36; radius: 18; anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                    width: 36; height: 36; radius: 23; anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
                     color: MusicStore.accent; opacity: (itH.hovered || pbH.hovered) ? 1 : (it.playing ? 0.9 : 0); scale: pbH.hovered ? 1.08 : 1
                     Behavior on opacity { NumberAnimation { duration: 90 } }
                     Behavior on scale { NumberAnimation { duration: 90 } }
@@ -191,7 +191,7 @@ Item {
         // hidden ones
         Rectangle {
             visible: MusicStore.libShown
-            x: 8; y: parent.height - 44; width: parent.width - 16; height: 36; radius: 18
+            x: 8; y: parent.height - 44; width: parent.width - 16; height: 36; radius: 23
             color: hidH.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
             Row { anchors.centerIn: parent; spacing: 8
                 BarIcon { anchors.verticalCenter: parent.verticalCenter; name: MusicStore.showHidden ? "visibility" : "visibility_off"; size: 18; color: BarStyle.subtext }
@@ -207,7 +207,7 @@ Item {
     Rectangle {
         id: menu
         visible: root.menuFor !== null; z: 51
-        x: 70; y: root.menuY; width: 230; height: menuCol.implicitHeight + 16; radius: 18
+        x: 70; y: root.menuY; width: 230; height: menuCol.implicitHeight + 16; radius: 23
         color: "#f01a1a1e"; border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.1)
         Column {
             id: menuCol

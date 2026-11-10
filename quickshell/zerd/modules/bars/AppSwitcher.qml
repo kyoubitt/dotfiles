@@ -192,7 +192,7 @@ Scope {
                 height: cardH + 2 * pad
                 x: Math.round((win.width - width) / 2)
                 y: Math.round((win.height - height) / 2 - 20)
-                radius: 26
+                radius: 30
                 color: BarStyle.surface
                 border.width: 1
                 border.color: BarStyle.border
@@ -222,7 +222,7 @@ Scope {
 
                     // One highlight that slides from card to card.
                     highlight: Rectangle {
-                        radius: 18
+                        radius: 23
                         color: Qt.rgba(BarStyle.accent.r, BarStyle.accent.g, BarStyle.accent.b, 0.22)
                     }
 

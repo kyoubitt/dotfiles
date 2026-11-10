@@ -12,7 +12,7 @@ Row {
         delegate: Rectangle {
             required property var modelData
             readonly property bool picked: String(root.ann.ink) === String(Qt.color(modelData))
-            width: 26; height: 26; radius: 13
+            width: 26; height: 26; radius: 17
             anchors.verticalCenter: parent.verticalCenter
             color: modelData
             border.width: picked ? 3 : 1

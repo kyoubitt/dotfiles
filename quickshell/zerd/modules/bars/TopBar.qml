@@ -145,7 +145,7 @@ Scope {
                     Rectangle {
                         visible: run.grouped && !run.flat
                         anchors.fill: parent
-                        radius: 16
+                        radius: 17
                         color: BarStyle.plateTint
                     }
                     Row {

@@ -10,7 +10,7 @@ Flow {
         model: BarActivity.chips
         delegate: Rectangle {
             required property var modelData
-            height: 26; width: chipRow.implicitWidth + 18; radius: 13
+            height: 26; width: chipRow.implicitWidth + 18; radius: 17
             color: modelData.hot ? Qt.rgba(1, 0.41, 0.38, 0.18) : BarStyle.plateHover
             border.width: 1
             border.color: modelData.hot ? Qt.rgba(1, 0.41, 0.38, 0.5) : BarStyle.border

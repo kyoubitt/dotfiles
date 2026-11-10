@@ -33,7 +33,7 @@ Column {
             Rectangle {
                 id: seg
                 anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter
-                width: segRow.width + 4; height: 28; radius: 14
+                width: segRow.width + 4; height: 28; radius: 17
                 color: BarStyle.cardHigh
                 border.width: 1; border.color: BarStyle.edge
                 Row {

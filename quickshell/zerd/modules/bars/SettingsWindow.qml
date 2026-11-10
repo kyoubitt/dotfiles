@@ -253,7 +253,7 @@ Scope {
                     }
                     Rectangle {
                         id: searchBox
-                        x: 14; y: 70; width: nav.width - 28; height: 36; radius: 18
+                        x: 14; y: 70; width: nav.width - 28; height: 36; radius: 23
                         color: BarStyle.plate; border.width: 1; border.color: searchIn.activeFocus ? BarStyle.accent : BarStyle.border
                         BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: "search"; size: 18; color: BarStyle.subtext }
                         TextInput {
@@ -293,7 +293,7 @@ Scope {
                             x: 12; width: nav.width - 24
                             height: nav.entries[nav.entries.length - 1].y + 36
                             Rectangle {
-                                y: nav.pageY[root.page] ?? 0; width: parent.width; height: 36; radius: 18
+                                y: nav.pageY[root.page] ?? 0; width: parent.width; height: 36; radius: 23
                                 color: BarStyle.accentContainer
                                 Behavior on y { NumberAnimation { duration: BarStyle.motionNormal; easing.type: Easing.BezierSpline; easing.bezierCurve: BarStyle.easeExpressive } }
                             }
@@ -318,7 +318,7 @@ Scope {
                                         BarText { anchors.verticalCenter: parent.verticalCenter; text: ent.isPage ? root.pages[ent.modelData.page].name : ""; font.pixelSize: 14; font.weight: ent.on ? Font.DemiBold : Font.Medium; color: ent.on ? BarStyle.onAccentContainer : BarStyle.text }
                                     }
                                     HoverHandler { id: navHover; enabled: ent.isPage; cursorShape: Qt.PointingHandCursor }
-                                    Rectangle { visible: ent.isPage && !ent.on && navHover.hovered; anchors.fill: parent; radius: 18; color: BarStyle.plateHover; z: -1 }
+                                    Rectangle { visible: ent.isPage && !ent.on && navHover.hovered; anchors.fill: parent; radius: 23; color: BarStyle.plateHover; z: -1 }
                                     TapHandler { enabled: ent.isPage; onTapped: { searchIn.text = ""; root.page = ent.modelData.page; view.forceActiveFocus() } }
                                 }
                             }
@@ -365,7 +365,7 @@ Scope {
                                     width: body.width; height: 64
                                     Rectangle {
                                         id: badge
-                                        width: 56; height: 56; radius: 20
+                                        width: 56; height: 56; radius: 23
                                         color: BarStyle.accentContainer
                                         BarIcon { anchors.centerIn: parent; name: flick.pg.icon; size: 28; fill: 1; color: BarStyle.onAccentContainer }
                                     }
@@ -422,7 +422,7 @@ Scope {
                                                         readonly property bool on: row.value === v
                                                         tone: row.stacked ? "outlined" : "plain"
                                                         toggled: on
-                                                        width: chipText.implicitWidth + 24; height: 32; radius: 16
+                                                        width: chipText.implicitWidth + 24; height: 32; radius: 17
                                                         onTapped: Config.setNestedValue(row.spec.path, chip.v)
                                                         BarText { id: chipText; anchors.centerIn: parent; text: typeof chip.modelData === "object" ? chip.modelData.l : String(chip.modelData); color: chip.ink; font.weight: chip.on ? Font.DemiBold : Font.Medium }
                                                     }
@@ -431,7 +431,7 @@ Scope {
                                                     id: chipsC
                                                     Item {
                                                         width: chipRow.width + 8; height: 38
-                                                        Rectangle { anchors.fill: parent; radius: 19; color: BarStyle.surface }
+                                                        Rectangle { anchors.fill: parent; radius: 23; color: BarStyle.surface }
                                                         Row { id: chipRow; x: 4; anchors.verticalCenter: parent.verticalCenter; spacing: 2
                                                             Repeater { model: row.spec.opts ?? []; delegate: chipC } }
                                                     }
@@ -458,13 +458,13 @@ Scope {
                                                     Row {
                                                         spacing: 6
                                                         BarButton {
-                                                            tone: "outlined"; width: 32; height: 32; radius: 16
+                                                            tone: "outlined"; width: 32; height: 32; radius: 17
                                                             onTapped: Config.setNestedValue(row.spec.path, Math.max(row.spec.min, Number(row.value) - row.spec.by))
                                                             BarIcon { anchors.centerIn: parent; name: "remove"; size: 18; color: BarStyle.text }
                                                         }
                                                         BarText { width: 52; horizontalAlignment: Text.AlignHCenter; anchors.verticalCenter: parent.verticalCenter; text: String(row.value); font.weight: Font.DemiBold }
                                                         BarButton {
-                                                            tone: "outlined"; width: 32; height: 32; radius: 16
+                                                            tone: "outlined"; width: 32; height: 32; radius: 17
                                                             onTapped: Config.setNestedValue(row.spec.path, Math.min(row.spec.max, Number(row.value) + row.spec.by))
                                                             BarIcon { anchors.centerIn: parent; name: "add"; size: 18; color: BarStyle.text }
                                                         }
@@ -530,7 +530,7 @@ Scope {
                                                         width: row.inner; height: 96
                                                         LockAvatar { x: 0; anchors.verticalCenter: parent.verticalCenter; size: 78 }
                                                         Rectangle {
-                                                            x: 100; y: 10; width: 280; height: 36; radius: 18
+                                                            x: 100; y: 10; width: 280; height: 36; radius: 23
                                                             color: BarStyle.surface; border.width: 1; border.color: nameIn.activeFocus ? BarStyle.accent : BarStyle.border
                                                             TextInput {
                                                                 id: nameIn
@@ -549,7 +549,7 @@ Scope {
                                                                     id: ub
                                                                     required property var modelData
                                                                     tone: "outlined"
-                                                                    width: ubText.implicitWidth + 28; height: 30; radius: 15
+                                                                    width: ubText.implicitWidth + 28; height: 30; radius: 17
                                                                     onTapped: { if (ub.modelData.a === "pick") picker.running = true; else Config.setNestedValue("account.avatar", "") }
                                                                     BarText { id: ubText; anchors.centerIn: parent; text: ub.modelData.text; font.pixelSize: 12; color: ub.ink }
                                                                 }
@@ -575,7 +575,7 @@ Scope {
                                                                 id: prof
                                                                 required property var modelData
                                                                 readonly property bool on: Profiles.active === modelData.name
-                                                                width: profCol.width; height: 46; radius: 14
+                                                                width: profCol.width; height: 46; radius: 17
                                                                 color: on ? BarStyle.accentContainer : "transparent"
                                                                 border.width: 1; border.color: on ? BarStyle.accent : BarStyle.border
                                                                 Image {
@@ -589,12 +589,12 @@ Scope {
                                                                     spacing: 6
                                                                     BarButton {
                                                                         id: applyBtn
-                                                                        tone: "filled"; width: 64; height: 30; radius: 15
+                                                                        tone: "filled"; width: 64; height: 30; radius: 17
                                                                         onTapped: Profiles.apply(prof.modelData.name)
                                                                         BarText { anchors.centerIn: parent; text: prof.on ? "Active" : "Apply"; font.pixelSize: 12; color: applyBtn.ink }
                                                                     }
                                                                     BarButton {
-                                                                        tone: "plain"; width: 30; height: 30; radius: 15
+                                                                        tone: "plain"; width: 30; height: 30; radius: 17
                                                                         onTapped: Profiles.remove(prof.modelData.name)
                                                                         BarIcon { anchors.centerIn: parent; name: "delete"; size: 17; color: BarStyle.subtext }
                                                                     }
@@ -675,7 +675,7 @@ Scope {
                                                                 delegate: Rectangle {
                                                                     id: tag
                                                                     required property var modelData
-                                                                    height: 28; radius: 14; width: tagText.implicitWidth + 40
+                                                                    height: 28; radius: 17; width: tagText.implicitWidth + 40
                                                                     color: BarStyle.cardHigh
                                                                     BarText { id: tagText; x: 12; anchors.verticalCenter: parent.verticalCenter; text: String(tag.modelData); font.pixelSize: 12 }
                                                                     BarIcon { anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter } name: "close"; size: 14; color: BarStyle.subtext }
@@ -685,7 +685,7 @@ Scope {
                                                             }
                                                         }
                                                         Rectangle {
-                                                            width: 240; height: 32; radius: 16; color: BarStyle.surface; border.width: 1; border.color: addIn.activeFocus ? BarStyle.accent : BarStyle.border
+                                                            width: 240; height: 32; radius: 17; color: BarStyle.surface; border.width: 1; border.color: addIn.activeFocus ? BarStyle.accent : BarStyle.border
                                                             TextInput {
                                                                 id: addIn
                                                                 x: 14; width: parent.width - 28; anchors.verticalCenter: parent.verticalCenter
@@ -703,7 +703,7 @@ Scope {
                                                     Row {
                                                         spacing: 8
                                                         Rectangle {
-                                                            width: 220; height: 32; radius: 16; color: BarStyle.surface; border.width: 1; border.color: cityIn.activeFocus ? BarStyle.accent : BarStyle.border
+                                                            width: 220; height: 32; radius: 17; color: BarStyle.surface; border.width: 1; border.color: cityIn.activeFocus ? BarStyle.accent : BarStyle.border
                                                             TextInput {
                                                                 id: cityIn
                                                                 x: 14; width: parent.width - 28; anchors.verticalCenter: parent.verticalCenter
@@ -729,7 +729,7 @@ Scope {
                                                                 required property var modelData
                                                                 readonly property bool on: Config.getNestedValue("desktopWidgets." + modelData.name + ".enable", false)
                                                                 tone: "outlined"; toggled: on
-                                                                width: tileRow.implicitWidth + 26; height: 38; radius: 19
+                                                                width: tileRow.implicitWidth + 26; height: 38; radius: 23
                                                                 onTapped: Config.setNestedValue("desktopWidgets." + tile.modelData.name + ".enable", !tile.on)
                                                                 Row {
                                                                     id: tileRow
@@ -790,7 +790,7 @@ Scope {
                                                                     id: capture
                                                                     visible: bind.editing
                                                                     anchors { right: changeBtn.left; rightMargin: 10; verticalCenter: parent.verticalCenter }
-                                                                    width: 230; height: 30; radius: 15; color: BarStyle.surface; border.width: 2; border.color: BarStyle.accent
+                                                                    width: 230; height: 30; radius: 17; color: BarStyle.surface; border.width: 2; border.color: BarStyle.accent
                                                                     property string combo: ""
                                                                     onVisibleChanged: if (visible) { combo = ""; grab.forceActiveFocus() }
                                                                     BarText { anchors.centerIn: parent; text: capture.combo.length > 0 ? capture.combo.replace("Mod", "Super") : "Press the new keys…"; font.pixelSize: 12; color: capture.combo.length > 0 ? BarStyle.text : BarStyle.subtext }
@@ -809,7 +809,7 @@ Scope {
                                                                     id: changeBtn
                                                                     anchors { right: parent.right; rightMargin: 4; verticalCenter: parent.verticalCenter }
                                                                     tone: bind.editing && capture.combo.length > 0 ? "filled" : "outlined"
-                                                                    width: 76; height: 30; radius: 15
+                                                                    width: 76; height: 30; radius: 17
                                                                     onTapped: {
                                                                         if (!bind.editing) { NiriBinds.message = ""; root.rebinding = bind.modelData.key }
                                                                         else if (capture.combo.length > 0) { NiriBinds.rebind(bind.modelData.key, capture.combo); root.rebinding = "" }
@@ -872,7 +872,7 @@ Scope {
                                                                     id: sq
                                                                     required property var modelData
                                                                     tone: "outlined"; toggled: modelData.on
-                                                                    width: sqRow.implicitWidth + 28; height: 40; radius: 20
+                                                                    width: sqRow.implicitWidth + 28; height: 40; radius: 23
                                                                     onTapped: sq.modelData.tap()
                                                                     Row {
                                                                         id: sqRow
@@ -895,7 +895,7 @@ Scope {
                                                                     width: Math.floor((overviewCol.width - 20) / 3); height: Math.max(84, pcText.height + 32); radius: BarStyle.radiusMedium
                                                                     onTapped: root.page = pc.index + 1
                                                                     Rectangle {
-                                                                        x: 14; anchors.verticalCenter: parent.verticalCenter; width: 44; height: 44; radius: 22
+                                                                        x: 14; anchors.verticalCenter: parent.verticalCenter; width: 44; height: 44; radius: 23
                                                                         color: BarStyle.accentContainer
                                                                         BarIcon { anchors.centerIn: parent; name: pc.modelData.icon; size: 22; color: BarStyle.onAccentContainer }
                                                                     }
@@ -989,7 +989,7 @@ Scope {
                                     readonly property bool sel: view.picked === index
                                     Rectangle { anchors.fill: parent; radius: BarStyle.radiusSmall; color: res.sel ? BarStyle.accentContainer : (resHov.hovered ? BarStyle.plateHover : "transparent") }
                                     Rectangle {
-                                        x: 10; anchors.verticalCenter: parent.verticalCenter; width: 38; height: 38; radius: 14
+                                        x: 10; anchors.verticalCenter: parent.verticalCenter; width: 38; height: 38; radius: 17
                                         color: res.sel ? BarStyle.accent : BarStyle.cardHigh
                                         BarIcon { anchors.centerIn: parent; name: root.pages[res.modelData.page]?.icon ?? "settings"; size: 20; color: res.sel ? BarStyle.onAccent : BarStyle.subtext }
                                     }

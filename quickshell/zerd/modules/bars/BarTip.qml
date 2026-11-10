@@ -64,7 +64,7 @@ Item {
             id: plate
             width: label.implicitWidth + 20
             height: 26
-            radius: 13
+            radius: 17
             color: BarStyle.surface
             border.width: 1
             border.color: BarStyle.border

@@ -233,7 +233,7 @@ Scope {
                     visible: win.onRight
                     x: 20; y: 62
                     tone: "tonal"
-                    width: parent.width - 40; height: 36; radius: 18
+                    width: parent.width - 40; height: 36; radius: 23
                     onTapped: BarState.openBoard()
                     Row {
                         anchors.centerIn: parent; spacing: 8
@@ -246,7 +246,7 @@ Scope {
                     id: tabs
                     visible: win.onRight
                     x: 20; y: 106
-                    width: parent.width - 40; height: 36; radius: 18
+                    width: parent.width - 40; height: 36; radius: 23
                     color: BarStyle.card
                     border.width: 1; border.color: BarStyle.edge
                     readonly property var items: [{ k: "main", t: "Sections", i: "widgets" }, { k: "translate", t: "Translate", i: "translate" }]
@@ -280,7 +280,7 @@ Scope {
                     id: searchBox
                     visible: win.onRight && win.tab === "main"
                     x: 20; y: 150
-                    width: parent.width - 40; height: 38; radius: 19
+                    width: parent.width - 40; height: 38; radius: 23
                     color: BarStyle.card
                     border.width: 1; border.color: searchInput.activeFocus ? BarStyle.accent : BarStyle.edge
                     Behavior on border.color { ColorAnimation { duration: BarStyle.motionFast } }

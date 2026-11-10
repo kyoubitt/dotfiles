@@ -114,7 +114,7 @@ ClippingRectangle {
             spacing: 4
             BarButton {
                 id: prevBtn
-                tone: "plain"; width: 32; height: 32; radius: 16
+                tone: "plain"; width: 32; height: 32; radius: 17
                 BarIcon { anchors.centerIn: parent; name: "skip_previous"; size: 22; fill: 1; color: prevBtn.ink }
                 onTapped: root.p?.previous()
             }
@@ -134,7 +134,7 @@ ClippingRectangle {
             }
             BarButton {
                 id: nextBtn
-                tone: "plain"; width: 32; height: 32; radius: 16
+                tone: "plain"; width: 32; height: 32; radius: 17
                 BarIcon { anchors.centerIn: parent; name: "skip_next"; size: 22; fill: 1; color: nextBtn.ink }
                 onTapped: root.p?.next()
             }

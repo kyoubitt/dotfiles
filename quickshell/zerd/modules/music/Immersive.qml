@@ -98,14 +98,14 @@ Item {
 
     // close
     Rectangle {
-        x: 22; y: 20; width: 44; height: 44; radius: 22; color: cHov.hovered ? "#44ffffff" : "#26ffffff"
+        x: 22; y: 20; width: 44; height: 44; radius: 23; color: cHov.hovered ? "#44ffffff" : "#26ffffff"
         BarIcon { anchors.centerIn: parent; name: "keyboard_arrow_down"; size: 26; color: "#ffffff" }
         HoverHandler { id: cHov }
         TapHandler { onTapped: root.closed() }
     }
     // queue toggle
     Rectangle {
-        anchors { right: parent.right; rightMargin: 24 } y: 20; width: 44; height: 44; radius: 22; color: root.showQueue ? "#ffffff" : (qHov.hovered ? "#44ffffff" : "#26ffffff")
+        anchors { right: parent.right; rightMargin: 24 } y: 20; width: 44; height: 44; radius: 23; color: root.showQueue ? "#ffffff" : (qHov.hovered ? "#44ffffff" : "#26ffffff")
         BarIcon { anchors.centerIn: parent; name: "queue_music"; size: 22; color: root.showQueue ? "#111111" : "#ffffff" }
         HoverHandler { id: qHov }
         TapHandler { onTapped: { root.showQueue = !root.showQueue; if (root.showQueue) MusicApi.playerQueue(q => root.queue = (q?.queue ?? []).slice(0, 12)) } }
@@ -197,7 +197,7 @@ Item {
                 id: qi
                 required property var modelData
                 width: ListView.view.width; height: 58
-                Rectangle { anchors.fill: parent; radius: 16; color: qiHov.hovered ? "#26ffffff" : "transparent" }
+                Rectangle { anchors.fill: parent; radius: 17; color: qiHov.hovered ? "#26ffffff" : "transparent" }
                 ClippingRectangle { x: 8; anchors.verticalCenter: parent.verticalCenter; width: 42; height: 42; radius: 10; color: "#33ffffff"
                     Image { anchors.fill: parent; source: CoverCache.src(MusicStore.artOf(qi.modelData, false)); sourceSize: Qt.size(96, 96); fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true } }
                 Column { x: 62; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 74

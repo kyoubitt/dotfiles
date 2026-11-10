@@ -117,7 +117,7 @@ Scope {
                 readonly property bool bar: root.value >= 0
                 width: bar ? 300 : Math.max(180, line.implicitWidth + 56)
                 height: 56
-                radius: 28
+                radius: 30
                 x: Math.round((parent.width - width) / 2)
                 y: Math.round((parent.height - height) / 2) + (root.shown ? 0 : (root.position === "top" ? -8 : 8))
                 color: BarStyle.surface
