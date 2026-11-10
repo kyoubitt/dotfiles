@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import qs.modules.common as Common
+import qs.modules.bars
 import qs.services as Svc
 
 QtObject {
@@ -11,7 +12,10 @@ QtObject {
     readonly property color bg: Svc.WallustTheme.rawBackground
     property string fontFamily: Common.Appearance.font.family.expressive
     property string iconFont: "JetBrainsMono Nerd Font Mono"
-    property int borderRadius: 16
+    // one scale for the whole shell: BarStyle's corners and motion
+    property int borderRadius: BarStyle.radiusMedium
+    readonly property int motionFast: BarStyle.motionFast
+    readonly property int motionNormal: BarStyle.motionNormal
     property int clampedBorderRadius: borderRadius
     property real elementOpacity: liquidGlass ? 0.55 : 0.88
     property bool blurBackground: false
@@ -20,27 +24,27 @@ QtObject {
     // bars.liquidGlass: frosted, see-through cards and plates; off: solid
     readonly property bool liquidGlass: Common.Config.options?.bars?.liquidGlass ?? false
 
-    // a soft tint of the accent over the surface, not flat black
-    readonly property color base: Qt.tint(Qt.tint(bg, Qt.rgba(text.r, text.g, text.b, 0.07)), Qt.rgba(blue.r, blue.g, blue.b, 0.08))
-    // popups and menus: the same tint, nearly opaque, so text over a busy window stays crisp
+    // surfaces and text are BarStyle's (iNiR's layers over the wallpaper), so a popup, Orbit, Settings and the side panels
+    // are the same material
+    readonly property color base: BarStyle.surface
     readonly property color card: Qt.alpha(base, liquidGlass ? 0.55 : 0.97)
     readonly property color mantle: bg
     readonly property color crust: Qt.darker(bg, 1.4)
-    readonly property color text: Svc.WallustTheme.textPrimary
-    readonly property color subtext0: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.62))
-    readonly property color subtext1: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.8))
+    readonly property color text: BarStyle.text
+    readonly property color subtext0: BarStyle.subtext
+    readonly property color subtext1: Qt.tint(BarStyle.subtext, Qt.rgba(text.r, text.g, text.b, 0.3))
     readonly property color onSurface: text
-    readonly property color surface0: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.08))
-    readonly property color surface1: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.13))
-    readonly property color surface2: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.19))
+    readonly property color surface0: BarStyle.card
+    readonly property color surface1: BarStyle.cardHigh
+    readonly property color surface2: Qt.tint(BarStyle.cardHigh, Qt.rgba(text.r, text.g, text.b, 0.07))
     readonly property color overlay0: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.28))
     readonly property color overlay1: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.4))
     readonly property color overlay2: Qt.tint(base, Qt.rgba(text.r, text.g, text.b, 0.52))
-    readonly property color blue: Svc.WallustTheme.accent
+    readonly property color blue: BarStyle.accent
     readonly property color primary: blue
     readonly property color sapphire: Qt.lighter(blue, 1.2)
     readonly property color lavender: Qt.tint(blue, Qt.rgba(1, 1, 1, 0.3))
-    readonly property color mauve: "#cba6f7"
+    readonly property color mauve: BarStyle.accent
     readonly property color pink: "#f5c2e7"
     readonly property color red: c.colError
     readonly property color maroon: "#eba0ac"
