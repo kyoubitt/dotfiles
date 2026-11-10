@@ -130,8 +130,9 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: ThemeBackend.borderRadius
+        radius: ThemeBackend.cardRadius
         color: ThemeBackend.card
+        border.width: 1; border.color: ThemeBackend.cardEdge
         clip: true
         opacity: root.intro
         GlassSheen {}

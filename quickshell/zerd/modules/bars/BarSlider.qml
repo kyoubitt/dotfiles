@@ -12,6 +12,8 @@ Item {
     property real minimum: 0
     property real maximum: 1
     property int trackHeight: 36
+    property color tone: BarStyle.accent        // the fill; the volume popup passes its tab colour
+    property bool muted: false
     signal moved(real v)
 
     implicitWidth: 260
@@ -48,11 +50,21 @@ Item {
             radius: height / 2
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: Qt.darker(BarStyle.accent, 1.15) }
-                GradientStop { position: 1; color: Qt.lighter(BarStyle.accent, 1.12) }
+                GradientStop { position: 0; color: root.muted ? BarStyle.plateActive : Qt.darker(root.tone, 1.15) }
+                GradientStop { position: 1; color: root.muted ? BarStyle.plateActive : Qt.lighter(root.tone, 1.12) }
+            }
+            // the handle: a short bar at the end of the fill that thickens under the pointer
+            Rectangle {
+                visible: root.shown > 0.04 && root.shown < 0.985
+                anchors.verticalCenter: parent.verticalCenter
+                x: parent.width - width - 6
+                width: root.dragging ? 6 : (hov.hovered ? 5 : 4); height: Math.max(12, parent.height - 14); radius: width / 2
+                color: BarStyle.onAccent; opacity: 0.85
+                Behavior on width { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutBack } }
             }
         }
     }
+    HoverHandler { id: hov }
     BarIcon {
         x: 10; anchors.verticalCenter: parent.verticalCenter
         name: root.icon; fill: 1

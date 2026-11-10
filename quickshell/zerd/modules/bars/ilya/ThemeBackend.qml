@@ -14,6 +14,8 @@ QtObject {
     property string iconFont: "JetBrainsMono Nerd Font Mono"
     // one scale for the whole shell: BarStyle's corners and motion
     property int borderRadius: BarStyle.radiusMedium
+    readonly property int cardRadius: BarStyle.radiusLarge       // popups and panels
+    readonly property color cardEdge: BarStyle.edge              // their hairline border
     readonly property int motionFast: BarStyle.motionFast
     readonly property int motionNormal: BarStyle.motionNormal
     property int clampedBorderRadius: borderRadius

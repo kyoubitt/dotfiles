@@ -405,7 +405,8 @@ MusicEqualizerState {
             anchors.fill: parent
             anchors.margins: ThemeBackend.liquidGlass ? 0 : popupRoot.s(3)
             color: ThemeBackend.card
-            radius: ThemeBackend.borderRadius
+            border.width: 1; border.color: ThemeBackend.cardEdge
+            radius: ThemeBackend.cardRadius
 
             GlassSheen {}
 
