@@ -161,8 +161,6 @@ Item {
     }
 
     onWorkspaceCountChanged: syncModel()
-    // TEMP DEBUG: dot state on every change
-    onActiveIndexChanged: console.log("WSDBG output", myOutput, "active", activeIndex, "count", workspaceCount, "occupied", JSON.stringify(niriOccupiedMap), "existing", JSON.stringify(niriExistingMap))
 
     function findRepeater(obj) {
         if (!obj) return null;

@@ -76,7 +76,6 @@ Item {
         }
     }
 
-    // TEMP DEBUG
 
     Timer {
         running: (!module || module.moduleActive) && barWindow && barWindow.isStartupReady && barWindow.isDataReady
@@ -137,8 +136,6 @@ Item {
                 property bool initAnimTrigger: false
                 opacity: isHovered ? 1.0 : 0.88
                 scale: isHovered ? 1.15 : 1.0
-                // TEMP DEBUG
-                Timer { interval: 4000; running: true; repeat: false; onTriggered: console.log("TRAYDBG icon", index, modelData.id, "opacity", trayIcon.opacity, "w", trayIcon.width, "visible", trayIcon.visible, "status", trayIcon.status, "src", String(trayIcon.source).slice(0, 60)) }
 
                 Component.onCompleted: {
                     if (barWindow && !barWindow.startupCascadeFinished) {

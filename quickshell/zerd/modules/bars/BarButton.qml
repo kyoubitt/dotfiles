@@ -1,4 +1,5 @@
 import QtQuick
+import "ilya" as Ilya
 import Quickshell.Widgets
 
 // A button surface the way iNiR does it: hovering lays 8 % of the text colour over it, pressing 12 % plus a ripple that
@@ -73,6 +74,6 @@ Item {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onPressed: mouse => { rx = mouse.x; ry = mouse.y; if (root.rippleEnabled) rippleAnim.restart() }
-        onClicked: mouse => { if (mouse.button === Qt.RightButton) root.secondary(); else if (mouse.button === Qt.MiddleButton) root.middle(); else root.tapped() }
+        onClicked: mouse => { if (mouse.button === Qt.RightButton) root.secondary(); else if (mouse.button === Qt.MiddleButton) root.middle(); else { Ilya.Sounds.playSfx("reusables/clickbutton/click.wav", 0.6); root.tapped() } }
     }
 }

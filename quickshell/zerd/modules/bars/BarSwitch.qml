@@ -1,4 +1,5 @@
 import QtQuick
+import "ilya" as Ilya
 
 // Material 3 switch: a track with a thumb. Off is an outlined track with a small thumb; on is the accent with a larger
 // thumb and a check. The thumb grows while pressed.
@@ -32,5 +33,5 @@ Item {
         BarIcon { anchors.centerIn: parent; visible: root.checked; name: "check"; size: 16; color: BarStyle.accent }
     }
     HoverHandler { cursorShape: Qt.PointingHandCursor }
-    MouseArea { id: ma; anchors.fill: parent; onClicked: root.toggled() }
+    MouseArea { id: ma; anchors.fill: parent; onClicked: { Ilya.Sounds.playSfx("reusables/toggle/sfx.wav", 0.7); root.toggled() } }
 }

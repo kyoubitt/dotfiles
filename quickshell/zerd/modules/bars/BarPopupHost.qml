@@ -85,9 +85,8 @@ Scope {
             Connections {
                 target: root
                 function onPopupChanged() {
-                    console.log("POPUPDBG changed", root.popup?.kind ?? "closed", root.spec ? String(root.spec.src).split("/").pop() : "no-spec") /* TEMP DEBUG */
-                    if (root.popup && !root.wasOpen) { console.log("SFXDBG", root.popup.kind, "open") /* TEMP DEBUG */; Ilya.Sounds.popupOpened() }
-                    else if (!root.popup && root.wasOpen) { console.log("SFXDBG", "popup", "close") /* TEMP DEBUG */; Ilya.Sounds.popupClosed() }
+                    if (root.popup && !root.wasOpen) { Ilya.Sounds.popupOpened() }
+                    else if (!root.popup && root.wasOpen) { Ilya.Sounds.popupClosed() }
                     root.wasOpen = !!root.popup
                     if (root.popup && root.spec) {
                         if (pl.source !== root.spec.src) { pl.active = false; pl.source = root.spec.src }

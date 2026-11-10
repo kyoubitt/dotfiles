@@ -10,7 +10,6 @@ QtObject {
         const now = Date.now();
         if (now - last < 300) return;
         last = now;
-        console.log("POPUPDBG toggle", kind, "current", GlobalStates.barPopup?.kind ?? "none") /* TEMP DEBUG */;
         const map = { music: "media", wifi: "network", bt: "network", system: "battery" };
         const k = map[kind] ?? kind;
         if (k === "settings") { GlobalStates.settingsOpen = !GlobalStates.settingsOpen; return; }

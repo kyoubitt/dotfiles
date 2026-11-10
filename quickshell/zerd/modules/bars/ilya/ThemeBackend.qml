@@ -113,8 +113,6 @@ QtObject {
     }
     readonly property string symbolFont: "Material Symbols Rounded"
 
-    // TEMP DEBUG: the resolved palette, printed whenever wallust changes it
-    onBaseChanged: console.log("WALLDBG base", base, "text", text, "accent", blue)
 
     function faded(col) {
         return Qt.alpha(col, root.elementOpacity);

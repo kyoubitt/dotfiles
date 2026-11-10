@@ -1,4 +1,5 @@
 import QtQuick
+import "ilya" as Ilya
 
 // A rounded slider: the fill follows the value, the icon sits in the fill.
 // Dragging, clicking and the wheel all report through `moved`.
@@ -79,8 +80,10 @@ Item {
         Behavior on color { ColorAnimation { duration: 100 } }
     }
 
+    property real lastTick: -1
     function fromX(x: real): void {
         root.local = Math.max(0, Math.min(1, x / width))
+        if (Math.abs(root.local - root.lastTick) >= 0.04) { root.lastTick = root.local; Ilya.Sounds.playSfx("reusables/draggable/tick.wav", 0.4) }
         root.holding = true
         root.shown = root.local
         root.pending = true
