@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../"
 import "../reusables"
 import "../reusables/media"
+import qs.modules.music as Orbit
 
 ColumnLayout {
     id: controls
@@ -195,18 +196,32 @@ ColumnLayout {
             onClicked: MprisController.previous()
         }
 
-        IconButton {
+        // the play button is Orbit's: a soft-lobed cookie that turns while a song plays
+        Item {
             id: playPauseBtn
-            Layout.preferredWidth: root.s(43)
-            Layout.preferredHeight: root.s(43)
-            cornerRadius: ThemeBackend.borderRadius
-            buttonIcon: (root.targetPlayer && root.targetPlayer.isPlaying) ? "󰏤" : "󰐊"
-            iconFontSize: root.s(15)
-            accentColor: ThemeBackend.surface0 || "#313244"
-            bgOpacity: ThemeBackend.liquidGlass ? 1.0 : ThemeBackend.elementOpacity
-            textColor: isHoveredOrHighlighted ? (ThemeBackend.mauve || "#cba6f7") : (ThemeBackend.text || "#cdd6f4")
+            Layout.preferredWidth: root.s(50)
+            Layout.preferredHeight: root.s(50)
             Layout.alignment: Qt.AlignVCenter
-            onClicked: MprisController.togglePlaying()
+            readonly property bool playing: root.targetPlayer ? root.targetPlayer.isPlaying : false
+            scale: playTap.pressed ? 0.92 : (playHover.hovered ? 1.05 : 1)
+            Behavior on scale { SpringAnimation { spring: 6; damping: 0.4 } }
+            Orbit.Cookie {
+                anchors.fill: parent
+                color: ThemeBackend.mauve || "#cba6f7"
+                lobes: 9; amp: 0.07
+                spin: playPauseBtn.playing; spinMs: 9000
+            }
+            Text {
+                anchors.centerIn: parent
+                text: playPauseBtn.playing ? "pause" : "play_arrow"
+                font.family: ThemeBackend.symbolFont
+                font.variableAxes: ({ "wght": 600, "opsz": 24, "FILL": 1 })
+                font.pixelSize: root.s(26)
+                color: ThemeBackend.crust
+                renderType: Text.NativeRendering
+            }
+            HoverHandler { id: playHover; cursorShape: Qt.PointingHandCursor }
+            TapHandler { id: playTap; onTapped: { Sounds.playSfx("reusables/iconbutton/click.wav", 0.7); MprisController.togglePlaying() } }
         }
 
         IconButton {
