@@ -134,47 +134,7 @@ Scope {
                     x: card.pad; y: card.pad
                     property real implicitWidth: item?.implicitWidth ?? 0
                     property real implicitHeight: item?.implicitHeight ?? 0
-                    sourceComponent: ({ notifications: notifications, clipboard: clipboard, barmenu: barmenu, desktopmenu: desktopmenu })[root.popup?.kind ?? ""] ?? null
-                }
-            }
-
-            // The right-click menu of the bar: the things you reach for most, one click each.
-            Component {
-                id: barmenu
-                Column {
-                    id: menuCol
-                    spacing: 2
-                    readonly property var items: [
-                        { i: "tune", t: "Edit the bar", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "baredit", "open"]) },
-                        { i: "settings", t: "Settings", f: () => { GlobalStates.settingsOpen = true } },
-                        { i: "wallpaper", t: "Wallpapers", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "toggle"]) },
-                        { i: "widgets", t: "Desktop widgets", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "widgets", "toggleAll"]) },
-                        { i: Notifications.silent ? "notifications" : "notifications_off", t: Notifications.silent ? "Turn notifications on" : "Do not disturb", f: () => Notifications.toggleSilent() },
-                        { sep: true },
-                        { i: "lock", t: "Lock", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) },
-                        { i: "power_settings_new", t: "Power menu", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "sessionScreen", "toggle"]) }
-                    ]
-                    Repeater {
-                        model: menuCol.items
-                        delegate: Item {
-                            id: mi
-                            required property var modelData
-                            width: 236; height: modelData.sep ? 9 : 40
-                            Rectangle { visible: mi.modelData.sep === true; anchors.centerIn: parent; width: parent.width - 16; height: 1; color: BarStyle.border; opacity: 0.6 }
-                            Rectangle {
-                                visible: !mi.modelData.sep
-                                anchors.fill: parent; radius: BarStyle.radiusSmall
-                                color: ma.pressed ? BarStyle.pressFill : ma.containsMouse ? BarStyle.hoverFill : "transparent"
-                                Behavior on color { ColorAnimation { duration: 120 } }
-                            }
-                            BarIcon { visible: !mi.modelData.sep; x: 12; anchors.verticalCenter: parent.verticalCenter; name: mi.modelData.i ?? ""; size: 20; color: BarStyle.accent }
-                            BarText { visible: !mi.modelData.sep; x: 44; anchors.verticalCenter: parent.verticalCenter; text: mi.modelData.t ?? "" }
-                            MouseArea {
-                                id: ma; enabled: !mi.modelData.sep; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: { root.close(); mi.modelData.f() }
-                            }
-                        }
-                    }
+                    sourceComponent: ({ notifications: notifications, clipboard: clipboard, desktopmenu: desktopmenu })[root.popup?.kind ?? ""] ?? null
                 }
             }
 

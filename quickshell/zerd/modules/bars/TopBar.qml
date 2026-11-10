@@ -230,10 +230,10 @@ Scope {
                 Behavior on y { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                 Behavior on opacity { NumberAnimation { duration: 110 } }
 
-                // right-click anywhere on the bar that a block does not take itself: the bar menu
+                // right-click anywhere on the bar that a block does not take itself: the same menu as on the desktop
                 TapHandler {
                     acceptedButtons: Qt.RightButton
-                    onTapped: point => { BarState.sidebar = ""; GlobalStates.barPopup = { kind: "barmenu", x: Math.round(point.scenePosition.x), tab: "" } }
+                    onTapped: point => { BarState.sidebar = ""; GlobalStates.barPopup = { kind: "desktopmenu", x: Math.round(point.scenePosition.x - 20), y: 56, tab: "" } }
                 }
 
                 // the one plate behind everything in the strip and floating looks
