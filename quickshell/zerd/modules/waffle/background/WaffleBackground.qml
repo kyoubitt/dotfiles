@@ -135,6 +135,15 @@ Variants {
             }
         }
 
+        // Right-click on the bare desktop: the desktop menu (shuffle wallpaper, night light, widgets, settings).
+        Item {
+            anchors.fill: parent
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: point => { BarState.sidebar = ""; GlobalStates.barPopup = { kind: "desktopmenu", x: Math.round(point.scenePosition.x), y: Math.round(point.scenePosition.y), tab: "" } }
+            }
+        }
+
         // Floating desktop cards (media, clock, weather, stats, greeting,
         // timer panel...), drawn in the wallpaper layer so apps cover them.
         WidgetLayer {

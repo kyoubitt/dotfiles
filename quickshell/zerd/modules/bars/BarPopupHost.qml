@@ -8,6 +8,7 @@ import Quickshell.Bluetooth
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.desktopWidgets
 import "ilya" as Ilya
 
 // One popup at a time under the top bar (GlobalStates.barPopup): calendar,
@@ -107,8 +108,13 @@ Scope {
                 readonly property int pad: 14
                 width: Math.max(220, body.implicitWidth + 2 * pad)
                 height: body.implicitHeight + 2 * pad
-                x: Math.round(Math.max(8, Math.min(win.width - width - 8, (root.popup?.x ?? 0) - width / 2)))
-                y: 54
+                readonly property bool atPointer: root.popup?.y !== undefined
+                x: atPointer ? Math.round(Math.max(8, Math.min(win.width - width - 8, root.popup?.x ?? 0)))
+                             : Math.round(Math.max(8, Math.min(win.width - width - 8, (root.popup?.x ?? 0) - width / 2)))
+                y: atPointer ? Math.round(Math.max(8, Math.min(win.height - height - 8, root.popup?.y ?? 0))) : 54
+                transformOrigin: Item.TopLeft
+                scale: open ? 1 : 0.9
+                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack; easing.overshoot: 1.05 } }
                 radius: BarStyle.radiusLarge
                 antialiasing: true
                 color: BarStyle.surface
@@ -128,7 +134,7 @@ Scope {
                     x: card.pad; y: card.pad
                     property real implicitWidth: item?.implicitWidth ?? 0
                     property real implicitHeight: item?.implicitHeight ?? 0
-                    sourceComponent: ({ notifications: notifications, clipboard: clipboard, barmenu: barmenu })[root.popup?.kind ?? ""] ?? null
+                    sourceComponent: ({ notifications: notifications, clipboard: clipboard, barmenu: barmenu, desktopmenu: desktopmenu })[root.popup?.kind ?? ""] ?? null
                 }
             }
 
@@ -167,6 +173,64 @@ Scope {
                                 id: ma; enabled: !mi.modelData.sep; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                 onClicked: { root.close(); mi.modelData.f() }
                             }
+                        }
+                    }
+                }
+            }
+
+            // The desktop menu, after ilyamiro's: right-click the bare desktop, or a desktop widget.
+            Component {
+                id: desktopmenu
+                Column {
+                    id: dm
+                    spacing: 6
+                    readonly property string widget: root.popup?.widget ?? ""
+                    function run(f) { root.close(); f() }
+                    readonly property var icons: [
+                        { i: "shuffle", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "random"]) },
+                        { i: "bedtime", on: Hyprsunset.active, f: () => Hyprsunset.toggle() },
+                        { i: "refresh", f: () => Quickshell.reload(false) },
+                        { i: "lock", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) }
+                    ]
+                    readonly property var rows: widget !== "" ? [
+                        { i: "tune", t: "Edit widgets", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "widgetboard", "open"]) },
+                        { i: "delete", t: "Remove this widget", danger: true, f: () => DesktopWidgets.set(dm.widget, false) }
+                    ] : [
+                        { i: "wallpaper", t: "Select wallpaper", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "toggle"]) },
+                        { i: "widgets", t: "Widget editor", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "widgetboard", "open"]) },
+                        { i: "palette", t: "Colours", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "settings", "page", "Colours"]) },
+                        { i: "settings", t: "Settings", f: () => { GlobalStates.settingsOpen = true } }
+                    ]
+                    Row {
+                        visible: dm.widget === ""
+                        spacing: 6
+                        Repeater {
+                            model: dm.icons
+                            delegate: Rectangle {
+                                id: ib
+                                required property var modelData
+                                width: 52; height: 44; radius: BarStyle.radiusSmall
+                                color: ima.pressed ? BarStyle.pressFill : (modelData.on ? BarStyle.accentContainer : (ima.containsMouse ? BarStyle.hoverFill : BarStyle.card))
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                                BarIcon { anchors.centerIn: parent; name: ib.modelData.i; size: 22; color: ib.modelData.on ? BarStyle.accent : BarStyle.text }
+                                MouseArea { id: ima; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: dm.run(ib.modelData.f) }
+                            }
+                        }
+                    }
+                    Repeater {
+                        model: dm.rows
+                        delegate: Item {
+                            id: rw
+                            required property var modelData
+                            width: 236; height: 40
+                            Rectangle {
+                                anchors.fill: parent; radius: BarStyle.radiusSmall
+                                color: rma.pressed ? BarStyle.pressFill : rma.containsMouse ? (rw.modelData.danger ? Qt.alpha(BarStyle.danger, 0.18) : BarStyle.hoverFill) : "transparent"
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                            }
+                            BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: rw.modelData.i; size: 20; color: rw.modelData.danger ? BarStyle.danger : BarStyle.accent }
+                            BarText { x: 44; anchors.verticalCenter: parent.verticalCenter; text: rw.modelData.t; color: rw.modelData.danger ? BarStyle.danger : BarStyle.text }
+                            MouseArea { id: rma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: dm.run(rw.modelData.f) }
                         }
                     }
                 }

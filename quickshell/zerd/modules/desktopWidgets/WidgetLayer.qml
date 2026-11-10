@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs
 import qs.modules.common
 import qs.services
 import qs.modules.bars
@@ -28,7 +29,16 @@ Item {
         scale: cs
         transformOrigin: Item.TopLeft
 
-        sourceComponent: Component { CardView { name: placed.name; screenRef: root.screenRef } }
+        sourceComponent: Component {
+            CardView {
+                name: placed.name; screenRef: root.screenRef
+                // right-click a card: the widget menu (edit, remove)
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: point => { BarState.sidebar = ""; GlobalStates.barPopup = { kind: "desktopmenu", widget: placed.name, x: Math.round(point.scenePosition.x), y: Math.round(point.scenePosition.y), tab: "" } }
+                }
+            }
+        }
         active: root.visible && (cfg.enable ?? false)
         x: Math.round(anchorName.endsWith("Right") ? root.width - width * cs - (cfg.mx ?? 0)
             : anchorName.endsWith("Left") ? (cfg.mx ?? 0) : (root.width - width * cs) / 2)
