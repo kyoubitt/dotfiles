@@ -41,7 +41,7 @@ Settings live in `~/.config/zerda-shell/config.json` and in the Settings window.
 
 ## Equalizer
 
-The music popup's equalizer is `quickshell/zerd/modules/bars/ilya/media/zerd-audio`, a small PipeWire filter-chain (10 bands, balance, mono, swap). It starts when you first use it and becomes the default output until stopped (`zerd-audio stop`).
+The music popup's equalizer is `quickshell/zerd/modules/bars/ilya/media/zerd-audio`, a small PipeWire filter-chain (10 bands, balance, mono, swap, and the dynamics modes through the LSP compressor, `sudo pacman -S lsp-plugins`). It starts when you first use it and becomes the default output until stopped (`zerd-audio stop`).
 
 ## Credits
 
