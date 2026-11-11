@@ -3,7 +3,7 @@
 My Arch setup: [niri](https://github.com/YaLTeR/niri) with a custom [Quickshell](https://quickshell.org) shell called **zerd**, colours from wallust.
 
 # DONT EXPECT UPDATES
-**I dont use niri, nor arch anymore.
+- *I dont use niri, nor arch anymore.
 
 ## What's in it
 
