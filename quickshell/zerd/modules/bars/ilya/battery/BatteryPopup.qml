@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.bars
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Quickshell.Io
@@ -20,7 +21,7 @@ Item {
     readonly property real level: ready ? Math.max(0, Math.min(1, dev.percentage)) : 0
     readonly property bool charging: ready && (dev.state === UPowerDeviceState.Charging || dev.state === UPowerDeviceState.FullyCharged)
     readonly property bool full: ready && dev.state === UPowerDeviceState.FullyCharged
-    property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
+    property color tone: charging ? BarStyle.success : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? BarStyle.warning : ThemeBackend.blue))
 
     // wear from the sysfs counters: UPower leaves health unset on this laptop
     FileView { id: fFull; path: "/sys/class/power_supply/BAT1/charge_full"; blockLoading: true }
@@ -101,7 +102,7 @@ Item {
             value: !root.ready ? "–" : (onAc ? "On AC" : watts.toFixed(1) + " W")
             caption: root.charging && !onAc ? "Charging" : (onAc ? "Plugged in" : "Draw")
             level: onAc ? 1 : Math.min(1, watts / 30)
-            tone: onAc ? "#7bd88f" : ThemeBackend.blue
+            tone: onAc ? BarStyle.success : ThemeBackend.blue
         }
     }
 

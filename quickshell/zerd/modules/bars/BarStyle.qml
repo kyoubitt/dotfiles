@@ -87,6 +87,10 @@ Singleton {
         return BarStyle.subtext
     }
     // Warnings and "critical" stay red whatever the wallpaper is: one place to change it.
+    // state colours that stay legible on the Light scheme's pale surfaces
+    readonly property bool lightScheme: schemed && IrisStyle.light
+    readonly property color success: lightScheme ? "#1f7a43" : "#7bd88f"
+    readonly property color warning: lightScheme ? "#a85f00" : "#f5b85a"
     readonly property color danger: c.colError
     readonly property color warm: "#e8a77c"
     readonly property color cool: "#7fb6e6"

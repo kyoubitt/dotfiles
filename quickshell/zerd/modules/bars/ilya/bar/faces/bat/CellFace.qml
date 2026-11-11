@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.bars
 import QtQuick.Shapes
 import Quickshell.Services.UPower
 import "../../../reusables"
@@ -13,7 +14,7 @@ BarFaceBase {
     readonly property bool ready: UPower.displayDevice.ready && UPower.displayDevice.isLaptopBattery
     readonly property real level: ready ? Math.max(0, Math.min(1, UPower.displayDevice.percentage)) : 0
     readonly property bool charging: ready && (UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-    readonly property color tone: charging ? "#7bd88f" : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? "#f5b85a" : ThemeBackend.blue))
+    readonly property color tone: charging ? BarStyle.success : (level < 0.15 ? "#ff6b63" : (level < 0.30 ? BarStyle.warning : ThemeBackend.blue))
 
     property bool isFaceVisible: true
     property real targetLength: 70

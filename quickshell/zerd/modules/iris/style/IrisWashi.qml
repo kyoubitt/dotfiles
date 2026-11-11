@@ -128,7 +128,7 @@ Singleton {
 
     // The last answer, or a fresh install's palette until the first one lands.
     property var data: root.useWallust ? root.wallustData
-        : (root.parse(root.cache.text()) ?? root.parse(root.fallback.text()))
+        : (root.parse(root.cache.text()) ?? root.parse(root.fallback.text()) ?? root.wallustData)     // never an empty palette
     function palette(scheme: string): var {
         return root.data?.schemes?.[scheme] ?? root.data?.schemes?.dark ?? ({})
     }
