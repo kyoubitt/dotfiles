@@ -156,12 +156,12 @@ Scope {
                     id: dm
                     spacing: 6
                     readonly property string widget: root.popup?.widget ?? ""
-                    function run(f) { root.close(); f() }
+                    function run(f) { Ilya.Sounds.playSfx("reusables/clickbutton/click.wav", 0.6); root.close(); f() }
                     readonly property var icons: [
-                        { i: "shuffle", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "random"]) },
-                        { i: "bedtime", on: Hyprsunset.active, f: () => Hyprsunset.toggle() },
-                        { i: "refresh", f: () => Quickshell.reload(false) },
-                        { i: "lock", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) }
+                        { i: "shuffle", t: "Shuffle", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "wallpaper", "random"]) },
+                        { i: "bedtime", t: Hyprsunset.active ? "Night on" : "Night", on: Hyprsunset.active, f: () => Hyprsunset.toggle() },
+                        { i: "refresh", t: "Reload", f: () => Quickshell.reload(false) },
+                        { i: "lock", t: "Lock", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "lockScreen", "lock"]) }
                     ]
                     readonly property var rows: widget !== "" ? [
                         { i: "tune", t: "Edit widgets", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "widgetboard", "open"]) },
@@ -172,18 +172,41 @@ Scope {
                         { i: "palette", t: "Colours", f: () => Quickshell.execDetached(["qs", "-c", "zerd", "ipc", "call", "settings", "page", "Colours"]) },
                         { i: "settings", t: "Settings", f: () => { GlobalStates.settingsOpen = true } }
                     ]
+                    // every part eases in one after another once the card has opened
+                    component Enter: SequentialAnimation {
+                        id: en
+                        property Item target
+                        property int order: 0
+                        running: true
+                        PropertyAction { target: en.target; property: "opacity"; value: 0 }
+                        PauseAnimation { duration: 50 + en.order * 32 }
+                        NumberAnimation { target: en.target; property: "opacity"; to: 1; duration: 180; easing.type: Easing.OutCubic }
+                    }
                     Row {
+                        id: iconRow
                         visible: dm.widget === ""
                         spacing: 6
                         Repeater {
                             model: dm.icons
-                            delegate: Rectangle {
+                            delegate: Item {
                                 id: ib
                                 required property var modelData
-                                width: 52; height: 44; radius: BarStyle.radiusSmall
-                                color: ima.pressed ? BarStyle.pressFill : (modelData.on ? BarStyle.accentContainer : (ima.containsMouse ? BarStyle.hoverFill : BarStyle.card))
-                                Behavior on color { ColorAnimation { duration: 120 } }
-                                BarIcon { anchors.centerIn: parent; name: ib.modelData.i; size: 22; color: ib.modelData.on ? BarStyle.accent : BarStyle.text }
+                                required property int index
+                                width: 56; height: 62
+                                Enter { target: ib; order: ib.index }
+                                Rectangle {
+                                    id: ibBg
+                                    anchors.fill: parent; radius: BarStyle.radiusSmall
+                                    color: ima.pressed ? BarStyle.pressFill : (ib.modelData.on ? BarStyle.accentContainer : (ima.containsMouse ? BarStyle.hoverFill : BarStyle.card))
+                                    scale: ima.pressed ? 0.95 : 1
+                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                                    Column {
+                                        anchors.centerIn: parent; spacing: 4
+                                        BarIcon { anchors.horizontalCenter: parent.horizontalCenter; name: ib.modelData.i; size: 22; color: ib.modelData.on ? BarStyle.accent : BarStyle.text }
+                                        BarText { anchors.horizontalCenter: parent.horizontalCenter; text: ib.modelData.t; font.pixelSize: 11; color: ib.modelData.on ? BarStyle.accent : BarStyle.subtext }
+                                    }
+                                }
                                 MouseArea { id: ima; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: dm.run(ib.modelData.f) }
                             }
                         }
@@ -193,14 +216,24 @@ Scope {
                         delegate: Item {
                             id: rw
                             required property var modelData
-                            width: 236; height: 40
+                            required property int index
+                            width: 236; height: 42
+                            Enter { target: rw; order: (dm.widget === "" ? 4 : 0) + rw.index }
                             Rectangle {
                                 anchors.fill: parent; radius: BarStyle.radiusSmall
                                 color: rma.pressed ? BarStyle.pressFill : rma.containsMouse ? (rw.modelData.danger ? Qt.alpha(BarStyle.danger, 0.18) : BarStyle.hoverFill) : "transparent"
+                                scale: rma.pressed ? 0.98 : 1
                                 Behavior on color { ColorAnimation { duration: 120 } }
+                                Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
                             }
-                            BarIcon { x: 12; anchors.verticalCenter: parent.verticalCenter; name: rw.modelData.i; size: 20; color: rw.modelData.danger ? BarStyle.danger : BarStyle.accent }
-                            BarText { x: 44; anchors.verticalCenter: parent.verticalCenter; text: rw.modelData.t; color: rw.modelData.danger ? BarStyle.danger : BarStyle.text }
+                            // the icon sits in a small tile that takes the accent while the row is under the pointer
+                            Rectangle {
+                                x: 6; anchors.verticalCenter: parent.verticalCenter; width: 30; height: 30; radius: 10
+                                color: rma.containsMouse ? (rw.modelData.danger ? Qt.alpha(BarStyle.danger, 0.22) : BarStyle.accentContainer) : "transparent"
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                                BarIcon { anchors.centerIn: parent; name: rw.modelData.i; size: 20; color: rw.modelData.danger ? BarStyle.danger : BarStyle.accent }
+                            }
+                            BarText { x: 46; anchors.verticalCenter: parent.verticalCenter; text: rw.modelData.t; color: rw.modelData.danger ? BarStyle.danger : BarStyle.text }
                             MouseArea { id: rma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: dm.run(rw.modelData.f) }
                         }
                     }
