@@ -11,6 +11,10 @@ sudo cp -r "$here"/Main.qml "$here"/metadata.desktop "$here"/theme.conf "$here"/
 sudo chown "$USER:$USER" "$dest/theme.conf"
 sudo mkdir -p /etc/sddm.conf.d
 printf '[Theme]\nCurrent=zerd-login\n' | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
+# /etc/sddm.conf is read last, so a Current= there wins over the drop-in: point it at this theme too
+if [[ -f /etc/sddm.conf ]] && sudo grep -q '^Current=' /etc/sddm.conf; then
+  sudo sed -i 's/^Current=.*/Current=zerd-login/' /etc/sddm.conf
+fi
 
 avatar="$(python3 -c "import json,os;print(json.load(open(os.path.expanduser('~/.config/zerda-shell/config.json'))).get('account',{}).get('avatar',''))" 2>/dev/null || true)"
 if [[ -n "$avatar" && -f "$avatar" ]]; then
