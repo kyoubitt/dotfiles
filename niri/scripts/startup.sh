@@ -17,4 +17,9 @@ sleep 1 && awww img "$(cat ~/.cache/awww/last-wallpaper 2>/dev/null)" -t fade --
 # builds a fresh QML engine per reload but doesn't clear this cache the way
 # a full restart does) - disabling it entirely means every reload, auto or
 # manual, always compiles fresh from the actual file on disk.
-MALLOC_ARENA_MAX=2 MALLOC_TRIM_THRESHOLD_=65536 MALLOC_MMAP_THRESHOLD_=131072 __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json __GLX_VENDOR_LIBRARY_NAME=mesa QML_DISABLE_DISK_CACHE=1 qs -c zerd > ~/.cache/quickshell-zerd.log 2>&1 &
+# ulimit -c: allow core dumps (coredumpctl) and log how the shell exited (signal/code) to find random crashes.
+(
+  ulimit -c unlimited
+  MALLOC_ARENA_MAX=2 MALLOC_TRIM_THRESHOLD_=65536 MALLOC_MMAP_THRESHOLD_=131072 __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json __GLX_VENDOR_LIBRARY_NAME=mesa QML_DISABLE_DISK_CACHE=1 qs -c zerd > ~/.cache/quickshell-zerd.log 2>&1
+  echo "$(date '+%F %T') qs exited with status $? (128+N = signal N)" >> ~/.cache/quickshell-exit.log
+) &

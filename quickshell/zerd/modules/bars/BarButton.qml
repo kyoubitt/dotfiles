@@ -30,7 +30,7 @@ Item {
     readonly property color inkSoft: tone === "filled" ? onAccentColor : (toggled ? BarStyle.onAccentContainer : BarStyle.subtext)
 
     scale: pressed ? Math.max(0.94, Math.min(0.995, 1 - 2 / Math.max(width, height))) : 1
-    Behavior on scale { NumberAnimation { duration: BarStyle.motionFast; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: root.pressed ? 60 : 130; easing.type: Easing.OutCubic } }
 
     Rectangle {
         id: face
@@ -46,7 +46,7 @@ Item {
         anchors.fill: parent
         radius: root.radius
         color: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, root.pressed ? 0.12 : root.hovered ? 0.08 : 0)
-        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on color { ColorAnimation { duration: 70 } }
         Rectangle {
             id: ripple
             property real r: 0
@@ -56,10 +56,10 @@ Item {
             opacity: 0
             ParallelAnimation {
                 id: rippleAnim
-                NumberAnimation { target: ripple; property: "r"; from: 0; to: Math.sqrt(root.width * root.width + root.height * root.height); duration: 550; easing.type: Easing.OutCubic }
+                NumberAnimation { target: ripple; property: "r"; from: 0; to: Math.sqrt(root.width * root.width + root.height * root.height); duration: 340; easing.type: Easing.OutCubic }
                 SequentialAnimation {
-                    NumberAnimation { target: ripple; property: "opacity"; from: 1; to: 1; duration: 150 }
-                    NumberAnimation { target: ripple; property: "opacity"; to: 0; duration: 450 }
+                    NumberAnimation { target: ripple; property: "opacity"; from: 1; to: 1; duration: 90 }
+                    NumberAnimation { target: ripple; property: "opacity"; to: 0; duration: 280 }
                 }
             }
         }

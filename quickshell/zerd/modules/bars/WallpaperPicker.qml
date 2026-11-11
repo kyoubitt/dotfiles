@@ -320,7 +320,9 @@ Scope {
                                         source: sl.thumb
                                         fillMode: Image.PreserveAspectCrop
                                         asynchronous: true
-                                        cache: true
+                                        // Decode at slice size, not full size, and don't keep every thumb in the cache.
+                                        sourceSize: Qt.size(Math.ceil(width * 1.5), Math.ceil(height * 1.5))
+                                        cache: false
                                         opacity: status === Image.Ready ? 1 : 0
                                         Behavior on opacity { NumberAnimation { duration: 120 } }
                                     }

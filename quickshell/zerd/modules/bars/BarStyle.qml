@@ -57,9 +57,9 @@ Singleton {
     readonly property int radiusXL: 30         // big surfaces
     readonly property color edge: Qt.rgba(border.r, border.g, border.b, 0.55)
     readonly property real shadowOpacity: 0.3
-    readonly property int motionFast: 200      // iNiR elementMoveFast
-    readonly property int motionNormal: 300    // iNiR elementResize
-    readonly property int motionSlow: 500      // iNiR elementMove (expressive)
+    readonly property int motionFast: 120      // iNiR elementMoveFast
+    readonly property int motionNormal: 190    // iNiR elementResize
+    readonly property int motionSlow: 320      // iNiR elementMove (expressive)
     readonly property var easeExpressive: [0.38, 1.21, 0.22, 1.0, 1, 1]
     readonly property var easeEmphasized: [0.05, 0.7, 0.1, 1.0, 1, 1]
 

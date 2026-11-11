@@ -105,7 +105,7 @@ Scope {
                     onPositionChanged: strip.moved = true
                     onExited: strip.moved = false
                 }
-                Timer { interval: 140; running: strip.active && strip.visible; onTriggered: BarState.peek(strip.side) }
+                Timer { interval: 90; running: strip.active && strip.visible; onTriggered: BarState.peek(strip.side) }
             }
             Strip { side: "left" }
             Strip { side: "right" }
@@ -146,7 +146,7 @@ Scope {
             }
             Timer {
                 id: swapTimer
-                interval: 120
+                interval: 60
                 onTriggered: { win.swapping = true; win.displaySide = win.wanted; settle.start() }
             }
             Timer { id: settle; interval: 30; onTriggered: { win.swapping = false; win.on = win.wanted !== "" } }
@@ -159,7 +159,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:zerd-sidebar"
             WlrLayershell.layer: WlrLayer.Overlay
             // Pinned panels take the keyboard so Escape works at once; a peek never steals it.
-            WlrLayershell.keyboardFocus: win.wanted === "" ? WlrKeyboardFocus.None : (BarState.pinned ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            WlrLayershell.keyboardFocus: win.wanted === "" ? WlrKeyboardFocus.None : ((BarState.pinned || win.tab === "translate") ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
             // Only a pinned panel catches clicks outside itself; a peek leaves the apps clickable.
             readonly property bool catching: win.wanted !== "" && BarState.pinned
             mask: Region { item: win.catching ? backdrop : panel; Region { item: hold } }
